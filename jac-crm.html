@@ -441,8 +441,12 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">
-      <div class="login-logo-badge">JC</div>
-      <div class="login-brand">JAC REALTY</div>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 74" width="190" style="display:block;margin:0 auto 12px">
+        <line x1="0" y1="10" x2="220" y2="10" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+        <text x="110" y="56" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="46" font-weight="300" fill="#FFFFFF" text-anchor="middle" letter-spacing="9">JAC</text>
+        <text x="110" y="67" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="9.5" font-weight="700" fill="#e8a020" text-anchor="middle" letter-spacing="10">REALTY</text>
+        <line x1="0" y1="74" x2="220" y2="74" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+      </svg>
       <div class="login-tagline">Portal Agentes · Licencia PN-0931 · Panamá</div>
     </div>
     <p class="login-title">Acceso al Sistema CRM</p>
@@ -475,7 +479,12 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 <div id="sidebar">
   <div class="logo">
     <div class="sidebar-top-row">
-      <h1>JAC REALTY</h1>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 50" height="40" style="display:block">
+        <line x1="0" y1="7" x2="150" y2="7" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+        <text x="75" y="37" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="27" font-weight="300" fill="#FFFFFF" text-anchor="middle" letter-spacing="5">JAC</text>
+        <text x="75" y="46" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="7" font-weight="700" fill="#e8a020" text-anchor="middle" letter-spacing="6">REALTY</text>
+        <line x1="0" y1="50" x2="150" y2="50" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+      </svg>
       <button id="sidebar-close" onclick="toggleSidebar()" title="Cerrar menú">✕</button>
     </div>
     <p>Portal Agentes · Lic. PN-0931</p>
@@ -552,7 +561,6 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <div class="email-selector" title="Correo activo para envíos">
         <div class="email-dot"></div>
         <select id="email-from-select" onchange="setActiveEmail(this.value)">
-          <option value="jelyanrealestate@gmail.com">jelyanrealestate@gmail.com</option>
           <option value="jcastro@jacrealtypa.com">jcastro@jacrealtypa.com</option>
         </select>
       </div>
@@ -1148,7 +1156,6 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <div class="form-group">
         <label>De (remitente)</label>
         <select id="em-from" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;outline:none">
-          <option value="jelyanrealestate@gmail.com">jelyanrealestate@gmail.com</option>
           <option value="jcastro@jacrealtypa.com">jcastro@jacrealtypa.com</option>
         </select>
       </div>
@@ -1512,7 +1519,7 @@ let emailLogs = [
   {id:'E002',from:'jelyanrealestate@gmail.com',to:'Ana Sofía Vargas',toEmail:'avargas@outlook.com',subject:'Propuesta arrendamiento Casco Antiguo',body:'',leadRef:'L002',fecha:'2026-06-07',status:'Respondido'},
   {id:'E003',from:'jcastro@jacrealtypa.com',to:'Carlos Herrera',toEmail:'cherrera@empresa.com',subject:'Portafolio de inversión · JAC Realty',body:'',leadRef:'L003',fecha:'2026-06-06',status:'Enviado'},
 ];
-let currentEmail='jelyanrealestate@gmail.com';
+let currentEmail='jcastro@jacrealtypa.com';
 
 function setActiveEmail(v){
   currentEmail=v;
