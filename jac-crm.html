@@ -433,6 +433,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
   .topbar-actions .btn-sm:not(.btn-primary){display:none}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -523,6 +524,10 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
     </div>
     <div class="nav-item" onclick="showPanel('mls')">
       <span class="icon">🌐</span> Red MLS
+    </div>
+    <div class="nav-item" onclick="showPanel('redInmo')">
+      <span class="icon">🤝</span> Red Inmobiliaria
+      <span class="nav-badge" id="badge-red" style="background:var(--purple)">0</span>
     </div>
   </nav>
   <div class="sidebar-footer">
@@ -937,6 +942,41 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       </div>
     </div>
 
+    <!-- ========== RED INMOBILIARIA ========== -->
+    <div class="panel" id="panel-redInmo">
+      <div class="kpi-grid" style="margin-bottom:16px">
+        <div class="kpi-card"><div class="kpi-label">Agentes en Mi Red</div><div class="kpi-value" style="color:var(--purple)" id="red-kpi-agentes">0</div><div class="kpi-delta up">Registrados</div></div>
+        <div class="kpi-card"><div class="kpi-label">Prop. Compartidas</div><div class="kpi-value" style="color:var(--blue)" id="red-kpi-props">0</div><div class="kpi-delta up">Co-broking</div></div>
+        <div class="kpi-card"><div class="kpi-label">Negocios Co-Broker</div><div class="kpi-value" style="color:var(--green)" id="red-kpi-negocios">–</div><div class="kpi-delta up">Este año</div></div>
+        <div class="kpi-card"><div class="kpi-label">Comisión Promedio</div><div class="kpi-value" style="color:var(--accent)">3%</div><div class="kpi-delta up">Compartida</div></div>
+      </div>
+
+      <div class="sec-header" style="margin-bottom:12px">
+        <span class="sec-title">🤝 Contactos de la Red</span>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input placeholder="🔍 Buscar agente..." style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:12px;outline:none;width:200px" oninput="filterRedContacts(this.value)">
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalRedContacto')">+ Agregar Agente / Corredor</button>
+        </div>
+      </div>
+      <div class="table-wrap" style="margin-bottom:28px">
+        <table>
+          <thead><tr><th>Nombre / Agencia</th><th>Tipo</th><th>Zona</th><th>Contacto</th><th>Licencia</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="red-tbody"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Sin contactos. Agrega tu primer agente o corredor.</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="sec-header" style="margin-bottom:12px">
+        <span class="sec-title">🏠 Propiedades Compartidas — Co-Broking</span>
+        <button class="btn btn-outline btn-sm" onclick="openModal('modalRedPropiedad')">+ Compartir Propiedad</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Propiedad</th><th>Tipo</th><th>Operación</th><th>Precio</th><th>Área</th><th>Comisión Compartida</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="red-props-tbody"><tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">Sin propiedades compartidas aún.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -977,37 +1017,77 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
   </div>
 </div>
 
-<!-- Modal Lead -->
+<!-- Modal Lead / Cliente — Formulario Completo -->
 <div class="modal-bg" id="modalLead">
-  <div class="modal">
+  <div class="modal" style="width:680px">
     <div class="modal-header">
-      <span class="modal-title">👤 Nuevo Lead</span>
+      <span class="modal-title">👤 Nuevo Cliente / Lead</span>
       <button class="modal-close" onclick="closeModal('modalLead')">✕</button>
     </div>
+    <!-- SECCIÓN: Datos Personales -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding:6px 10px;background:var(--card2);border-radius:6px">📋 Información Personal</div>
     <div class="form-grid">
-      <div class="form-group"><label>Nombre completo</label><input id="l-nombre" placeholder="Nombre Apellido"></div>
-      <div class="form-group"><label>Teléfono / WhatsApp</label><input id="l-tel" placeholder="+507 6000-0000"></div>
-      <div class="form-group"><label>Email</label><input id="l-email" type="email" placeholder="correo@ejemplo.com"></div>
-      <div class="form-group"><label>Interés</label>
+      <div class="form-group"><label>Nombre *</label><input id="l-nombre" placeholder="Nombre"></div>
+      <div class="form-group"><label>Apellido</label><input id="l-apellido" placeholder="Apellido"></div>
+      <div class="form-group"><label>Cédula / ID</label><input id="l-cedula" placeholder="8-123-456"></div>
+      <div class="form-group"><label>Pasaporte</label><input id="l-pasaporte" placeholder="PA123456"></div>
+      <div class="form-group"><label>Fecha de Nacimiento</label><input id="l-nacimiento" type="date"></div>
+      <div class="form-group"><label>Nacionalidad</label>
+        <select id="l-nacionalidad"><option>Panameña</option><option>Colombiana</option><option>Venezolana</option><option>Estadounidense</option><option>Española</option><option>China</option><option>Canadiense</option><option>Otra</option></select>
+      </div>
+    </div>
+    <!-- SECCIÓN: Contacto -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📞 Contacto</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Teléfono principal *</label><input id="l-tel" placeholder="+507 6000-0000"></div>
+      <div class="form-group"><label>Teléfono 2</label><input id="l-tel2" placeholder="+507 6000-0001"></div>
+      <div class="form-group"><label>WhatsApp</label><input id="l-wa" placeholder="+507 6000-0000"></div>
+      <div class="form-group"><label>Email *</label><input id="l-email" type="email" placeholder="correo@ejemplo.com"></div>
+      <div class="form-group"><label>Instagram</label><input id="l-instagram" placeholder="@usuario"></div>
+      <div class="form-group"><label>LinkedIn / Web</label><input id="l-linkedin" placeholder="linkedin.com/in/nombre"></div>
+    </div>
+    <!-- SECCIÓN: Perfil profesional -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">💼 Perfil Profesional</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Ocupación</label><input id="l-ocupacion" placeholder="Empresario, Médico, Abogado..."></div>
+      <div class="form-group"><label>Empresa</label><input id="l-empresa" placeholder="Nombre de la empresa"></div>
+      <div class="form-group"><label>Tipo de Cliente</label>
+        <select id="l-tipo-cliente"><option>Comprador</option><option>Arrendatario</option><option>Vendedor</option><option>Propietario</option><option>Inversionista</option></select>
+      </div>
+      <div class="form-group"><label>Fuente / Origen</label>
+        <select id="l-fuente"><option>Web</option><option>WhatsApp</option><option>Instagram</option><option>Facebook</option><option>Referido</option><option>MLS / Portales</option><option>Evento</option><option>Google Ads</option><option>Otro</option></select>
+      </div>
+    </div>
+    <!-- SECCIÓN: Preferencias de Búsqueda -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">🏠 Preferencias de Búsqueda</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Interés principal</label>
         <select id="l-interes"><option>Compra</option><option>Alquiler</option><option>Inversión</option><option>Preventa</option></select>
       </div>
-      <div class="form-group"><label>Presupuesto</label>
-        <select id="l-presupuesto"><option>Menos de $100K</option><option>$100K–$300K</option><option>$300K–$600K</option><option>$600K–$1M</option><option>Más de $1M</option></select>
+      <div class="form-group"><label>Tipo de propiedad</label>
+        <select id="l-tipo-prop"><option>Cualquiera</option><option>Apartamento</option><option>Casa</option><option>Penthouse</option><option>Local Comercial</option><option>Oficina</option><option>Terreno</option></select>
+      </div>
+      <div class="form-group"><label>Presupuesto mínimo (USD)</label><input id="l-presupuesto-min" type="number" placeholder="100000"></div>
+      <div class="form-group"><label>Presupuesto máximo (USD)</label><input id="l-presupuesto-max" type="number" placeholder="500000"></div>
+      <div class="form-group"><label>Habitaciones deseadas</label>
+        <select id="l-hab-deseadas"><option value="">Cualquiera</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select>
       </div>
       <div class="form-group"><label>Zona de interés</label>
-        <select id="l-zona"><option>Cualquier zona</option><option>Costa del Este</option><option>Casco Antiguo</option><option>San Francisco</option><option>Punta Pacífica</option><option>Marbella</option><option>Coronado</option></select>
+        <select id="l-zona"><option>Cualquier zona</option><option>Costa del Este</option><option>Casco Antiguo</option><option>San Francisco</option><option>Punta Pacífica</option><option>Marbella</option><option>Bella Vista</option><option>El Cangrejo</option><option>Obarrio</option><option>Coronado</option><option>Chiriquí</option></select>
       </div>
-      <div class="form-group"><label>Estado</label>
+    </div>
+    <!-- SECCIÓN: Gestión -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">⚙️ Gestión</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Estado del Lead</label>
         <select id="l-status"><option>Nuevo</option><option>Contactado</option><option>Visita</option><option>Oferta</option><option>Cerrado</option><option>Perdido</option></select>
       </div>
-      <div class="form-group"><label>Fuente</label>
-        <select id="l-fuente"><option>Web</option><option>WhatsApp</option><option>Instagram</option><option>Facebook</option><option>Referido</option><option>MLS</option><option>Otro</option></select>
-      </div>
-      <div class="form-group form-full"><label>Notas</label><textarea id="l-notas" placeholder="Detalles adicionales del cliente..."></textarea></div>
+      <div class="form-group"><label>Agente Asignado</label><input id="l-agente" placeholder="J. Castro" value="J. Castro"></div>
+      <div class="form-group form-full"><label>Notas / Observaciones</label><textarea id="l-notas" placeholder="Preferencias especiales, idioma, historial, info relevante..."></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalLead')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveLead()">Guardar Lead</button>
+      <button class="btn btn-primary" onclick="saveLead()">💾 Guardar Cliente</button>
     </div>
   </div>
 </div>
@@ -1206,12 +1286,179 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
   </div>
 </div>
 
+<!-- Modal Contacto Red Inmobiliaria -->
+<div class="modal-bg" id="modalRedContacto">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🤝 Agregar Contacto a la Red</span>
+      <button class="modal-close" onclick="closeModal('modalRedContacto')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Nombre completo *</label><input id="rc-nombre" placeholder="Nombre del agente / corredor"></div>
+      <div class="form-group"><label>Tipo</label>
+        <select id="rc-tipo"><option>Agente Inmobiliario</option><option>Corredor</option><option>Broker</option><option>Desarrollador</option><option>Propietario</option><option>Inversionista</option><option>Otro</option></select>
+      </div>
+      <div class="form-group"><label>Empresa / Agencia</label><input id="rc-empresa" placeholder="Nombre de la agencia"></div>
+      <div class="form-group"><label>Licencia</label><input id="rc-licencia" placeholder="PN-XXXX"></div>
+      <div class="form-group"><label>Teléfono</label><input id="rc-tel" placeholder="+507 6000-0000"></div>
+      <div class="form-group"><label>WhatsApp</label><input id="rc-wa" placeholder="+507 6000-0000"></div>
+      <div class="form-group form-full"><label>Email</label><input id="rc-email" type="email" placeholder="correo@agencia.com"></div>
+      <div class="form-group"><label>Zona principal</label>
+        <select id="rc-zona"><option>Costa del Este</option><option>Casco Antiguo</option><option>San Francisco</option><option>Punta Pacífica</option><option>Marbella</option><option>Bella Vista</option><option>El Cangrejo</option><option>Coronado</option><option>Chiriquí</option><option>Todo Panamá</option></select>
+      </div>
+      <div class="form-group"><label>Especialidades</label><input id="rc-especialidades" placeholder="Lujo, Alquiler, Comercial..."></div>
+      <div class="form-group form-full"><label>Notas</label><textarea id="rc-notas" placeholder="Áreas de trabajo, condiciones de co-broking..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalRedContacto')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveRedContact()">➕ Agregar a la Red</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Propiedad Red — Co-Broking -->
+<div class="modal-bg" id="modalRedPropiedad">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🏠 Compartir Propiedad en la Red</span>
+      <button class="modal-close" onclick="closeModal('modalRedPropiedad')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Título de la propiedad *</label><input id="rp-titulo" placeholder="Ej: Apartamento 3hab · Costa del Este"></div>
+      <div class="form-group"><label>Tipo</label>
+        <select id="rp-tipo"><option>Apartamento</option><option>Casa</option><option>Penthouse</option><option>Local Comercial</option><option>Oficina</option><option>Terreno</option></select>
+      </div>
+      <div class="form-group"><label>Operación</label>
+        <select id="rp-op"><option>Venta</option><option>Alquiler</option><option>Pre-venta</option></select>
+      </div>
+      <div class="form-group"><label>Precio (USD)</label><input id="rp-precio" type="number" placeholder="350000"></div>
+      <div class="form-group"><label>Área (m²)</label><input id="rp-area" type="number" placeholder="120"></div>
+      <div class="form-group"><label>Habitaciones</label><input id="rp-hab" type="number" placeholder="3"></div>
+      <div class="form-group"><label>Baños</label><input id="rp-banos" type="number" placeholder="2"></div>
+      <div class="form-group"><label>Zona</label>
+        <select id="rp-zona"><option>Costa del Este</option><option>Casco Antiguo</option><option>San Francisco</option><option>Punta Pacífica</option><option>Marbella</option><option>Bella Vista</option><option>El Cangrejo</option><option>Coronado</option><option>Chiriquí</option></select>
+      </div>
+      <div class="form-group"><label>Comisión compartida</label>
+        <select id="rp-comision"><option>2%</option><option>2.5%</option><option>3%</option><option>3.5%</option><option>4%</option><option>50/50 del total</option><option>A negociar</option></select>
+      </div>
+      <div class="form-group form-full"><label>Descripción / Condiciones</label><textarea id="rp-desc" placeholder="Amenidades, condiciones, documentación, observaciones..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalRedPropiedad')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveRedProp()">🤝 Compartir en la Red</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 // ============================================================
+// SUPABASE — Real-time cloud persistence
+// Anon key is a public, read-only publishable key (safe in frontend)
+// ============================================================
+const _sbUrl = 'https://dskslrlxldnxrglrochv.supabase.co';
+const _sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRza3Nscmx4bGRueHJnbHJvY2h2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyOTM2MzMsImV4cCI6MjA5NTg2OTYzM30.62U_9hefwe0Jbck-QQ-wzhQm5PygCobXsa3Mql45Ctc';
+let sb = null;
+try { if(window.supabase) sb = window.supabase.createClient(_sbUrl, _sbKey); } catch(e){}
+
+async function loadSupabaseData(){
+  if(!sb) return;
+  try {
+    const [propsRes, leadsRes, agendaRes, redContactsRes, redPropsRes] = await Promise.all([
+      sb.from('propiedades').select('*').order('created_at',{ascending:false}),
+      sb.from('clientes').select('*').order('created_at',{ascending:false}),
+      sb.from('agenda').select('*').order('fecha',{ascending:true}),
+      sb.from('red_inmobiliaria').select('*').order('created_at',{ascending:false}),
+      sb.from('propiedades_red').select('*').order('created_at',{ascending:false})
+    ]);
+    if(propsRes.data && propsRes.data.length){
+      props = propsRes.data.map(p=>({
+        id: p.id, titulo:p.titulo||'', tipo:p.tipo||'Apartamento',
+        op:p.operacion||'Venta', zona:p.zona||'', precio:p.precio||0,
+        area:p.area_total||0, hab:p.habitaciones||0, banos:p.banos||0,
+        estac:p.parqueos||0, status:p.estado||'Disponible', desc:p.descripcion||'',
+        _sbId:p.id
+      }));
+    }
+    if(leadsRes.data && leadsRes.data.length){
+      leads = leadsRes.data.map(l=>({
+        id: l.id,
+        nombre: ((l.nombre||'') + ' ' + (l.apellido||'')).trim(),
+        apellido:l.apellido||'', tel:l.telefono||'', tel2:l.telefono2||'',
+        wa:l.whatsapp||'', email:l.email||'', cedula:l.cedula||'',
+        pasaporte:l.pasaporte||'', nacimiento:l.fecha_nacimiento||'',
+        nacionalidad:l.nacionalidad||'', ocupacion:l.ocupacion||'',
+        empresa:l.empresa||'', tipo_cliente:l.tipo_cliente||'Comprador',
+        interes:l.interes||'Compra', tipo_prop:l.tipo_propiedad_interes||'',
+        presupuesto_min:l.presupuesto_min||0, presupuesto_max:l.presupuesto_max||0,
+        presupuesto: l.presupuesto_max ? `$${(l.presupuesto_min||0).toLocaleString()}–$${l.presupuesto_max.toLocaleString()}` : '',
+        zona: Array.isArray(l.zonas_interes)?(l.zonas_interes[0]||''):(l.zonas_interes||''),
+        hab_deseadas:l.habitaciones_deseadas||'', status:l.estado||'Nuevo',
+        fuente:l.origen||'Web', agente:l.agente_asignado||'J. Castro',
+        notas:l.notas||'',
+        fecha:l.created_at?l.created_at.split('T')[0]:new Date().toISOString().split('T')[0],
+        _sbId:l.id
+      }));
+    }
+    if(agendaRes.data && agendaRes.data.length){
+      citas = agendaRes.data.map(a=>({
+        tipo:a.tipo||'',cliente:a.titulo||'',propiedad:a.lugar||'',
+        fecha:a.fecha||'',hora:a.hora||'',notas:a.notas||'',_sbId:a.id
+      }));
+    }
+    if(redContactsRes.data) redContacts = redContactsRes.data;
+    if(redPropsRes.data) redProps = redPropsRes.data;
+
+    // Re-render
+    renderDashboard(); renderProps(); renderLeads(); renderCalendar();
+    if(document.getElementById('panel-redInmo').classList.contains('active')) renderRedInmo();
+    document.getElementById('badge-leads').textContent=leads.filter(l=>l.status==='Nuevo').length;
+    document.getElementById('badge-red').textContent=redContacts.length;
+    toast('🟢 Sincronizado con la nube');
+  } catch(e){ console.warn('Supabase load error:',e); }
+}
+
+function initRealtime(){
+  if(!sb) return;
+  sb.channel('crm-live')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'propiedades'},p=>{
+      const d=p.new;
+      if(!props.find(x=>x._sbId===d.id)){
+        props.unshift({id:d.id,titulo:d.titulo||'',tipo:d.tipo||'Apartamento',op:d.operacion||'Venta',zona:d.zona||'',precio:d.precio||0,area:d.area_total||0,hab:d.habitaciones||0,banos:d.banos||0,estac:d.parqueos||0,status:d.estado||'Disponible',desc:d.descripcion||'',_sbId:d.id});
+        renderProps();renderDashboard();toast('🏠 Nueva propiedad en la nube');
+      }
+    })
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'propiedades'},p=>{
+      props=props.filter(x=>x._sbId!==p.old.id); renderProps();renderDashboard();
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'clientes'},p=>{
+      const d=p.new;
+      if(!leads.find(x=>x._sbId===d.id)){
+        leads.unshift({id:d.id,nombre:((d.nombre||'')+' '+(d.apellido||'')).trim(),tel:d.telefono||'',email:d.email||'',interes:d.interes||'Compra',presupuesto:'',zona:'',status:d.estado||'Nuevo',fuente:d.origen||'Web',notas:d.notas||'',fecha:new Date().toISOString().split('T')[0],_sbId:d.id});
+        renderLeads();renderDashboard();
+        document.getElementById('badge-leads').textContent=leads.filter(l=>l.status==='Nuevo').length;
+        toast('👤 Nuevo cliente en la nube');
+      }
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'agenda'},p=>{
+      const d=p.new;
+      citas.unshift({tipo:d.tipo||'',cliente:d.titulo||'',propiedad:d.lugar||'',fecha:d.fecha||'',hora:d.hora||'',notas:d.notas||'',_sbId:d.id});
+      renderCalendar();toast('📅 Nueva cita en la nube');
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'red_inmobiliaria'},p=>{
+      redContacts.unshift(p.new); renderRedInmo();
+      document.getElementById('badge-red').textContent=redContacts.length;
+    })
+    .subscribe(s=>{ if(s==='SUBSCRIBED') console.log('🟢 CRM realtime activo'); });
+}
+
+// ============================================================
 // DATA STORE
 // ============================================================
+let redContacts = [];
+let redProps = [];
+
 let props = [
   {id:'P001',titulo:'Residencia de Lujo con Vista al Mar',tipo:'Apartamento',op:'Venta',zona:'Punta Pacífica',precio:485000,area:185,hab:3,banos:3,estac:2,status:'Disponible',desc:'Acabados premium, piscina, gimnasio.'},
   {id:'P002',titulo:'Penthouse Colonial con Terraza Privada',tipo:'Penthouse',op:'Alquiler',zona:'Casco Antiguo',precio:3800,area:320,hab:4,banos:4,estac:2,status:'Disponible',desc:'Patrimonio UNESCO, vistas panorámicas.'},
@@ -1280,7 +1527,7 @@ function showPanel(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  const labels={dashboard:'Dashboard',propiedades:'Propiedades',leads:'Leads / Clientes',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',automatizaciones:'Automatizaciones',mls:'Red MLS'};
+  const labels={dashboard:'Dashboard',propiedades:'Propiedades',leads:'Leads / Clientes',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria'};
   document.getElementById('topbar-title').textContent=labels[id]||id;
   event.currentTarget.classList.add('active');
   if(id==='propiedades') renderProps();
@@ -1293,6 +1540,7 @@ function showPanel(id){
   if(id==='portales') renderPortales();
   if(id==='automatizaciones') renderAutomations();
   if(id==='mls') renderMLS();
+  if(id==='redInmo') renderRedInmo();
   if(id==='reportes') updateReportKPIs();
 }
 
@@ -1860,45 +2108,98 @@ function saveProp(){
   };
   props.push(p);
   activities.unshift({tipo:'📝 Nota',cliente:'Sistema',desc:`Propiedad ${p.id} "${p.titulo}" agregada.`,time:'Ahora'});
+  // Persist to Supabase
+  if(sb){
+    sb.from('propiedades').insert({
+      titulo:p.titulo, tipo:p.tipo, operacion:p.op, zona:p.zona,
+      precio:p.precio, area_total:p.area, habitaciones:p.hab,
+      banos:p.banos, parqueos:p.estac, estado:p.status, descripcion:p.desc
+    }).then(({error,data})=>{
+      if(error) console.warn('Supabase prop save error:',error);
+      else if(data && data[0]) p._sbId=data[0].id;
+    });
+  }
   closeModal('modalProp');
+  // Clear form
+  ['p-titulo','p-precio','p-area','p-hab','p-banos','p-estac','p-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   renderProps();renderDashboard();
   toast('✅ Propiedad guardada: '+p.id);
 }
 
 function saveLead(){
-  const nombre=document.getElementById('l-nombre').value.trim();
-  if(!nombre){alert('Ingresa el nombre del lead');return;}
+  const nombre=(document.getElementById('l-nombre').value||'').trim();
+  if(!nombre){alert('Ingresa el nombre del cliente');return;}
+  const g=id=>(document.getElementById(id)||{value:''}).value||'';
+  const apellido=g('l-apellido'), tel=g('l-tel'), tel2=g('l-tel2'), wa=g('l-wa');
+  const email=g('l-email'), cedula=g('l-cedula'), pasaporte=g('l-pasaporte');
+  const nacimiento=g('l-nacimiento'), nacionalidad=g('l-nacionalidad')||'Panameña';
+  const ocupacion=g('l-ocupacion'), empresa=g('l-empresa');
+  const tipoCliente=g('l-tipo-cliente')||'Comprador';
+  const interes=g('l-interes')||'Compra';
+  const tipoProp=g('l-tipo-prop')||'';
+  const presMin=+g('l-presupuesto-min')||0, presMax=+g('l-presupuesto-max')||0;
+  const habDeseadas=g('l-hab-deseadas'), zona=g('l-zona')||'Cualquier zona';
+  const status=g('l-status')||'Nuevo', fuente=g('l-fuente')||'Web';
+  const agente=g('l-agente')||'J. Castro';
+  const notas=g('l-notas');
+  const instagram=g('l-instagram'), linkedin=g('l-linkedin');
+
+  const presupuesto = presMax ? `$${presMin.toLocaleString()}–$${presMax.toLocaleString()}` :
+    presMin ? `Desde $${presMin.toLocaleString()}` : '';
+
   const l={
     id:'L'+String(leads.length+1).padStart(3,'0'),
-    nombre,tel:document.getElementById('l-tel').value,
-    email:document.getElementById('l-email').value,
-    interes:document.getElementById('l-interes').value,
-    presupuesto:document.getElementById('l-presupuesto').value,
-    zona:document.getElementById('l-zona').value,
-    status:document.getElementById('l-status').value,
-    fuente:document.getElementById('l-fuente').value,
-    notas:document.getElementById('l-notas').value,
+    nombre: nombre+(apellido?' '+apellido:''),
+    apellido, tel, tel2, wa:wa||tel, email, cedula, pasaporte,
+    nacimiento, nacionalidad, ocupacion, empresa, tipo_cliente:tipoCliente,
+    interes, tipo_prop:tipoProp, presupuesto_min:presMin, presupuesto_max:presMax,
+    presupuesto, hab_deseadas:habDeseadas, zona, status, fuente, agente,
+    notas, instagram, linkedin,
     fecha:new Date().toISOString().split('T')[0]
   };
   leads.push(l);
-  activities.unshift({tipo:'👤 Nuevo lead',cliente:l.nombre,desc:`Lead creado. Fuente: ${l.fuente}. Interés: ${l.interes}.`,time:'Ahora'});
+  activities.unshift({tipo:'👤 Nuevo cliente',cliente:l.nombre,desc:`Cliente creado. Fuente: ${fuente}. Interés: ${interes}. Presupuesto: ${presupuesto||'N/A'}.`,time:'Ahora'});
+
+  // Persist to Supabase
+  if(sb){
+    sb.from('clientes').insert({
+      nombre, apellido, email, telefono:tel, telefono2:tel2,
+      whatsapp:wa||tel, cedula, pasaporte,
+      fecha_nacimiento:nacimiento||null, nacionalidad, ocupacion, empresa,
+      tipo_cliente:tipoCliente, origen:fuente, interes,
+      tipo_propiedad_interes:tipoProp,
+      presupuesto_min:presMin||null, presupuesto_max:presMax||null,
+      zonas_interes:[zona], habitaciones_deseadas:habDeseadas||null,
+      estado:status, agente_asignado:agente, notas,
+      redes_sociales:{instagram, linkedin}
+    }).then(({error,data})=>{
+      if(error) console.warn('Supabase lead save error:',error);
+      else if(data && data[0]) l._sbId=data[0].id;
+    });
+  }
+
   closeModal('modalLead');
   renderLeads();renderDashboard();
   document.getElementById('badge-leads').textContent=leads.filter(x=>x.status==='Nuevo').length;
-  toast('✅ Lead guardado: '+l.nombre);
+  toast('✅ Cliente guardado: '+l.nombre);
 }
 
 function saveCita(){
   const cliente=document.getElementById('c-cliente').value.trim();
   if(!cliente){alert('Ingresa el nombre del cliente');return;}
-  citas.push({
-    tipo:document.getElementById('c-tipo').value,
-    cliente,propiedad:document.getElementById('c-propiedad').value,
-    fecha:document.getElementById('c-fecha').value,
-    hora:document.getElementById('c-hora').value,
-    notas:document.getElementById('c-notas').value
-  });
-  activities.unshift({tipo:'📅 Cita',cliente,desc:`${document.getElementById('c-tipo').value} agendada para ${document.getElementById('c-fecha').value} ${document.getElementById('c-hora').value}.`,time:'Ahora'});
+  const tipo=document.getElementById('c-tipo').value;
+  const fecha=document.getElementById('c-fecha').value;
+  const hora=document.getElementById('c-hora').value;
+  const propiedad=document.getElementById('c-propiedad').value;
+  const notas=document.getElementById('c-notas').value;
+  const cita={tipo,cliente,propiedad,fecha,hora,notas};
+  citas.push(cita);
+  activities.unshift({tipo:'📅 Cita',cliente,desc:`${tipo} agendada para ${fecha} ${hora}.`,time:'Ahora'});
+  // Persist to Supabase
+  if(sb){
+    sb.from('agenda').insert({titulo:cliente,tipo,lugar:propiedad||null,fecha:fecha||null,hora:hora||null,notas:notas||null,estado:'Programada'})
+      .then(({error,data})=>{ if(error) console.warn('Agenda save error:',error); else if(data&&data[0]) cita._sbId=data[0].id; });
+  }
   closeModal('modalCita');
   renderCalendar();renderDashboard();
   toast('✅ Cita agendada');
@@ -2180,6 +2481,151 @@ function updateTareaRef(tipo){
 }
 
 // ============================================================
+// RED INMOBILIARIA
+// ============================================================
+function renderRedInmo(){
+  const tbody=document.getElementById('red-tbody');
+  if(tbody){
+    tbody.innerHTML=redContacts.length?redContacts.map(c=>`<tr>
+      <td><div style="font-weight:500">${c.nombre||''}</div><div style="font-size:11px;color:var(--muted)">${c.empresa||'Independiente'}</div></td>
+      <td><span class="tag" style="background:var(--card2);color:var(--text)">${c.tipo||'Agente'}</span></td>
+      <td>${c.zona||'–'}</td>
+      <td><div style="font-size:12px">${c.telefono||c.whatsapp||'–'}</div><div style="font-size:11px;color:var(--muted)">${c.email||''}</div></td>
+      <td>${c.licencia||'–'}</td>
+      <td><span class="tag tag-${(c.estado||'activo').toLowerCase()}">${c.estado||'Activo'}</span></td>
+      <td><div class="action-btns">
+        <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="waRedContact('${c.nombre}')" title="WhatsApp">💬</button>
+        <button class="email-btn" style="font-size:10px;padding:3px 7px" onclick="emailRedContact('${c.nombre}')" title="Email">📧</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteRedContact('${c.nombre}')">🗑️</button>
+      </div></td>
+    </tr>`).join('')
+    :'<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Sin contactos. Agrega tu primer agente o corredor.</td></tr>';
+  }
+  const tbody2=document.getElementById('red-props-tbody');
+  if(tbody2){
+    tbody2.innerHTML=redProps.length?redProps.map(p=>`<tr>
+      <td><div style="font-weight:500">${p.titulo||''}</div><div style="font-size:11px;color:var(--muted)">📍 ${p.ubicacion||p.zona||''}</div></td>
+      <td>${p.tipo||'–'}</td>
+      <td><span class="tag tag-${(p.operacion||'venta').toLowerCase()}">${p.operacion||'–'}</span></td>
+      <td class="price">$${(p.precio||0).toLocaleString()}</td>
+      <td>${p.area||'–'}m²</td>
+      <td style="color:var(--accent);font-weight:600">${p.comision_compartida||'–'}</td>
+      <td><span class="tag tag-${(p.estado||'disponible').toLowerCase()}">${p.estado||'Disponible'}</span></td>
+      <td><div class="action-btns">
+        <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="toast('Enviando por WhatsApp...')" title="Compartir">💬</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteRedProp('${p.titulo||p.id}')">🗑️</button>
+      </div></td>
+    </tr>`).join('')
+    :'<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">Sin propiedades compartidas aún.</td></tr>';
+  }
+  const ka=document.getElementById('red-kpi-agentes');
+  const kp=document.getElementById('red-kpi-props');
+  if(ka) ka.textContent=redContacts.length;
+  if(kp) kp.textContent=redProps.length;
+  document.getElementById('badge-red').textContent=redContacts.length;
+}
+
+function filterRedContacts(q){
+  if(!q){renderRedInmo();return;}
+  const filtered=redContacts.filter(c=>
+    (c.nombre||'').toLowerCase().includes(q.toLowerCase())||
+    (c.empresa||'').toLowerCase().includes(q.toLowerCase())||
+    (c.zona||'').toLowerCase().includes(q.toLowerCase())
+  );
+  const tbody=document.getElementById('red-tbody');
+  if(tbody) tbody.innerHTML=filtered.map(c=>`<tr>
+    <td><div style="font-weight:500">${c.nombre||''}</div><div style="font-size:11px;color:var(--muted)">${c.empresa||''}</div></td>
+    <td>${c.tipo||''}</td><td>${c.zona||''}</td>
+    <td>${c.telefono||''}</td><td>${c.licencia||'–'}</td>
+    <td><span class="tag">${c.estado||'Activo'}</span></td>
+    <td><button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="waRedContact('${c.nombre}')">💬</button></td>
+  </tr>`).join('')||'<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted)">Sin resultados</td></tr>';
+}
+
+function saveRedContact(){
+  const nombre=(document.getElementById('rc-nombre').value||'').trim();
+  if(!nombre){alert('Ingresa el nombre del contacto');return;}
+  const g=id=>(document.getElementById(id)||{value:''}).value||'';
+  const c={
+    nombre, tipo:g('rc-tipo'), empresa:g('rc-empresa'), licencia:g('rc-licencia'),
+    telefono:g('rc-tel'), email:g('rc-email'), whatsapp:g('rc-wa')||g('rc-tel'),
+    zona:g('rc-zona'), especialidades:g('rc-especialidades'), notas:g('rc-notas'), estado:'Activo'
+  };
+  redContacts.unshift(c);
+  if(sb){
+    sb.from('red_inmobiliaria').insert({
+      nombre:c.nombre, tipo:c.tipo, empresa:c.empresa, licencia:c.licencia,
+      telefono:c.telefono, email:c.email, whatsapp:c.whatsapp,
+      zona:c.zona, especialidades:c.especialidades?[c.especialidades]:[], notas:c.notas, estado:'Activo'
+    }).then(({error,data})=>{ if(error) console.warn('Red contact save error:',error); else if(data&&data[0]) c._sbId=data[0].id; });
+  }
+  closeModal('modalRedContacto');
+  renderRedInmo();
+  activities.unshift({tipo:'🤝 Red',cliente:c.nombre,desc:`Nuevo contacto en la red: ${c.tipo} · ${c.empresa||'Independiente'}`,time:'Ahora'});
+  ['rc-nombre','rc-empresa','rc-licencia','rc-tel','rc-wa','rc-email','rc-especialidades','rc-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  toast('✅ Contacto agregado a la red: '+c.nombre);
+}
+
+function saveRedProp(){
+  const titulo=(document.getElementById('rp-titulo').value||'').trim();
+  if(!titulo){alert('Ingresa el título de la propiedad');return;}
+  const g=id=>+(document.getElementById(id)||{value:0}).value||0;
+  const gs=id=>(document.getElementById(id)||{value:''}).value||'';
+  const p={
+    titulo, tipo:gs('rp-tipo'), operacion:gs('rp-op'),
+    precio:g('rp-precio'), area:g('rp-area'), habitaciones:g('rp-hab'), banos:g('rp-banos'),
+    ubicacion:gs('rp-zona'), descripcion:gs('rp-desc'),
+    comision_compartida:gs('rp-comision'), estado:'Disponible'
+  };
+  redProps.unshift(p);
+  if(sb){
+    sb.from('propiedades_red').insert({
+      titulo:p.titulo, tipo:p.tipo, operacion:p.operacion, precio:p.precio,
+      area:p.area, habitaciones:p.habitaciones, banos:p.banos,
+      ubicacion:p.ubicacion, descripcion:p.descripcion,
+      comision_compartida:p.comision_compartida, estado:'Disponible'
+    }).then(({error,data})=>{ if(error) console.warn('Red prop save error:',error); else if(data&&data[0]) p._sbId=data[0].id; });
+  }
+  closeModal('modalRedPropiedad');
+  renderRedInmo();
+  ['rp-titulo','rp-precio','rp-area','rp-hab','rp-banos','rp-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  toast('✅ Propiedad compartida en la red: '+p.titulo);
+}
+
+function waRedContact(nombre){
+  const c=redContacts.find(x=>x.nombre===nombre);
+  if(!c) return;
+  const num=(c.whatsapp||c.telefono||'').replace(/\D/g,'');
+  const txt=encodeURIComponent(`Hola ${c.nombre}, soy J. Castro de JAC Realty (Lic. PN-0931). Me comunico para explorar oportunidades de co-broking y propiedades compartidas. ¿Tiene un momento? 🤝\n+507 64627763 · jacrealtypa.com`);
+  if(num) window.open('https://wa.me/'+num+'?text='+txt);
+  else toast('Sin número de WhatsApp registrado');
+}
+
+function emailRedContact(nombre){
+  const c=redContacts.find(x=>x.nombre===nombre);
+  if(!c||!c.email){toast('Sin email registrado');return;}
+  const sub=encodeURIComponent('Colaboración inmobiliaria · JAC Realty Panamá');
+  const body=encodeURIComponent(`Estimado/a ${c.nombre},\n\nMe comunico desde JAC Realty Panamá (Lic. PN-0931).\n\nMe gustaría explorar oportunidades de colaboración y co-broking en la industria inmobiliaria panameña.\n\nSaludos,\nJelyan Castro\nJAC Realty Panamá · +507 64627763\njacrealtypa.com`);
+  window.open(`mailto:${c.email}?subject=${sub}&body=${body}`);
+}
+
+function deleteRedContact(nombre){
+  if(!confirm('¿Eliminar contacto de la red?')) return;
+  const c=redContacts.find(x=>x.nombre===nombre);
+  redContacts=redContacts.filter(x=>x.nombre!==nombre);
+  if(sb&&c&&c._sbId) sb.from('red_inmobiliaria').delete().eq('id',c._sbId).then(()=>{});
+  renderRedInmo();toast('Contacto eliminado de la red');
+}
+
+function deleteRedProp(titleOrId){
+  if(!confirm('¿Eliminar propiedad de la red?')) return;
+  const p=redProps.find(x=>x.titulo===titleOrId||x.id===titleOrId);
+  redProps=redProps.filter(x=>x.titulo!==titleOrId&&x.id!==titleOrId);
+  if(sb&&p&&p._sbId) sb.from('propiedades_red').delete().eq('id',p._sbId).then(()=>{});
+  renderRedInmo();toast('Propiedad eliminada de la red');
+}
+
+// ============================================================
 // AUTH — LOGIN / LOGOUT
 // Credentials obfuscated; not stored as plain text
 // ============================================================
@@ -2238,6 +2684,9 @@ document.querySelectorAll('.nav-item').forEach(el=>{
 // INIT
 // ============================================================
 renderDashboard();
+renderProps();
+renderLeads();
+renderRedInmo();
 // Set default date on cita/tarea modals
 document.getElementById('c-fecha').value=new Date().toISOString().split('T')[0];
 document.getElementById('t-vence').value=new Date().toISOString().split('T')[0];
@@ -2245,9 +2694,12 @@ document.getElementById('t-vence').value=new Date().toISOString().split('T')[0];
 populateNotaRef();
 // Init tarea ref selector
 updateTareaRef('lead');
-// Init badge
+// Init badges
 document.getElementById('badge-notas').textContent=notes.length;
 document.getElementById('badge-tareas').textContent=tasks.filter(t=>t.status!=='Completada').length;
+document.getElementById('badge-leads').textContent=leads.filter(l=>l.status==='Nuevo').length;
+// Load from Supabase (async — fills from cloud, overrides local demo data if available)
+loadSupabaseData().then(()=>initRealtime());
 </script>
 </body>
 </html>
