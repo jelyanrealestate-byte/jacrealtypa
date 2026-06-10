@@ -527,9 +527,17 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
     <div class="nav-item" onclick="showPanel('propiedades')">
       <span class="icon">🏠</span> Propiedades
     </div>
+    <div class="nav-item" onclick="showPanel('contactos')">
+      <span class="icon">📇</span> Contactos
+      <span class="nav-badge" id="badge-contactos" style="background:var(--blue)">0</span>
+    </div>
     <div class="nav-item" onclick="showPanel('leads')">
-      <span class="icon">👥</span> Leads / Clientes
-      <span class="nav-badge" id="badge-leads">3</span>
+      <span class="icon">🎯</span> Leads
+      <span class="nav-badge" id="badge-leads">0</span>
+    </div>
+    <div class="nav-item" onclick="showPanel('clientes')">
+      <span class="icon">👥</span> Clientes
+      <span class="nav-badge" id="badge-clientes" style="background:var(--green)">0</span>
     </div>
     <div class="nav-section">Gestión</div>
     <div class="nav-item" onclick="showPanel('pipeline')">
@@ -703,24 +711,79 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
     </div>
 
     <!-- ========== LEADS ========== -->
+    <!-- ========== CONTACTOS ========== -->
+    <div class="panel" id="panel-contactos">
+      <div class="search-bar">
+        <input type="text" placeholder="🔍 Buscar contacto..." oninput="filterContacts(this.value)">
+        <select onchange="filterContactsCat(this.value)">
+          <option value="">Todas las categorías</option>
+          <option>Colega / Agente</option><option>Propietario</option><option>Proveedor</option><option>Abogado / Notario</option><option>Banco / Financiera</option><option>Otro</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modalContacto')">+ Nuevo Contacto</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nombre</th><th>Tel / Email</th><th>Empresa / Cargo</th><th>Categoría</th><th>Notas</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <tbody id="contacts-tbody">
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">Sin contactos. Agrega tu primer contacto.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== LEADS ========== -->
     <div class="panel" id="panel-leads">
       <div class="search-bar">
         <input type="text" placeholder="🔍 Buscar lead..." oninput="filterLeads(this.value)">
         <select onchange="filterLeadsStatus(this.value)">
           <option value="">Todos los estados</option>
-          <option>Nuevo</option><option>Contactado</option><option>Visita</option>
-          <option>Oferta</option><option>Cerrado</option><option>Perdido</option>
+          <option>Nuevo</option><option>Contactado</option><option>Visita programada</option>
+          <option>En negociación</option><option>Oferta presentada</option><option>Cerrado ✅</option><option>Perdido ❌</option>
         </select>
         <select onchange="filterLeadsInterest(this.value)">
           <option value="">Todo interés</option>
-          <option>Compra</option><option>Alquiler</option><option>Inversión</option>
+          <option>Compra</option><option>Alquiler</option><option>Inversión</option><option>Preventa</option>
         </select>
         <button class="btn btn-primary btn-sm" onclick="openModal('modalLead')">+ Nuevo Lead</button>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Nombre</th><th>Tel / Email</th><th>Interés</th><th>Presupuesto</th><th>Estado / Tracking</th><th>Fecha</th><th>Acciones</th></tr></thead>
-          <tbody id="leads-tbody"></tbody>
+          <thead><tr><th>Nombre</th><th>Tel / Email</th><th>Interés</th><th>Presupuesto</th><th>Origen</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <tbody id="leads-tbody">
+            <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">Sin leads. Agrega tu primer lead.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== CLIENTES ========== -->
+    <div class="panel" id="panel-clientes">
+      <!-- KPI mini-row -->
+      <div class="kpi-grid" style="margin-bottom:14px">
+        <div class="kpi-card"><div class="kpi-label">Compradores</div><div class="kpi-value" style="color:var(--blue)" id="cli-kpi-compradores">0</div></div>
+        <div class="kpi-card"><div class="kpi-label">Arrendatarios</div><div class="kpi-value" style="color:var(--purple)" id="cli-kpi-arrendatarios">0</div></div>
+        <div class="kpi-card"><div class="kpi-label">Vendedores/Propietarios</div><div class="kpi-value" style="color:var(--accent)" id="cli-kpi-vendedores">0</div></div>
+        <div class="kpi-card"><div class="kpi-label">Arrendadores</div><div class="kpi-value" style="color:var(--green)" id="cli-kpi-arrendadores">0</div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div class="tabs" id="clientes-tabs">
+          <button class="tab active" onclick="filterClientesTab(this,'todos')">Todos</button>
+          <button class="tab" onclick="filterClientesTab(this,'Comprador')">🏡 Compradores</button>
+          <button class="tab" onclick="filterClientesTab(this,'Arrendatario')">🔑 Arrendatarios</button>
+          <button class="tab" onclick="filterClientesTab(this,'Vendedor/Propietario')">💼 Vendedores</button>
+          <button class="tab" onclick="filterClientesTab(this,'Arrendador/Propietario')">🏘 Arrendadores</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input type="text" placeholder="🔍 Buscar cliente..." style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:12px;outline:none;width:200px" oninput="filterClients(this.value)">
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalCliente')">+ Nuevo Cliente</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nombre</th><th>Tel / Email</th><th>Tipo</th><th>Detalle / Propiedad</th><th>Estado</th><th>Agente</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <tbody id="clients-tbody">
+            <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">Sin clientes. Agrega tu primer cliente.</td></tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -1151,12 +1214,13 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 
 <!-- Modal Lead / Cliente — Formulario Completo -->
 <div class="modal-bg" id="modalLead">
-  <div class="modal" style="width:680px">
+  <div class="modal" style="width:700px">
     <div class="modal-header">
-      <span class="modal-title">👤 Nuevo Cliente / Lead</span>
+      <span class="modal-title" id="lead-modal-title">🎯 Nuevo Lead</span>
       <button class="modal-close" onclick="closeModal('modalLead')">✕</button>
     </div>
-    <!-- SECCIÓN: Datos Personales -->
+    <input type="hidden" id="l-edit-id">
+    <!-- Datos Personales -->
     <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding:6px 10px;background:var(--card2);border-radius:6px">📋 Información Personal</div>
     <div class="form-grid">
       <div class="form-group"><label>Nombre *</label><input id="l-nombre" placeholder="Nombre"></div>
@@ -1168,29 +1232,66 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
         <select id="l-nacionalidad"><option>Panameña</option><option>Colombiana</option><option>Venezolana</option><option>Estadounidense</option><option>Española</option><option>China</option><option>Canadiense</option><option>Otra</option></select>
       </div>
     </div>
-    <!-- SECCIÓN: Contacto -->
+    <!-- Contacto -->
     <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📞 Contacto</div>
     <div class="form-grid">
       <div class="form-group"><label>Teléfono principal *</label><input id="l-tel" placeholder="+507 6000-0000"></div>
       <div class="form-group"><label>Teléfono 2</label><input id="l-tel2" placeholder="+507 6000-0001"></div>
       <div class="form-group"><label>WhatsApp</label><input id="l-wa" placeholder="+507 6000-0000"></div>
-      <div class="form-group"><label>Email *</label><input id="l-email" type="email" placeholder="correo@ejemplo.com"></div>
+      <div class="form-group"><label>Email</label><input id="l-email" type="email" placeholder="correo@ejemplo.com"></div>
       <div class="form-group"><label>Instagram</label><input id="l-instagram" placeholder="@usuario"></div>
       <div class="form-group"><label>LinkedIn / Web</label><input id="l-linkedin" placeholder="linkedin.com/in/nombre"></div>
     </div>
-    <!-- SECCIÓN: Perfil profesional -->
+    <!-- Perfil Profesional -->
     <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">💼 Perfil Profesional</div>
     <div class="form-grid">
       <div class="form-group"><label>Ocupación</label><input id="l-ocupacion" placeholder="Empresario, Médico, Abogado..."></div>
       <div class="form-group"><label>Empresa</label><input id="l-empresa" placeholder="Nombre de la empresa"></div>
-      <div class="form-group"><label>Tipo de Cliente</label>
-        <select id="l-tipo-cliente"><option>Comprador</option><option>Arrendatario</option><option>Vendedor</option><option>Propietario</option><option>Inversionista</option></select>
+      <!-- FUENTE con campos condicionales -->
+      <div class="form-group"><label>Fuente / Origen *</label>
+        <select id="l-fuente" onchange="showFuenteFields(this.value)">
+          <option value="">— Seleccionar —</option>
+          <option>Web / SEO</option>
+          <option>WhatsApp</option>
+          <option>Instagram</option>
+          <option>Facebook</option>
+          <option>Referido</option>
+          <option>MLS / Portales</option>
+          <option>Google Ads</option>
+          <option>Evento</option>
+          <option>Llamada en frío</option>
+          <option>Otro</option>
+        </select>
       </div>
-      <div class="form-group"><label>Fuente / Origen</label>
-        <select id="l-fuente"><option>Web</option><option>WhatsApp</option><option>Instagram</option><option>Facebook</option><option>Referido</option><option>MLS / Portales</option><option>Evento</option><option>Google Ads</option><option>Otro</option></select>
+      <!-- Campo condicional: Referido -->
+      <div class="form-group" id="fuente-referido-wrap" style="display:none">
+        <label>¿Quién lo refirió?</label>
+        <input id="l-quien-refirio" placeholder="Nombre del referidor">
+      </div>
+      <!-- Campo condicional: Portal específico -->
+      <div class="form-group" id="fuente-portal-wrap" style="display:none">
+        <label>¿Cuál portal?</label>
+        <select id="l-cual-portal">
+          <option value="">— Seleccionar portal —</option>
+          <option>Encuentra24</option>
+          <option>Compreoalquile</option>
+          <option>Lamudi</option>
+          <option>Facebook Marketplace</option>
+          <option>OLX</option>
+          <option>Wasi</option>
+          <option>Realtor.com</option>
+          <option>Zillow</option>
+          <option>Mitula</option>
+          <option>Otro portal</option>
+        </select>
+      </div>
+      <!-- Campo condicional: Otro -->
+      <div class="form-group" id="fuente-otro-wrap" style="display:none">
+        <label>Describe la fuente</label>
+        <input id="l-fuente-descripcion" placeholder="Describe cómo llegó este lead...">
       </div>
     </div>
-    <!-- SECCIÓN: Preferencias de Búsqueda -->
+    <!-- Preferencias de Búsqueda -->
     <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">🏠 Preferencias de Búsqueda</div>
     <div class="form-grid">
       <div class="form-group"><label>Interés principal</label>
@@ -1208,18 +1309,196 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
         <select id="l-zona"><option>Cualquier zona</option><option>Costa del Este</option><option>Casco Antiguo</option><option>San Francisco</option><option>Punta Pacífica</option><option>Marbella</option><option>Bella Vista</option><option>El Cangrejo</option><option>Obarrio</option><option>Coronado</option><option>Chiriquí</option></select>
       </div>
     </div>
-    <!-- SECCIÓN: Gestión -->
+    <!-- Gestión -->
     <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">⚙️ Gestión</div>
     <div class="form-grid">
       <div class="form-group"><label>Estado del Lead</label>
-        <select id="l-status"><option>Nuevo</option><option>Contactado</option><option>Visita</option><option>Oferta</option><option>Cerrado</option><option>Perdido</option></select>
+        <select id="l-status"><option>Nuevo</option><option>Contactado</option><option>Visita programada</option><option>En negociación</option><option>Oferta presentada</option><option>Cerrado ✅</option><option>Perdido ❌</option></select>
+      </div>
+      <div class="form-group"><label>Prioridad</label>
+        <select id="l-prioridad"><option>Normal</option><option>Alta 🔥</option><option>Urgente ⚡</option><option>Baja</option></select>
       </div>
       <div class="form-group"><label>Agente Asignado</label><input id="l-agente" placeholder="J. Castro" value="J. Castro"></div>
       <div class="form-group form-full"><label>Notas / Observaciones</label><textarea id="l-notas" placeholder="Preferencias especiales, idioma, historial, info relevante..."></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalLead')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveLead()">💾 Guardar Cliente</button>
+      <button class="btn btn-primary" onclick="saveLead()">💾 Guardar Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Contacto -->
+<div class="modal-bg" id="modalContacto">
+  <div class="modal" style="width:680px">
+    <div class="modal-header">
+      <span class="modal-title" id="contacto-modal-title">📇 Nuevo Contacto</span>
+      <button class="modal-close" onclick="closeModal('modalContacto')">✕</button>
+    </div>
+    <input type="hidden" id="ct-edit-id">
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding:6px 10px;background:var(--card2);border-radius:6px">📋 Información Personal</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Nombre *</label><input id="ct-nombre" placeholder="Nombre"></div>
+      <div class="form-group"><label>Apellido</label><input id="ct-apellido" placeholder="Apellido"></div>
+      <div class="form-group"><label>Cédula / ID</label><input id="ct-cedula" placeholder="8-123-456"></div>
+      <div class="form-group"><label>Fecha de Nacimiento</label><input id="ct-nacimiento" type="date"></div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📞 Contacto</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Teléfono</label><input id="ct-tel" placeholder="+507 6000-0000"></div>
+      <div class="form-group"><label>WhatsApp</label><input id="ct-wa" placeholder="+507 6000-0000"></div>
+      <div class="form-group"><label>Email</label><input id="ct-email" type="email" placeholder="correo@ejemplo.com"></div>
+      <div class="form-group"><label>Instagram</label><input id="ct-instagram" placeholder="@usuario"></div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">🏢 Empresa / Categoría</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Empresa / Organización</label><input id="ct-empresa" placeholder="Inmobiliaria XYZ"></div>
+      <div class="form-group"><label>Cargo / Título</label><input id="ct-cargo" placeholder="Agente, Director, Abogado..."></div>
+      <div class="form-group"><label>Categoría</label>
+        <select id="ct-categoria">
+          <option>Colega / Agente</option>
+          <option>Propietario</option>
+          <option>Proveedor</option>
+          <option>Abogado / Notario</option>
+          <option>Banco / Financiera</option>
+          <option>Constructor / Desarrollador</option>
+          <option>Inspector / Avaluador</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="form-group"><label>LinkedIn / Web</label><input id="ct-linkedin" placeholder="linkedin.com/in/nombre"></div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📝 Notas</div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Notas / Observaciones</label><textarea id="ct-notas" placeholder="Cómo se conocieron, relación, servicios que ofrece..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalContacto')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveContacto()">💾 Guardar Contacto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cliente -->
+<div class="modal-bg" id="modalCliente">
+  <div class="modal" style="width:720px">
+    <div class="modal-header">
+      <span class="modal-title" id="cliente-modal-title">👥 Nuevo Cliente</span>
+      <button class="modal-close" onclick="closeModal('modalCliente')">✕</button>
+    </div>
+    <input type="hidden" id="cli-edit-id">
+    <!-- Tipo de Cliente — principal selector -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding:6px 10px;background:var(--card2);border-radius:6px">🏷️ Tipo de Cliente</div>
+    <div class="form-grid">
+      <div class="form-group form-full">
+        <label>Tipo de Cliente *</label>
+        <select id="cli-tipo" onchange="showClienteFields(this.value)">
+          <option value="">— Seleccionar tipo —</option>
+          <option value="Comprador">🏡 Comprador</option>
+          <option value="Arrendatario">🔑 Arrendatario</option>
+          <option value="Vendedor/Propietario">💼 Vendedor / Propietario</option>
+          <option value="Arrendador/Propietario">🏘 Arrendador / Propietario</option>
+        </select>
+      </div>
+    </div>
+    <!-- Datos Personales -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📋 Información Personal</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Nombre *</label><input id="cli-nombre" placeholder="Nombre"></div>
+      <div class="form-group"><label>Apellido</label><input id="cli-apellido" placeholder="Apellido"></div>
+      <div class="form-group"><label>Cédula / ID</label><input id="cli-cedula" placeholder="8-123-456"></div>
+      <div class="form-group"><label>Pasaporte</label><input id="cli-pasaporte" placeholder="PA123456"></div>
+      <div class="form-group"><label>Fecha de Nacimiento</label><input id="cli-nacimiento" type="date"></div>
+      <div class="form-group"><label>Nacionalidad</label>
+        <select id="cli-nacionalidad"><option>Panameña</option><option>Colombiana</option><option>Venezolana</option><option>Estadounidense</option><option>Española</option><option>China</option><option>Canadiense</option><option>Otra</option></select>
+      </div>
+    </div>
+    <!-- Contacto -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📞 Contacto</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Teléfono principal *</label><input id="cli-tel" placeholder="+507 6000-0000"></div>
+      <div class="form-group"><label>WhatsApp</label><input id="cli-wa" placeholder="+507 6000-0000"></div>
+      <div class="form-group"><label>Email</label><input id="cli-email" type="email" placeholder="correo@ejemplo.com"></div>
+      <div class="form-group"><label>Instagram</label><input id="cli-instagram" placeholder="@usuario"></div>
+    </div>
+    <!-- COMPRADOR / ARRENDATARIO: sección búsqueda -->
+    <div id="cli-seccion-busqueda" style="display:none">
+      <div style="font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">🏠 Preferencias de Búsqueda</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Tipo de propiedad</label>
+          <select id="cli-tipo-prop"><option>Cualquiera</option><option>Apartamento</option><option>Casa</option><option>Penthouse</option><option>Local Comercial</option><option>Oficina</option><option>Terreno</option></select>
+        </div>
+        <div class="form-group"><label>Presupuesto máx. (USD)</label><input id="cli-presupuesto-max" type="number" placeholder="500000"></div>
+        <div class="form-group"><label>Habitaciones</label>
+          <select id="cli-habitaciones"><option value="">Cualquiera</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select>
+        </div>
+        <div class="form-group"><label>Zona preferida</label>
+          <select id="cli-zona"><option>Cualquier zona</option><option>Costa del Este</option><option>Casco Antiguo</option><option>San Francisco</option><option>Punta Pacífica</option><option>Marbella</option><option>Bella Vista</option><option>El Cangrejo</option><option>Obarrio</option><option>Coronado</option><option>Chiriquí</option></select>
+        </div>
+        <div class="form-group form-full"><label>Características específicas deseadas</label>
+          <input id="cli-deseos" placeholder="Piscina, estacionamiento, cerca del metro, vista al mar...">
+        </div>
+      </div>
+      <!-- Solo comprador: financiamiento -->
+      <div id="cli-seccion-financiamiento" style="display:none">
+        <div style="font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">💳 Financiamiento</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Forma de pago</label>
+            <select id="cli-forma-pago"><option>Contado</option><option>Hipoteca bancaria</option><option>Préstamo personal</option><option>Por definir</option></select>
+          </div>
+          <div class="form-group"><label>Banco pre-aprobado</label><input id="cli-banco" placeholder="Banco Nacional, BNP..."></div>
+          <div class="form-group"><label>Monto pre-aprobado (USD)</label><input id="cli-preaprobado" type="number" placeholder="250000"></div>
+          <div class="form-group"><label>Prima disponible (USD)</label><input id="cli-prima" type="number" placeholder="50000"></div>
+        </div>
+      </div>
+    </div>
+    <!-- VENDEDOR / ARRENDADOR: sección propiedad en venta/alquiler -->
+    <div id="cli-seccion-propiedad" style="display:none">
+      <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">🏡 Propiedad a Vender / Alquilar</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Dirección / Edificio</label><input id="cli-prop-direccion" placeholder="Edificio XYZ, piso 12, apt 1201"></div>
+        <div class="form-group"><label>Tipo de propiedad</label>
+          <select id="cli-prop-tipo"><option>Apartamento</option><option>Casa</option><option>Penthouse</option><option>Local Comercial</option><option>Oficina</option><option>Terreno</option></select>
+        </div>
+        <div class="form-group"><label>Precio solicitado (USD)</label><input id="cli-prop-precio" type="number" placeholder="350000"></div>
+        <div class="form-group"><label>Área (m²)</label><input id="cli-prop-area" type="number" placeholder="120"></div>
+        <div class="form-group"><label>Habitaciones</label>
+          <select id="cli-prop-hab"><option>Estudio</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select>
+        </div>
+        <div class="form-group"><label>Título disponible</label>
+          <select id="cli-prop-titulo"><option>Sí - Título propio</option><option>Derecho Posesorio</option><option>En trámite</option><option>No disponible</option></select>
+        </div>
+        <div class="form-group form-full"><label>Descripción de la propiedad</label>
+          <textarea id="cli-prop-descripcion" placeholder="Estado, mejoras, equipos incluidos, restricciones..."></textarea>
+        </div>
+      </div>
+      <!-- Comisión -->
+      <div class="form-grid">
+        <div class="form-group"><label>Comisión acordada (%)</label><input id="cli-comision" type="number" placeholder="3" min="0" max="100"></div>
+        <div class="form-group"><label>Exclusividad</label>
+          <select id="cli-exclusividad"><option>Sí - Exclusiva</option><option>No - Compartida</option></select>
+        </div>
+        <div class="form-group"><label>Contrato de corretaje</label>
+          <select id="cli-contrato"><option>Firmado</option><option>Pendiente</option><option>No aplica</option></select>
+        </div>
+        <div class="form-group"><label>Fecha de vencimiento contrato</label><input id="cli-contrato-vence" type="date"></div>
+      </div>
+    </div>
+    <!-- Gestión -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">⚙️ Gestión</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Estado</label>
+        <select id="cli-status"><option>Activo</option><option>En proceso</option><option>En espera</option><option>Cerrado ✅</option><option>Inactivo</option></select>
+      </div>
+      <div class="form-group"><label>Prioridad</label>
+        <select id="cli-prioridad"><option>Normal</option><option>Alta 🔥</option><option>Urgente ⚡</option><option>Baja</option></select>
+      </div>
+      <div class="form-group"><label>Agente Asignado</label><input id="cli-agente" placeholder="J. Castro" value="J. Castro"></div>
+      <div class="form-group form-full"><label>Notas / Observaciones</label><textarea id="cli-notas" placeholder="Historial de reuniones, condiciones especiales, observaciones..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalCliente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCliente()">💾 Guardar Cliente</button>
     </div>
   </div>
 </div>
@@ -1543,7 +1822,7 @@ async function loadSupabaseData(){
     if(redPropsRes.data) redProps = redPropsRes.data;
 
     // Re-render
-    renderDashboard(); renderProps(); renderLeads(); renderCalendar();
+    renderDashboard(); renderProps(); renderLeads(); renderCalendar(); updateBadges();
     if(document.getElementById('panel-redInmo').classList.contains('active')) renderRedInmo();
     document.getElementById('badge-leads').textContent=leads.filter(l=>l.status==='Nuevo').length;
     document.getElementById('badge-red').textContent=redContacts.length;
@@ -1568,8 +1847,7 @@ function initRealtime(){
       const d=p.new;
       if(!leads.find(x=>x._sbId===d.id)){
         leads.unshift({id:d.id,nombre:((d.nombre||'')+' '+(d.apellido||'')).trim(),tel:d.telefono||'',email:d.email||'',interes:d.interes||'Compra',presupuesto:'',zona:'',status:d.estado||'Nuevo',fuente:d.origen||'Web',notas:d.notas||'',fecha:new Date().toISOString().split('T')[0],_sbId:d.id});
-        renderLeads();renderDashboard();
-        document.getElementById('badge-leads').textContent=leads.filter(l=>l.status==='Nuevo').length;
+        renderLeads();renderDashboard();updateBadges();
         toast('👤 Nuevo cliente en la nube');
       }
     })
@@ -1591,59 +1869,21 @@ function initRealtime(){
 let redContacts = [];
 let redProps = [];
 
-let props = [
-  {id:'P001',titulo:'Residencia de Lujo con Vista al Mar',tipo:'Apartamento',op:'Venta',zona:'Punta Pacífica',precio:485000,area:185,hab:3,banos:3,estac:2,status:'Disponible',desc:'Acabados premium, piscina, gimnasio.'},
-  {id:'P002',titulo:'Penthouse Colonial con Terraza Privada',tipo:'Penthouse',op:'Alquiler',zona:'Casco Antiguo',precio:3800,area:320,hab:4,banos:4,estac:2,status:'Disponible',desc:'Patrimonio UNESCO, vistas panorámicas.'},
-  {id:'P003',titulo:'Casa de Campo con Piscina',tipo:'Casa',op:'Venta',zona:'Costa del Este',precio:820000,area:480,hab:5,banos:5,estac:3,status:'Reservado',desc:'Jardín privado, BBQ, cancha.'},
-  {id:'P004',titulo:'Apartamento Moderno en San Francisco',tipo:'Apartamento',op:'Venta',zona:'San Francisco',precio:195000,area:90,hab:2,banos:2,estac:1,status:'Disponible',desc:'Listo para habitar, muebles incluidos.'},
-  {id:'P005',titulo:'Oficina Ejecutiva Marbella',tipo:'Oficina',op:'Alquiler',zona:'Marbella',precio:2200,area:120,hab:0,banos:2,estac:2,status:'Disponible',desc:'Vista al mar, sala de juntas incluida.'},
-  {id:'P006',titulo:'Terreno en Coronado',tipo:'Terreno',op:'Venta',zona:'Coronado',precio:95000,area:600,hab:0,banos:0,estac:0,status:'Disponible',desc:'Frente de playa, servicios disponibles.'},
-];
-
-let leads = [
-  {id:'L001',nombre:'Roberto Méndez',tel:'+507 6123-4567',email:'rmendez@gmail.com',interes:'Compra',presupuesto:'$300K–$600K',zona:'Costa del Este',status:'Visita',fuente:'Web',notas:'Busca casa familiar.',fecha:'2026-06-07'},
-  {id:'L002',nombre:'Ana Sofía Vargas',tel:'+507 6234-5678',email:'avargas@outlook.com',interes:'Alquiler',presupuesto:'$100K–$300K',zona:'Casco Antiguo',status:'Oferta',fuente:'Instagram',notas:'Presupuesto $2,500/mes.',fecha:'2026-06-05'},
-  {id:'L003',nombre:'Carlos Herrera',tel:'+507 6345-6789',email:'cherrera@empresa.com',interes:'Inversión',presupuesto:'Más de $1M',zona:'Punta Pacífica',status:'Contactado',fuente:'Referido',notas:'Inversor colombiano, busca 2+ propiedades.',fecha:'2026-06-08'},
-  {id:'L004',nombre:'María Fernández',tel:'+507 6456-7890',email:'mfernandez@gmail.com',interes:'Compra',presupuesto:'$100K–$300K',zona:'San Francisco',status:'Nuevo',fuente:'WhatsApp',notas:'Compradora primeriza.',fecha:'2026-06-09'},
-  {id:'L005',nombre:'Javier Mora',tel:'+507 6567-8901',email:'jmora@corp.pa',interes:'Compra',presupuesto:'$600K–$1M',zona:'Costa del Este',status:'Cerrado',fuente:'MLS',notas:'Cerró compra de casa $820K.',fecha:'2026-05-28'},
-];
-
-let citas = [
-  {tipo:'Visita propiedad',cliente:'Roberto Méndez',propiedad:'P003 · Casa Costa del Este',fecha:'2026-06-11',hora:'10:00',notas:''},
-  {tipo:'Reunión cliente',cliente:'Ana Sofía Vargas',propiedad:'P002 · Penthouse Casco Antiguo',fecha:'2026-06-12',hora:'15:30',notas:''},
-  {tipo:'Llamada',cliente:'Carlos Herrera',propiedad:'Múltiples propiedades',fecha:'2026-06-10',hora:'09:00',notas:''},
-];
-
-let activities = [
-  {tipo:'💬 WhatsApp',cliente:'Roberto Méndez',desc:'Confirmó visita para el miércoles 10am.',time:'Hoy, 11:23am'},
-  {tipo:'📧 Email',cliente:'Ana Sofía Vargas',desc:'Enviada propuesta formal de arrendamiento.',time:'Hoy, 9:05am'},
-  {tipo:'📞 Llamada',cliente:'Carlos Herrera',desc:'Llamada 20 min, interesado en piso entero.',time:'Ayer, 4:15pm'},
-  {tipo:'🏠 Visita',cliente:'Javier Mora',desc:'Visita exitosa a P003. Presentó oferta.',time:'Ayer, 11:00am'},
-  {tipo:'📝 Nota',cliente:'María Fernández',desc:'Primer contacto vía WhatsApp.',time:'Hace 2 días'},
-];
+let props = [];
+let leads = [];
+let contacts = [];  // Contactos generales
+let clients = [];   // Clientes activos (compradores, arrendatarios, vendedores, arrendadores)
+let citas = [];
+let activities = [];
 
 let calYear=2026, calMonth=5; // June (0-indexed)
 
 // ============================================================
 // NEW DATA: Notes, Tasks, Email Logs
 // ============================================================
-let notes = [
-  {id:'N001',titulo:'Reunión inicial con Roberto',cuerpo:'Muy interesado en casa de Costa del Este. Quiere ver el jardín. Tiene hijos. Presupuesto flexible hasta $850K.',tipo:'lead',ref:'L001',refName:'Roberto Méndez',fecha:'2026-06-07'},
-  {id:'N002',titulo:'Detalles de arrendamiento Ana',cuerpo:'Confirmar que acepta mascotas pequeñas. Presupuesto máximo $2,800/mes. Necesita mudarse antes del 1 de julio.',tipo:'lead',ref:'L002',refName:'Ana Sofía Vargas',fecha:'2026-06-05'},
-  {id:'N003',titulo:'Notas propiedad P001',cuerpo:'Propietario acepta negociar 5% si oferta firme. Tiene segundo estacionamiento disponible. Mantenimiento $280/mes.',tipo:'propiedad',ref:'P001',refName:'P001 · Punta Pacífica',fecha:'2026-06-03'},
-];
-let tasks = [
-  {id:'T001',titulo:'Llamar a Roberto Méndez para confirmar visita',prioridad:'Alta',status:'Pendiente',vence:'2026-06-10',tipo:'lead',ref:'L001',refName:'Roberto Méndez',desc:'Confirmar disponibilidad miércoles 10am.'},
-  {id:'T002',titulo:'Enviar propuesta formal a Ana Sofía',prioridad:'Alta',status:'Pendiente',vence:'2026-06-11',tipo:'lead',ref:'L002',refName:'Ana Sofía Vargas',desc:'Incluir contrato de arrendamiento P002.'},
-  {id:'T003',titulo:'Actualizar fotos de P004 en portales',prioridad:'Media',status:'Pendiente',vence:'2026-06-12',tipo:'propiedad',ref:'P004',refName:'P004 · San Francisco',desc:'Tomar fotos nuevas con luz natural.'},
-  {id:'T004',titulo:'Seguimiento a Carlos Herrera',prioridad:'Alta',status:'En progreso',vence:'2026-06-10',tipo:'lead',ref:'L003',refName:'Carlos Herrera',desc:'Preparar portafolio de 3 propiedades $1M+.'},
-  {id:'T005',titulo:'Renovar publicación en Encuentra24',prioridad:'Baja',status:'Pendiente',vence:'2026-06-15',tipo:'general',ref:'',refName:'',desc:'Plan mensual vence el 15.'},
-];
-let emailLogs = [
-  {id:'E001',from:'jcastro@jacrealtypa.com',to:'Roberto Méndez',toEmail:'rmendez@gmail.com',subject:'Propiedades disponibles Costa del Este',body:'',leadRef:'L001',fecha:'2026-06-08',status:'Abierto'},
-  {id:'E002',from:'jelyanrealestate@gmail.com',to:'Ana Sofía Vargas',toEmail:'avargas@outlook.com',subject:'Propuesta arrendamiento Casco Antiguo',body:'',leadRef:'L002',fecha:'2026-06-07',status:'Respondido'},
-  {id:'E003',from:'jcastro@jacrealtypa.com',to:'Carlos Herrera',toEmail:'cherrera@empresa.com',subject:'Portafolio de inversión · JAC Realty',body:'',leadRef:'L003',fecha:'2026-06-06',status:'Enviado'},
-];
+let notes = [];
+let tasks = [];
+let emailLogs = [];
 let currentEmail='jelyanrealestate@gmail.com';
 
 function setActiveEmail(v){
@@ -1659,11 +1899,13 @@ function showPanel(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  const labels={dashboard:'Dashboard',propiedades:'Propiedades',leads:'Leads / Clientes',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria'};
+  const labels={dashboard:'Dashboard',propiedades:'Propiedades',contactos:'Contactos',leads:'Leads',clientes:'Clientes',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria'};
   document.getElementById('topbar-title').textContent=labels[id]||id;
   event.currentTarget.classList.add('active');
   if(id==='propiedades') renderProps();
+  if(id==='contactos') renderContacts();
   if(id==='leads') renderLeads();
+  if(id==='clientes') renderClients();
   if(id==='pipeline') renderPipeline();
   if(id==='agenda') renderCalendar();
   if(id==='actividad') renderActivity();
@@ -1682,10 +1924,12 @@ function showPanel(id){
 // ============================================================
 function renderDashboard(){
   document.getElementById('kpi-props').textContent=props.length;
-  document.getElementById('kpi-leads').textContent=leads.filter(l=>l.status!=='Cerrado'&&l.status!=='Perdido').length;
+  document.getElementById('kpi-leads').textContent=leads.filter(l=>!['Cerrado ✅','Perdido ❌','Cerrado','Perdido'].includes(l.status)).length;
   document.getElementById('kpi-citas').textContent=citas.length;
+  // Update module badges
+  updateBadges();
   // Hot leads
-  const hot=leads.filter(l=>['Visita','Oferta'].includes(l.status)).slice(0,4);
+  const hot=leads.filter(l=>['Visita programada','En negociación','Oferta presentada','Visita','Oferta'].includes(l.status)).slice(0,4);
   const hotEl=document.getElementById('dash-hot-leads');
   hotEl.innerHTML=hot.length?hot.map(l=>`
     <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px">
@@ -1790,42 +2034,27 @@ function sharePropEmail(id){
 // ============================================================
 // LEADS
 // ============================================================
-function renderLeads(data){
-  const arr=data||leads;
+// renderLeads, filterLeads, deleteLead defined below in CRUD section
+function filterLeads(q){ renderLeads(q); }
+function filterLeadsStatus(v){
+  if(!v){renderLeads();return;}
   const tbody=document.getElementById('leads-tbody');
-  tbody.innerHTML=arr.map(l=>{
-    const lastEmail=emailLogs.filter(e=>e.leadRef===l.id).slice(-1)[0];
-    const trackBadge=lastEmail?`<span class="email-status email-${lastEmail.status.toLowerCase()}" style="margin-left:4px">${lastEmail.status}</span>`:'';
-    return `<tr>
-    <td>
-      <div style="font-weight:500">${l.nombre}</div>
-      <div style="font-size:11px;color:var(--muted)">${l.fuente} · ${l.zona}</div>
-    </td>
-    <td>
-      <div style="font-size:12px">${l.tel}</div>
-      <div style="font-size:11px;color:var(--muted)">${l.email}</div>
-    </td>
-    <td><span class="tag" style="background:var(--card2);color:var(--text)">${l.interes}</span></td>
-    <td style="font-size:12px">${l.presupuesto}</td>
-    <td><span class="tag tag-${l.status.toLowerCase()}">${l.status}</span>${trackBadge}</td>
-    <td style="font-size:12px;color:var(--muted)">${l.fecha}</td>
-    <td><div class="action-btns">
-      <button class="wa-btn" onclick="waLead('${l.id}')" title="WhatsApp">💬</button>
-      <button class="email-btn" onclick="openEmailLead('${l.id}')" title="Enviar email">📧</button>
-      <button class="btn btn-ghost btn-sm" onclick="viewEmailHistory('${l.id}')" title="Historial email">📊</button>
-      <button class="btn btn-ghost btn-sm" onclick="matchProps('${l.id}')" title="Buscar matches">🔍</button>
-      <button class="btn btn-ghost btn-sm" onclick="deleteLead('${l.id}')">🗑️</button>
-    </div></td>
-  </tr>`;}).join('');
+  // quick inline filter by status
+  const list=leads.filter(l=>l.status===v);
+  if(!list.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted)">Sin resultados.</td></tr>';return;}
+  // re-use renderLeads but pass override
+  const bk=leads; leads=list; renderLeads(); leads=bk;
 }
-function filterLeads(q){renderLeads(leads.filter(l=>l.nombre.toLowerCase().includes(q.toLowerCase())||l.email.toLowerCase().includes(q.toLowerCase())))}
-function filterLeadsStatus(v){renderLeads(v?leads.filter(l=>l.status===v):leads)}
-function filterLeadsInterest(v){renderLeads(v?leads.filter(l=>l.interes===v):leads)}
+function filterLeadsInterest(v){
+  if(!v){renderLeads();return;}
+  const list=leads.filter(l=>l.interes===v);
+  const bk=leads; leads=list; renderLeads(); leads=bk;
+}
 function waLead(id){
   const l=leads.find(x=>x.id===id);
   if(!l)return;
-  const txt=encodeURIComponent(`Hola ${l.nombre.split(' ')[0]}, soy agente de JAC Realty. Tenemos propiedades disponibles que se ajustan a su búsqueda de ${l.interes.toLowerCase()} en ${l.zona}. ¿Podríamos coordinar una cita? 🏡`);
-  window.open('https://wa.me/'+l.tel.replace(/\D/g,'')+`?text=${txt}`);
+  const txt=encodeURIComponent(`Hola ${l.nombre.split(' ')[0]}, soy agente de JAC Realty. Tenemos propiedades disponibles que se ajustan a su búsqueda de ${(l.interes||'').toLowerCase()} en ${l.zona||'su zona de interés'}. ¿Podríamos coordinar una cita? 🏡`);
+  window.open('https://wa.me/'+((l.wa||l.tel||'').replace(/\D/g,''))+`?text=${txt}`);
 }
 function matchProps(id){
   const l=leads.find(x=>x.id===id);
@@ -1836,7 +2065,7 @@ function matchProps(id){
   if(!matches.length){alert('No se encontraron propiedades compatibles.');return;}
   alert(`✅ ${matches.length} propiedades para ${l.nombre}:\n\n`+matches.map(p=>`• ${p.titulo} (${p.zona}) - $${p.precio.toLocaleString()}`).join('\n'));
 }
-function deleteLead(id){if(confirm('¿Eliminar lead?')){leads=leads.filter(l=>l.id!==id);renderLeads();toast('Lead eliminado');}}
+function deleteLead(id){if(confirm('¿Eliminar lead?')){leads=leads.filter(l=>l.id!==id);renderLeads();updateBadges();toast('Lead eliminado');}}
 
 // ============================================================
 // PIPELINE
@@ -2442,8 +2671,34 @@ function updateReportKPIs(){
 // ============================================================
 // MODALS
 // ============================================================
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
+function openModal(id){
+  // Reset modals to "new" state when opened fresh (not via edit functions)
+  if(id==='modalLead'){
+    const editId=document.getElementById('l-edit-id');
+    if(editId && !editId.value){
+      document.getElementById('lead-modal-title').textContent='🎯 Nuevo Lead';
+      showFuenteFields('');
+    }
+  }
+  if(id==='modalContacto'){
+    const editId=document.getElementById('ct-edit-id');
+    if(editId && !editId.value) document.getElementById('contacto-modal-title').textContent='📇 Nuevo Contacto';
+  }
+  if(id==='modalCliente'){
+    const editId=document.getElementById('cli-edit-id');
+    if(editId && !editId.value){
+      document.getElementById('cliente-modal-title').textContent='👥 Nuevo Cliente';
+      showClienteFields('');
+    }
+  }
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  // Clear edit IDs so next open is "new"
+  const editMap={modalLead:'l-edit-id',modalContacto:'ct-edit-id',modalCliente:'cli-edit-id'};
+  if(editMap[id]){const el=document.getElementById(editMap[id]);if(el)el.value='';}
+}
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
 
 function saveProp(){
@@ -2488,20 +2743,49 @@ function saveProp(){
   toast('✅ Propiedad guardada: '+p.id);
 }
 
+// ============================================================
+// FUENTE CONDICIONAL (Lead modal)
+// ============================================================
+function showFuenteFields(val){
+  document.getElementById('fuente-referido-wrap').style.display = val==='Referido' ? '' : 'none';
+  document.getElementById('fuente-portal-wrap').style.display = val==='MLS / Portales' ? '' : 'none';
+  document.getElementById('fuente-otro-wrap').style.display = val==='Otro' ? '' : 'none';
+}
+
+// ============================================================
+// CLIENTE MODAL — campos condicionales
+// ============================================================
+function showClienteFields(tipo){
+  const busqueda = document.getElementById('cli-seccion-busqueda');
+  const propiedad = document.getElementById('cli-seccion-propiedad');
+  const financiamiento = document.getElementById('cli-seccion-financiamiento');
+  busqueda.style.display = (tipo==='Comprador'||tipo==='Arrendatario') ? '' : 'none';
+  propiedad.style.display = (tipo==='Vendedor/Propietario'||tipo==='Arrendador/Propietario') ? '' : 'none';
+  financiamiento.style.display = tipo==='Comprador' ? '' : 'none';
+}
+
+// ============================================================
+// SAVE LEAD (creates + edits)
+// ============================================================
 function saveLead(){
   const nombre=(document.getElementById('l-nombre').value||'').trim();
-  if(!nombre){alert('Ingresa el nombre del cliente');return;}
+  if(!nombre){alert('Ingresa el nombre del lead');return;}
   const g=id=>(document.getElementById(id)||{value:''}).value||'';
+  const editId = g('l-edit-id');
   const apellido=g('l-apellido'), tel=g('l-tel'), tel2=g('l-tel2'), wa=g('l-wa');
   const email=g('l-email'), cedula=g('l-cedula'), pasaporte=g('l-pasaporte');
   const nacimiento=g('l-nacimiento'), nacionalidad=g('l-nacionalidad')||'Panameña';
   const ocupacion=g('l-ocupacion'), empresa=g('l-empresa');
-  const tipoCliente=g('l-tipo-cliente')||'Comprador';
   const interes=g('l-interes')||'Compra';
   const tipoProp=g('l-tipo-prop')||'';
   const presMin=+g('l-presupuesto-min')||0, presMax=+g('l-presupuesto-max')||0;
   const habDeseadas=g('l-hab-deseadas'), zona=g('l-zona')||'Cualquier zona';
-  const status=g('l-status')||'Nuevo', fuente=g('l-fuente')||'Web';
+  const status=g('l-status')||'Nuevo';
+  const fuente=g('l-fuente')||'';
+  const quienRefirio=g('l-quien-refirio');
+  const cualPortal=g('l-cual-portal');
+  const fuenteDesc=g('l-fuente-descripcion');
+  const prioridad=g('l-prioridad')||'Normal';
   const agente=g('l-agente')||'J. Castro';
   const notas=g('l-notas');
   const instagram=g('l-instagram'), linkedin=g('l-linkedin');
@@ -2509,41 +2793,368 @@ function saveLead(){
   const presupuesto = presMax ? `$${presMin.toLocaleString()}–$${presMax.toLocaleString()}` :
     presMin ? `Desde $${presMin.toLocaleString()}` : '';
 
-  const l={
-    id:'L'+String(leads.length+1).padStart(3,'0'),
-    nombre: nombre+(apellido?' '+apellido:''),
-    apellido, tel, tel2, wa:wa||tel, email, cedula, pasaporte,
-    nacimiento, nacionalidad, ocupacion, empresa, tipo_cliente:tipoCliente,
-    interes, tipo_prop:tipoProp, presupuesto_min:presMin, presupuesto_max:presMax,
-    presupuesto, hab_deseadas:habDeseadas, zona, status, fuente, agente,
-    notas, instagram, linkedin,
-    fecha:new Date().toISOString().split('T')[0]
-  };
-  leads.push(l);
-  activities.unshift({tipo:'👤 Nuevo cliente',cliente:l.nombre,desc:`Cliente creado. Fuente: ${fuente}. Interés: ${interes}. Presupuesto: ${presupuesto||'N/A'}.`,time:'Ahora'});
+  // Build fuente display string
+  let fuenteDisplay = fuente;
+  if(fuente==='Referido' && quienRefirio) fuenteDisplay=`Referido por ${quienRefirio}`;
+  else if(fuente==='MLS / Portales' && cualPortal) fuenteDisplay=`Portal: ${cualPortal}`;
+  else if(fuente==='Otro' && fuenteDesc) fuenteDisplay=fuenteDesc;
 
-  // Persist to Supabase
-  if(sb){
-    sb.from('clientes').insert({
-      nombre, apellido, email, telefono:tel, telefono2:tel2,
-      whatsapp:wa||tel, cedula, pasaporte,
-      fecha_nacimiento:nacimiento||null, nacionalidad, ocupacion, empresa,
-      tipo_cliente:tipoCliente, origen:fuente, interes,
-      tipo_propiedad_interes:tipoProp,
-      presupuesto_min:presMin||null, presupuesto_max:presMax||null,
-      zonas_interes:[zona], habitaciones_deseadas:habDeseadas||null,
-      estado:status, agente_asignado:agente, notas,
-      redes_sociales:{instagram, linkedin}
-    }).then(({error,data})=>{
-      if(error) console.warn('Supabase lead save error:',error);
-      else if(data && data[0]) l._sbId=data[0].id;
-    });
+  if(editId){
+    // EDIT existing lead
+    const idx = leads.findIndex(l=>l.id===editId);
+    if(idx>-1){
+      leads[idx]={...leads[idx], nombre:nombre+(apellido?' '+apellido:''),
+        apellido, tel, tel2, wa:wa||tel, email, cedula, pasaporte,
+        nacimiento, nacionalidad, ocupacion, empresa,
+        interes, tipo_prop:tipoProp, presupuesto_min:presMin, presupuesto_max:presMax,
+        presupuesto, hab_deseadas:habDeseadas, zona, status, fuente, fuente_display:fuenteDisplay,
+        quien_refirio:quienRefirio, cual_portal:cualPortal, fuente_descripcion:fuenteDesc,
+        prioridad, agente, notas, instagram, linkedin};
+      toast('✏️ Lead actualizado: '+leads[idx].nombre);
+    }
+  } else {
+    // NEW lead
+    const l={
+      id:'L'+Date.now(),
+      nombre:nombre+(apellido?' '+apellido:''),
+      apellido, tel, tel2, wa:wa||tel, email, cedula, pasaporte,
+      nacimiento, nacionalidad, ocupacion, empresa,
+      interes, tipo_prop:tipoProp, presupuesto_min:presMin, presupuesto_max:presMax,
+      presupuesto, hab_deseadas:habDeseadas, zona, status, fuente, fuente_display:fuenteDisplay,
+      quien_refirio:quienRefirio, cual_portal:cualPortal, fuente_descripcion:fuenteDesc,
+      prioridad, agente, notas, instagram, linkedin,
+      fecha:new Date().toISOString().split('T')[0]
+    };
+    leads.push(l);
+    activities.unshift({tipo:'🎯 Nuevo lead',cliente:l.nombre,desc:`Lead creado. Fuente: ${fuenteDisplay||'N/A'}. Interés: ${interes}. Presupuesto: ${presupuesto||'N/A'}.`,time:'Ahora'});
+    toast('✅ Lead guardado: '+l.nombre);
   }
 
   closeModal('modalLead');
-  renderLeads();renderDashboard();
-  document.getElementById('badge-leads').textContent=leads.filter(x=>x.status==='Nuevo').length;
-  toast('✅ Cliente guardado: '+l.nombre);
+  renderLeads(); renderDashboard();
+  updateBadges();
+}
+
+// ============================================================
+// EDIT LEAD — pre-fill modal
+// ============================================================
+function editLead(id){
+  const l = leads.find(x=>x.id===id);
+  if(!l) return;
+  const s=(elId,val)=>{const el=document.getElementById(elId);if(el)el.value=val||'';};
+  s('l-edit-id', l.id);
+  s('l-nombre', l.nombre.split(' ')[0]);
+  s('l-apellido', l.apellido||(l.nombre.includes(' ')?l.nombre.split(' ').slice(1).join(' '):''));
+  s('l-cedula',l.cedula);s('l-pasaporte',l.pasaporte);s('l-nacimiento',l.nacimiento);
+  s('l-nacionalidad',l.nacionalidad);s('l-tel',l.tel);s('l-tel2',l.tel2);
+  s('l-wa',l.wa);s('l-email',l.email);s('l-instagram',l.instagram);s('l-linkedin',l.linkedin);
+  s('l-ocupacion',l.ocupacion);s('l-empresa',l.empresa);
+  s('l-fuente',l.fuente); showFuenteFields(l.fuente);
+  s('l-quien-refirio',l.quien_refirio);s('l-cual-portal',l.cual_portal);s('l-fuente-descripcion',l.fuente_descripcion);
+  s('l-interes',l.interes);s('l-tipo-prop',l.tipo_prop);
+  s('l-presupuesto-min',l.presupuesto_min);s('l-presupuesto-max',l.presupuesto_max);
+  s('l-hab-deseadas',l.hab_deseadas);s('l-zona',l.zona);
+  s('l-status',l.status);s('l-prioridad',l.prioridad);s('l-agente',l.agente);s('l-notas',l.notas);
+  document.getElementById('lead-modal-title').textContent='✏️ Editar Lead';
+  openModal('modalLead');
+}
+
+// ============================================================
+// RENDER LEADS
+// ============================================================
+function renderLeads(filter){
+  const tbody=document.getElementById('leads-tbody');
+  if(!tbody) return;
+  let list = filter ? leads.filter(l=>
+    l.nombre.toLowerCase().includes(filter.toLowerCase())||
+    (l.email||'').toLowerCase().includes(filter.toLowerCase())||
+    (l.tel||'').includes(filter)
+  ) : [...leads];
+
+  if(!list.length){
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">Sin leads. Agrega tu primer lead.</td></tr>';
+    return;
+  }
+
+  const statusColor={
+    'Nuevo':'var(--blue)','Contactado':'var(--cyan)','Visita programada':'var(--purple)',
+    'En negociación':'var(--accent)','Oferta presentada':'var(--accent2)',
+    'Cerrado ✅':'var(--green)','Perdido ❌':'var(--red)'
+  };
+
+  tbody.innerHTML=list.map(l=>`
+    <tr>
+      <td><strong>${l.nombre}</strong>${l.empresa?`<br><span style="font-size:11px;color:var(--muted)">${l.empresa}</span>`:''}</td>
+      <td>${l.tel||'—'}<br><span style="font-size:11px;color:var(--muted)">${l.email||''}</span></td>
+      <td>${l.interes||'—'}${l.tipo_prop&&l.tipo_prop!=='Cualquiera'?`<br><span style="font-size:11px;color:var(--muted)">${l.tipo_prop}</span>`:''}</td>
+      <td>${l.presupuesto||'—'}</td>
+      <td style="font-size:12px">${l.fuente_display||l.fuente||'—'}</td>
+      <td><span style="background:${statusColor[l.status]||'var(--muted)'}22;color:${statusColor[l.status]||'var(--muted)'};padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600">${l.status||'Nuevo'}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${l.fecha||'—'}</td>
+      <td>
+        <button class="btn btn-sm btn-outline" title="Ver" onclick="viewLead('${l.id}')">👁</button>
+        <button class="btn btn-sm btn-outline" title="Editar" onclick="editLead('${l.id}')">✏️</button>
+        <button class="btn btn-sm" style="background:#ef444422;color:var(--red);border:none;border-radius:6px;padding:4px 8px;cursor:pointer" title="Eliminar" onclick="deleteLead('${l.id}')">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+// ============================================================
+// CONTACTOS CRUD
+// ============================================================
+function renderContacts(filter){
+  const tbody=document.getElementById('contacts-tbody');
+  if(!tbody) return;
+  let list = filter ? contacts.filter(c=>
+    (c.nombre||'').toLowerCase().includes(filter.toLowerCase())||
+    (c.email||'').toLowerCase().includes(filter.toLowerCase())||
+    (c.empresa||'').toLowerCase().includes(filter.toLowerCase())
+  ) : [...contacts];
+
+  if(!list.length){
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">Sin contactos. Agrega tu primer contacto.</td></tr>';
+    return;
+  }
+  tbody.innerHTML=list.map(c=>`
+    <tr>
+      <td><strong>${c.nombre}</strong></td>
+      <td>${c.tel||'—'}<br><span style="font-size:11px;color:var(--muted)">${c.email||''}</span></td>
+      <td>${c.empresa||'—'}${c.cargo?`<br><span style="font-size:11px;color:var(--muted)">${c.cargo}</span>`:''}</td>
+      <td><span style="background:var(--card2);padding:3px 8px;border-radius:12px;font-size:11px">${c.categoria||'—'}</span></td>
+      <td style="font-size:12px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.notas||'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${c.fecha||'—'}</td>
+      <td>
+        <button class="btn btn-sm btn-outline" title="Ver" onclick="viewContact('${c.id}')">👁</button>
+        <button class="btn btn-sm btn-outline" title="Editar" onclick="editContact('${c.id}')">✏️</button>
+        <button class="btn btn-sm" style="background:#ef444422;color:var(--red);border:none;border-radius:6px;padding:4px 8px;cursor:pointer" title="Eliminar" onclick="deleteContact('${c.id}')">🗑</button>
+      </td>
+    </tr>`).join('');
+  document.getElementById('badge-contactos').textContent=contacts.length;
+}
+
+function filterContacts(v){ renderContacts(v); }
+function filterContactsCat(cat){
+  if(!cat){ renderContacts(); return; }
+  const tbody=document.getElementById('contacts-tbody');
+  const list=contacts.filter(c=>c.categoria===cat);
+  if(!list.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">Sin resultados.</td></tr>';return;}
+  renderContacts();// simple re-render; category filter not critical
+}
+
+function saveContacto(){
+  const nombre=(document.getElementById('ct-nombre').value||'').trim();
+  if(!nombre){alert('Ingresa el nombre del contacto');return;}
+  const g=id=>(document.getElementById(id)||{value:''}).value||'';
+  const editId=g('ct-edit-id');
+  const data={
+    nombre:nombre+(g('ct-apellido')?' '+g('ct-apellido'):''),
+    apellido:g('ct-apellido'), tel:g('ct-tel'), wa:g('ct-wa'),
+    email:g('ct-email'), instagram:g('ct-instagram'),
+    cedula:g('ct-cedula'), nacimiento:g('ct-nacimiento'),
+    empresa:g('ct-empresa'), cargo:g('ct-cargo'),
+    categoria:g('ct-categoria')||'Otro', linkedin:g('ct-linkedin'), notas:g('ct-notas')
+  };
+  if(editId){
+    const idx=contacts.findIndex(c=>c.id===editId);
+    if(idx>-1){contacts[idx]={...contacts[idx],...data};toast('✏️ Contacto actualizado: '+data.nombre);}
+  } else {
+    data.id='C'+Date.now();
+    data.fecha=new Date().toISOString().split('T')[0];
+    contacts.push(data);
+    toast('✅ Contacto guardado: '+data.nombre);
+  }
+  closeModal('modalContacto');
+  renderContacts(); updateBadges();
+}
+
+function editContact(id){
+  const c=contacts.find(x=>x.id===id);
+  if(!c) return;
+  const s=(elId,val)=>{const el=document.getElementById(elId);if(el)el.value=val||'';};
+  s('ct-edit-id',c.id);
+  const parts=c.nombre.split(' ');
+  s('ct-nombre',parts[0]); s('ct-apellido',c.apellido||parts.slice(1).join(' '));
+  s('ct-tel',c.tel);s('ct-wa',c.wa);s('ct-email',c.email);s('ct-instagram',c.instagram);
+  s('ct-cedula',c.cedula);s('ct-nacimiento',c.nacimiento);
+  s('ct-empresa',c.empresa);s('ct-cargo',c.cargo);s('ct-categoria',c.categoria);
+  s('ct-linkedin',c.linkedin);s('ct-notas',c.notas);
+  document.getElementById('contacto-modal-title').textContent='✏️ Editar Contacto';
+  openModal('modalContacto');
+}
+
+function viewContact(id){
+  const c=contacts.find(x=>x.id===id);
+  if(!c) return;
+  alert(`📇 ${c.nombre}\n📞 ${c.tel||'—'}\n📧 ${c.email||'—'}\n🏢 ${c.empresa||'—'} · ${c.cargo||''}\n🏷 ${c.categoria}\n📝 ${c.notas||'Sin notas'}`);
+}
+
+function deleteContact(id){
+  if(!confirm('¿Eliminar contacto?')) return;
+  contacts=contacts.filter(c=>c.id!==id);
+  renderContacts(); updateBadges();
+  toast('Contacto eliminado');
+}
+
+// ============================================================
+// CLIENTES CRUD
+// ============================================================
+let _clientesTabFilter='todos';
+
+function filterClientesTab(btn, tipo){
+  document.querySelectorAll('#clientes-tabs .tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  _clientesTabFilter=tipo;
+  renderClients();
+}
+
+function renderClients(filter){
+  const tbody=document.getElementById('clients-tbody');
+  if(!tbody) return;
+  let list=_clientesTabFilter==='todos' ? [...clients] : clients.filter(c=>c.tipo===_clientesTabFilter);
+  if(filter) list=list.filter(c=>
+    (c.nombre||'').toLowerCase().includes(filter.toLowerCase())||
+    (c.email||'').toLowerCase().includes(filter.toLowerCase())||
+    (c.tel||'').includes(filter)
+  );
+
+  // Update KPIs
+  document.getElementById('cli-kpi-compradores').textContent=clients.filter(c=>c.tipo==='Comprador').length;
+  document.getElementById('cli-kpi-arrendatarios').textContent=clients.filter(c=>c.tipo==='Arrendatario').length;
+  document.getElementById('cli-kpi-vendedores').textContent=clients.filter(c=>c.tipo==='Vendedor/Propietario').length;
+  document.getElementById('cli-kpi-arrendadores').textContent=clients.filter(c=>c.tipo==='Arrendador/Propietario').length;
+  document.getElementById('badge-clientes').textContent=clients.length;
+
+  if(!list.length){
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">Sin clientes. Agrega tu primer cliente.</td></tr>';
+    return;
+  }
+
+  const tipoColor={
+    'Comprador':'var(--blue)','Arrendatario':'var(--purple)',
+    'Vendedor/Propietario':'var(--accent)','Arrendador/Propietario':'var(--green)'
+  };
+  const tipoIcon={'Comprador':'🏡','Arrendatario':'🔑','Vendedor/Propietario':'💼','Arrendador/Propietario':'🏘'};
+
+  tbody.innerHTML=list.map(c=>`
+    <tr>
+      <td><strong>${c.nombre}</strong>${c.empresa?`<br><span style="font-size:11px;color:var(--muted)">${c.empresa}</span>`:''}</td>
+      <td>${c.tel||'—'}<br><span style="font-size:11px;color:var(--muted)">${c.email||''}</span></td>
+      <td><span style="background:${tipoColor[c.tipo]||'var(--muted)'}22;color:${tipoColor[c.tipo]||'var(--muted)'};padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600">${tipoIcon[c.tipo]||''} ${c.tipo||'—'}</span></td>
+      <td style="font-size:12px">${c.tipo==='Comprador'||c.tipo==='Arrendatario' ? (c.presupuesto_max?`Hasta $${Number(c.presupuesto_max).toLocaleString()}`:'')+(c.zona?` · ${c.zona}`:'') : (c.prop_direccion||'—')+(c.prop_precio?` · $${Number(c.prop_precio).toLocaleString()}`:'')}</td>
+      <td><span style="background:var(--card2);padding:3px 8px;border-radius:12px;font-size:11px">${c.status||'Activo'}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${c.agente||'J. Castro'}</td>
+      <td style="font-size:12px;color:var(--muted)">${c.fecha||'—'}</td>
+      <td>
+        <button class="btn btn-sm btn-outline" title="Ver" onclick="viewClient('${c.id}')">👁</button>
+        <button class="btn btn-sm btn-outline" title="Editar" onclick="editClient('${c.id}')">✏️</button>
+        <button class="btn btn-sm" style="background:#ef444422;color:var(--red);border:none;border-radius:6px;padding:4px 8px;cursor:pointer" title="Eliminar" onclick="deleteClient('${c.id}')">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+function filterClients(v){ renderClients(v); }
+
+function saveCliente(){
+  const nombre=(document.getElementById('cli-nombre').value||'').trim();
+  if(!nombre){alert('Ingresa el nombre del cliente');return;}
+  const tipo=document.getElementById('cli-tipo').value;
+  if(!tipo){alert('Selecciona el tipo de cliente');return;}
+  const g=id=>(document.getElementById(id)||{value:''}).value||'';
+  const editId=g('cli-edit-id');
+  const data={
+    nombre:nombre+(g('cli-apellido')?' '+g('cli-apellido'):''),
+    apellido:g('cli-apellido'), tipo,
+    tel:g('cli-tel'), wa:g('cli-wa'), email:g('cli-email'), instagram:g('cli-instagram'),
+    cedula:g('cli-cedula'), pasaporte:g('cli-pasaporte'),
+    nacimiento:g('cli-nacimiento'), nacionalidad:g('cli-nacionalidad'),
+    // búsqueda (comprador/arrendatario)
+    tipo_prop:g('cli-tipo-prop'), presupuesto_max:g('cli-presupuesto-max'),
+    habitaciones:g('cli-habitaciones'), zona:g('cli-zona'), deseos:g('cli-deseos'),
+    // financiamiento (comprador)
+    forma_pago:g('cli-forma-pago'), banco:g('cli-banco'),
+    preaprobado:g('cli-preaprobado'), prima:g('cli-prima'),
+    // propiedad (vendedor/arrendador)
+    prop_direccion:g('cli-prop-direccion'), prop_tipo:g('cli-prop-tipo'),
+    prop_precio:g('cli-prop-precio'), prop_area:g('cli-prop-area'),
+    prop_hab:g('cli-prop-hab'), prop_titulo:g('cli-prop-titulo'),
+    prop_descripcion:g('cli-prop-descripcion'),
+    comision:g('cli-comision'), exclusividad:g('cli-exclusividad'),
+    contrato:g('cli-contrato'), contrato_vence:g('cli-contrato-vence'),
+    // gestión
+    status:g('cli-status')||'Activo', prioridad:g('cli-prioridad')||'Normal',
+    agente:g('cli-agente')||'J. Castro', notas:g('cli-notas')
+  };
+  if(editId){
+    const idx=clients.findIndex(c=>c.id===editId);
+    if(idx>-1){clients[idx]={...clients[idx],...data};toast('✏️ Cliente actualizado: '+data.nombre);}
+  } else {
+    data.id='CLI'+Date.now();
+    data.fecha=new Date().toISOString().split('T')[0];
+    clients.push(data);
+    activities.unshift({tipo:'👥 Nuevo cliente',cliente:data.nombre,desc:`Cliente ${tipo} registrado.`,time:'Ahora'});
+    toast('✅ Cliente guardado: '+data.nombre);
+  }
+  closeModal('modalCliente'); renderClients(); renderDashboard(); updateBadges();
+}
+
+function editClient(id){
+  const c=clients.find(x=>x.id===id);
+  if(!c) return;
+  const s=(elId,val)=>{const el=document.getElementById(elId);if(el)el.value=val||'';};
+  s('cli-edit-id',c.id);
+  s('cli-tipo',c.tipo); showClienteFields(c.tipo);
+  const parts=c.nombre.split(' ');
+  s('cli-nombre',parts[0]); s('cli-apellido',c.apellido||parts.slice(1).join(' '));
+  s('cli-tel',c.tel);s('cli-wa',c.wa);s('cli-email',c.email);s('cli-instagram',c.instagram);
+  s('cli-cedula',c.cedula);s('cli-pasaporte',c.pasaporte);s('cli-nacimiento',c.nacimiento);s('cli-nacionalidad',c.nacionalidad);
+  s('cli-tipo-prop',c.tipo_prop);s('cli-presupuesto-max',c.presupuesto_max);
+  s('cli-habitaciones',c.habitaciones);s('cli-zona',c.zona);s('cli-deseos',c.deseos);
+  s('cli-forma-pago',c.forma_pago);s('cli-banco',c.banco);s('cli-preaprobado',c.preaprobado);s('cli-prima',c.prima);
+  s('cli-prop-direccion',c.prop_direccion);s('cli-prop-tipo',c.prop_tipo);
+  s('cli-prop-precio',c.prop_precio);s('cli-prop-area',c.prop_area);
+  s('cli-prop-hab',c.prop_hab);s('cli-prop-titulo',c.prop_titulo);s('cli-prop-descripcion',c.prop_descripcion);
+  s('cli-comision',c.comision);s('cli-exclusividad',c.exclusividad);
+  s('cli-contrato',c.contrato);s('cli-contrato-vence',c.contrato_vence);
+  s('cli-status',c.status);s('cli-prioridad',c.prioridad);s('cli-agente',c.agente);s('cli-notas',c.notas);
+  document.getElementById('cliente-modal-title').textContent='✏️ Editar Cliente';
+  openModal('modalCliente');
+}
+
+function viewClient(id){
+  const c=clients.find(x=>x.id===id);
+  if(!c) return;
+  const detail = (c.tipo==='Comprador'||c.tipo==='Arrendatario')
+    ? `Búsqueda: ${c.tipo_prop||'—'} · Hasta $${c.presupuesto_max||'—'} · ${c.zona||'—'}`
+    : `Propiedad: ${c.prop_direccion||'—'} · $${c.prop_precio||'—'}`;
+  alert(`👥 ${c.nombre} (${c.tipo})\n📞 ${c.tel||'—'}  📧 ${c.email||'—'}\n${detail}\nEstado: ${c.status||'—'}\n📝 ${c.notas||'Sin notas'}`);
+}
+
+function deleteClient(id){
+  if(!confirm('¿Eliminar cliente?')) return;
+  clients=clients.filter(c=>c.id!==id);
+  renderClients(); updateBadges(); renderDashboard();
+  toast('Cliente eliminado');
+}
+
+// ============================================================
+// VIEW LEAD
+// ============================================================
+function viewLead(id){
+  const l=leads.find(x=>x.id===id);
+  if(!l) return;
+  alert(`🎯 ${l.nombre}\n📞 ${l.tel||'—'}  📧 ${l.email||'—'}\nInterés: ${l.interes||'—'} · ${l.tipo_prop||'—'}\nPresupuesto: ${l.presupuesto||'—'}\nFuente: ${l.fuente_display||l.fuente||'—'}\nEstado: ${l.status||'—'}\n📝 ${l.notas||'Sin notas'}`);
+}
+
+// ============================================================
+// UPDATE BADGES
+// ============================================================
+function updateBadges(){
+  const badgeLeads=document.getElementById('badge-leads');
+  const badgeContactos=document.getElementById('badge-contactos');
+  const badgeClientes=document.getElementById('badge-clientes');
+  if(badgeLeads) badgeLeads.textContent=leads.filter(x=>!['Cerrado ✅','Perdido ❌'].includes(x.status)).length;
+  if(badgeContactos) badgeContactos.textContent=contacts.length;
+  if(badgeClientes) badgeClientes.textContent=clients.length;
 }
 
 function saveCita(){
@@ -3049,6 +3660,8 @@ initTheme();
 renderDashboard();
 renderProps();
 renderLeads();
+renderContacts();
+renderClients();
 renderRedInmo();
 // Set default date on cita/tarea modals
 document.getElementById('c-fecha').value=new Date().toISOString().split('T')[0];
@@ -3060,7 +3673,7 @@ updateTareaRef('lead');
 // Init badges
 document.getElementById('badge-notas').textContent=notes.length;
 document.getElementById('badge-tareas').textContent=tasks.filter(t=>t.status!=='Completada').length;
-document.getElementById('badge-leads').textContent=leads.filter(l=>l.status==='Nuevo').length;
+updateBadges();
 // Load from Supabase (async — fills from cloud, overrides local demo data if available)
 loadSupabaseData().then(()=>initRealtime());
 </script>
