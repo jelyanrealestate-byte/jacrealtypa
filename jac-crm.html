@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JAC Realty CRM · Portal Agentes</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f1117;--sidebar:#161b27;--card:#1e2535;--card2:#252d3f;
+  --border:#2a3347;--accent:#e8a020;--accent2:#f0b840;
+  --text:#e8eaf0;--muted:#7a8499;--green:#22c55e;--red:#ef4444;
+  --blue:#3b82f6;--purple:#a855f7;--cyan:#06b6d4;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:14px}
+
+/* SIDEBAR */
+#sidebar{width:220px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.logo{padding:20px 16px 16px;border-bottom:1px solid var(--border)}
+.logo h1{font-size:18px;font-weight:700;color:var(--accent);letter-spacing:1px}
+.logo p{font-size:10px;color:var(--muted);margin-top:2px}
+nav{flex:1;padding:12px 8px;overflow-y:auto}
+.nav-section{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:8px 8px 4px;margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;color:var(--muted);transition:.15s;margin-bottom:2px;font-size:13px}
+.nav-item:hover{background:var(--card);color:var(--text)}
+.nav-item.active{background:rgba(232,160,32,.15);color:var(--accent);font-weight:600}
+.nav-item .icon{font-size:16px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px}
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border)}
+.agent-info{display:flex;align-items:center;gap:10px}
+.agent-avatar{width:34px;height:34px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#000;flex-shrink:0}
+.agent-name{font-size:12px;font-weight:600}
+.agent-lic{font-size:10px;color:var(--muted)}
+
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:12px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--sidebar)}
+.topbar h2{font-size:16px;font-weight:600;flex:1}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.btn{padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:.15s}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{background:var(--accent2)}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-outline:hover{background:var(--card)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-ghost{background:transparent;color:var(--muted);border:none;padding:5px 8px;cursor:pointer;border-radius:6px}
+.btn-ghost:hover{background:var(--card);color:var(--text)}
+
+#content{flex:1;overflow-y:auto;padding:20px 24px}
+
+/* PANELS */
+.panel{display:none}
+.panel.active{display:block}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:26px;font-weight:700;margin:6px 0 4px}
+.kpi-delta{font-size:11px}
+.kpi-delta.up{color:var(--green)}
+.kpi-delta.down{color:var(--red)}
+
+/* SECTION HEADER */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:14px;font-weight:600}
+
+/* TABLES */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{background:var(--card2);padding:10px 14px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+td{padding:10px 14px;border-top:1px solid var(--border);font-size:13px}
+tr:hover td{background:rgba(255,255,255,.02)}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.tag-venta{background:rgba(59,130,246,.2);color:#60a5fa}
+.tag-alquiler{background:rgba(168,85,247,.2);color:#c084fc}
+.tag-preventa{background:rgba(232,160,32,.2);color:var(--accent2)}
+.tag-disponible{background:rgba(34,197,94,.15);color:#4ade80}
+.tag-reservado{background:rgba(245,158,11,.15);color:#fbbf24}
+.tag-vendido{background:rgba(239,68,68,.15);color:#f87171}
+.tag-nuevo{background:rgba(6,182,212,.15);color:#22d3ee}
+.tag-contactado{background:rgba(59,130,246,.15);color:#60a5fa}
+.tag-visita{background:rgba(168,85,247,.15);color:#c084fc}
+.tag-oferta{background:rgba(232,160,32,.15);color:var(--accent2)}
+.tag-cerrado{background:rgba(34,197,94,.15);color:#4ade80}
+.tag-perdido{background:rgba(239,68,68,.15);color:#f87171}
+.price{font-weight:600;color:var(--accent)}
+.action-btns{display:flex;gap:6px}
+
+/* SEARCH BAR */
+.search-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.search-bar input,.search-bar select{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none}
+.search-bar input{flex:1;min-width:180px}
+.search-bar input:focus,.search-bar select:focus{border-color:var(--accent)}
+.search-bar select option{background:var(--card2)}
+
+/* PIPELINE KANBAN */
+.pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;min-height:400px}
+.pipeline-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}
+.pipeline-col-header{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.pipeline-count{background:var(--card2);color:var(--muted);font-size:11px;padding:1px 7px;border-radius:10px}
+.pipeline-card{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer;transition:.15s}
+.pipeline-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.pipeline-card-name{font-size:13px;font-weight:500;margin-bottom:4px}
+.pipeline-card-meta{font-size:11px;color:var(--muted)}
+.pipeline-card-val{font-size:12px;color:var(--accent);font-weight:600;margin-top:6px}
+
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:1fr 320px;gap:16px}
+.cal-main{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-month{font-size:15px;font-weight:600}
+.cal-days-header{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;color:var(--muted);margin-bottom:8px}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day{min-height:70px;background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:6px;font-size:12px;cursor:pointer;transition:.1s}
+.cal-day:hover{border-color:var(--accent)}
+.cal-day.today{border-color:var(--accent);background:rgba(232,160,32,.08)}
+.cal-day.other-month{opacity:.35}
+.cal-day-num{font-weight:500;margin-bottom:3px}
+.cal-event{background:rgba(59,130,246,.25);color:#93c5fd;font-size:10px;padding:2px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-event.visita{background:rgba(168,85,247,.25);color:#d8b4fe}
+.cal-event.reunion{background:rgba(232,160,32,.25);color:var(--accent2)}
+.cal-sidebar{display:flex;flex-direction:column;gap:12px}
+.upcoming{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+.upcoming-title{font-size:13px;font-weight:600;margin-bottom:10px}
+.event-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.event-item:last-child{border-bottom:none}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.event-desc{font-size:12px}
+.event-time{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.stat-title{font-size:13px;font-weight:600;margin-bottom:12px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-label{font-size:12px;color:var(--muted);width:110px;flex-shrink:0}
+.bar-track{flex:1;height:7px;background:var(--card2);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.bar-val{font-size:12px;font-weight:500;width:48px;text-align:right}
+.donut-wrap{display:flex;align-items:center;justify-content:space-around}
+.donut-legend{display:flex;flex-direction:column;gap:8px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.funnel-wrap{display:flex;flex-direction:column;gap:6px}
+.funnel-row{display:flex;align-items:center;gap:10px}
+.funnel-label{font-size:12px;color:var(--muted);width:90px;flex-shrink:0}
+.funnel-bar{height:28px;border-radius:4px;display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:600;color:#fff;transition:width .6s}
+.metric-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.metric-row:last-child{border-bottom:none}
+.metric-val{font-weight:600}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;width:520px;max-width:95vw;max-height:85vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-title{font-size:15px;font-weight:600}
+.modal-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-full{grid-column:1/-1}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:11px;color:var(--muted);font-weight:500}
+.form-group input,.form-group select,.form-group textarea{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;outline:none;font-family:inherit}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-group textarea{resize:vertical;min-height:70px}
+.form-group select option{background:var(--card2)}
+.modal-footer{margin-top:16px;display:flex;justify-content:flex-end;gap:8px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;transform:translateY(80px);opacity:0;transition:.3s}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* WHATSAPP BTN */
+.wa-btn{background:#25D366;color:#fff;padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:8px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:16px}
+.tab{padding:7px 14px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;font-weight:500}
+.tab.active{background:var(--card);color:var(--text)}
+
+/* ACTIVITY LOG */
+.activity-list{display:flex;flex-direction:column;gap:0}
+.activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);position:relative}
+.activity-item:last-child{border-bottom:none}
+.activity-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.activity-body{flex:1}
+.activity-text{font-size:13px}
+.activity-time{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* PROPERTY CARD VIEW */
+.prop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.prop-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:.15s}
+.prop-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.prop-img{height:130px;background:linear-gradient(135deg,#1e2535,#252d3f);display:flex;align-items:center;justify-content:center;font-size:36px;position:relative}
+.prop-img-badge{position:absolute;top:8px;left:8px}
+.prop-body{padding:12px}
+.prop-title{font-weight:600;font-size:13px;margin-bottom:4px}
+.prop-loc{font-size:11px;color:var(--muted);margin-bottom:8px}
+.prop-specs{display:flex;gap:10px;font-size:11px;color:var(--muted);margin-bottom:8px}
+.prop-price{font-size:15px;font-weight:700;color:var(--accent)}
+
+svg.mini-chart{overflow:visible}
+
+/* PORTALES */
+.portales-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.portal-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;transition:.15s}
+.portal-card.connected{border-color:var(--green)}
+.portal-card.pending{border-color:var(--accent)}
+.portal-card.disconnected{border-color:var(--border)}
+.portal-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.portal-logo{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.portal-name{font-size:13px;font-weight:600}
+.portal-type{font-size:10px;color:var(--muted);margin-top:1px}
+.portal-stats{display:flex;gap:12px;margin-bottom:10px}
+.portal-stat{text-align:center}
+.portal-stat-val{font-size:15px;font-weight:700}
+.portal-stat-label{font-size:10px;color:var(--muted)}
+.portal-status{display:flex;align-items:center;gap:6px;font-size:11px}
+.status-dot{width:7px;height:7px;border-radius:50%}
+.portal-actions{display:flex;gap:6px;margin-top:10px}
+.portal-toggle{position:relative;width:36px;height:20px;cursor:pointer}
+.portal-toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--card2);border-radius:20px;transition:.2s;border:1px solid var(--border)}
+.toggle-slider:before{content:'';position:absolute;width:14px;height:14px;left:2px;top:2px;background:var(--muted);border-radius:50%;transition:.2s}
+input:checked+.toggle-slider{background:rgba(34,197,94,.3);border-color:var(--green)}
+input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--green)}
+.sync-bar{height:4px;background:var(--card2);border-radius:2px;overflow:hidden;margin-top:8px}
+.sync-progress{height:100%;border-radius:2px;background:var(--green);transition:width 1s ease}
+.multipost-banner{background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(168,85,247,.15));border:1px solid rgba(59,130,246,.3);border-radius:12px;padding:16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.multipost-info h3{font-size:14px;font-weight:600;margin-bottom:4px}
+.multipost-info p{font-size:12px;color:var(--muted)}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.portal-conn-type{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+.conn-api{background:rgba(34,197,94,.15);color:#4ade80}
+.conn-xml{background:rgba(245,158,11,.15);color:#fbbf24}
+.conn-manual{background:rgba(99,102,241,.15);color:#818cf8}
+
+/* EMAIL SELECTOR */
+.email-selector{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer}
+.email-selector select{background:transparent;border:none;color:var(--text);font-size:12px;outline:none;cursor:pointer;max-width:200px}
+.email-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+.email-btn{background:rgba(59,130,246,.15);color:#60a5fa;padding:4px 9px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:4px;transition:.15s}
+.email-btn:hover{background:rgba(59,130,246,.3)}
+
+/* EMAIL TRACKING */
+.email-track-row{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.email-track-row:last-child{border-bottom:none}
+.email-status{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600}
+.email-sent{background:rgba(59,130,246,.15);color:#60a5fa}
+.email-opened{background:rgba(34,197,94,.15);color:#4ade80}
+.email-replied{background:rgba(168,85,247,.15);color:#c084fc}
+.email-clicked{background:rgba(232,160,32,.15);color:var(--accent2)}
+
+/* NOTES */
+.note-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;transition:.15s}
+.note-card:hover{border-color:var(--accent)}
+.note-card-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.note-card-body{font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5}
+.note-card-meta{font-size:11px;color:var(--muted);display:flex;gap:10px;align-items:center}
+.note-ref{background:var(--card2);padding:2px 7px;border-radius:6px;font-size:10px}
+
+/* TASKS */
+.task-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.task-row:last-child{border-bottom:none}
+.task-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:.15s}
+.task-check.done{background:var(--green);border-color:var(--green);color:#000}
+.task-check:hover{border-color:var(--accent)}
+.task-title{flex:1;font-size:13px}
+.task-title.done-text{text-decoration:line-through;color:var(--muted)}
+.pri-alta{color:var(--red);font-size:10px;font-weight:700}
+.pri-media{color:var(--accent);font-size:10px;font-weight:700}
+.pri-baja{color:var(--muted);font-size:10px;font-weight:700}
+.task-due{font-size:11px;color:var(--muted);white-space:nowrap}
+.task-due.overdue{color:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="logo">
+    <h1>JAC REALTY</h1>
+    <p>Portal Agentes · Lic. PN-0931</p>
+  </div>
+  <nav>
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="showPanel('dashboard')">
+      <span class="icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPanel('propiedades')">
+      <span class="icon">🏠</span> Propiedades
+    </div>
+    <div class="nav-item" onclick="showPanel('leads')">
+      <span class="icon">👥</span> Leads / Clientes
+      <span class="nav-badge" id="badge-leads">3</span>
+    </div>
+    <div class="nav-section">Gestión</div>
+    <div class="nav-item" onclick="showPanel('pipeline')">
+      <span class="icon">📋</span> Pipeline
+    </div>
+    <div class="nav-item" onclick="showPanel('agenda')">
+      <span class="icon">📅</span> Agenda
+    </div>
+    <div class="nav-item" onclick="showPanel('actividad')">
+      <span class="icon">⚡</span> Actividad
+    </div>
+    <div class="nav-item" onclick="showPanel('notas')">
+      <span class="icon">📝</span> Notas
+      <span class="nav-badge" id="badge-notas" style="background:var(--blue)">0</span>
+    </div>
+    <div class="nav-item" onclick="showPanel('tareas')">
+      <span class="icon">✅</span> Tareas
+      <span class="nav-badge" id="badge-tareas">0</span>
+    </div>
+    <div class="nav-section">Análisis</div>
+    <div class="nav-item" onclick="showPanel('reportes')">
+      <span class="icon">📈</span> Reportes
+    </div>
+    <div class="nav-section">Herramientas</div>
+    <div class="nav-item" onclick="showPanel('portales')">
+      <span class="icon">📡</span> Portales
+      <span class="nav-badge" id="badge-portales">10</span>
+    </div>
+    <div class="nav-item" onclick="showPanel('automatizaciones')">
+      <span class="icon">🤖</span> Automatizaciones
+    </div>
+    <div class="nav-item" onclick="showPanel('mls')">
+      <span class="icon">🌐</span> Red MLS
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="agent-info">
+      <div class="agent-avatar">JC</div>
+      <div>
+        <div class="agent-name">J. Castro</div>
+        <div class="agent-lic">Agente · PN-0931</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+  <div class="topbar">
+    <h2 id="topbar-title">Dashboard</h2>
+    <div class="topbar-actions">
+      <div class="email-selector" title="Correo activo para envíos">
+        <div class="email-dot"></div>
+        <select id="email-from-select" onchange="setActiveEmail(this.value)">
+          <option value="jelyanrealestate@gmail.com">jelyanrealestate@gmail.com</option>
+          <option value="jcastro@jacrealtypa.com">jcastro@jacrealtypa.com</option>
+        </select>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="openModal('modalProp')">+ Propiedad</button>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modalLead')">+ Lead</button>
+    </div>
+  </div>
+  <div id="content">
+
+    <!-- ========== DASHBOARD ========== -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Propiedades Activas</div>
+          <div class="kpi-value" style="color:var(--blue)" id="kpi-props">0</div>
+          <div class="kpi-delta up">↑ 2 este mes</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Leads Activos</div>
+          <div class="kpi-value" style="color:var(--accent)" id="kpi-leads">0</div>
+          <div class="kpi-delta up">↑ 5 esta semana</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Citas este Mes</div>
+          <div class="kpi-value" style="color:var(--purple)" id="kpi-citas">0</div>
+          <div class="kpi-delta up">↑ 3 vs mes anterior</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Tasa de Cierre</div>
+          <div class="kpi-value" style="color:var(--green)">24%</div>
+          <div class="kpi-delta up">↑ 4% vs trimestre</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:16px">
+        <!-- Recent activity -->
+        <div>
+          <div class="sec-header">
+            <span class="sec-title">Actividad Reciente</span>
+            <button class="btn btn-ghost btn-sm" onclick="showPanel('actividad')">Ver todo →</button>
+          </div>
+          <div class="table-wrap">
+            <div id="dash-activity" style="padding:8px 0"></div>
+          </div>
+        </div>
+        <!-- Quick leads -->
+        <div>
+          <div class="sec-header">
+            <span class="sec-title">Leads Calientes 🔥</span>
+            <button class="btn btn-ghost btn-sm" onclick="showPanel('leads')">Ver todo →</button>
+          </div>
+          <div class="table-wrap" id="dash-hot-leads" style="padding:4px 0"></div>
+        </div>
+      </div>
+
+      <!-- Upcoming events -->
+      <div style="margin-top:16px">
+        <div class="sec-header">
+          <span class="sec-title">Próximas Citas</span>
+          <button class="btn btn-ghost btn-sm" onclick="showPanel('agenda')">Ver agenda →</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Tipo</th><th>Cliente</th><th>Propiedad</th><th>Fecha & Hora</th><th>Acciones</th></tr></thead>
+            <tbody id="dash-citas"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PROPIEDADES ========== -->
+    <div class="panel" id="panel-propiedades">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this,'tabla-props')">Lista</button>
+        <button class="tab" onclick="switchTab(this,'grid-props')">Tarjetas</button>
+      </div>
+      <div class="search-bar">
+        <input type="text" placeholder="🔍 Buscar propiedad..." oninput="filterProps(this.value)" id="prop-search">
+        <select onchange="filterPropsType(this.value)" id="prop-type-filter">
+          <option value="">Todos los tipos</option>
+          <option>Apartamento</option><option>Casa</option><option>Penthouse</option>
+          <option>Local Comercial</option><option>Oficina</option><option>Terreno</option>
+        </select>
+        <select onchange="filterPropsOp(this.value)">
+          <option value="">Todas las operaciones</option>
+          <option>Venta</option><option>Alquiler</option><option>Pre-venta</option>
+        </select>
+        <select onchange="filterPropsStatus(this.value)">
+          <option value="">Todos los estados</option>
+          <option>Disponible</option><option>Reservado</option><option>Vendido</option>
+        </select>
+      </div>
+
+      <div id="tabla-props">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Ref.</th><th>Propiedad</th><th>Tipo</th><th>Operación</th><th>Zona</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="props-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="grid-props" style="display:none">
+        <div class="prop-grid" id="props-grid-container"></div>
+      </div>
+    </div>
+
+    <!-- ========== LEADS ========== -->
+    <div class="panel" id="panel-leads">
+      <div class="search-bar">
+        <input type="text" placeholder="🔍 Buscar lead..." oninput="filterLeads(this.value)">
+        <select onchange="filterLeadsStatus(this.value)">
+          <option value="">Todos los estados</option>
+          <option>Nuevo</option><option>Contactado</option><option>Visita</option>
+          <option>Oferta</option><option>Cerrado</option><option>Perdido</option>
+        </select>
+        <select onchange="filterLeadsInterest(this.value)">
+          <option value="">Todo interés</option>
+          <option>Compra</option><option>Alquiler</option><option>Inversión</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modalLead')">+ Nuevo Lead</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nombre</th><th>Tel / Email</th><th>Interés</th><th>Presupuesto</th><th>Estado / Tracking</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <tbody id="leads-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== PIPELINE ========== -->
+    <div class="panel" id="panel-pipeline">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Arrastra los cards entre columnas para actualizar el embudo de ventas.</p>
+      <div class="pipeline" id="pipeline-board"></div>
+    </div>
+
+    <!-- ========== AGENDA ========== -->
+    <div class="panel" id="panel-agenda">
+      <div class="cal-grid">
+        <div class="cal-main">
+          <div class="cal-header">
+            <button class="btn btn-ghost" onclick="calPrev()">‹</button>
+            <span class="cal-month" id="cal-month-label"></span>
+            <button class="btn btn-ghost" onclick="calNext()">›</button>
+          </div>
+          <div class="cal-days-header">
+            <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+          </div>
+          <div class="cal-days" id="cal-days"></div>
+        </div>
+        <div class="cal-sidebar">
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" style="flex:1" onclick="openModal('modalCita')">+ Cita</button>
+            <button class="btn btn-outline btn-sm" style="flex:1" onclick="openModal('modalCita')">+ Recordatorio</button>
+          </div>
+          <div class="upcoming">
+            <div class="upcoming-title">📅 Esta Semana</div>
+            <div id="upcoming-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== ACTIVIDAD ========== -->
+    <div class="panel" id="panel-actividad">
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:16px">
+        <div>
+          <div class="sec-header"><span class="sec-title">Registro de Actividades</span>
+            <button class="btn btn-primary btn-sm" onclick="openModal('modalActividad')">+ Registrar</button>
+          </div>
+          <div class="table-wrap" style="padding:8px 14px">
+            <div class="activity-list" id="activity-log"></div>
+          </div>
+        </div>
+        <div>
+          <div class="sec-title" style="margin-bottom:10px">Resumen</div>
+          <div class="table-wrap" style="padding:12px 14px">
+            <div class="metric-row"><span>Llamadas este mes</span><span class="metric-val" style="color:var(--blue)">12</span></div>
+            <div class="metric-row"><span>Emails enviados</span><span class="metric-val" style="color:var(--cyan)">28</span></div>
+            <div class="metric-row"><span>Visitas realizadas</span><span class="metric-val" style="color:var(--purple)">7</span></div>
+            <div class="metric-row"><span>WhatsApp enviados</span><span class="metric-val" style="color:#4ade80">41</span></div>
+            <div class="metric-row"><span>Reuniones</span><span class="metric-val" style="color:var(--accent)">5</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== NOTAS ========== -->
+    <div class="panel" id="panel-notas">
+      <div class="search-bar" style="margin-bottom:14px">
+        <input type="text" placeholder="🔍 Buscar nota..." oninput="filterNotas(this.value)" style="flex:1">
+        <select onchange="filterNotasTipo(this.value)">
+          <option value="">Todos los tipos</option>
+          <option value="lead">Lead</option>
+          <option value="propiedad">Propiedad</option>
+          <option value="general">General</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modalNota')">+ Nueva Nota</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px" id="notas-grid"></div>
+    </div>
+
+    <!-- ========== TAREAS ========== -->
+    <div class="panel" id="panel-tareas">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+        <select onchange="filterTareasPri(this.value)" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:13px;outline:none">
+          <option value="">Todas las prioridades</option>
+          <option value="Alta">Alta</option>
+          <option value="Media">Media</option>
+          <option value="Baja">Baja</option>
+        </select>
+        <select onchange="filterTareasStatus(this.value)" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:13px;outline:none">
+          <option value="">Todos los estados</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="En progreso">En progreso</option>
+          <option value="Completada">Completada</option>
+        </select>
+        <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="openModal('modalTarea')">+ Nueva Tarea</button>
+      </div>
+      <div class="table-wrap">
+        <div id="tareas-list"></div>
+      </div>
+    </div>
+
+    <!-- ========== REPORTES ========== -->
+    <div class="panel" id="panel-reportes">
+      <div class="kpi-grid" style="margin-bottom:16px">
+        <div class="kpi-card">
+          <div class="kpi-label">Ventas Cerradas YTD</div>
+          <div class="kpi-value" style="color:var(--green)">$1.24M</div>
+          <div class="kpi-delta up">↑ 18% vs año anterior</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Alquileres Activos</div>
+          <div class="kpi-value" style="color:var(--purple)">14</div>
+          <div class="kpi-delta up">↑ 3 este trimestre</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Comisiones Estimadas</div>
+          <div class="kpi-value" style="color:var(--accent)">$48,200</div>
+          <div class="kpi-delta up">↑ 12% vs Q anterior</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Tiempo Prom. Cierre</div>
+          <div class="kpi-value" style="color:var(--blue)">47d</div>
+          <div class="kpi-delta down">↑ 3d vs prom.</div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-title">Propiedades por Zona</div>
+          <div class="bar-row"><span class="bar-label">Costa del Este</span><div class="bar-track"><div class="bar-fill" style="width:80%;background:var(--blue)"></div></div><span class="bar-val">8</span></div>
+          <div class="bar-row"><span class="bar-label">Casco Antiguo</span><div class="bar-track"><div class="bar-fill" style="width:60%;background:var(--purple)"></div></div><span class="bar-val">6</span></div>
+          <div class="bar-row"><span class="bar-label">San Francisco</span><div class="bar-track"><div class="bar-fill" style="width:50%;background:var(--cyan)"></div></div><span class="bar-val">5</span></div>
+          <div class="bar-row"><span class="bar-label">Punta Pacífica</span><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--accent)"></div></div><span class="bar-val">4</span></div>
+          <div class="bar-row"><span class="bar-label">Marbella</span><div class="bar-track"><div class="bar-fill" style="width:30%;background:var(--green)"></div></div><span class="bar-val">3</span></div>
+          <div class="bar-row"><span class="bar-label">Coronado</span><div class="bar-track"><div class="bar-fill" style="width:20%;background:#fb923c)"></div></div><span class="bar-val">2</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Embudo de Conversión</div>
+          <div class="funnel-wrap">
+            <div class="funnel-row"><span class="funnel-label">Leads totales</span><div class="funnel-bar" style="width:100%;background:var(--blue)">48</div></div>
+            <div class="funnel-row"><span class="funnel-label">Contactados</span><div class="funnel-bar" style="width:80%;background:var(--purple)">38</div></div>
+            <div class="funnel-row"><span class="funnel-label">Visita</span><div class="funnel-bar" style="width:50%;background:var(--cyan)">24</div></div>
+            <div class="funnel-row"><span class="funnel-label">Oferta</span><div class="funnel-bar" style="width:30%;background:var(--accent)">14</div></div>
+            <div class="funnel-row"><span class="funnel-label">Cerrado</span><div class="funnel-bar" style="width:18%;background:var(--green)">8</div></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Mix de Operaciones</div>
+          <div class="donut-wrap" style="padding:10px 0">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--card2)" stroke-width="20"/>
+              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--blue)" stroke-width="20" stroke-dasharray="180 122" stroke-dashoffset="-30" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--purple)" stroke-width="20" stroke-dasharray="110 192" stroke-dashoffset="-210" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--accent)" stroke-width="20" stroke-dasharray="10 292" stroke-dashoffset="-320" transform="rotate(-90 60 60)"/>
+              <text x="60" y="64" text-anchor="middle" fill="var(--text)" font-size="12" font-weight="600">Mix</text>
+            </svg>
+            <div class="donut-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Venta 60%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Alquiler 37%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Pre-venta 3%</div>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Métricas Clave</div>
+          <div class="metric-row"><span>Precio prom. venta</span><span class="metric-val" style="color:var(--accent)">$425,000</span></div>
+          <div class="metric-row"><span>Alquiler prom. mensual</span><span class="metric-val" style="color:var(--purple)">$1,850/mes</span></div>
+          <div class="metric-row"><span>Propiedades listadas</span><span class="metric-val" style="color:var(--blue)" id="rep-props">0</span></div>
+          <div class="metric-row"><span>Leads este mes</span><span class="metric-val" style="color:var(--cyan)" id="rep-leads">0</span></div>
+          <div class="metric-row"><span>Tasa de conversión</span><span class="metric-val" style="color:var(--green)">24%</span></div>
+          <div class="metric-row"><span>NPS clientes</span><span class="metric-val" style="color:var(--accent)">⭐ 4.8/5</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== AUTOMATIZACIONES ========== -->
+    <div class="panel" id="panel-automatizaciones">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div class="sec-title" style="margin-bottom:12px">🤖 Flujos Activos</div>
+          <div id="automation-list"></div>
+        </div>
+        <div>
+          <div class="sec-title" style="margin-bottom:12px">📤 Acciones Rápidas</div>
+          <div style="display:flex;flex-direction:column;gap:8px" id="quick-actions"></div>
+          <div style="margin-top:16px">
+            <div class="sec-title" style="margin-bottom:10px">📧 Plantillas de Mensaje</div>
+            <div id="templates-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PORTALES ========== -->
+    <div class="panel" id="panel-portales">
+
+      <!-- Banner multiposting -->
+      <div class="multipost-banner">
+        <div class="multipost-info">
+          <h3>📡 Multiposting Automático — JAC Realty</h3>
+          <p>Publica una propiedad una sola vez y se distribuye automáticamente a todos los portales activos. Cualquier cambio de precio, foto o estado se sincroniza en tiempo real.</p>
+        </div>
+        <div style="text-align:center;flex-shrink:0">
+          <div style="font-size:28px;font-weight:700;color:var(--green)" id="portales-activos-count">0</div>
+          <div style="font-size:11px;color:var(--muted)">portales activos</div>
+          <button class="btn btn-primary" style="margin-top:8px;font-size:12px" onclick="publishAll()">🚀 Publicar en Todos</button>
+        </div>
+      </div>
+
+      <!-- Selector de propiedad para publicar -->
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px">
+        <span style="font-size:12px;color:var(--muted);white-space:nowrap">Propiedad a publicar:</span>
+        <select id="portal-prop-select" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:13px;outline:none"></select>
+        <button class="btn btn-primary btn-sm" onclick="publishSelected()">Publicar selección</button>
+        <button class="btn btn-outline btn-sm" onclick="syncAll()">🔄 Sincronizar todos</button>
+      </div>
+
+      <!-- Estadísticas rápidas -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:22px;font-weight:700;color:var(--green)" id="stat-publicadas">0</div>
+          <div style="font-size:11px;color:var(--muted)">Publicaciones activas</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:22px;font-weight:700;color:var(--blue)" id="stat-vistas">1,240</div>
+          <div style="font-size:11px;color:var(--muted)">Vistas este mes</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:22px;font-weight:700;color:var(--accent)" id="stat-leads-portales">18</div>
+          <div style="font-size:11px;color:var(--muted)">Leads de portales</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:22px;font-weight:700;color:var(--purple)">API+XML</div>
+          <div style="font-size:11px;color:var(--muted)">Tipo de conexión</div>
+        </div>
+      </div>
+
+      <!-- Tabs: Gratuitos / De Pago / Social -->
+      <div class="tabs" id="portales-tabs">
+        <button class="tab active" onclick="filterPortalesTab(this,'gratis')">🆓 Gratuitos Panamá</button>
+        <button class="tab" onclick="filterPortalesTab(this,'red')">🌐 Red Lifull Connect</button>
+        <button class="tab" onclick="filterPortalesTab(this,'pago')">💳 De Pago</button>
+        <button class="tab" onclick="filterPortalesTab(this,'social')">📲 Redes Sociales</button>
+        <button class="tab" onclick="filterPortalesTab(this,'todos')">Todos</button>
+      </div>
+
+      <div class="portales-grid" id="portales-grid"></div>
+    </div>
+
+    <!-- ========== RED MLS ========== -->
+    <div class="panel" id="panel-mls">
+      <div class="sec-header">
+        <span class="sec-title">🌐 Red Inmobiliaria · MLS Panamá</span>
+      </div>
+      <div class="kpi-grid" style="margin-bottom:16px">
+        <div class="kpi-card"><div class="kpi-label">Agentes en Red</div><div class="kpi-value" style="color:var(--blue)">127</div><div class="kpi-delta up">Panamá</div></div>
+        <div class="kpi-card"><div class="kpi-label">Prop. Compartidas</div><div class="kpi-value" style="color:var(--purple)">342</div><div class="kpi-delta up">Disponibles</div></div>
+        <div class="kpi-card"><div class="kpi-label">Negocios Compartidos</div><div class="kpi-value" style="color:var(--green)">18</div><div class="kpi-delta up">Este año</div></div>
+        <div class="kpi-card"><div class="kpi-label">Mi Reputación</div><div class="kpi-value" style="color:var(--accent)">⭐ 4.9</div><div class="kpi-delta up">Top Agent</div></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Propiedad</th><th>Agente</th><th>Agencia</th><th>Zona</th><th>Precio</th><th>Comisión</th><th>Acción</th></tr></thead>
+          <tbody id="mls-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ===== MODALS ===== -->
+
+<!-- Modal Propiedad -->
+<div class="modal-bg" id="modalProp">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🏠 Nueva Propiedad</span>
+      <button class="modal-close" onclick="closeModal('modalProp')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Título / Descripción corta</label><input id="p-titulo" placeholder="Ej: Apartamento moderno con vista al mar"></div>
+      <div class="form-group"><label>Tipo</label>
+        <select id="p-tipo"><option>Apartamento</option><option>Casa</option><option>Penthouse</option><option>Local Comercial</option><option>Oficina</option><option>Terreno</option></select>
+      </div>
+      <div class="form-group"><label>Operación</label>
+        <select id="p-op"><option>Venta</option><option>Alquiler</option><option>Pre-venta</option></select>
+      </div>
+      <div class="form-group"><label>Zona</label>
+        <select id="p-zona"><option>Costa del Este</option><option>Casco Antiguo</option><option>San Francisco</option><option>Punta Pacífica</option><option>Marbella</option><option>Bella Vista</option><option>El Cangrejo</option><option>Obarrio</option><option>Coronado</option><option>Chiriquí</option></select>
+      </div>
+      <div class="form-group"><label>Precio (USD)</label><input id="p-precio" type="number" placeholder="485000"></div>
+      <div class="form-group"><label>Área (m²)</label><input id="p-area" type="number" placeholder="120"></div>
+      <div class="form-group"><label>Habitaciones</label><input id="p-hab" type="number" placeholder="3"></div>
+      <div class="form-group"><label>Baños</label><input id="p-banos" type="number" placeholder="2"></div>
+      <div class="form-group"><label>Estacionamientos</label><input id="p-estac" type="number" placeholder="1"></div>
+      <div class="form-group"><label>Estado</label>
+        <select id="p-status"><option>Disponible</option><option>Reservado</option><option>Vendido</option></select>
+      </div>
+      <div class="form-group form-full"><label>Descripción adicional</label><textarea id="p-desc" placeholder="Características, amenidades, ubicación exacta..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalProp')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveProp()">Guardar Propiedad</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Lead -->
+<div class="modal-bg" id="modalLead">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">👤 Nuevo Lead</span>
+      <button class="modal-close" onclick="closeModal('modalLead')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Nombre completo</label><input id="l-nombre" placeholder="Nombre Apellido"></div>
+      <div class="form-group"><label>Teléfono / WhatsApp</label><input id="l-tel" placeholder="+507 6000-0000"></div>
+      <div class="form-group"><label>Email</label><input id="l-email" type="email" placeholder="correo@ejemplo.com"></div>
+      <div class="form-group"><label>Interés</label>
+        <select id="l-interes"><option>Compra</option><option>Alquiler</option><option>Inversión</option><option>Preventa</option></select>
+      </div>
+      <div class="form-group"><label>Presupuesto</label>
+        <select id="l-presupuesto"><option>Menos de $100K</option><option>$100K–$300K</option><option>$300K–$600K</option><option>$600K–$1M</option><option>Más de $1M</option></select>
+      </div>
+      <div class="form-group"><label>Zona de interés</label>
+        <select id="l-zona"><option>Cualquier zona</option><option>Costa del Este</option><option>Casco Antiguo</option><option>San Francisco</option><option>Punta Pacífica</option><option>Marbella</option><option>Coronado</option></select>
+      </div>
+      <div class="form-group"><label>Estado</label>
+        <select id="l-status"><option>Nuevo</option><option>Contactado</option><option>Visita</option><option>Oferta</option><option>Cerrado</option><option>Perdido</option></select>
+      </div>
+      <div class="form-group"><label>Fuente</label>
+        <select id="l-fuente"><option>Web</option><option>WhatsApp</option><option>Instagram</option><option>Facebook</option><option>Referido</option><option>MLS</option><option>Otro</option></select>
+      </div>
+      <div class="form-group form-full"><label>Notas</label><textarea id="l-notas" placeholder="Detalles adicionales del cliente..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalLead')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveLead()">Guardar Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cita -->
+<div class="modal-bg" id="modalCita">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📅 Nueva Cita / Evento</span>
+      <button class="modal-close" onclick="closeModal('modalCita')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Tipo de evento</label>
+        <select id="c-tipo"><option>Visita propiedad</option><option>Reunión cliente</option><option>Llamada</option><option>Firma contrato</option><option>Seguimiento</option><option>Otro</option></select>
+      </div>
+      <div class="form-group"><label>Cliente</label><input id="c-cliente" placeholder="Nombre del cliente"></div>
+      <div class="form-group"><label>Propiedad</label><input id="c-propiedad" placeholder="Ref. o descripción"></div>
+      <div class="form-group"><label>Fecha</label><input id="c-fecha" type="date"></div>
+      <div class="form-group"><label>Hora</label><input id="c-hora" type="time" value="10:00"></div>
+      <div class="form-group form-full"><label>Notas</label><textarea id="c-notas" placeholder="Instrucciones, dirección exacta..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalCita')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCita()">Agendar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Actividad -->
+<div class="modal-bg" id="modalActividad">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">⚡ Registrar Actividad</span>
+      <button class="modal-close" onclick="closeModal('modalActividad')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Tipo</label>
+        <select id="a-tipo"><option>📞 Llamada</option><option>📧 Email</option><option>💬 WhatsApp</option><option>🏠 Visita</option><option>🤝 Reunión</option><option>📝 Nota</option></select>
+      </div>
+      <div class="form-group"><label>Cliente</label><input id="a-cliente" placeholder="Nombre del cliente"></div>
+      <div class="form-group form-full"><label>Descripción</label><textarea id="a-desc" placeholder="¿Qué ocurrió?"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalActividad')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveActividad()">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Email Compose -->
+<div class="modal-bg" id="modalEmail">
+  <div class="modal" style="width:580px">
+    <div class="modal-header">
+      <span class="modal-title">📧 Redactar Email</span>
+      <button class="modal-close" onclick="closeModal('modalEmail')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>De (remitente)</label>
+        <select id="em-from" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;outline:none">
+          <option value="jelyanrealestate@gmail.com">jelyanrealestate@gmail.com</option>
+          <option value="jcastro@jacrealtypa.com">jcastro@jacrealtypa.com</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Para (destinatario)</label>
+        <input id="em-to" placeholder="correo@cliente.com">
+      </div>
+      <div class="form-group form-full">
+        <label>Asunto</label>
+        <input id="em-subject" placeholder="Propiedades disponibles en JAC Realty · Panamá">
+      </div>
+      <div class="form-group form-full">
+        <label>Plantilla rápida</label>
+        <select onchange="applyEmailTemplate(this.value)" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;outline:none">
+          <option value="">-- Sin plantilla --</option>
+          <option value="bienvenida">Bienvenida nuevo lead</option>
+          <option value="seguimiento">Seguimiento post-visita</option>
+          <option value="propuesta">Propuesta de propiedad</option>
+          <option value="oferta">Confirmación de oferta</option>
+          <option value="cierre">Felicitación cierre</option>
+        </select>
+      </div>
+      <div class="form-group form-full">
+        <label>Mensaje</label>
+        <textarea id="em-body" style="min-height:140px" placeholder="Escribe tu mensaje aquí..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Seguimiento automático</label>
+        <select id="em-followup" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;outline:none">
+          <option value="">Sin seguimiento</option>
+          <option value="1">Recordar en 1 día</option>
+          <option value="3">Recordar en 3 días</option>
+          <option value="7">Recordar en 1 semana</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Vinculado a</label>
+        <select id="em-lead-ref" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;outline:none">
+          <option value="">-- Seleccionar lead --</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalEmail')">Cancelar</button>
+      <button class="btn btn-primary" onclick="sendEmail()">📤 Enviar Email</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nueva Nota -->
+<div class="modal-bg" id="modalNota">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📝 Nueva Nota</span>
+      <button class="modal-close" onclick="closeModal('modalNota')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group form-full">
+        <label>Título</label>
+        <input id="n-titulo" placeholder="Resumen de la reunión...">
+      </div>
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="n-tipo">
+          <option value="lead">Lead / Cliente</option>
+          <option value="propiedad">Propiedad</option>
+          <option value="general">General</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Vincular a</label>
+        <select id="n-ref">
+          <option value="">-- Sin vínculo --</option>
+        </select>
+      </div>
+      <div class="form-group form-full">
+        <label>Contenido</label>
+        <textarea id="n-cuerpo" style="min-height:100px" placeholder="Detalle de la nota..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalNota')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveNota()">Guardar Nota</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nueva Tarea -->
+<div class="modal-bg" id="modalTarea">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">✅ Nueva Tarea</span>
+      <button class="modal-close" onclick="closeModal('modalTarea')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group form-full">
+        <label>Título de la tarea</label>
+        <input id="t-titulo" placeholder="Llamar a cliente, enviar propuesta...">
+      </div>
+      <div class="form-group">
+        <label>Prioridad</label>
+        <select id="t-prioridad">
+          <option value="Alta">🔴 Alta</option>
+          <option value="Media" selected>🟡 Media</option>
+          <option value="Baja">🟢 Baja</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Fecha límite</label>
+        <input id="t-vence" type="date">
+      </div>
+      <div class="form-group">
+        <label>Tipo de vínculo</label>
+        <select id="t-tipo" onchange="updateTareaRef(this.value)">
+          <option value="lead">Lead / Cliente</option>
+          <option value="propiedad">Propiedad</option>
+          <option value="general">General</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Vincular a</label>
+        <select id="t-ref">
+          <option value="">-- Sin vínculo --</option>
+        </select>
+      </div>
+      <div class="form-group form-full">
+        <label>Descripción</label>
+        <textarea id="t-desc" placeholder="Detalles adicionales de la tarea..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalTarea')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTarea()">Guardar Tarea</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// DATA STORE
+// ============================================================
+let props = [
+  {id:'P001',titulo:'Residencia de Lujo con Vista al Mar',tipo:'Apartamento',op:'Venta',zona:'Punta Pacífica',precio:485000,area:185,hab:3,banos:3,estac:2,status:'Disponible',desc:'Acabados premium, piscina, gimnasio.'},
+  {id:'P002',titulo:'Penthouse Colonial con Terraza Privada',tipo:'Penthouse',op:'Alquiler',zona:'Casco Antiguo',precio:3800,area:320,hab:4,banos:4,estac:2,status:'Disponible',desc:'Patrimonio UNESCO, vistas panorámicas.'},
+  {id:'P003',titulo:'Casa de Campo con Piscina',tipo:'Casa',op:'Venta',zona:'Costa del Este',precio:820000,area:480,hab:5,banos:5,estac:3,status:'Reservado',desc:'Jardín privado, BBQ, cancha.'},
+  {id:'P004',titulo:'Apartamento Moderno en San Francisco',tipo:'Apartamento',op:'Venta',zona:'San Francisco',precio:195000,area:90,hab:2,banos:2,estac:1,status:'Disponible',desc:'Listo para habitar, muebles incluidos.'},
+  {id:'P005',titulo:'Oficina Ejecutiva Marbella',tipo:'Oficina',op:'Alquiler',zona:'Marbella',precio:2200,area:120,hab:0,banos:2,estac:2,status:'Disponible',desc:'Vista al mar, sala de juntas incluida.'},
+  {id:'P006',titulo:'Terreno en Coronado',tipo:'Terreno',op:'Venta',zona:'Coronado',precio:95000,area:600,hab:0,banos:0,estac:0,status:'Disponible',desc:'Frente de playa, servicios disponibles.'},
+];
+
+let leads = [
+  {id:'L001',nombre:'Roberto Méndez',tel:'+507 6123-4567',email:'rmendez@gmail.com',interes:'Compra',presupuesto:'$300K–$600K',zona:'Costa del Este',status:'Visita',fuente:'Web',notas:'Busca casa familiar.',fecha:'2026-06-07'},
+  {id:'L002',nombre:'Ana Sofía Vargas',tel:'+507 6234-5678',email:'avargas@outlook.com',interes:'Alquiler',presupuesto:'$100K–$300K',zona:'Casco Antiguo',status:'Oferta',fuente:'Instagram',notas:'Presupuesto $2,500/mes.',fecha:'2026-06-05'},
+  {id:'L003',nombre:'Carlos Herrera',tel:'+507 6345-6789',email:'cherrera@empresa.com',interes:'Inversión',presupuesto:'Más de $1M',zona:'Punta Pacífica',status:'Contactado',fuente:'Referido',notas:'Inversor colombiano, busca 2+ propiedades.',fecha:'2026-06-08'},
+  {id:'L004',nombre:'María Fernández',tel:'+507 6456-7890',email:'mfernandez@gmail.com',interes:'Compra',presupuesto:'$100K–$300K',zona:'San Francisco',status:'Nuevo',fuente:'WhatsApp',notas:'Compradora primeriza.',fecha:'2026-06-09'},
+  {id:'L005',nombre:'Javier Mora',tel:'+507 6567-8901',email:'jmora@corp.pa',interes:'Compra',presupuesto:'$600K–$1M',zona:'Costa del Este',status:'Cerrado',fuente:'MLS',notas:'Cerró compra de casa $820K.',fecha:'2026-05-28'},
+];
+
+let citas = [
+  {tipo:'Visita propiedad',cliente:'Roberto Méndez',propiedad:'P003 · Casa Costa del Este',fecha:'2026-06-11',hora:'10:00',notas:''},
+  {tipo:'Reunión cliente',cliente:'Ana Sofía Vargas',propiedad:'P002 · Penthouse Casco Antiguo',fecha:'2026-06-12',hora:'15:30',notas:''},
+  {tipo:'Llamada',cliente:'Carlos Herrera',propiedad:'Múltiples propiedades',fecha:'2026-06-10',hora:'09:00',notas:''},
+];
+
+let activities = [
+  {tipo:'💬 WhatsApp',cliente:'Roberto Méndez',desc:'Confirmó visita para el miércoles 10am.',time:'Hoy, 11:23am'},
+  {tipo:'📧 Email',cliente:'Ana Sofía Vargas',desc:'Enviada propuesta formal de arrendamiento.',time:'Hoy, 9:05am'},
+  {tipo:'📞 Llamada',cliente:'Carlos Herrera',desc:'Llamada 20 min, interesado en piso entero.',time:'Ayer, 4:15pm'},
+  {tipo:'🏠 Visita',cliente:'Javier Mora',desc:'Visita exitosa a P003. Presentó oferta.',time:'Ayer, 11:00am'},
+  {tipo:'📝 Nota',cliente:'María Fernández',desc:'Primer contacto vía WhatsApp.',time:'Hace 2 días'},
+];
+
+let calYear=2026, calMonth=5; // June (0-indexed)
+
+// ============================================================
+// NEW DATA: Notes, Tasks, Email Logs
+// ============================================================
+let notes = [
+  {id:'N001',titulo:'Reunión inicial con Roberto',cuerpo:'Muy interesado en casa de Costa del Este. Quiere ver el jardín. Tiene hijos. Presupuesto flexible hasta $850K.',tipo:'lead',ref:'L001',refName:'Roberto Méndez',fecha:'2026-06-07'},
+  {id:'N002',titulo:'Detalles de arrendamiento Ana',cuerpo:'Confirmar que acepta mascotas pequeñas. Presupuesto máximo $2,800/mes. Necesita mudarse antes del 1 de julio.',tipo:'lead',ref:'L002',refName:'Ana Sofía Vargas',fecha:'2026-06-05'},
+  {id:'N003',titulo:'Notas propiedad P001',cuerpo:'Propietario acepta negociar 5% si oferta firme. Tiene segundo estacionamiento disponible. Mantenimiento $280/mes.',tipo:'propiedad',ref:'P001',refName:'P001 · Punta Pacífica',fecha:'2026-06-03'},
+];
+let tasks = [
+  {id:'T001',titulo:'Llamar a Roberto Méndez para confirmar visita',prioridad:'Alta',status:'Pendiente',vence:'2026-06-10',tipo:'lead',ref:'L001',refName:'Roberto Méndez',desc:'Confirmar disponibilidad miércoles 10am.'},
+  {id:'T002',titulo:'Enviar propuesta formal a Ana Sofía',prioridad:'Alta',status:'Pendiente',vence:'2026-06-11',tipo:'lead',ref:'L002',refName:'Ana Sofía Vargas',desc:'Incluir contrato de arrendamiento P002.'},
+  {id:'T003',titulo:'Actualizar fotos de P004 en portales',prioridad:'Media',status:'Pendiente',vence:'2026-06-12',tipo:'propiedad',ref:'P004',refName:'P004 · San Francisco',desc:'Tomar fotos nuevas con luz natural.'},
+  {id:'T004',titulo:'Seguimiento a Carlos Herrera',prioridad:'Alta',status:'En progreso',vence:'2026-06-10',tipo:'lead',ref:'L003',refName:'Carlos Herrera',desc:'Preparar portafolio de 3 propiedades $1M+.'},
+  {id:'T005',titulo:'Renovar publicación en Encuentra24',prioridad:'Baja',status:'Pendiente',vence:'2026-06-15',tipo:'general',ref:'',refName:'',desc:'Plan mensual vence el 15.'},
+];
+let emailLogs = [
+  {id:'E001',from:'jcastro@jacrealtypa.com',to:'Roberto Méndez',toEmail:'rmendez@gmail.com',subject:'Propiedades disponibles Costa del Este',body:'',leadRef:'L001',fecha:'2026-06-08',status:'Abierto'},
+  {id:'E002',from:'jelyanrealestate@gmail.com',to:'Ana Sofía Vargas',toEmail:'avargas@outlook.com',subject:'Propuesta arrendamiento Casco Antiguo',body:'',leadRef:'L002',fecha:'2026-06-07',status:'Respondido'},
+  {id:'E003',from:'jcastro@jacrealtypa.com',to:'Carlos Herrera',toEmail:'cherrera@empresa.com',subject:'Portafolio de inversión · JAC Realty',body:'',leadRef:'L003',fecha:'2026-06-06',status:'Enviado'},
+];
+let currentEmail='jelyanrealestate@gmail.com';
+
+function setActiveEmail(v){
+  currentEmail=v;
+  document.getElementById('email-from-select').value=v;
+  toast('📧 Correo activo: '+v);
+}
+
+// ============================================================
+// NAV
+// ============================================================
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  const labels={dashboard:'Dashboard',propiedades:'Propiedades',leads:'Leads / Clientes',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',automatizaciones:'Automatizaciones',mls:'Red MLS'};
+  document.getElementById('topbar-title').textContent=labels[id]||id;
+  event.currentTarget.classList.add('active');
+  if(id==='propiedades') renderProps();
+  if(id==='leads') renderLeads();
+  if(id==='pipeline') renderPipeline();
+  if(id==='agenda') renderCalendar();
+  if(id==='actividad') renderActivity();
+  if(id==='notas') renderNotas();
+  if(id==='tareas') renderTareas();
+  if(id==='portales') renderPortales();
+  if(id==='automatizaciones') renderAutomations();
+  if(id==='mls') renderMLS();
+  if(id==='reportes') updateReportKPIs();
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard(){
+  document.getElementById('kpi-props').textContent=props.length;
+  document.getElementById('kpi-leads').textContent=leads.filter(l=>l.status!=='Cerrado'&&l.status!=='Perdido').length;
+  document.getElementById('kpi-citas').textContent=citas.length;
+  // Hot leads
+  const hot=leads.filter(l=>['Visita','Oferta'].includes(l.status)).slice(0,4);
+  const hotEl=document.getElementById('dash-hot-leads');
+  hotEl.innerHTML=hot.length?hot.map(l=>`
+    <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500">${l.nombre}</div>
+        <div style="font-size:11px;color:var(--muted)">${l.interes} · ${l.presupuesto}</div>
+      </div>
+      <span class="tag tag-${l.status.toLowerCase()}">${l.status}</span>
+      <div style="display:flex;gap:4px">
+        <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="waLead('${l.id}')" title="WhatsApp">💬</button>
+        <button class="email-btn" style="font-size:10px;padding:3px 7px" onclick="openEmailLead('${l.id}')" title="Enviar email">📧</button>
+      </div>
+    </div>`).join(''):`<div class="empty"><div>–</div></div>`;
+  // Dash citas
+  const tbody=document.getElementById('dash-citas');
+  tbody.innerHTML=citas.slice(0,4).map(c=>`<tr>
+    <td>${c.tipo}</td><td>${c.cliente}</td><td style="color:var(--muted)">${c.propiedad}</td>
+    <td>${c.fecha} ${c.hora}</td>
+    <td><div class="action-btns">
+      <button class="btn btn-ghost btn-sm" title="WhatsApp" onclick="waClick('${c.cliente}')">💬</button>
+      <button class="email-btn" title="Email" onclick="emailCita('${c.cliente}','${c.tipo}','${c.fecha}','${c.hora}')">📧</button>
+    </div></td>
+  </tr>`).join('');
+  // Activity
+  const actEl=document.getElementById('dash-activity');
+  actEl.innerHTML=activities.slice(0,5).map(a=>`
+    <div class="activity-item" style="padding:8px 14px">
+      <div class="activity-icon" style="background:var(--card2)">${a.tipo.split(' ')[0]}</div>
+      <div class="activity-body">
+        <div class="activity-text"><strong>${a.cliente}</strong> · ${a.desc}</div>
+        <div class="activity-time">${a.time}</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('badge-leads').textContent=leads.filter(l=>l.status==='Nuevo').length;
+}
+
+// ============================================================
+// PROPS
+// ============================================================
+const propEmoji={Apartamento:'🏢',Casa:'🏡',Penthouse:'🏙️','Local Comercial':'🏪',Oficina:'🏦',Terreno:'🌿'};
+function renderProps(data){
+  const arr=data||props;
+  const tbody=document.getElementById('props-tbody');
+  tbody.innerHTML=arr.map(p=>`<tr>
+    <td style="color:var(--muted)">${p.id}</td>
+    <td><div style="font-weight:500">${p.titulo}</div><div style="font-size:11px;color:var(--muted)">${p.area}m² · ${p.hab>0?p.hab+' hab':'Sin hab'}</div></td>
+    <td><span class="tag" style="background:var(--card2);color:var(--text)">${propEmoji[p.tipo]||'🏠'} ${p.tipo}</span></td>
+    <td><span class="tag tag-${p.op.toLowerCase().replace('-','')}">${p.op}</span></td>
+    <td>${p.zona}</td>
+    <td class="price">${p.op==='Venta'||p.op==='Pre-venta'?'$'+p.precio.toLocaleString():'$'+p.precio.toLocaleString()+'/mes'}</td>
+    <td><span class="tag tag-${p.status.toLowerCase()}">${p.status}</span></td>
+    <td><div class="action-btns">
+      <button class="btn btn-ghost btn-sm" title="Compartir WhatsApp" onclick="shareWA('${p.id}')">💬</button>
+      <button class="email-btn" title="Enviar por email" onclick="sharePropEmail('${p.id}')">📧</button>
+      <button class="btn btn-ghost btn-sm" title="Editar">✏️</button>
+      <button class="btn btn-ghost btn-sm" title="Eliminar" onclick="deleteProp('${p.id}')">🗑️</button>
+    </div></td>
+  </tr>`).join('');
+  // Grid view
+  const grid=document.getElementById('props-grid-container');
+  grid.innerHTML=arr.map(p=>`
+    <div class="prop-card">
+      <div class="prop-img">
+        ${propEmoji[p.tipo]||'🏠'}
+        <div class="prop-img-badge"><span class="tag tag-${p.op.toLowerCase().replace('-','')}">${p.op}</span></div>
+      </div>
+      <div class="prop-body">
+        <div class="prop-title">${p.titulo}</div>
+        <div class="prop-loc">📍 ${p.zona}</div>
+        <div class="prop-specs">
+          ${p.hab>0?`<span>🛏 ${p.hab}</span>`:''}
+          ${p.banos>0?`<span>🚿 ${p.banos}</span>`:''}
+          <span>📐 ${p.area}m²</span>
+          ${p.estac>0?`<span>🚗 ${p.estac}</span>`:''}
+        </div>
+        <div class="prop-price">${p.op==='Venta'||p.op==='Pre-venta'?'$'+p.precio.toLocaleString():'$'+p.precio.toLocaleString()+'/mes'}</div>
+      </div>
+    </div>`).join('');
+}
+function filterProps(q){
+  renderProps(props.filter(p=>p.titulo.toLowerCase().includes(q.toLowerCase())||p.zona.toLowerCase().includes(q.toLowerCase())));
+}
+function filterPropsType(v){renderProps(v?props.filter(p=>p.tipo===v):props)}
+function filterPropsOp(v){renderProps(v?props.filter(p=>p.op===v):props)}
+function filterPropsStatus(v){renderProps(v?props.filter(p=>p.status===v):props)}
+function deleteProp(id){if(confirm('¿Eliminar propiedad?')){props=props.filter(p=>p.id!==id);renderProps();toast('Propiedad eliminada');}}
+function shareWA(id){
+  const p=props.find(x=>x.id===id);
+  if(!p)return;
+  const txt=encodeURIComponent(`🏠 *${p.titulo}*\n📍 ${p.zona}\n💰 ${p.op==='Alquiler'?'$'+p.precio.toLocaleString()+'/mes':'$'+p.precio.toLocaleString()}\n🛏 ${p.hab} hab · 🚿 ${p.banos} baños · 📐 ${p.area}m²\n\nContacto: +507 64627763 · JAC Realty Panama\nLic. PN-0931`);
+  window.open('https://wa.me/?text='+txt);
+}
+
+function sharePropEmail(id){
+  const p=props.find(x=>x.id===id);
+  if(!p)return;
+  const sub=encodeURIComponent(`${p.titulo} · ${p.zona} · JAC Realty Panamá`);
+  const body=encodeURIComponent(`🏠 ${p.titulo}\n📍 ${p.zona}\n💰 ${p.op==='Alquiler'?'$'+p.precio.toLocaleString()+'/mes':'$'+p.precio.toLocaleString()}\n🛏 ${p.hab} hab · 🚿 ${p.banos} baños · 📐 ${p.area}m²\n\n${p.desc}\n\nJelyan Castro · JAC Realty Panamá · Lic. PN-0931\n📞 +507 64627763\n✉️ ${currentEmail}`);
+  window.open(`mailto:?subject=${sub}&body=${body}`);
+}
+
+// ============================================================
+// LEADS
+// ============================================================
+function renderLeads(data){
+  const arr=data||leads;
+  const tbody=document.getElementById('leads-tbody');
+  tbody.innerHTML=arr.map(l=>{
+    const lastEmail=emailLogs.filter(e=>e.leadRef===l.id).slice(-1)[0];
+    const trackBadge=lastEmail?`<span class="email-status email-${lastEmail.status.toLowerCase()}" style="margin-left:4px">${lastEmail.status}</span>`:'';
+    return `<tr>
+    <td>
+      <div style="font-weight:500">${l.nombre}</div>
+      <div style="font-size:11px;color:var(--muted)">${l.fuente} · ${l.zona}</div>
+    </td>
+    <td>
+      <div style="font-size:12px">${l.tel}</div>
+      <div style="font-size:11px;color:var(--muted)">${l.email}</div>
+    </td>
+    <td><span class="tag" style="background:var(--card2);color:var(--text)">${l.interes}</span></td>
+    <td style="font-size:12px">${l.presupuesto}</td>
+    <td><span class="tag tag-${l.status.toLowerCase()}">${l.status}</span>${trackBadge}</td>
+    <td style="font-size:12px;color:var(--muted)">${l.fecha}</td>
+    <td><div class="action-btns">
+      <button class="wa-btn" onclick="waLead('${l.id}')" title="WhatsApp">💬</button>
+      <button class="email-btn" onclick="openEmailLead('${l.id}')" title="Enviar email">📧</button>
+      <button class="btn btn-ghost btn-sm" onclick="viewEmailHistory('${l.id}')" title="Historial email">📊</button>
+      <button class="btn btn-ghost btn-sm" onclick="matchProps('${l.id}')" title="Buscar matches">🔍</button>
+      <button class="btn btn-ghost btn-sm" onclick="deleteLead('${l.id}')">🗑️</button>
+    </div></td>
+  </tr>`;}).join('');
+}
+function filterLeads(q){renderLeads(leads.filter(l=>l.nombre.toLowerCase().includes(q.toLowerCase())||l.email.toLowerCase().includes(q.toLowerCase())))}
+function filterLeadsStatus(v){renderLeads(v?leads.filter(l=>l.status===v):leads)}
+function filterLeadsInterest(v){renderLeads(v?leads.filter(l=>l.interes===v):leads)}
+function waLead(id){
+  const l=leads.find(x=>x.id===id);
+  if(!l)return;
+  const txt=encodeURIComponent(`Hola ${l.nombre.split(' ')[0]}, soy agente de JAC Realty. Tenemos propiedades disponibles que se ajustan a su búsqueda de ${l.interes.toLowerCase()} en ${l.zona}. ¿Podríamos coordinar una cita? 🏡`);
+  window.open('https://wa.me/'+l.tel.replace(/\D/g,'')+`?text=${txt}`);
+}
+function matchProps(id){
+  const l=leads.find(x=>x.id===id);
+  if(!l)return;
+  const matches=props.filter(p=>
+    (l.interes==='Compra'&&p.op==='Venta')||(l.interes==='Alquiler'&&p.op==='Alquiler')||(l.interes==='Inversión')
+  ).slice(0,3);
+  if(!matches.length){alert('No se encontraron propiedades compatibles.');return;}
+  alert(`✅ ${matches.length} propiedades para ${l.nombre}:\n\n`+matches.map(p=>`• ${p.titulo} (${p.zona}) - $${p.precio.toLocaleString()}`).join('\n'));
+}
+function deleteLead(id){if(confirm('¿Eliminar lead?')){leads=leads.filter(l=>l.id!==id);renderLeads();toast('Lead eliminado');}}
+
+// ============================================================
+// PIPELINE
+// ============================================================
+const stages=['Nuevo','Contactado','Visita','Oferta','Cerrado'];
+const stageColors={Nuevo:'var(--cyan)',Contactado:'var(--blue)',Visita:'var(--purple)',Oferta:'var(--accent)',Cerrado:'var(--green)'};
+function renderPipeline(){
+  const board=document.getElementById('pipeline-board');
+  board.innerHTML=stages.map(stage=>{
+    const stLeads=leads.filter(l=>l.status===stage);
+    return `<div class="pipeline-col" ondragover="event.preventDefault()" ondrop="dropLead(event,'${stage}')">
+      <div class="pipeline-col-header">
+        <span style="color:${stageColors[stage]}">${stage}</span>
+        <span class="pipeline-count">${stLeads.length}</span>
+      </div>
+      ${stLeads.map(l=>`
+        <div class="pipeline-card" draggable="true" ondragstart="dragLead(event,'${l.id}')">
+          <div class="pipeline-card-name">${l.nombre}</div>
+          <div class="pipeline-card-meta">${l.interes} · ${l.fuente}</div>
+          <div class="pipeline-card-val">${l.presupuesto}</div>
+          <div style="margin-top:6px;display:flex;gap:4px">
+            <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="waLead('${l.id}')">💬 WA</button>
+            <button class="email-btn" style="font-size:10px;padding:3px 7px" onclick="openEmailLead('${l.id}')">📧</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+let dragId=null;
+function dragLead(e,id){dragId=id;}
+function dropLead(e,stage){
+  if(!dragId)return;
+  const l=leads.find(x=>x.id===dragId);
+  if(l){l.status=stage;renderPipeline();toast(`${l.nombre} → ${stage}`);}
+  dragId=null;
+}
+
+// ============================================================
+// CALENDAR
+// ============================================================
+function renderCalendar(){
+  const months=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('cal-month-label').textContent=`${months[calMonth]} ${calYear}`;
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  let html='';
+  for(let i=0;i<firstDay;i++) html+=`<div class="cal-day other-month"><div class="cal-day-num">${new Date(calYear,calMonth,1-firstDay+i).getDate()}</div></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayCitas=citas.filter(c=>c.fecha===dateStr);
+    html+=`<div class="cal-day${isToday?' today':''}" onclick="openModal('modalCita')">
+      <div class="cal-day-num">${d}</div>
+      ${dayCitas.map(c=>`<div class="cal-event ${c.tipo.includes('Visita')?'visita':'reunion'}">${c.hora} ${c.cliente}</div>`).join('')}
+    </div>`;
+  }
+  document.getElementById('cal-days').innerHTML=html;
+  // Upcoming
+  const upcoming=citas.sort((a,b)=>a.fecha.localeCompare(b.fecha)).slice(0,5);
+  const typeColors={Visita:'var(--purple)','Reunión':'var(--accent)',Llamada:'var(--blue)',Firma:'var(--green)'};
+  document.getElementById('upcoming-list').innerHTML=upcoming.map(c=>{
+    const color=Object.entries(typeColors).find(([k])=>c.tipo.includes(k))?.[1]||'var(--muted)';
+    return `<div class="event-item">
+      <div class="event-dot" style="background:${color}"></div>
+      <div>
+        <div class="event-desc"><strong>${c.tipo}</strong> · ${c.cliente}</div>
+        <div class="event-time">📅 ${c.fecha} ⏰ ${c.hora}</div>
+      </div>
+    </div>`;}).join('');
+}
+function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
+function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();}
+
+// ============================================================
+// ACTIVITY
+// ============================================================
+function renderActivity(){
+  const iconColors={'📞':'var(--blue)','📧':'var(--cyan)','💬':'#4ade80','🏠':'var(--purple)','🤝':'var(--accent)','📝':'var(--muted)'};
+  document.getElementById('activity-log').innerHTML=activities.map(a=>{
+    const icon=a.tipo.split(' ')[0];
+    const color=iconColors[icon]||'var(--muted)';
+    return `<div class="activity-item">
+      <div class="activity-icon" style="background:${color}22;color:${color}">${icon}</div>
+      <div class="activity-body">
+        <div class="activity-text"><strong>${a.cliente}</strong> — ${a.desc}</div>
+        <div class="activity-time">${a.tipo} · ${a.time}</div>
+      </div>
+    </div>`;}).join('');
+}
+
+// ============================================================
+// AUTOMATIONS
+// ============================================================
+const automations=[
+  {name:'Bienvenida a nuevo lead',trigger:'Lead creado',action:'Enviar WhatsApp de bienvenida',active:true},
+  {name:'Seguimiento post-visita',trigger:'Cita de visita completada',action:'Email + recordatorio 48h',active:true},
+  {name:'Alerta de oferta recibida',trigger:'Lead pasa a Oferta',action:'Notificar agente + email propietario',active:true},
+  {name:'Recordatorio de cita',trigger:'24h antes de cita',action:'WhatsApp al cliente',active:true},
+  {name:'Reporte semanal',trigger:'Cada lunes 8am',action:'Resumen de actividad por email',active:false},
+  {name:'Match automático',trigger:'Lead creado con búsqueda',action:'Buscar propiedades y enviar',active:false},
+];
+const quickActions=[
+  {label:'📤 Enviar listado de propiedades',desc:'Selecciona un lead y envía matches por WhatsApp'},
+  {label:'📧 Email masivo a leads activos',desc:'Envía newsletter a todos los contactos activos'},
+  {label:'📊 Exportar reporte a Excel',desc:'Descarga reporte completo de actividad'},
+  {label:'🔁 Sincronizar con MLS Panamá',desc:'Actualiza inventario compartido con la red'},
+];
+const templates=[
+  {name:'Primer contacto',body:'Hola {nombre}, soy agente de JAC Realty. Tengo propiedades en {zona} que pueden interesarle...'},
+  {name:'Post-visita',body:'Estimado/a {nombre}, gracias por visitar {propiedad}. ¿Tiene alguna consulta?'},
+  {name:'Seguimiento oferta',body:'Buenos días {nombre}, quería actualizarle sobre su oferta para {propiedad}...'},
+];
+function renderAutomations(){
+  document.getElementById('automation-list').innerHTML=automations.map(a=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:13px;font-weight:500">${a.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">⚡ ${a.trigger} → ${a.action}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:${a.active?'var(--green)':'var(--muted)'}">${a.active?'● Activo':'○ Inactivo'}</span>
+        <button class="btn btn-ghost btn-sm" onclick="toggleAuto(this,'${a.name}')">${a.active?'Desactivar':'Activar'}</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('quick-actions').innerHTML=quickActions.map(q=>`
+    <button class="btn btn-outline" style="text-align:left;padding:10px 14px;border-radius:10px" onclick="toast('Ejecutando: ${q.label.replace(/'/g,'')}...')">
+      <div style="font-weight:500">${q.label}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${q.desc}</div>
+    </button>`).join('');
+  document.getElementById('templates-list').innerHTML=templates.map(t=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px">
+      <div style="font-size:12px;font-weight:600;margin-bottom:4px">${t.name}</div>
+      <div style="font-size:11px;color:var(--muted)">${t.body}</div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="toast('Plantilla copiada')">📋 Copiar</button>
+    </div>`).join('');
+}
+function toggleAuto(btn,name){toast(`Automatización "${name}" actualizada`);}
+
+// ============================================================
+// MLS
+// ============================================================
+const mlsProps=[
+  {prop:'Apto 3hab · Paitilla',agente:'Luis García',agencia:'Panama Prime Realty',zona:'Paitilla',precio:'$380,000',comision:'3%'},
+  {prop:'Casa 4hab · Albrook',agente:'Sandra Mora',agencia:'Realty Plus PA',zona:'Albrook',precio:'$560,000',comision:'3.5%'},
+  {prop:'Penthouse · Bella Vista',agente:'Marco Rivera',agencia:'Capital Bienes Raíces',zona:'Bella Vista',precio:'$850,000',comision:'3%'},
+  {prop:'Local Comercial · El Dorado',agente:'Patricia Chan',agencia:'Inversiones PA',zona:'El Dorado',precio:'$4,200/mes',comision:'1 mes'},
+];
+function renderMLS(){
+  document.getElementById('mls-tbody').innerHTML=mlsProps.map(m=>`<tr>
+    <td style="font-weight:500">${m.prop}</td>
+    <td>${m.agente}</td>
+    <td style="color:var(--muted)">${m.agencia}</td>
+    <td>${m.zona}</td>
+    <td class="price">${m.precio}</td>
+    <td style="color:var(--green)">${m.comision}</td>
+    <td><button class="btn btn-primary btn-sm" onclick="toast('Solicitud enviada a ${m.agente}')">Contactar</button></td>
+  </tr>`).join('');
+}
+
+// ============================================================
+// PORTALES DATA & RENDER
+// ============================================================
+const portalesData = [
+  // ── GRATUITOS PANAMÁ ──
+  {id:'encuentra24', name:'Encuentra24', emoji:'🔍', bg:'#e65c00',
+   url:'https://www.encuentra24.com/panama-es/bienes-raices',
+   tipo:'gratis', conn:'API', desc:'Portal líder en Panamá y Centroamérica.',
+   active:true, props:6, vistas:420, leads:5, syncTime:'Inmediata (API)'},
+  {id:'compreoalquile', name:'Compreoalquile', emoji:'🏘', bg:'#0057b8',
+   url:'https://www.compreoalquile.com',
+   tipo:'gratis', conn:'XML', desc:'10 años en el mercado · 1.9M anuncios.',
+   active:true, props:6, vistas:210, leads:3, syncTime:'24-48h (XML)'},
+  {id:'bienesonline', name:'BienesOnline', emoji:'🌐', bg:'#00897b',
+   url:'https://www.bienesonline.com.pa',
+   tipo:'gratis', conn:'XML', desc:'Portal panameño de agencias y particulares.',
+   active:true, props:4, vistas:95, leads:1, syncTime:'24-48h (XML)'},
+  {id:'buscocasita', name:'BuscoCasita', emoji:'🏠', bg:'#e53935',
+   url:'https://panama.buscocasita.com',
+   tipo:'gratis', conn:'XML', desc:'Portal gratuito ilimitado para Panamá.',
+   active:false, props:0, vistas:0, leads:0, syncTime:'24-48h (XML)'},
+  {id:'gogetit', name:'GoGetIt', emoji:'🚀', bg:'#5c35b5',
+   url:'https://www.gogetit.com.pa',
+   tipo:'gratis', conn:'XML', desc:'Portal panameño con +304K propiedades.',
+   active:true, props:3, vistas:88, leads:2, syncTime:'24-48h (XML)'},
+  {id:'inmopanama', name:'InmoPanamá', emoji:'🏙', bg:'#1565c0',
+   url:'https://www.inmopanama.com',
+   tipo:'gratis', conn:'Manual', desc:'Directorio inmobiliario nacional.',
+   active:false, props:0, vistas:0, leads:0, syncTime:'Manual'},
+  {id:'mlsacobir', name:'MLS ACOBIR', emoji:'🏅', bg:'#c62828',
+   url:'https://www.mlsacobir.com',
+   tipo:'gratis', conn:'API', desc:'Red oficial MLS de Panamá · ACOBIR.',
+   active:true, props:6, vistas:310, leads:4, syncTime:'Inmediata (API)'},
+  // ── RED LIFULL CONNECT ──
+  {id:'proppit', name:'Proppit / Lifull', emoji:'🔗', bg:'#4a90d9',
+   url:'https://www.proppit.com',
+   tipo:'red', conn:'API', desc:'Red Lifull Connect: Trovit, Mitula, Nuroa, Nestoria, Properati, iCasas, LaEncontré, Globaliza, DotProperty.',
+   active:true, props:6, vistas:280, leads:3, syncTime:'Inmediata (API)', subred:true},
+  {id:'trovit', name:'Trovit', emoji:'📊', bg:'#ff7043',
+   url:'https://www.trovit.com',
+   tipo:'red', conn:'API', desc:'Agregador de anuncios clasificados global.',
+   active:true, props:6, vistas:140, leads:1, syncTime:'Vía Proppit'},
+  {id:'mitula', name:'Mitula', emoji:'📌', bg:'#43a047',
+   url:'https://www.mitula.com',
+   tipo:'red', conn:'API', desc:'Buscador internacional inmobiliario.',
+   active:true, props:6, vistas:120, leads:1, syncTime:'Vía Proppit'},
+  {id:'nuroa', name:'Nuroa', emoji:'🗺', bg:'#8e24aa',
+   url:'https://www.nuroa.com',
+   tipo:'red', conn:'API', desc:'Motor de búsqueda inmobiliario.',
+   active:true, props:6, vistas:90, leads:1, syncTime:'Vía Proppit'},
+  {id:'nestoria', name:'Nestoria', emoji:'🪺', bg:'#00838f',
+   url:'https://www.nestoria.com',
+   tipo:'red', conn:'API', desc:'Buscador inmobiliario internacional.',
+   active:true, props:6, vistas:75, leads:0, syncTime:'Vía Proppit'},
+  {id:'properati', name:'Properati', emoji:'🏢', bg:'#1976d2',
+   url:'https://www.properati.com',
+   tipo:'red', conn:'API', desc:'Red de portales de Latinoamérica.',
+   active:true, props:6, vistas:95, leads:1, syncTime:'Vía Proppit'},
+  // ── DE PAGO ──
+  {id:'mercadolibre', name:'Mercado Libre', emoji:'🛒', bg:'#FFE600',
+   url:'https://inmuebles.mercadolibre.com.pa',
+   tipo:'pago', conn:'API', desc:'Mayor marketplace de LatAm. Plan pago requerido.',
+   active:false, props:0, vistas:0, leads:0, syncTime:'Inmediata (API)'},
+  {id:'lamudi', name:'Lamudi', emoji:'🏗', bg:'#1abc9c',
+   url:'https://www.lamudi.com.pa',
+   tipo:'pago', conn:'XML', desc:'Portal global presente en Panamá.',
+   active:false, props:0, vistas:0, leads:0, syncTime:'24-48h (XML)'},
+  {id:'realtor', name:'Realtor.com', emoji:'🇺🇸', bg:'#d32f2f',
+   url:'https://www.realtor.com',
+   tipo:'pago', conn:'XML', desc:'Portal #1 en EE.UU. · atrae compradores extranjeros.',
+   active:false, props:0, vistas:0, leads:0, syncTime:'24-48h (XML)'},
+  // ── SOCIAL ──
+  {id:'facebook', name:'Facebook / Marketplace', emoji:'📘', bg:'#1877f2',
+   url:'https://www.facebook.com/marketplace',
+   tipo:'social', conn:'API', desc:'Publicación automática de propiedades en Marketplace y página de empresa.',
+   active:true, props:6, vistas:520, leads:6, syncTime:'Inmediata (API)'},
+  {id:'instagram', name:'Instagram', emoji:'📷', bg:'#c13584',
+   url:'https://www.instagram.com/jacrealtypa',
+   tipo:'social', conn:'Manual', desc:'Publicación de fichas en feed y stories.',
+   active:true, props:2, vistas:340, leads:2, syncTime:'Manual'},
+  {id:'whatsapp', name:'WhatsApp Business', emoji:'💬', bg:'#25D366',
+   url:'https://wa.me/50764627763',
+   tipo:'social', conn:'API', desc:'Envío automático de fichas por WhatsApp a leads.',
+   active:true, props:6, vistas:0, leads:8, syncTime:'Inmediata (API)'},
+];
+
+let currentPortalTab = 'gratis';
+
+function renderPortales(tab){
+  tab = tab || currentPortalTab;
+  const filtered = tab==='todos' ? portalesData : portalesData.filter(p=>p.tipo===tab);
+  const activeCount = portalesData.filter(p=>p.active).length;
+  document.getElementById('portales-activos-count').textContent = activeCount;
+  document.getElementById('badge-portales').textContent = activeCount;
+  const totalPubs = portalesData.filter(p=>p.active).reduce((s,p)=>s+p.props,0);
+  document.getElementById('stat-publicadas').textContent = totalPubs;
+
+  // Fill property selector
+  const sel = document.getElementById('portal-prop-select');
+  if(sel && sel.options.length <= 1){
+    sel.innerHTML = '<option value="">-- Seleccionar propiedad --</option>' +
+      props.map(p=>`<option value="${p.id}">${p.id} · ${p.titulo}</option>`).join('');
+  }
+
+  const connBadge = c => {
+    if(c==='API') return '<span class="portal-conn-type conn-api">⚡ API</span>';
+    if(c==='XML') return '<span class="portal-conn-type conn-xml">🔄 XML</span>';
+    return '<span class="portal-conn-type conn-manual">✍️ Manual</span>';
+  };
+
+  document.getElementById('portales-grid').innerHTML = filtered.map(p => {
+    const statusClass = p.active ? 'connected' : 'disconnected';
+    const dotColor = p.active ? 'var(--green)' : 'var(--border)';
+    const statusText = p.active ? '● Conectado' : '○ Desconectado';
+    const statusColor = p.active ? 'var(--green)' : 'var(--muted)';
+    const logoStyle = `background:${p.bg}22;color:${p.bg};border:1px solid ${p.bg}44`;
+
+    return `<div class="portal-card ${statusClass}" id="pcard-${p.id}">
+      <div class="portal-header">
+        <div class="portal-logo" style="${logoStyle}">${p.emoji}</div>
+        <div style="flex:1">
+          <div class="portal-name">${p.name}
+            ${p.subred?'<span style="font-size:10px;background:rgba(59,130,246,.2);color:#60a5fa;padding:1px 6px;border-radius:8px;margin-left:4px">+9 portales</span>':''}
+          </div>
+          <div class="portal-type">${connBadge(p.conn)} · ${p.syncTime}</div>
+        </div>
+        <label class="portal-toggle" title="${p.active?'Desactivar':'Activar'}">
+          <input type="checkbox" ${p.active?'checked':''} onchange="togglePortal('${p.id}',this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${p.desc}</div>
+
+      ${p.active ? `
+      <div class="portal-stats">
+        <div class="portal-stat"><div class="portal-stat-val" style="color:var(--blue)">${p.props}</div><div class="portal-stat-label">Publicadas</div></div>
+        <div class="portal-stat"><div class="portal-stat-val" style="color:var(--purple)">${p.vistas}</div><div class="portal-stat-label">Vistas/mes</div></div>
+        <div class="portal-stat"><div class="portal-stat-val" style="color:var(--accent)">${p.leads}</div><div class="portal-stat-label">Leads</div></div>
+      </div>
+      <div class="sync-bar"><div class="sync-progress" style="width:${Math.round(p.vistas/6)}%"></div></div>` : ''}
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+        <span style="font-size:11px;color:${statusColor}">${statusText}</span>
+        <div class="action-btns">
+          ${p.active ? `<button class="btn btn-primary btn-sm" onclick="syncPortal('${p.id}')">🔄 Sync</button>` : `<button class="btn btn-outline btn-sm" onclick="connectPortal('${p.id}')">Conectar</button>`}
+          <a href="${p.url}" target="_blank" class="btn btn-ghost btn-sm" title="Abrir portal">↗</a>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterPortalesTab(btn, tab){
+  document.querySelectorAll('#portales-tabs .tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  currentPortalTab = tab;
+  renderPortales(tab);
+}
+
+function togglePortal(id, active){
+  const p = portalesData.find(x=>x.id===id);
+  if(!p) return;
+  p.active = active;
+  if(active){ p.props = props.length; toast(`✅ ${p.name} activado · Publicando ${props.length} propiedades...`); }
+  else { p.props=0; p.vistas=0; p.leads=0; toast(`⏹ ${p.name} desactivado`); }
+  renderPortales();
+}
+
+function connectPortal(id){
+  const p = portalesData.find(x=>x.id===id);
+  if(!p) return;
+  if(p.tipo==='pago'){ toast(`💳 ${p.name} requiere plan pago. Abre ${p.url} para contratar.`); return; }
+  p.active=true; p.props=props.length;
+  p.vistas=Math.floor(Math.random()*200+50);
+  renderPortales();
+  toast(`✅ ${p.name} conectado. Propiedades enviadas.`);
+}
+
+function syncPortal(id){
+  const p = portalesData.find(x=>x.id===id);
+  if(!p) return;
+  p.props = props.length;
+  const card = document.getElementById('pcard-'+id);
+  if(card){ const bar=card.querySelector('.sync-progress'); if(bar){bar.style.width='0%'; setTimeout(()=>bar.style.width=Math.round(p.vistas/6)+'%',100);} }
+  toast(`🔄 ${p.name} sincronizado · ${p.props} propiedades actualizadas`);
+}
+
+function syncAll(){
+  portalesData.filter(p=>p.active).forEach(p=>{ p.props=props.length; });
+  renderPortales();
+  toast(`🔄 Todos los portales sincronizados · ${props.length} propiedades × ${portalesData.filter(p=>p.active).length} portales`);
+}
+
+function publishAll(){
+  const active = portalesData.filter(p=>p.active);
+  active.forEach(p=>{ p.props=props.length; });
+  renderPortales();
+  toast(`🚀 Publicando ${props.length} propiedades en ${active.length} portales...`);
+  setTimeout(()=>toast(`✅ Listo · ${props.length*active.length} publicaciones activas en todos los portales`),2000);
+}
+
+function publishSelected(){
+  const sel = document.getElementById('portal-prop-select');
+  const propId = sel.value;
+  if(!propId){ toast('Selecciona una propiedad primero'); return; }
+  const prop = props.find(p=>p.id===propId);
+  const active = portalesData.filter(p=>p.active);
+  toast(`🚀 Publicando "${prop.titulo}" en ${active.length} portales...`);
+  setTimeout(()=>toast(`✅ "${prop.titulo}" publicada en ${active.length} portales`),1800);
+}
+
+// ============================================================
+// REPORT KPIS
+// ============================================================
+function updateReportKPIs(){
+  document.getElementById('rep-props').textContent=props.length;
+  document.getElementById('rep-leads').textContent=leads.length;
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
+
+function saveProp(){
+  const titulo=document.getElementById('p-titulo').value.trim();
+  if(!titulo){alert('Ingresa el título de la propiedad');return;}
+  const p={
+    id:'P'+String(props.length+1).padStart(3,'0'),
+    titulo,tipo:document.getElementById('p-tipo').value,
+    op:document.getElementById('p-op').value,zona:document.getElementById('p-zona').value,
+    precio:+document.getElementById('p-precio').value||0,
+    area:+document.getElementById('p-area').value||0,
+    hab:+document.getElementById('p-hab').value||0,
+    banos:+document.getElementById('p-banos').value||0,
+    estac:+document.getElementById('p-estac').value||0,
+    status:document.getElementById('p-status').value,
+    desc:document.getElementById('p-desc').value
+  };
+  props.push(p);
+  activities.unshift({tipo:'📝 Nota',cliente:'Sistema',desc:`Propiedad ${p.id} "${p.titulo}" agregada.`,time:'Ahora'});
+  closeModal('modalProp');
+  renderProps();renderDashboard();
+  toast('✅ Propiedad guardada: '+p.id);
+}
+
+function saveLead(){
+  const nombre=document.getElementById('l-nombre').value.trim();
+  if(!nombre){alert('Ingresa el nombre del lead');return;}
+  const l={
+    id:'L'+String(leads.length+1).padStart(3,'0'),
+    nombre,tel:document.getElementById('l-tel').value,
+    email:document.getElementById('l-email').value,
+    interes:document.getElementById('l-interes').value,
+    presupuesto:document.getElementById('l-presupuesto').value,
+    zona:document.getElementById('l-zona').value,
+    status:document.getElementById('l-status').value,
+    fuente:document.getElementById('l-fuente').value,
+    notas:document.getElementById('l-notas').value,
+    fecha:new Date().toISOString().split('T')[0]
+  };
+  leads.push(l);
+  activities.unshift({tipo:'👤 Nuevo lead',cliente:l.nombre,desc:`Lead creado. Fuente: ${l.fuente}. Interés: ${l.interes}.`,time:'Ahora'});
+  closeModal('modalLead');
+  renderLeads();renderDashboard();
+  document.getElementById('badge-leads').textContent=leads.filter(x=>x.status==='Nuevo').length;
+  toast('✅ Lead guardado: '+l.nombre);
+}
+
+function saveCita(){
+  const cliente=document.getElementById('c-cliente').value.trim();
+  if(!cliente){alert('Ingresa el nombre del cliente');return;}
+  citas.push({
+    tipo:document.getElementById('c-tipo').value,
+    cliente,propiedad:document.getElementById('c-propiedad').value,
+    fecha:document.getElementById('c-fecha').value,
+    hora:document.getElementById('c-hora').value,
+    notas:document.getElementById('c-notas').value
+  });
+  activities.unshift({tipo:'📅 Cita',cliente,desc:`${document.getElementById('c-tipo').value} agendada para ${document.getElementById('c-fecha').value} ${document.getElementById('c-hora').value}.`,time:'Ahora'});
+  closeModal('modalCita');
+  renderCalendar();renderDashboard();
+  toast('✅ Cita agendada');
+}
+
+function saveActividad(){
+  const cliente=document.getElementById('a-cliente').value.trim();
+  if(!cliente){alert('Ingresa el nombre del cliente');return;}
+  activities.unshift({
+    tipo:document.getElementById('a-tipo').value,
+    cliente,
+    desc:document.getElementById('a-desc').value,
+    time:'Ahora'
+  });
+  closeModal('modalActividad');
+  renderActivity();renderDashboard();
+  toast('✅ Actividad registrada');
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(btn,targetId){
+  btn.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  const panel=btn.closest('.panel');
+  const containers=['tabla-props','grid-props'];
+  containers.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  const el=document.getElementById(targetId);
+  if(el)el.style.display='block';
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function waClick(name){
+  const txt=encodeURIComponent(`Hola ${name}, le confirmo su cita con JAC Realty. 🏡\n+507 64627763`);
+  window.open('https://wa.me/?text='+txt);
+}
+function emailCita(cliente,tipo,fecha,hora){
+  const sub=encodeURIComponent(`Confirmación de ${tipo} · JAC Realty`);
+  const body=encodeURIComponent(`Estimado/a ${cliente},\n\nLe confirmo su ${tipo.toLowerCase()} programada:\n📅 Fecha: ${fecha}\n⏰ Hora: ${hora}\n\nCualquier cambio, comuníquese por WhatsApp al +507 64627763.\n\nSaludos,\nJelyan Castro · JAC Realty Panamá\n${currentEmail}`);
+  window.open(`mailto:?subject=${sub}&body=${body}`);
+}
+
+// ============================================================
+// EMAIL
+// ============================================================
+function openEmailLead(leadId){
+  const l=leads.find(x=>x.id===leadId);
+  if(!l)return;
+  document.getElementById('em-to').value=l.email||'';
+  document.getElementById('em-from').value=currentEmail;
+  const refSel=document.getElementById('em-lead-ref');
+  refSel.innerHTML='<option value="">-- Seleccionar lead --</option>'+leads.map(x=>`<option value="${x.id}" ${x.id===leadId?'selected':''}>${x.nombre}</option>`).join('');
+  openModal('modalEmail');
+}
+function openEmailModal(){
+  document.getElementById('em-from').value=currentEmail;
+  const refSel=document.getElementById('em-lead-ref');
+  refSel.innerHTML='<option value="">-- Seleccionar lead --</option>'+leads.map(x=>`<option value="${x.id}">${x.nombre}</option>`).join('');
+  openModal('modalEmail');
+}
+const emailTemplates={
+  bienvenida:{subject:'Bienvenido/a a JAC Realty · Propiedades en Panamá',body:`Estimado/a {nombre},\n\nMucho gusto, soy J. Castro de JAC Realty Panamá (Lic. PN-0931). Me comunico porque hemos recibido su solicitud de información.\n\nContamos con propiedades exclusivas en Costa del Este, Casco Antiguo, Punta Pacífica y otras zonas premium de Panamá. Me encantaría coordinar una reunión o llamada para entender mejor sus necesidades.\n\n¿Cuándo le viene bien?\n\nSaludos,\nJelyan Castro · JAC Realty\n+507 64627763`},
+  seguimiento:{subject:'Seguimiento · Su visita a la propiedad',body:`Estimado/a {nombre},\n\nGracias por tomarse el tiempo de visitar la propiedad. Fue un placer acompañarle.\n\n¿Tiene alguna pregunta sobre lo que vio? Estoy disponible para aclarar cualquier duda y avanzar con los próximos pasos.\n\nQuedo atento/a.\n\nSaludos,\nJelyan Castro · JAC Realty\n+507 64627763`},
+  propuesta:{subject:'Propuesta de propiedad · JAC Realty',body:`Estimado/a {nombre},\n\nAdjunto una selección de propiedades que se ajustan a su perfil de búsqueda. Todas cuentan con documentación en regla y acceso inmediato.\n\nPor favor revise los detalles y si desea agendar una visita, con gusto coordino.\n\nSaludos,\nJelyan Castro · JAC Realty\n+507 64627763`},
+  oferta:{subject:'Confirmación de oferta recibida',body:`Estimado/a {nombre},\n\nHemos recibido formalmente su oferta. Estamos en proceso de comunicarla al propietario y le responderemos en un máximo de 48 horas hábiles.\n\nGracias por su interés en JAC Realty.\n\nSaludos,\nJelyan Castro · JAC Realty\n+507 64627763`},
+  cierre:{subject:'¡Felicitaciones por su nuevo inmueble! 🏡',body:`Estimado/a {nombre},\n\nEs un placer comunicarle que el proceso se ha completado exitosamente. ¡Bienvenido/a a su nuevo hogar!\n\nFue un honor acompañarle en este proceso. Quedo a su disposición para cualquier necesidad futura.\n\nCon mucha alegría,\nJelyan Castro · JAC Realty\n+507 64627763`},
+};
+function applyEmailTemplate(key){
+  if(!key)return;
+  const t=emailTemplates[key];
+  if(!t)return;
+  const refId=document.getElementById('em-lead-ref').value;
+  const l=leads.find(x=>x.id===refId);
+  const nombre=l?l.nombre.split(' ')[0]:'{nombre}';
+  document.getElementById('em-subject').value=t.subject;
+  document.getElementById('em-body').value=t.body.replace(/{nombre}/g,nombre);
+}
+function sendEmail(){
+  const to=document.getElementById('em-to').value.trim();
+  const subject=document.getElementById('em-subject').value.trim();
+  const body=document.getElementById('em-body').value.trim();
+  const from=document.getElementById('em-from').value;
+  const leadRef=document.getElementById('em-lead-ref').value;
+  if(!to||!subject){alert('Completa destinatario y asunto.');return;}
+  const lead=leads.find(x=>x.id===leadRef);
+  const toName=lead?lead.nombre:to;
+  // Open mailto
+  window.open(`mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+  // Log it
+  const entry={
+    id:'E'+String(emailLogs.length+1).padStart(3,'0'),
+    from,to:toName,toEmail:to,subject,body,leadRef,
+    fecha:new Date().toISOString().split('T')[0],
+    status:'Enviado'
+  };
+  emailLogs.unshift(entry);
+  activities.unshift({tipo:'📧 Email',cliente:toName,desc:`Email enviado: "${subject}" desde ${from}`,time:'Ahora'});
+  // Schedule followup toast
+  const fu=document.getElementById('em-followup').value;
+  if(fu) toast(`✅ Email enviado · Seguimiento en ${fu} día(s) programado`);
+  else toast('✅ Email enviado a '+toName);
+  closeModal('modalEmail');
+  renderLeads();
+  document.getElementById('em-to').value='';
+  document.getElementById('em-subject').value='';
+  document.getElementById('em-body').value='';
+}
+function viewEmailHistory(leadId){
+  const l=leads.find(x=>x.id===leadId);
+  const logs=emailLogs.filter(e=>e.leadRef===leadId);
+  if(!logs.length){toast(`Sin historial de email para ${l.nombre}`);return;}
+  const statusMap={Enviado:'📤',Abierto:'👁',Respondido:'↩️',Clicked:'🔗'};
+  const html=logs.map(e=>`• ${statusMap[e.status]||''} ${e.fecha} | ${e.subject} [${e.status}]`).join('\n');
+  alert(`📧 Historial de email — ${l.nombre}:\n\n${html}`);
+}
+
+// ============================================================
+// NOTAS
+// ============================================================
+function renderNotas(arr){
+  arr=arr||notes;
+  const el=document.getElementById('notas-grid');
+  document.getElementById('badge-notas').textContent=notes.length;
+  if(!arr.length){el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">📝</div><div>Sin notas aún</div></div>';return;}
+  el.innerHTML=arr.map(n=>`
+    <div class="note-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div class="note-card-title">${n.titulo}</div>
+        <button class="btn btn-ghost btn-sm" onclick="deleteNota('${n.id}')" style="flex-shrink:0">🗑️</button>
+      </div>
+      <div class="note-card-body">${n.cuerpo}</div>
+      <div class="note-card-meta">
+        <span>📅 ${n.fecha}</span>
+        ${n.refName?`<span class="note-ref">${n.tipo==='lead'?'👤':'🏠'} ${n.refName}</span>`:''}
+        <div style="margin-left:auto;display:flex;gap:4px">
+          <button class="wa-btn" style="font-size:10px;padding:3px 8px" onclick="shareNotaWA('${n.id}')">💬</button>
+          <button class="email-btn" style="font-size:10px;padding:3px 8px" onclick="shareNotaEmail('${n.id}')">📧</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function filterNotas(q){renderNotas(q?notes.filter(n=>n.titulo.toLowerCase().includes(q.toLowerCase())||n.cuerpo.toLowerCase().includes(q.toLowerCase())):notes);}
+function filterNotasTipo(v){renderNotas(v?notes.filter(n=>n.tipo===v):notes);}
+function saveNota(){
+  const titulo=document.getElementById('n-titulo').value.trim();
+  const cuerpo=document.getElementById('n-cuerpo').value.trim();
+  if(!titulo){alert('Ingresa un título para la nota');return;}
+  const tipo=document.getElementById('n-tipo').value;
+  const refVal=document.getElementById('n-ref').value;
+  const allRefs=[...leads.map(l=>({id:l.id,name:l.nombre,tipo:'lead'})),...props.map(p=>({id:p.id,name:p.id+' · '+p.titulo,tipo:'propiedad'}))];
+  const refObj=allRefs.find(x=>x.id===refVal);
+  notes.unshift({
+    id:'N'+String(notes.length+1).padStart(3,'0'),
+    titulo,cuerpo,tipo,
+    ref:refVal,refName:refObj?refObj.name:'',
+    fecha:new Date().toISOString().split('T')[0]
+  });
+  activities.unshift({tipo:'📝 Nota',cliente:refObj?refObj.name:'General',desc:`Nota creada: "${titulo}"`,time:'Ahora'});
+  closeModal('modalNota');
+  renderNotas();
+  document.getElementById('n-titulo').value='';
+  document.getElementById('n-cuerpo').value='';
+  toast('✅ Nota guardada');
+}
+function deleteNota(id){if(confirm('¿Eliminar nota?')){notes=notes.filter(n=>n.id!==id);renderNotas();toast('Nota eliminada');}}
+function shareNotaWA(id){
+  const n=notes.find(x=>x.id===id);
+  if(!n)return;
+  const txt=encodeURIComponent(`📝 *${n.titulo}*\n\n${n.cuerpo}\n\n— JAC Realty · +507 64627763`);
+  window.open('https://wa.me/?text='+txt);
+}
+function shareNotaEmail(id){
+  const n=notes.find(x=>x.id===id);
+  if(!n)return;
+  window.open(`mailto:?subject=${encodeURIComponent(n.titulo)}&body=${encodeURIComponent(n.cuerpo+'\n\n— JAC Realty')}`);
+}
+function populateNotaRef(){
+  const sel=document.getElementById('n-ref');
+  sel.innerHTML='<option value="">-- Sin vínculo --</option>'+leads.map(l=>`<option value="${l.id}">👤 ${l.nombre}</option>`).join('')+props.map(p=>`<option value="${p.id}">🏠 ${p.id} · ${p.titulo}</option>`).join('');
+}
+
+// ============================================================
+// TAREAS
+// ============================================================
+let tareasFilter={pri:'',status:''};
+function renderTareas(arr){
+  arr=arr||tasks.filter(t=>{
+    if(tareasFilter.pri&&t.prioridad!==tareasFilter.pri)return false;
+    if(tareasFilter.status&&t.status!==tareasFilter.status)return false;
+    return true;
+  });
+  const el=document.getElementById('tareas-list');
+  const pending=tasks.filter(t=>t.status!=='Completada').length;
+  document.getElementById('badge-tareas').textContent=pending;
+  if(!arr.length){el.innerHTML='<div class="empty"><div class="empty-icon">✅</div><div>Sin tareas pendientes</div></div>';return;}
+  const today=new Date().toISOString().split('T')[0];
+  el.innerHTML=arr.map(t=>{
+    const done=t.status==='Completada';
+    const overdue=!done&&t.vence<today;
+    const priClass=t.prioridad==='Alta'?'pri-alta':t.prioridad==='Media'?'pri-media':'pri-baja';
+    return `<div class="task-row">
+      <div class="task-check ${done?'done':''}" onclick="toggleTarea('${t.id}')">${done?'✓':''}</div>
+      <div style="flex:1;min-width:0">
+        <div class="task-title ${done?'done-text':''}">${t.titulo}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap">
+          <span class="${priClass}">● ${t.prioridad}</span>
+          ${t.refName?`<span>${t.tipo==='lead'?'👤':'🏠'} ${t.refName}</span>`:''}
+          ${t.desc?`<span>${t.desc}</span>`:''}
+        </div>
+      </div>
+      <div class="task-due ${overdue?'overdue':''}">📅 ${t.vence}</div>
+      <div style="display:flex;gap:4px">
+        <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="notifyTareaWA('${t.id}')" title="Notificar por WhatsApp">💬</button>
+        <button class="email-btn" style="font-size:10px;padding:3px 7px" onclick="notifyTareaEmail('${t.id}')" title="Notificar por email">📧</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteTarea('${t.id}')">🗑️</button>
+      </div>
+    </div>`;}).join('');
+}
+function filterTareasPri(v){tareasFilter.pri=v;renderTareas();}
+function filterTareasStatus(v){tareasFilter.status=v;renderTareas();}
+function toggleTarea(id){
+  const t=tasks.find(x=>x.id===id);
+  if(!t)return;
+  t.status=t.status==='Completada'?'Pendiente':'Completada';
+  if(t.status==='Completada'){activities.unshift({tipo:'✅ Tarea',cliente:t.refName||'General',desc:`Tarea completada: "${t.titulo}"`,time:'Ahora'});}
+  renderTareas();
+  renderDashboard();
+}
+function deleteTarea(id){if(confirm('¿Eliminar tarea?')){tasks=tasks.filter(t=>t.id!==id);renderTareas();toast('Tarea eliminada');}}
+function saveTarea(){
+  const titulo=document.getElementById('t-titulo').value.trim();
+  if(!titulo){alert('Ingresa el título de la tarea');return;}
+  const tipo=document.getElementById('t-tipo').value;
+  const refVal=document.getElementById('t-ref').value;
+  const allRefs=[...leads.map(l=>({id:l.id,name:l.nombre})),...props.map(p=>({id:p.id,name:p.id+' · '+p.titulo}))];
+  const refObj=allRefs.find(x=>x.id===refVal);
+  tasks.unshift({
+    id:'T'+String(tasks.length+1).padStart(3,'0'),
+    titulo,prioridad:document.getElementById('t-prioridad').value,
+    status:'Pendiente',
+    vence:document.getElementById('t-vence').value||new Date().toISOString().split('T')[0],
+    tipo,ref:refVal,refName:refObj?refObj.name:'',
+    desc:document.getElementById('t-desc').value
+  });
+  activities.unshift({tipo:'✅ Tarea',cliente:refObj?refObj.name:'General',desc:`Nueva tarea: "${titulo}"`,time:'Ahora'});
+  closeModal('modalTarea');
+  renderTareas();
+  document.getElementById('t-titulo').value='';
+  document.getElementById('t-desc').value='';
+  toast('✅ Tarea guardada');
+}
+function notifyTareaWA(id){
+  const t=tasks.find(x=>x.id===id);
+  if(!t)return;
+  const txt=encodeURIComponent(`🔔 *Tarea pendiente:* ${t.titulo}\n📅 Vence: ${t.vence}\n🔴 Prioridad: ${t.prioridad}\n\n— JAC Realty +507 64627763`);
+  window.open('https://wa.me/50764627763?text='+txt);
+}
+function notifyTareaEmail(id){
+  const t=tasks.find(x=>x.id===id);
+  if(!t)return;
+  const sub=encodeURIComponent(`Tarea pendiente: ${t.titulo}`);
+  const body=encodeURIComponent(`Recordatorio de tarea:\n\n${t.titulo}\nVence: ${t.vence}\nPrioridad: ${t.prioridad}\n${t.desc?'\n'+t.desc:''}\n\n— JAC Realty`);
+  window.open(`mailto:${currentEmail}?subject=${sub}&body=${body}`);
+}
+function updateTareaRef(tipo){
+  const sel=document.getElementById('t-ref');
+  sel.innerHTML='<option value="">-- Sin vínculo --</option>';
+  if(tipo==='lead') leads.forEach(l=>{const o=document.createElement('option');o.value=l.id;o.textContent='👤 '+l.nombre;sel.appendChild(o);});
+  else if(tipo==='propiedad') props.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent='🏠 '+p.id+' · '+p.titulo;sel.appendChild(o);});
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderDashboard();
+// Set default date on cita/tarea modals
+document.getElementById('c-fecha').value=new Date().toISOString().split('T')[0];
+document.getElementById('t-vence').value=new Date().toISOString().split('T')[0];
+// Init nota ref selector
+populateNotaRef();
+// Init tarea ref selector
+updateTareaRef('lead');
+// Init badge
+document.getElementById('badge-notas').textContent=notes.length;
+document.getElementById('badge-tareas').textContent=tasks.filter(t=>t.status!=='Completada').length;
+</script>
+</body>
+</html>
