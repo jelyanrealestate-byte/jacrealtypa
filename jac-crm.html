@@ -12,6 +12,36 @@
   --text:#e8eaf0;--muted:#7a8499;--green:#22c55e;--red:#ef4444;
   --blue:#3b82f6;--purple:#a855f7;--cyan:#06b6d4;
 }
+/* LIGHT MODE */
+body.light{
+  --bg:#f0f4fa;--sidebar:#ffffff;--card:#ffffff;--card2:#f5f7fc;
+  --border:#d4dbe8;--text:#1a202c;--muted:#64748b;
+  --accent:#c47f0a;--accent2:#e09c1a;--green:#16a34a;--red:#dc2626;
+  --blue:#2563eb;--purple:#7c3aed;--cyan:#0891b2;
+}
+body.light .login-box{background:#ffffff;border:1px solid #d4dbe8}
+body.light .nav-item:hover,body.light .nav-item.active{background:rgba(0,0,0,.05)}
+body.light .modal{background:#ffffff;border:1px solid #d4dbe8}
+body.light .modal-header{background:#f5f7fc;border-bottom:1px solid #d4dbe8}
+body.light input,body.light select,body.light textarea{background:#f5f7fc!important;color:#1a202c!important;border-color:#d4dbe8!important}
+body.light .btn-outline{border-color:#d4dbe8;color:#1a202c}
+body.light .btn-outline:hover{background:#e2e8f0}
+body.light .topbar{background:#ffffff;border-bottom:1px solid #d4dbe8}
+body.light .kpi-card{background:#ffffff;border-color:#d4dbe8}
+body.light .table-wrap table thead tr{background:#f5f7fc}
+body.light tbody tr:hover{background:rgba(0,0,0,.03)}
+body.light #sidebar{background:#ffffff;border-right:1px solid #d4dbe8}
+body.light .nav-section{color:#94a3b8}
+body.light .sidebar-footer{background:#f5f7fc;border-top:1px solid #d4dbe8}
+body.light .agent-name{color:#1a202c}
+body.light .agent-lic{color:#64748b}
+body.light .agent-sig{color:#94a3b8}
+body.light .panel{background:#f0f4fa}
+body.light .card{background:#ffffff}
+body.light .tab{background:#f5f7fc;border-color:#d4dbe8;color:#64748b}
+body.light .tab.active{background:#fff7ed;border-color:var(--accent);color:var(--accent)}
+/* Theme toggle button */
+#theme-toggle{font-size:16px;padding:4px 8px;line-height:1;border-radius:8px;cursor:pointer;transition:.2s}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:14px}
 
 /* SIDEBAR */
@@ -528,6 +558,9 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <span class="icon">📡</span> Portales
       <span class="nav-badge" id="badge-portales">10</span>
     </div>
+    <div class="nav-item" onclick="showPanel('ventaCruzada')">
+      <span class="icon">🔄</span> Venta Cruzada
+    </div>
     <div class="nav-item" onclick="showPanel('automatizaciones')">
       <span class="icon">🤖</span> Automatizaciones
     </div>
@@ -565,6 +598,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
           <option value="jcastro@jacrealtypa.com">jcastro@jacrealtypa.com</option>
         </select>
       </div>
+      <button id="theme-toggle" class="btn btn-outline btn-sm" onclick="toggleTheme()" title="Alternar modo claro / oscuro">🌙</button>
       <button class="btn btn-outline btn-sm" onclick="openModal('modalProp')">+ Propiedad</button>
       <button class="btn btn-primary btn-sm" onclick="openModal('modalLead')">+ Lead</button>
     </div>
@@ -932,6 +966,50 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <div class="portales-grid" id="portales-grid"></div>
     </div>
 
+    <!-- ========== VENTA CRUZADA ========== -->
+    <div class="panel" id="panel-ventaCruzada">
+      <div class="kpi-grid" style="margin-bottom:16px">
+        <div class="kpi-card"><div class="kpi-label">Matches Automáticos</div><div class="kpi-value" style="color:var(--accent)" id="vc-kpi-matches">0</div><div class="kpi-delta up">Prop ↔ Lead</div></div>
+        <div class="kpi-card"><div class="kpi-label">Portales Aliados</div><div class="kpi-value" style="color:var(--blue)">6</div><div class="kpi-delta up">Activos</div></div>
+        <div class="kpi-card"><div class="kpi-label">Oportunidades Cross-sell</div><div class="kpi-value" style="color:var(--green)" id="vc-kpi-oport">0</div><div class="kpi-delta up">Detectadas</div></div>
+        <div class="kpi-card"><div class="kpi-label">Referidos Generados</div><div class="kpi-value" style="color:var(--purple)">5</div><div class="kpi-delta up">Este mes</div></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" style="margin-bottom:16px">
+        <button class="tab active" onclick="vcTab(this,'matches')" id="vc-tab-matches">🔍 Auto-Match Prop ↔ Lead</button>
+        <button class="tab" onclick="vcTab(this,'portales')" id="vc-tab-portales">🌐 Portales Aliados</button>
+        <button class="tab" onclick="vcTab(this,'cruzada')" id="vc-tab-cruzada">🔄 Venta Cruzada</button>
+      </div>
+
+      <!-- AUTO-MATCH -->
+      <div id="vc-section-matches">
+        <div class="sec-header" style="margin-bottom:12px">
+          <span class="sec-title">🔍 Propiedades que coinciden con búsquedas de leads</span>
+          <button class="btn btn-primary btn-sm" onclick="runAutoMatch()">⚡ Ejecutar Match Ahora</button>
+        </div>
+        <div id="vc-matches-list" style="display:grid;gap:10px"></div>
+      </div>
+
+      <!-- PORTALES ALIADOS -->
+      <div id="vc-section-portales" style="display:none">
+        <div class="sec-header" style="margin-bottom:16px">
+          <span class="sec-title">🌐 Portales Aliados — Red de Distribución</span>
+          <button class="btn btn-primary btn-sm" onclick="publishAll()">🚀 Publicar en Todos</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px" id="vc-portales-grid"></div>
+      </div>
+
+      <!-- VENTA CRUZADA -->
+      <div id="vc-section-cruzada" style="display:none">
+        <div class="sec-header" style="margin-bottom:16px">
+          <span class="sec-title">🔄 Sugerencias de Venta Cruzada</span>
+          <span style="font-size:12px;color:var(--muted)">Leads que buscan en zonas con oferta adicional</span>
+        </div>
+        <div style="display:grid;gap:12px" id="vc-cruzada-list"></div>
+      </div>
+    </div>
+
     <!-- ========== RED MLS ========== -->
     <div class="panel" id="panel-mls">
       <div class="sec-header">
@@ -998,30 +1076,75 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <span class="modal-title">🏠 Nueva Propiedad</span>
       <button class="modal-close" onclick="closeModal('modalProp')">✕</button>
     </div>
+    <!-- Básicos -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding:6px 10px;background:var(--card2);border-radius:6px">🏠 Datos Básicos</div>
     <div class="form-grid">
-      <div class="form-group form-full"><label>Título / Descripción corta</label><input id="p-titulo" placeholder="Ej: Apartamento moderno con vista al mar"></div>
+      <div class="form-group form-full"><label>Título / Descripción corta *</label><input id="p-titulo" placeholder="Ej: Apartamento moderno con vista al mar"></div>
       <div class="form-group"><label>Tipo</label>
-        <select id="p-tipo"><option>Apartamento</option><option>Casa</option><option>Penthouse</option><option>Local Comercial</option><option>Oficina</option><option>Terreno</option></select>
+        <select id="p-tipo"><option>Apartamento</option><option>Casa</option><option>Penthouse</option><option>Local Comercial</option><option>Oficina</option><option>Terreno</option><option>Villa</option><option>Finca</option></select>
       </div>
       <div class="form-group"><label>Operación</label>
-        <select id="p-op"><option>Venta</option><option>Alquiler</option><option>Pre-venta</option></select>
+        <select id="p-op"><option>Venta</option><option>Alquiler</option><option>Pre-venta</option><option>Venta y Alquiler</option></select>
       </div>
       <div class="form-group"><label>Zona</label>
-        <select id="p-zona"><option>Costa del Este</option><option>Casco Antiguo</option><option>San Francisco</option><option>Punta Pacífica</option><option>Marbella</option><option>Bella Vista</option><option>El Cangrejo</option><option>Obarrio</option><option>Coronado</option><option>Chiriquí</option></select>
+        <select id="p-zona"><option>Costa del Este</option><option>Casco Antiguo</option><option>San Francisco</option><option>Punta Pacífica</option><option>Marbella</option><option>Bella Vista</option><option>El Cangrejo</option><option>Obarrio</option><option>Coronado</option><option>Chiriquí</option><option>Boquete</option><option>Colón</option><option>Arraiján</option><option>La Chorrera</option></select>
       </div>
-      <div class="form-group"><label>Precio (USD)</label><input id="p-precio" type="number" placeholder="485000"></div>
-      <div class="form-group"><label>Área (m²)</label><input id="p-area" type="number" placeholder="120"></div>
+      <div class="form-group"><label>Estado del Inmueble</label>
+        <select id="p-estado-inmueble"><option>Nuevo</option><option>En construcción</option><option>Usado en excelente estado</option><option>Usado en buen estado</option><option>Para remodelar</option></select>
+      </div>
+      <div class="form-group"><label>Estado de Disponibilidad</label>
+        <select id="p-status"><option>Disponible</option><option>Reservado</option><option>Vendido</option><option>Alquilado</option></select>
+      </div>
+    </div>
+    <!-- Precios -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">💰 Precios</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Precio de Venta (USD)</label><input id="p-precio" type="number" placeholder="485000"></div>
+      <div class="form-group"><label>Precio de Alquiler (USD/mes)</label><input id="p-precio-alquiler" type="number" placeholder="1800"></div>
+      <div class="form-group"><label>Mantenimiento (USD/mes)</label><input id="p-mantenimiento" type="number" placeholder="250"></div>
+      <div class="form-group"><label>Precio Negociable</label>
+        <select id="p-negociable"><option value="si">Sí</option><option value="no">No</option></select>
+      </div>
+    </div>
+    <!-- Características -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📐 Características</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Área Total (m²)</label><input id="p-area" type="number" placeholder="120"></div>
+      <div class="form-group"><label>Área de Construcción (m²)</label><input id="p-area-const" type="number" placeholder="110"></div>
       <div class="form-group"><label>Habitaciones</label><input id="p-hab" type="number" placeholder="3"></div>
       <div class="form-group"><label>Baños</label><input id="p-banos" type="number" placeholder="2"></div>
+      <div class="form-group"><label>Medios Baños</label><input id="p-medios-banos" type="number" placeholder="1"></div>
       <div class="form-group"><label>Estacionamientos</label><input id="p-estac" type="number" placeholder="1"></div>
-      <div class="form-group"><label>Estado</label>
-        <select id="p-status"><option>Disponible</option><option>Reservado</option><option>Vendido</option></select>
-      </div>
-      <div class="form-group form-full"><label>Descripción adicional</label><textarea id="p-desc" placeholder="Características, amenidades, ubicación exacta..."></textarea></div>
+      <div class="form-group"><label>Piso / Nivel</label><input id="p-piso" type="number" placeholder="8"></div>
+      <div class="form-group"><label>Año de Construcción</label><input id="p-anio" type="number" placeholder="2019"></div>
+    </div>
+    <!-- Amenidades -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">✨ Amenidades</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px" id="p-amenidades-grid">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="am-piscina"> Piscina</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="am-gym"> Gimnasio</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="am-salon"> Salón de eventos</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="am-bbq"> Área BBQ</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="am-playground"> Playground</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="am-lobby"> Lobby 24h</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="am-rooftop"> Rooftop</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="am-spa"> Spa / Sauna</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="am-generator"> Planta eléctrica</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="am-vista-mar"> Vista al mar</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="am-amoblado"> Amoblado</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="am-mascotas"> Acepta mascotas</label>
+    </div>
+    <!-- Descripción -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📝 Descripción y Propietario</div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Descripción adicional</label><textarea id="p-desc" placeholder="Características especiales, vista, acabados, ubicación exacta..."></textarea></div>
+      <div class="form-group"><label>Propietario / Contacto</label><input id="p-propietario" placeholder="Nombre del propietario"></div>
+      <div class="form-group"><label>Teléfono del propietario</label><input id="p-tel-propietario" placeholder="+507 6000-0000"></div>
+      <div class="form-group form-full"><label>Nota interna (no visible al cliente)</label><textarea id="p-nota-interna" placeholder="Condiciones especiales, urgencia de venta, motivación..."></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalProp')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveProp()">Guardar Propiedad</button>
+      <button class="btn btn-primary" onclick="saveProp()">💾 Guardar Propiedad</button>
     </div>
   </div>
 </div>
@@ -1536,7 +1659,7 @@ function showPanel(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  const labels={dashboard:'Dashboard',propiedades:'Propiedades',leads:'Leads / Clientes',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria'};
+  const labels={dashboard:'Dashboard',propiedades:'Propiedades',leads:'Leads / Clientes',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria'};
   document.getElementById('topbar-title').textContent=labels[id]||id;
   event.currentTarget.classList.add('active');
   if(id==='propiedades') renderProps();
@@ -1547,6 +1670,7 @@ function showPanel(id){
   if(id==='notas') renderNotas();
   if(id==='tareas') renderTareas();
   if(id==='portales') renderPortales();
+  if(id==='ventaCruzada') renderVentaCruzada();
   if(id==='automatizaciones') renderAutomations();
   if(id==='mls') renderMLS();
   if(id==='redInmo') renderRedInmo();
@@ -1808,49 +1932,98 @@ function renderActivity(){
 // AUTOMATIONS
 // ============================================================
 const automations=[
-  {name:'Bienvenida a nuevo lead',trigger:'Lead creado',action:'Enviar WhatsApp de bienvenida',active:true},
-  {name:'Seguimiento post-visita',trigger:'Cita de visita completada',action:'Email + recordatorio 48h',active:true},
-  {name:'Alerta de oferta recibida',trigger:'Lead pasa a Oferta',action:'Notificar agente + email propietario',active:true},
-  {name:'Recordatorio de cita',trigger:'24h antes de cita',action:'WhatsApp al cliente',active:true},
-  {name:'Reporte semanal',trigger:'Cada lunes 8am',action:'Resumen de actividad por email',active:false},
-  {name:'Match automático',trigger:'Lead creado con búsqueda',action:'Buscar propiedades y enviar',active:false},
+  /* ── LEADS ── */
+  {name:'Bienvenida a nuevo lead',trigger:'Lead creado',action:'Enviar WhatsApp de bienvenida',active:true,cat:'lead'},
+  {name:'Seguimiento post-visita',trigger:'Cita de visita completada',action:'Email + recordatorio 48h',active:true,cat:'lead'},
+  {name:'Alerta de oferta recibida',trigger:'Lead pasa a "Oferta"',action:'Notificar agente + email propietario',active:true,cat:'lead'},
+  {name:'Recordatorio de cita',trigger:'24h antes de cita',action:'WhatsApp + email al cliente',active:true,cat:'agenda'},
+  {name:'Follow-up sin respuesta (3 días)',trigger:'3 días sin respuesta del lead',action:'WhatsApp automático de recordatorio',active:true,cat:'lead'},
+  {name:'Follow-up sin respuesta (7 días)',trigger:'7 días sin contacto',action:'Email: "¿Aún estás buscando propiedad?"',active:true,cat:'lead'},
+  {name:'Reactivar lead inactivo',trigger:'30 días sin actividad',action:'WhatsApp + crear tarea de seguimiento',active:false,cat:'lead'},
+  {name:'Felicitación de cumpleaños',trigger:'1 día antes del cumpleaños del cliente',action:'WhatsApp personalizado: "Feliz cumpleaños"',active:true,cat:'lead'},
+  {name:'Match automático: nueva propiedad',trigger:'Propiedad agregada al inventario',action:'Buscar leads compatibles y notificar',active:true,cat:'prop'},
+  {name:'Alerta bajada de precio',trigger:'Precio de propiedad reducido >5%',action:'Notificar leads interesados en esa zona',active:true,cat:'prop'},
+  {name:'Propiedad recién publicada',trigger:'Propiedad publicada en portales',action:'Email a leads activos de la misma zona',active:false,cat:'prop'},
+  /* ── REPORTES ── */
+  {name:'Reporte semanal',trigger:'Cada lunes 8am',action:'Resumen de actividad por email',active:true,cat:'report'},
+  {name:'Reporte mensual de portales',trigger:'Día 1 de cada mes 9am',action:'Informe de vistas, leads y ROI por portal',active:false,cat:'report'},
+  /* ── PORTALES ── */
+  {name:'Sincronizar portales (diario)',trigger:'Cada día 6am',action:'Actualizar precios y disponibilidad en todos los portales',active:true,cat:'portal'},
+  {name:'Vencimiento de publicación',trigger:'5 días antes de vencer anuncio',action:'Alerta al agente para renovar',active:true,cat:'portal'},
 ];
 const quickActions=[
   {label:'📤 Enviar listado de propiedades',desc:'Selecciona un lead y envía matches por WhatsApp'},
   {label:'📧 Email masivo a leads activos',desc:'Envía newsletter a todos los contactos activos'},
-  {label:'📊 Exportar reporte a Excel',desc:'Descarga reporte completo de actividad'},
+  {label:'📊 Exportar leads a CSV',desc:'Descarga todos los clientes en formato Excel/CSV',fn:'exportLeadsCSV'},
+  {label:'🏠 Exportar propiedades a CSV',desc:'Descarga inventario completo de propiedades',fn:'exportPropsCSV'},
+  {label:'🔄 Ejecutar auto-match',desc:'Cruza propiedades disponibles con búsquedas de leads',fn:'runAutoMatch'},
+  {label:'🎂 Verificar cumpleaños hoy',desc:'Lista clientes con cumpleaños esta semana',fn:'checkBirthdays'},
+  {label:'🔔 Reactivar leads inactivos',desc:'Identifica leads sin contacto >30 días',fn:'findInactiveLeads'},
   {label:'🔁 Sincronizar con MLS Panamá',desc:'Actualiza inventario compartido con la red'},
 ];
 const templates=[
-  {name:'Primer contacto',body:'Hola {nombre}, soy agente de JAC Realty. Tengo propiedades en {zona} que pueden interesarle...'},
-  {name:'Post-visita',body:'Estimado/a {nombre}, gracias por visitar {propiedad}. ¿Tiene alguna consulta?'},
-  {name:'Seguimiento oferta',body:'Buenos días {nombre}, quería actualizarle sobre su oferta para {propiedad}...'},
+  /* EMAIL */
+  {name:'📧 Primer contacto',cat:'email',body:'Hola {nombre}, soy agente de JAC Realty. Tengo propiedades en {zona} que pueden interesarle. ¿Podríamos coordinar una llamada?'},
+  {name:'📧 Post-visita',cat:'email',body:'Estimado/a {nombre}, gracias por visitar {propiedad}. Quedamos atentos a cualquier consulta. ¿Le interesa hacer una oferta?'},
+  {name:'📧 Seguimiento oferta',cat:'email',body:'Buenos días {nombre}, quería actualizarle sobre su oferta para {propiedad}. El propietario ha respondido y...'},
+  {name:'📧 Bajada de precio',cat:'email',body:'Estimado/a {nombre}, la propiedad que le interesó en {zona} bajó su precio a ${nuevo_precio}. ¡Excelente oportunidad!'},
+  /* WHATSAPP */
+  {name:'💬 WA Bienvenida',cat:'whatsapp',body:'Hola {nombre} 👋 Soy {agente} de JAC Realty. Vi tu consulta sobre propiedades en {zona}. Con gusto te ayudo. ¿Cuándo podemos hablar?'},
+  {name:'💬 WA Recordatorio cita',cat:'whatsapp',body:'Hola {nombre}! Te recuerdo tu visita mañana {fecha} a las {hora} en {direccion}. Cualquier cambio, avísame. 🏠'},
+  {name:'💬 WA Feliz cumpleaños',cat:'whatsapp',body:'¡Feliz cumpleaños {nombre}! 🎉 Todo el equipo de JAC Realty te desea un excelente día. ¡Salud!'},
+  {name:'💬 WA Match nueva propiedad',cat:'whatsapp',body:'Hola {nombre}! Acaba de entrar una propiedad en {zona} que coincide con lo que buscas: {habitaciones}hab, ${precio}. ¿Te interesa verla? 🏠'},
+  {name:'💬 WA Seguimiento 7 días',cat:'whatsapp',body:'Hola {nombre}, ¿cómo estás? Solo quería saber si aún estás buscando propiedad en {zona}. Tenemos nuevas opciones disponibles. 😊'},
 ];
 function renderAutomations(){
-  document.getElementById('automation-list').innerHTML=automations.map(a=>`
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+  const catLabels={lead:'👤 Leads',agenda:'📅 Agenda',prop:'🏠 Propiedades',report:'📊 Reportes',portal:'📡 Portales'};
+  const cats=[...new Set(automations.map(a=>a.cat))];
+  document.getElementById('automation-list').innerHTML=cats.map(cat=>`
+    <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.7px;margin:10px 0 6px">${catLabels[cat]||cat}</div>
+    ${automations.filter(a=>a.cat===cat).map(a=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
       <div>
         <div style="font-size:13px;font-weight:500">${a.name}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:3px">⚡ ${a.trigger} → ${a.action}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">⚡ ${a.trigger} → ${a.action}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
         <span style="font-size:11px;color:${a.active?'var(--green)':'var(--muted)'}">${a.active?'● Activo':'○ Inactivo'}</span>
-        <button class="btn btn-ghost btn-sm" onclick="toggleAuto(this,'${a.name}')">${a.active?'Desactivar':'Activar'}</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleAuto(this,'${a.name.replace(/'/g,'')}')">${a.active?'Desactivar':'Activar'}</button>
       </div>
-    </div>`).join('');
+    </div>`).join('')}
+  `).join('');
   document.getElementById('quick-actions').innerHTML=quickActions.map(q=>`
-    <button class="btn btn-outline" style="text-align:left;padding:10px 14px;border-radius:10px" onclick="toast('Ejecutando: ${q.label.replace(/'/g,'')}...')">
+    <button class="btn btn-outline" style="text-align:left;padding:10px 14px;border-radius:10px" onclick="${q.fn?q.fn+'()':("toast('Ejecutando: "+q.label.replace(/'/g,'')+"...')")}">
       <div style="font-weight:500">${q.label}</div>
       <div style="font-size:11px;color:var(--muted);margin-top:2px">${q.desc}</div>
     </button>`).join('');
-  document.getElementById('templates-list').innerHTML=templates.map(t=>`
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px">
+  const emailTpl=templates.filter(t=>t.cat==='email');
+  const waTpl=templates.filter(t=>t.cat==='whatsapp');
+  document.getElementById('templates-list').innerHTML=`
+    <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">📧 Email</div>
+    ${emailTpl.map(t=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px">
       <div style="font-size:12px;font-weight:600;margin-bottom:4px">${t.name}</div>
-      <div style="font-size:11px;color:var(--muted)">${t.body}</div>
-      <button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="toast('Plantilla copiada')">📋 Copiar</button>
-    </div>`).join('');
+      <div style="font-size:11px;color:var(--muted);line-height:1.5">${t.body}</div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="copyTemplate('${t.body.replace(/'/g,'&#39;').replace(/\n/g,' ')}')">📋 Copiar</button>
+    </div>`).join('')}
+    <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.7px;margin:12px 0 6px">💬 WhatsApp</div>
+    ${waTpl.map(t=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px">
+      <div style="font-size:12px;font-weight:600;margin-bottom:4px">${t.name}</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5">${t.body}</div>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <button class="btn btn-ghost btn-sm" onclick="copyTemplate('${t.body.replace(/'/g,'&#39;').replace(/\n/g,' ')}')">📋 Copiar</button>
+        <button class="btn btn-ghost btn-sm" onclick="toast('Abriendo WhatsApp...')">💬 Enviar</button>
+      </div>
+    </div>`).join('')}
+  `;
 }
-function toggleAuto(btn,name){toast(`Automatización "${name}" actualizada`);}
+function copyTemplate(text){
+  navigator.clipboard.writeText(text).then(()=>toast('📋 Plantilla copiada al portapapeles')).catch(()=>toast('Plantilla copiada'));
+}
+function toggleAuto(btn,name){
+  const a=automations.find(x=>x.name===name);
+  if(a){a.active=!a.active;renderAutomations();}
+  toast(`Automatización "${name}" ${a&&a.active?'activada':'desactivada'}`);
+}
 
 // ============================================================
 // MLS
@@ -1871,6 +2044,179 @@ function renderMLS(){
     <td style="color:var(--green)">${m.comision}</td>
     <td><button class="btn btn-primary btn-sm" onclick="toast('Solicitud enviada a ${m.agente}')">Contactar</button></td>
   </tr>`).join('');
+}
+
+// ============================================================
+// THEME TOGGLE
+// ============================================================
+function initTheme(){
+  const saved=localStorage.getItem('jcr_theme');
+  if(saved==='light'){document.body.classList.add('light');document.getElementById('theme-toggle').textContent='☀️';}
+  else{document.body.classList.remove('light');document.getElementById('theme-toggle').textContent='🌙';}
+}
+function toggleTheme(){
+  const isLight=document.body.classList.toggle('light');
+  localStorage.setItem('jcr_theme',isLight?'light':'dark');
+  document.getElementById('theme-toggle').textContent=isLight?'☀️':'🌙';
+  toast(isLight?'☀️ Modo claro activado':'🌙 Modo oscuro activado');
+}
+
+// ============================================================
+// CSV EXPORT
+// ============================================================
+function exportLeadsCSV(){
+  if(!leads.length){toast('No hay leads para exportar');return;}
+  const headers=['ID','Nombre','Email','Teléfono','WhatsApp','Tipo','Interés','Zona','Presupuesto','Estado','Fuente','Agente','Fecha'];
+  const rows=leads.map(l=>[l.id,l.nombre,l.email,l.tel,l.wa,l.tipo_cliente,l.interes,l.zona,l.presupuesto,l.status,l.fuente,l.agente,l.fecha].map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  downloadCSV(csv,'jac_realty_leads_'+(new Date().toISOString().split('T')[0])+'.csv');
+  toast('📊 Leads exportados a CSV');
+}
+function exportPropsCSV(){
+  if(!props.length){toast('No hay propiedades para exportar');return;}
+  const headers=['ID','Título','Tipo','Operación','Zona','Precio','Área m²','Hab','Baños','Estac','Estado'];
+  const rows=props.map(p=>[p.id,p.titulo,p.tipo,p.op,p.zona,p.precio,p.area,p.hab,p.banos,p.estac,p.status].map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  downloadCSV(csv,'jac_realty_propiedades_'+(new Date().toISOString().split('T')[0])+'.csv');
+  toast('🏠 Propiedades exportadas a CSV');
+}
+function downloadCSV(csv,filename){
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+
+// ============================================================
+// AUTO-MATCH & CROSS-SELL
+// ============================================================
+function checkBirthdays(){
+  const today=new Date();const mm=today.getMonth()+1,dd=today.getDate();
+  const upcoming=leads.filter(l=>{
+    if(!l.nacimiento)return false;
+    const d=new Date(l.nacimiento);
+    const diff=new Date(today.getFullYear(),d.getMonth(),d.getDate())-new Date(today.getFullYear(),mm-1,dd);
+    return diff>=0&&diff<=7*24*3600*1000;
+  });
+  if(!upcoming.length){toast('🎂 Ningún cumpleaños en los próximos 7 días');return;}
+  toast(`🎂 ${upcoming.length} cumpleaños esta semana: ${upcoming.map(l=>l.nombre).join(', ')}`);
+}
+function findInactiveLeads(){
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
+  const inactive=leads.filter(l=>l.status!=='Cerrado'&&l.status!=='Perdido');
+  toast(`🔔 ${inactive.length} leads activos (verificar última actividad manualmente)`);
+}
+function runAutoMatch(){
+  const matches=[];
+  leads.forEach(l=>{
+    if(l.status==='Cerrado'||l.status==='Perdido')return;
+    props.forEach(p=>{
+      if(p.status!=='Disponible')return;
+      const zonaOk=(l.zona==='Cualquier zona'||l.zona===p.zona);
+      const presOk=(!l.presupuesto_max||p.precio<=l.presupuesto_max)&&(!l.presupuesto_min||p.precio>=l.presupuesto_min*0.8);
+      const habOk=(!l.hab_deseadas||parseInt(l.hab_deseadas)===p.hab);
+      const tipoOk=(!l.tipo_prop||l.tipo_prop==='Cualquiera'||l.tipo_prop===p.tipo);
+      if(zonaOk&&presOk&&tipoOk){matches.push({lead:l,prop:p,score:(zonaOk?3:0)+(presOk?3:0)+(habOk?2:0)+(tipoOk?2:0)});}
+    });
+  });
+  matches.sort((a,b)=>b.score-a.score);
+  document.getElementById('vc-kpi-matches').textContent=matches.length;
+  document.getElementById('vc-kpi-oport').textContent=Math.min(matches.length,leads.length);
+  const el=document.getElementById('vc-matches-list');
+  if(!el)return;
+  if(!matches.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">No se encontraron matches. Agrega propiedades y leads con zonas y presupuestos compatibles.</div>';return;}
+  el.innerHTML=matches.slice(0,20).map(m=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px">MATCH ${m.score}/10</span>
+          <span style="font-size:12px;font-weight:600;color:var(--text)">${m.lead.nombre}</span>
+          <span style="font-size:11px;color:var(--muted)">→</span>
+          <span style="font-size:12px;font-weight:600;color:var(--blue)">${m.prop.id} · ${m.prop.titulo}</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">
+          Lead: ${m.lead.interes} · ${m.lead.zona} · ${m.lead.presupuesto||'Sin presupuesto'} &nbsp;|&nbsp;
+          Prop: ${m.prop.tipo} · ${m.prop.zona} · $${m.prop.precio.toLocaleString()}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-primary btn-sm" onclick="toast('WhatsApp enviado a ${m.lead.nombre.replace(/'/g,'')}')">💬 WA</button>
+        <button class="btn btn-outline btn-sm" onclick="toast('Email enviado a ${m.lead.nombre.replace(/'/g,'')}')">📧 Email</button>
+      </div>
+    </div>`).join('');
+}
+
+const ventaCruzadaPortales=[
+  {name:'Encuentra24',emoji:'🔍',color:'#e65c00',desc:'Portal líder en Panamá. Ideal para propiedades en Ciudad de Panamá.',zonas:['Costa del Este','San Francisco','Paitilla','Marbella'],leads_mes:24,costo:'Gratuito / API'},
+  {name:'Compreoalquile',emoji:'🏘',color:'#0057b8',desc:'+1.9M anuncios. Fuerte en vivienda familiar y sectores residenciales.',zonas:['Albrook','Clayton','Versalles','Coronado'],leads_mes:15,costo:'Gratuito / XML'},
+  {name:'MLS ACOBIR',emoji:'🏅',color:'#c62828',desc:'Red oficial ACOBIR. Co-broking con agentes licenciados.',zonas:['Toda Panamá'],leads_mes:30,costo:'Membresía ACOBIR'},
+  {name:'Proppit / Lifull',emoji:'🔗',color:'#4a90d9',desc:'Distribuye en Trovit, Mitula, Nuroa, Nestoria, Properati simultáneamente.',zonas:['Internacional'],leads_mes:18,costo:'API / Suscripción'},
+  {name:'Facebook Marketplace',emoji:'📘',color:'#1877f2',desc:'Alcance masivo en Panamá. Ideal para alquileres y preventa.',zonas:['Toda Panamá'],leads_mes:35,costo:'Gratuito / Boost pago'},
+  {name:'WhatsApp Business',emoji:'💬',color:'#25D366',desc:'Canal directo de conversión. Envía fichas automáticas a leads.',zonas:['Directos'],leads_mes:40,costo:'Gratuito / API pago'},
+];
+
+function renderVentaCruzada(){
+  runAutoMatch();
+  // Portales grid
+  const pgEl=document.getElementById('vc-portales-grid');
+  if(pgEl){
+    pgEl.innerHTML=ventaCruzadaPortales.map(p=>`
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+        <div style="background:${p.color};padding:12px 14px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">${p.emoji}</span>
+          <span style="font-weight:700;color:#fff;font-size:14px">${p.name}</span>
+        </div>
+        <div style="padding:12px 14px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${p.desc}</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+            <div style="text-align:center"><div style="font-size:18px;font-weight:700;color:var(--accent)">${p.leads_mes}</div><div style="font-size:10px;color:var(--muted)">leads/mes</div></div>
+            <div style="text-align:right;font-size:11px;color:var(--muted)">${p.costo}</div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px">📍 ${p.zonas.join(' · ')}</div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-primary btn-sm" onclick="toast('Publicando en ${p.name}...')">🚀 Publicar</button>
+            <button class="btn btn-outline btn-sm" onclick="toast('Sincronizando ${p.name}...')">🔄 Sync</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+  // Venta cruzada
+  const vcEl=document.getElementById('vc-cruzada-list');
+  if(vcEl){
+    const zonaMap={};
+    leads.filter(l=>l.status!=='Cerrado'&&l.status!=='Perdido').forEach(l=>{
+      if(!l.zona||l.zona==='Cualquier zona')return;
+      if(!zonaMap[l.zona])zonaMap[l.zona]=[];
+      zonaMap[l.zona].push(l);
+    });
+    const entries=Object.entries(zonaMap).sort((a,b)=>b[1].length-a[1].length);
+    if(!entries.length){vcEl.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Agrega leads con zona de interés para ver sugerencias de venta cruzada.</div>';return;}
+    vcEl.innerHTML=entries.map(([zona,ls])=>{
+      const propsEnZona=props.filter(p=>p.zona===zona&&p.status==='Disponible');
+      return `
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-weight:600;font-size:14px">📍 ${zona}</div>
+            <div style="display:flex;gap:8px">
+              <span style="background:rgba(59,130,246,.15);color:var(--blue);font-size:11px;padding:2px 8px;border-radius:20px">${ls.length} lead${ls.length!==1?'s':''}</span>
+              <span style="background:rgba(34,197,94,.15);color:var(--green);font-size:11px;padding:2px 8px;border-radius:20px">${propsEnZona.length} prop${propsEnZona.length!==1?'s':''}</span>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Leads interesados: ${ls.slice(0,4).map(l=>l.nombre).join(', ')}${ls.length>4?`...+${ls.length-4}`:''}</div>
+          ${propsEnZona.length?`<div style="font-size:12px;color:var(--text);margin-bottom:8px">Propiedades disponibles: ${propsEnZona.map(p=>`<span style="color:var(--accent)">${p.id}</span>`).join(', ')}</div>`:'<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Sin propiedades disponibles en esta zona actualmente.</div>'}
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="toast('Enviando listado a ${ls.length} leads en ${zona}...')">📤 Enviar a todos</button>
+            <button class="btn btn-outline btn-sm" onclick="toast('Buscando portales activos en ${zona}...')">📡 Ver portales</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+}
+function vcTab(btn,section){
+  document.querySelectorAll('[id^="vc-tab-"]').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('[id^="vc-section-"]').forEach(s=>s.style.display='none');
+  btn.classList.add('active');
+  document.getElementById('vc-section-'+section).style.display='';
 }
 
 // ============================================================
@@ -2103,20 +2449,26 @@ document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',fun
 function saveProp(){
   const titulo=document.getElementById('p-titulo').value.trim();
   if(!titulo){alert('Ingresa el título de la propiedad');return;}
+  const gv=id=>{const el=document.getElementById(id);return el?el.value:''};
+  const gn=id=>+gv(id)||0;
+  const amenidades=[];
+  ['piscina','gym','salon','bbq','playground','lobby','rooftop','spa','generator','vista-mar','amoblado','mascotas']
+    .forEach(a=>{if(document.getElementById('am-'+a)&&document.getElementById('am-'+a).checked)amenidades.push(a);});
   const p={
     id:'P'+String(props.length+1).padStart(3,'0'),
-    titulo,tipo:document.getElementById('p-tipo').value,
-    op:document.getElementById('p-op').value,zona:document.getElementById('p-zona').value,
-    precio:+document.getElementById('p-precio').value||0,
-    area:+document.getElementById('p-area').value||0,
-    hab:+document.getElementById('p-hab').value||0,
-    banos:+document.getElementById('p-banos').value||0,
-    estac:+document.getElementById('p-estac').value||0,
-    status:document.getElementById('p-status').value,
-    desc:document.getElementById('p-desc').value
+    titulo,tipo:gv('p-tipo'),op:gv('p-op'),zona:gv('p-zona'),
+    precio:gn('p-precio'),precio_alquiler:gn('p-precio-alquiler'),mantenimiento:gn('p-mantenimiento'),
+    area:gn('p-area'),area_const:gn('p-area-const'),
+    hab:gn('p-hab'),banos:gn('p-banos'),medios_banos:gn('p-medios-banos'),
+    estac:gn('p-estac'),piso:gn('p-piso'),anio:gn('p-anio'),
+    estado_inmueble:gv('p-estado-inmueble'),
+    status:gv('p-status'),negociable:gv('p-negociable'),
+    amenidades,desc:gv('p-desc'),
+    propietario:gv('p-propietario'),tel_propietario:gv('p-tel-propietario'),
+    nota_interna:gv('p-nota-interna')
   };
   props.push(p);
-  activities.unshift({tipo:'📝 Nota',cliente:'Sistema',desc:`Propiedad ${p.id} "${p.titulo}" agregada.`,time:'Ahora'});
+  activities.unshift({tipo:'📝 Nota',cliente:'Sistema',desc:`Propiedad ${p.id} "${p.titulo}" agregada. Zona: ${p.zona}. $${p.precio.toLocaleString()}.`,time:'Ahora'});
   // Persist to Supabase
   if(sb){
     sb.from('propiedades').insert({
@@ -2130,7 +2482,8 @@ function saveProp(){
   }
   closeModal('modalProp');
   // Clear form
-  ['p-titulo','p-precio','p-area','p-hab','p-banos','p-estac','p-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['p-titulo','p-precio','p-precio-alquiler','p-mantenimiento','p-area','p-area-const','p-hab','p-banos','p-medios-banos','p-estac','p-piso','p-anio','p-desc','p-propietario','p-tel-propietario','p-nota-interna'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.querySelectorAll('#p-amenidades-grid input[type=checkbox]').forEach(c=>c.checked=false);
   renderProps();renderDashboard();
   toast('✅ Propiedad guardada: '+p.id);
 }
@@ -2692,6 +3045,7 @@ document.querySelectorAll('.nav-item').forEach(el=>{
 // ============================================================
 // INIT
 // ============================================================
+initTheme();
 renderDashboard();
 renderProps();
 renderLeads();
