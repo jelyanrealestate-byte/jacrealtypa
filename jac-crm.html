@@ -561,6 +561,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <div class="email-selector" title="Correo activo para envíos">
         <div class="email-dot"></div>
         <select id="email-from-select" onchange="setActiveEmail(this.value)">
+          <option value="jelyanrealestate@gmail.com">jelyanrealestate@gmail.com</option>
           <option value="jcastro@jacrealtypa.com">jcastro@jacrealtypa.com</option>
         </select>
       </div>
@@ -1156,6 +1157,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <div class="form-group">
         <label>De (remitente)</label>
         <select id="em-from" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;outline:none">
+          <option value="jelyanrealestate@gmail.com">jelyanrealestate@gmail.com</option>
           <option value="jcastro@jacrealtypa.com">jcastro@jacrealtypa.com</option>
         </select>
       </div>
@@ -1519,7 +1521,7 @@ let emailLogs = [
   {id:'E002',from:'jelyanrealestate@gmail.com',to:'Ana Sofía Vargas',toEmail:'avargas@outlook.com',subject:'Propuesta arrendamiento Casco Antiguo',body:'',leadRef:'L002',fecha:'2026-06-07',status:'Respondido'},
   {id:'E003',from:'jcastro@jacrealtypa.com',to:'Carlos Herrera',toEmail:'cherrera@empresa.com',subject:'Portafolio de inversión · JAC Realty',body:'',leadRef:'L003',fecha:'2026-06-06',status:'Enviado'},
 ];
-let currentEmail='jcastro@jacrealtypa.com';
+let currentEmail='jelyanrealestate@gmail.com';
 
 function setActiveEmail(v){
   currentEmail=v;
