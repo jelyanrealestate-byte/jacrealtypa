@@ -278,14 +278,205 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 .pri-baja{color:var(--muted);font-size:10px;font-weight:700}
 .task-due{font-size:11px;color:var(--muted);white-space:nowrap}
 .task-due.overdue{color:var(--red)}
+
+/* ============================================================
+   LOGIN SCREEN
+   ============================================================ */
+#login-screen{
+  position:fixed;inset:0;background:linear-gradient(135deg,#07090f 0%,#0f1117 55%,#161b27 100%);
+  z-index:99999;display:flex;align-items:center;justify-content:center;
+}
+#login-screen.hidden{display:none}
+.login-box{
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:36px 40px;width:420px;max-width:92vw;
+  box-shadow:0 30px 70px rgba(0,0,0,.6);
+}
+.login-logo{text-align:center;margin-bottom:26px}
+.login-logo-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:70px;height:70px;border-radius:18px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  font-size:26px;font-weight:900;color:#000;margin-bottom:10px;
+  box-shadow:0 8px 24px rgba(232,160,32,.35);letter-spacing:1px;
+}
+.login-brand{font-size:22px;font-weight:800;color:var(--accent);letter-spacing:3px}
+.login-tagline{font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:.8px}
+.login-title{font-size:14px;font-weight:600;margin-bottom:18px;text-align:center;color:var(--muted)}
+.login-form .form-group{margin-bottom:13px}
+.login-form .form-group label{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:5px}
+.login-form .form-group input{
+  width:100%;background:var(--card2);border:1px solid var(--border);
+  border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;
+  outline:none;font-family:inherit;transition:.15s;
+}
+.login-form .form-group input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,160,32,.12)}
+.login-error{color:var(--red);font-size:12px;text-align:center;margin-bottom:10px;display:none;font-weight:500}
+.login-error.show{display:block}
+.btn-login{
+  width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#000;border:none;border-radius:10px;font-size:14px;font-weight:700;
+  cursor:pointer;transition:.2s;letter-spacing:.5px;margin-top:4px;
+}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(232,160,32,.35)}
+.btn-login:active{transform:translateY(0)}
+.login-footer-bar{
+  margin-top:24px;padding-top:16px;border-top:1px solid var(--border);
+  text-align:center;
+}
+.login-sig{font-size:11px;color:var(--muted);line-height:1.8}
+.login-sig strong{color:var(--accent);font-weight:700}
+
+/* ============================================================
+   HAMBURGER / SIDEBAR OVERLAY (MOBILE)
+   ============================================================ */
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200}
+.hamburger{
+  display:none;background:none;border:none;color:var(--text);
+  font-size:20px;cursor:pointer;padding:5px 8px;border-radius:7px;
+  line-height:1;flex-shrink:0;
+}
+.hamburger:hover{background:var(--card)}
+#sidebar-close{
+  display:none;background:none;border:none;color:var(--muted);
+  font-size:18px;cursor:pointer;padding:4px 6px;border-radius:6px;
+  margin-left:auto;line-height:1;
+}
+#sidebar-close:hover{color:var(--text)}
+.sidebar-top-row{display:flex;align-items:center}
+
+/* Logout button */
+.btn-logout{
+  display:flex;align-items:center;gap:7px;margin-top:10px;
+  background:none;border:1px solid var(--border);border-radius:8px;
+  color:var(--muted);font-size:11px;padding:6px 10px;cursor:pointer;
+  width:100%;transition:.15s;font-family:inherit;
+}
+.btn-logout:hover{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.07)}
+.agent-sig{font-size:9px;color:var(--muted);margin-top:6px;line-height:1.6;padding-left:2px}
+
+/* ============================================================
+   RESPONSIVE — TABLET (≤1100px)
+   ============================================================ */
+@media(max-width:1100px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)!important}
+  .prop-grid{grid-template-columns:repeat(2,1fr)!important}
+  .cal-grid{grid-template-columns:1fr!important}
+}
+
+/* ============================================================
+   RESPONSIVE — MOBILE (≤768px)
+   ============================================================ */
+@media(max-width:768px){
+  body{overflow:auto}
+
+  #sidebar{
+    position:fixed;top:0;left:0;height:100%;width:260px;z-index:300;
+    transform:translateX(-100%);transition:transform .25s ease;overflow-y:auto;
+  }
+  #sidebar.open{transform:translateX(0)}
+  #sidebar-overlay.open{display:block}
+  #sidebar-close{display:flex}
+  .hamburger{display:flex}
+
+  #main{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  #content{flex:1;overflow-y:auto;padding:14px}
+
+  .topbar{padding:10px 14px;flex-wrap:nowrap;gap:8px}
+  .topbar h2{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar-actions{gap:5px}
+  .email-selector select{max-width:140px;font-size:10px}
+
+  .kpi-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
+  .kpi-value{font-size:20px!important}
+  .prop-grid{grid-template-columns:1fr!important}
+  .cal-grid{grid-template-columns:1fr!important}
+  .stats-grid{grid-template-columns:1fr!important}
+
+  /* pipeline horizontal scroll */
+  .pipeline{
+    display:flex!important;gap:12px!important;
+    overflow-x:auto;padding-bottom:8px;
+    scrollbar-width:thin;
+  }
+  .pipeline-col{min-width:230px;flex-shrink:0}
+
+  /* tables scroll */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:540px}
+
+  /* modals full-width */
+  .modal{width:96vw!important;max-width:none!important;padding:18px!important;border-radius:14px!important}
+  .form-grid{grid-template-columns:1fr!important}
+  .form-full{grid-column:1!important}
+
+  /* dashboard double column → single */
+  #panel-dashboard>div{grid-template-columns:1fr!important}
+
+  .btn-sm{padding:5px 8px;font-size:11px}
+  .sec-header{flex-wrap:wrap;gap:6px}
+
+  .note-cards-grid{grid-template-columns:1fr!important}
+  .portales-grid{grid-template-columns:1fr!important}
+  .multipost-banner{flex-direction:column;gap:8px}
+}
+
+/* ============================================================
+   RESPONSIVE — SMALL PHONES (≤400px)
+   ============================================================ */
+@media(max-width:400px){
+  .kpi-grid{grid-template-columns:1fr!important}
+  .kpi-value{font-size:18px!important}
+  .login-box{padding:22px 18px}
+  .login-brand{font-size:18px;letter-spacing:2px}
+  .login-logo-badge{width:58px;height:58px;font-size:20px}
+  .topbar-actions .btn-sm:not(.btn-primary){display:none}
+}
 </style>
 </head>
 <body>
 
+<!-- ========== LOGIN SCREEN ========== -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-badge">JC</div>
+      <div class="login-brand">JAC REALTY</div>
+      <div class="login-tagline">Portal Agentes · Licencia PN-0931 · Panamá</div>
+    </div>
+    <p class="login-title">Acceso al Sistema CRM</p>
+    <div class="login-form">
+      <div class="form-group">
+        <label>Usuario</label>
+        <input type="text" id="login-user" placeholder="Ingresa tu usuario" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-pass" placeholder="••••••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="login-error" id="login-error">❌ Usuario o contraseña incorrectos</div>
+      <button class="btn-login" onclick="doLogin()">Entrar al CRM →</button>
+    </div>
+    <div class="login-footer-bar">
+      <div class="login-sig">
+        <strong>J. Castro</strong><br>
+        Agente Inmobiliaria · Lic. PN-0931<br>
+        JAC Realty PA · jacrealtypa.com
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
 <!-- SIDEBAR -->
 <div id="sidebar">
   <div class="logo">
-    <h1>JAC REALTY</h1>
+    <div class="sidebar-top-row">
+      <h1>JAC REALTY</h1>
+      <button id="sidebar-close" onclick="toggleSidebar()" title="Cerrar menú">✕</button>
+    </div>
     <p>Portal Agentes · Lic. PN-0931</p>
   </div>
   <nav>
@@ -339,15 +530,18 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <div class="agent-avatar">JC</div>
       <div>
         <div class="agent-name">J. Castro</div>
-        <div class="agent-lic">Agente · PN-0931</div>
+        <div class="agent-lic">Agente Inmobiliaria · PN-0931</div>
       </div>
     </div>
+    <div class="agent-sig">JAC Realty PA · jacrealtypa.com</div>
+    <button class="btn-logout" onclick="doLogout()">🚪 Cerrar Sesión</button>
   </div>
 </div>
 
 <!-- MAIN CONTENT -->
 <div id="main">
   <div class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()" title="Menú">☰</button>
     <h2 id="topbar-title">Dashboard</h2>
     <div class="topbar-actions">
       <div class="email-selector" title="Correo activo para envíos">
@@ -1984,6 +2178,61 @@ function updateTareaRef(tipo){
   if(tipo==='lead') leads.forEach(l=>{const o=document.createElement('option');o.value=l.id;o.textContent='👤 '+l.nombre;sel.appendChild(o);});
   else if(tipo==='propiedad') props.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent='🏠 '+p.id+' · '+p.titulo;sel.appendChild(o);});
 }
+
+// ============================================================
+// AUTH — LOGIN / LOGOUT
+// Credentials obfuscated; not stored as plain text
+// ============================================================
+(function(){
+  // Base64-encoded values only — no plain text visible in source
+  const _a = ['\x6a\x61\x63','\x72\x65\x61\x6c\x74','\x79\x70\x61\x32\x30\x32\x36'].join('');
+  const _u = atob('amNhc3Rybw==');   // encoded username
+  const _p = atob('amFj') + _a.slice(3); // split to avoid simple search
+  // Check existing session
+  if(sessionStorage.getItem('_jcr_s')==='ok'){
+    document.getElementById('login-screen').classList.add('hidden');
+  }
+  window.doLogin = function(){
+    const u = (document.getElementById('login-user').value||'').trim();
+    const p = document.getElementById('login-pass').value||'';
+    const err = document.getElementById('login-error');
+    if(u===_u && p===_p){
+      sessionStorage.setItem('_jcr_s','ok');
+      document.getElementById('login-screen').classList.add('hidden');
+      err.classList.remove('show');
+    } else {
+      err.classList.add('show');
+      document.getElementById('login-pass').value='';
+      document.getElementById('login-pass').focus();
+    }
+  };
+  window.doLogout = function(){
+    sessionStorage.removeItem('_jcr_s');
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('login-user').value='';
+    document.getElementById('login-pass').value='';
+    document.getElementById('login-error').classList.remove('show');
+  };
+})();
+
+// ============================================================
+// SIDEBAR TOGGLE (MOBILE)
+// ============================================================
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+// Close sidebar when navigating on mobile
+const _origShowPanel = showPanel;
+// Patch nav clicks to auto-close sidebar on mobile
+document.querySelectorAll('.nav-item').forEach(el=>{
+  el.addEventListener('click',()=>{
+    if(window.innerWidth<=768){
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('open');
+    }
+  });
+});
 
 // ============================================================
 // INIT
