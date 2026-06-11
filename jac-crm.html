@@ -287,6 +287,28 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 .email-replied{background:rgba(168,85,247,.15);color:#c084fc}
 .email-clicked{background:rgba(232,160,32,.15);color:var(--accent2)}
 
+/* HISTORIAL TIMELINE */
+.hs-item{display:flex;gap:14px;padding:10px 0;position:relative}
+.hs-item:not(:last-child)::before{content:'';position:absolute;left:17px;top:36px;bottom:-10px;width:2px;background:var(--border)}
+.hs-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:var(--card2);border:2px solid var(--border);z-index:1}
+.hs-dot.email{background:rgba(59,130,246,.15);border-color:#3b82f6}
+.hs-dot.wa{background:rgba(34,197,94,.15);border-color:#22c55e}
+.hs-dot.call{background:rgba(168,85,247,.15);border-color:#a855f7}
+.hs-dot.visit{background:rgba(232,160,32,.15);border-color:var(--accent)}
+.hs-dot.status{background:rgba(6,182,212,.15);border-color:var(--cyan)}
+.hs-dot.note{background:rgba(120,120,180,.15);border-color:var(--muted)}
+.hs-dot.create{background:rgba(34,197,94,.15);border-color:var(--green)}
+.hs-body{flex:1;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;min-width:0}
+.hs-body:hover{border-color:var(--border);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.hs-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.hs-tipo{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.hs-fecha{font-size:11px;color:var(--muted)}
+.hs-desc{font-size:13px;line-height:1.5;color:var(--text)}
+.hs-extra{margin-top:8px;font-size:12px;color:var(--muted);background:var(--card2);border-radius:6px;padding:8px 10px;white-space:pre-wrap;word-break:break-word}
+.hs-stat-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 12px;background:var(--card);border-radius:8px;border:1px solid var(--border)}
+.hs-stat-num{font-size:18px;font-weight:700;color:var(--accent)}
+.hs-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase}
+
 /* NOTES */
 .note-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;transition:.15s}
 .note-card:hover{border-color:var(--accent)}
@@ -462,8 +484,46 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
   .login-logo-badge{width:58px;height:58px;font-size:20px}
   .topbar-actions .btn-sm:not(.btn-primary){display:none}
 }
+
+/* ===== FOTOS PROPIEDAD ===== */
+.foto-upload-zone{border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:.2s;color:var(--muted);font-size:13px}
+.foto-upload-zone:hover{border-color:var(--accent);color:var(--accent)}
+.foto-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:10px}
+.foto-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--card2)}
+.foto-thumb img{width:100%;height:100%;object-fit:cover}
+.foto-thumb .foto-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
+.foto-cover{position:absolute;bottom:0;left:0;right:0;font-size:9px;background:var(--accent);color:#000;text-align:center;padding:2px;font-weight:600}
+/* ===== ARCHIVOS ===== */
+.archivo-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card2);border-radius:8px;margin-bottom:6px}
+.archivo-item .archivo-icon{font-size:20px;flex-shrink:0}
+.archivo-item .archivo-info{flex:1;min-width:0}
+.archivo-item .archivo-nombre{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.archivo-item .archivo-meta{font-size:11px;color:var(--muted)}
+.archivo-item .archivo-acciones{display:flex;gap:4px;flex-shrink:0}
+.arch-drop-zone{border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:.2s;color:var(--muted)}
+.arch-drop-zone:hover,.arch-drop-zone.dragover{border-color:var(--accent);color:var(--accent);background:rgba(232,160,32,.05)}
+/* ===== FICHA PROPIEDAD ===== */
+.ficha-panel{max-width:800px;margin:0 auto;padding:20px}
+.ficha-hero{border-radius:12px;overflow:hidden;background:var(--card2);margin-bottom:20px;position:relative}
+.ficha-gallery{display:grid;grid-template-columns:2fr 1fr;gap:4px;height:280px}
+.ficha-gallery .main-foto{grid-row:1/3}
+.ficha-gallery img{width:100%;height:100%;object-fit:cover}
+.ficha-gallery .no-foto{display:flex;align-items:center;justify-content:center;font-size:60px;background:var(--card2);height:100%}
+.ficha-badge{position:absolute;top:12px;left:12px;display:flex;gap:8px}
+.ficha-share-btns{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+/* ===== POST-VENTA ===== */
+.pv-badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.pv-entregado{background:rgba(34,197,94,.2);color:var(--green)}
+.pv-proceso{background:rgba(59,130,246,.2);color:var(--blue)}
+.pv-garantia{background:rgba(168,85,247,.2);color:var(--purple)}
+.pv-cerrado{background:rgba(122,132,153,.2);color:var(--muted)}
+/* ===== MAPA ===== */
+#prop-mapa{height:260px;border-radius:10px;border:1px solid var(--border);margin-top:8px;z-index:1}
+.map-coords{font-size:11px;color:var(--muted);margin-top:4px;font-family:monospace}
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 
@@ -539,6 +599,10 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <span class="icon">👥</span> Clientes
       <span class="nav-badge" id="badge-clientes" style="background:var(--green)">0</span>
     </div>
+    <div class="nav-item" onclick="showPanel('empresas')">
+      <span class="icon">🏢</span> Empresas
+      <span class="nav-badge" id="badge-empresas" style="background:var(--cyan)">0</span>
+    </div>
     <div class="nav-section">Gestión</div>
     <div class="nav-item" onclick="showPanel('pipeline')">
       <span class="icon">📋</span> Pipeline
@@ -578,6 +642,10 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
     <div class="nav-item" onclick="showPanel('redInmo')">
       <span class="icon">🤝</span> Red Inmobiliaria
       <span class="nav-badge" id="badge-red" style="background:var(--purple)">0</span>
+    </div>
+    <div class="nav-item" onclick="showPanel('postVenta')">
+      <span class="icon">🏆</span> Post-Venta
+      <span class="nav-badge" id="badge-postventa" style="background:var(--green)">0</span>
     </div>
   </nav>
   <div class="sidebar-footer">
@@ -636,6 +704,11 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
           <div class="kpi-value" style="color:var(--green)">24%</div>
           <div class="kpi-delta up">↑ 4% vs trimestre</div>
         </div>
+        <div class="kpi-card" style="cursor:pointer" onclick="showPanelById('empresas')">
+          <div class="kpi-label">Empresas</div>
+          <div class="kpi-value" style="color:var(--cyan)" id="kpi-empresas-dash">0</div>
+          <div class="kpi-delta">Clientes corporativos</div>
+        </div>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 340px;gap:16px">
@@ -659,6 +732,19 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
         </div>
       </div>
 
+      <!-- Quick props -->
+      <div style="margin-top:16px">
+        <div class="sec-header">
+          <span class="sec-title">Propiedades Recientes</span>
+          <button class="btn btn-ghost btn-sm" onclick="showPanelById('propiedades')">Ver todas →</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Propiedad</th><th>Tipo</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="dash-props-quick"></tbody>
+          </table>
+        </div>
+      </div>
       <!-- Upcoming events -->
       <div style="margin-top:16px">
         <div class="sec-header">
@@ -1127,10 +1213,126 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       </div>
     </div>
 
+    <!-- ========== POST-VENTA ========== -->
+    <div class="panel" id="panel-postVenta">
+      <div class="kpi-grid" style="margin-bottom:14px">
+        <div class="kpi-card"><div class="kpi-label">Cierres Totales</div><div class="kpi-value" style="color:var(--green)" id="pv-kpi-total">0</div></div>
+        <div class="kpi-card"><div class="kpi-label">En Proceso</div><div class="kpi-value" style="color:var(--blue)" id="pv-kpi-proceso">0</div></div>
+        <div class="kpi-card"><div class="kpi-label">Garantías Activas</div><div class="kpi-value" style="color:var(--purple)" id="pv-kpi-garantia">0</div></div>
+        <div class="kpi-card"><div class="kpi-label">Comisión Total</div><div class="kpi-value" style="color:var(--accent)" id="pv-kpi-comision">$0</div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <input type="text" placeholder="🔍 Buscar post-venta..." style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:12px;outline:none;width:220px" oninput="filterPostVenta(this.value)">
+        <button class="btn btn-primary btn-sm" onclick="openModal('modalPostVenta')">+ Nuevo Cierre</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Cliente</th><th>Propiedad</th><th>Tipo</th><th>Precio Cierre</th><th>Comisión</th><th>Fecha Cierre</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="postventa-tbody"><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">Sin cierres registrados. Agrega tu primer post-venta.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
 <!-- ===== MODALS ===== -->
+
+<!-- Modal Archivos Universal -->
+<div class="modal-bg" id="modalArchivos">
+  <div class="modal" style="width:680px">
+    <div class="modal-header">
+      <span class="modal-title" id="archivos-modal-title">📎 Archivos</span>
+      <button class="modal-close" onclick="closeModal('modalArchivos')">✕</button>
+    </div>
+    <div style="padding:0 4px">
+      <div class="arch-drop-zone" onclick="document.getElementById('arch-input').click()" id="arch-drop" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="this.classList.remove('dragover');addArchivoFromInput({files:event.dataTransfer.files})">
+        <div style="font-size:28px;margin-bottom:6px">📁</div>
+        <div style="font-size:13px">Arrastra archivos aquí o haz clic para seleccionar</div>
+        <div style="font-size:11px;margin-top:4px;color:var(--muted)">Documentos, contratos, fotos, PDFs, Excel... Sin límite</div>
+      </div>
+      <input type="file" id="arch-input" multiple style="display:none" onchange="addArchivoFromInput(this)">
+      <div style="margin-top:14px" id="archivos-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalArchivos')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ficha Propiedad -->
+<div class="modal-bg" id="modalFicha">
+  <div class="modal" style="width:760px;max-height:90vh">
+    <div class="modal-header">
+      <span class="modal-title">📄 Ficha de Propiedad</span>
+      <button class="modal-close" onclick="closeModal('modalFicha')">✕</button>
+    </div>
+    <input type="hidden" id="ficha-modal-prop-id">
+    <div style="padding:4px 4px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px">
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="ficha-con-contacto" checked onchange="fichaToggleContacto()"> Incluir mis datos de contacto
+      </label>
+      <div class="ficha-share-btns">
+        <button class="btn btn-primary btn-sm" onclick="compartirFichaWA()">💬 Compartir por WhatsApp</button>
+        <button class="btn btn-outline btn-sm" onclick="compartirFichaEmail()">📧 Compartir por Email</button>
+        <button class="btn btn-outline btn-sm" onclick="copiarLinkFicha()">🔗 Copiar Link</button>
+      </div>
+    </div>
+    <div id="ficha-preview" style="overflow-y:auto;max-height:60vh;border:1px solid var(--border);border-radius:8px;background:var(--card2)"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalFicha')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Post-Venta -->
+<div class="modal-bg" id="modalPostVenta">
+  <div class="modal" style="width:720px">
+    <div class="modal-header">
+      <span class="modal-title" id="pv-modal-title">🏆 Nuevo Cierre / Post-Venta</span>
+      <button class="modal-close" onclick="closeModal('modalPostVenta');clearFormPostVenta()">✕</button>
+    </div>
+    <input type="hidden" id="pv-edit-id">
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding:6px 10px;background:var(--card2);border-radius:6px">👤 Datos del Cliente</div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Nombre del Cliente *</label><input id="pv-cliente" placeholder="Nombre completo del cliente"></div>
+      <div class="form-group"><label>Teléfono</label><input id="pv-tel" placeholder="+507 6000-0000"></div>
+      <div class="form-group"><label>Email</label><input id="pv-email" type="email" placeholder="cliente@email.com"></div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">🏠 Datos del Cierre</div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Propiedad vendida / alquilada</label><input id="pv-propiedad" placeholder="Título o descripción de la propiedad"></div>
+      <div class="form-group"><label>Tipo de operación</label>
+        <select id="pv-tipo"><option>Venta</option><option>Alquiler</option><option>Pre-venta</option><option>Cesión de derechos</option></select>
+      </div>
+      <div class="form-group"><label>Estado</label>
+        <select id="pv-estado"><option>En proceso</option><option>Con garantías</option><option>Entregado</option><option>Cerrado</option></select>
+      </div>
+      <div class="form-group"><label>Precio de cierre (USD)</label><input id="pv-precio-cierre" type="number" placeholder="250000"></div>
+      <div class="form-group"><label>Comisión cobrada (USD)</label><input id="pv-comision" type="number" placeholder="7500"></div>
+      <div class="form-group"><label>% Comisión</label><input id="pv-comision-pct" placeholder="3%"></div>
+      <div class="form-group"><label>Fecha de cierre</label><input id="pv-fecha-cierre" type="date"></div>
+      <div class="form-group"><label>Fecha de entrega de llaves</label><input id="pv-fecha-entrega" type="date"></div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📋 Trazabilidad / Seguimiento</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Banco / Financiera</label><input id="pv-banco" placeholder="Banistmo, BAC, Multibank..."></div>
+      <div class="form-group"><label>Notaría</label><input id="pv-notaria" placeholder="Notaría #..."></div>
+      <div class="form-group"><label>Nº de Escritura</label><input id="pv-escritura" placeholder="Escritura pública #"></div>
+      <div class="form-group"><label>Paz y Salvo</label>
+        <select id="pv-paz-salvo"><option value="">--</option><option>Pendiente</option><option>En gestión</option><option>Obtenido</option></select>
+      </div>
+      <div class="form-group"><label>Entrega de llaves</label>
+        <select id="pv-llaves"><option value="">--</option><option>Pendiente</option><option>Programada</option><option>Entregadas</option></select>
+      </div>
+      <div class="form-group form-full"><label>Notas del cierre</label><textarea id="pv-notas" placeholder="Observaciones, garantías, pendientes..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalPostVenta');clearFormPostVenta()">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePostVenta()">💾 Guardar Cierre</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal Propiedad -->
 <div class="modal-bg" id="modalProp">
@@ -1149,8 +1351,17 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <div class="form-group"><label>Operación</label>
         <select id="p-op"><option>Venta</option><option>Alquiler</option><option>Pre-venta</option><option>Venta y Alquiler</option></select>
       </div>
-      <div class="form-group"><label>Zona</label>
-        <select id="p-zona"><option>Costa del Este</option><option>Casco Antiguo</option><option>San Francisco</option><option>Punta Pacífica</option><option>Marbella</option><option>Bella Vista</option><option>El Cangrejo</option><option>Obarrio</option><option>Coronado</option><option>Chiriquí</option><option>Boquete</option><option>Colón</option><option>Arraiján</option><option>La Chorrera</option></select>
+      <div class="form-group"><label>Provincia</label>
+        <select id="p-provincia" onchange="updateDistritos(this.value)"><option value="">-- Selecciona --</option></select>
+      </div>
+      <div class="form-group"><label>Distrito / Municipio</label>
+        <select id="p-distrito" onchange="updateCorregimientos(document.getElementById('p-provincia').value, this.value)"><option value="">-- Selecciona provincia --</option></select>
+      </div>
+      <div class="form-group"><label>Corregimiento / Área</label>
+        <select id="p-corregimiento"><option value="">-- Selecciona distrito --</option></select>
+      </div>
+      <div class="form-group"><label>Zona / Urbanización</label>
+        <input id="p-zona" placeholder="Ej: Costa del Este, Punta Pacífica, Coronado...">
       </div>
       <div class="form-group"><label>Estado del Inmueble</label>
         <select id="p-estado-inmueble"><option>Nuevo</option><option>En construcción</option><option>Usado en excelente estado</option><option>Usado en buen estado</option><option>Para remodelar</option></select>
@@ -1205,8 +1416,38 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <div class="form-group"><label>Teléfono del propietario</label><input id="p-tel-propietario" placeholder="+507 6000-0000"></div>
       <div class="form-group form-full"><label>Nota interna (no visible al cliente)</label><textarea id="p-nota-interna" placeholder="Condiciones especiales, urgencia de venta, motivación..."></textarea></div>
     </div>
+    <!-- Ubicación en Mapa -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📍 Ubicación en Mapa</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Dirección exacta</label><input id="p-direccion" placeholder="Calle, edificio, número..."></div>
+      <div class="form-group"><label>Referencia</label><input id="p-referencia" placeholder="Cerca de, frente a..."></div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:6px">Haz clic en el mapa para marcar la ubicación exacta o aproximada de la propiedad.</p>
+    <div id="prop-mapa"></div>
+    <p class="map-coords" id="prop-mapa-coords">📍 Sin ubicación marcada</p>
+    <input type="hidden" id="p-lat"><input type="hidden" id="p-lng">
+    <!-- External Links -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">🔗 Links Externos</div>
+    <div class="form-grid">
+      <div class="form-group"><label>URL Wasi</label><input id="p-url-wasi" placeholder="https://wasi.co/propiedad/..."></div>
+      <div class="form-group"><label>URL MLS / Portal MLS</label><input id="p-url-mls" placeholder="https://mls.com/listing/..."></div>
+      <div class="form-group"><label>URL Encuentra24</label><input id="p-url-e24" placeholder="https://encuentra24.com/..."></div>
+      <div class="form-group"><label>URL Compreoalquile</label><input id="p-url-c24" placeholder="https://compreoalquile.com/..."></div>
+      <div class="form-group"><label>Tour Virtual / YouTube</label><input id="p-url-tour" placeholder="https://youtube.com/watch?v=..."></div>
+      <div class="form-group"><label>Ficha PDF / Brochure</label><input id="p-url-brochure" placeholder="https://drive.google.com/..."></div>
+    </div>
+    <!-- Fotos -->
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📸 Fotos (sin límite)</div>
+    <div class="foto-upload-zone" onclick="document.getElementById('p-fotos-input').click()">
+      <div style="font-size:28px;margin-bottom:6px">📷</div>
+      <div>Haz clic para agregar fotos · También puedes arrastrar imágenes aquí</div>
+      <div style="font-size:11px;margin-top:4px">JPG, PNG, WEBP · Sin límite de cantidad</div>
+    </div>
+    <input type="file" id="p-fotos-input" accept="image/*" multiple style="display:none" onchange="addFotosPropiedad(this.files)">
+    <div class="foto-grid" id="p-fotos-grid"></div>
+    <input type="hidden" id="p-edit-id">
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modalProp')">Cancelar</button>
+      <button class="btn btn-outline" onclick="closeModal('modalProp');clearFormProp()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveProp()">💾 Guardar Propiedad</button>
     </div>
   </div>
@@ -1548,6 +1789,48 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
   </div>
 </div>
 
+<!-- Modal Historial Universal (expandible, sin límite) -->
+<div class="modal-bg" id="modalHistorial" style="z-index:1100">
+  <div class="modal" style="width:820px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column">
+    <div class="modal-header" style="flex-shrink:0">
+      <span class="modal-title" id="historial-title">📋 Historial completo</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="historial-filter" onchange="renderHistorialFilter()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--text);font-size:12px;outline:none">
+          <option value="">Todos los eventos</option>
+          <option value="📧">📧 Emails</option>
+          <option value="💬">💬 WhatsApp</option>
+          <option value="📞">📞 Llamadas</option>
+          <option value="🏠">🏠 Visitas</option>
+          <option value="✏️">✏️ Ediciones</option>
+          <option value="🎯">🎯 Estado</option>
+          <option value="📝">📝 Notas</option>
+        </select>
+        <button class="modal-close" onclick="closeModal('modalHistorial')">✕</button>
+      </div>
+    </div>
+    <!-- Resumen rápido -->
+    <div id="historial-summary" style="flex-shrink:0;padding:12px 20px;background:var(--card2);border-bottom:1px solid var(--border);display:flex;gap:20px;flex-wrap:wrap;font-size:12px"></div>
+    <!-- Timeline scrollable sin límite -->
+    <div id="historial-timeline" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:0"></div>
+    <!-- Agregar nota rápida al historial -->
+    <div style="flex-shrink:0;padding:14px 20px;border-top:1px solid var(--border);background:var(--card2);display:flex;gap:10px;align-items:flex-end">
+      <div style="flex:1">
+        <label style="font-size:11px;color:var(--muted);margin-bottom:4px;display:block">Agregar nota / observación al historial</label>
+        <textarea id="historial-nota-input" placeholder="Escribe una nota rápida (llamada, observación, recordatorio...)" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;resize:none;min-height:50px;outline:none"></textarea>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+        <select id="historial-nota-tipo" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;outline:none">
+          <option value="📝">📝 Nota</option>
+          <option value="📞">📞 Llamada</option>
+          <option value="🤝">🤝 Reunión</option>
+          <option value="⚡">⚡ Acción</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="addHistorialNota()">➕ Agregar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal Email Compose -->
 <div class="modal-bg" id="modalEmail">
   <div class="modal" style="width:580px">
@@ -1598,8 +1881,12 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <div class="form-group">
         <label>Vinculado a</label>
         <select id="em-lead-ref" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;outline:none">
-          <option value="">-- Seleccionar lead --</option>
+          <option value="">-- Sin vincular --</option>
         </select>
+      </div>
+      <div class="form-group" style="display:none" id="em-ref-tipo-wrap">
+        <input type="hidden" id="em-ref-tipo" value="">
+        <input type="hidden" id="em-ref-id" value="">
       </div>
     </div>
     <div class="modal-footer">
@@ -1761,6 +2048,96 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
   </div>
 </div>
 
+
+<!-- ========== EMPRESAS ========== -->
+<div class="panel" id="panel-empresas">
+  <div class="search-bar">
+    <input type="text" placeholder="🔍 Buscar empresa..." oninput="filterEmpresas(this.value)">
+    <button class="btn btn-primary" onclick="openModal('modalEmpresa')">+ Nueva Empresa</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Empresa</th><th>Sector</th><th>Contacto</th><th>Teléfono</th><th>Email</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody id="empresas-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Nueva Empresa -->
+<div class="modal-bg" id="modalEmpresa">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <span class="modal-title">🏢 Nueva Empresa</span>
+      <button class="modal-close" onclick="closeModal('modalEmpresa')">✕</button>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:0 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">🏢 Datos de la Empresa</div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Nombre de la empresa *</label><input id="em-nombre" placeholder="Razón social"></div>
+      <div class="form-group"><label>Nombre comercial</label><input id="em-comercial" placeholder="Nombre con que opera"></div>
+      <div class="form-group"><label>RUC / NIT</label><input id="em-ruc" placeholder="Número de registro"></div>
+      <div class="form-group"><label>Sector / Industria</label>
+        <select id="em-sector">
+          <option>Bienes Raíces</option><option>Construcción</option><option>Inversión</option>
+          <option>Financiero / Banca</option><option>Legal / Notaría</option><option>Comercial / Retail</option>
+          <option>Hotelería / Turismo</option><option>Salud</option><option>Educación</option>
+          <option>Gobierno / Público</option><option>Tecnología</option><option>Otro</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Tipo de relación</label>
+        <select id="em-tipo">
+          <option>Cliente</option><option>Propietario</option><option>Inversionista</option>
+          <option>Proveedor</option><option>Co-broker</option><option>Partner</option><option>Prospecto</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Estado</label>
+        <select id="em-status">
+          <option>Activo</option><option>Prospecto</option><option>Inactivo</option><option>VIP</option>
+        </select>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">👤 Contacto Principal</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Nombre del contacto</label><input id="em-contacto" placeholder="Gerente / Director"></div>
+      <div class="form-group"><label>Cargo</label><input id="em-cargo" placeholder="CEO, Gerente, Dir. Finanzas..."></div>
+      <div class="form-group"><label>Teléfono directo</label><input id="em-tel" placeholder="+507 6000-0000"></div>
+      <div class="form-group"><label>WhatsApp</label><input id="em-wa" placeholder="+507 6000-0000"></div>
+      <div class="form-group"><label>Email corporativo</label><input id="em-email" type="email" placeholder="nombre@empresa.com"></div>
+      <div class="form-group"><label>Email secundario</label><input id="em-email2" type="email" placeholder="contacto2@empresa.com"></div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📍 Ubicación</div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Dirección</label><input id="em-direccion" placeholder="Ciudad de Panamá, zona, edificio..."></div>
+      <div class="form-group"><label>Zona / Ciudad</label>
+        <select id="em-zona">
+          <option>Ciudad de Panamá</option><option>Panamá Oeste</option><option>Colón</option>
+          <option>Chiriquí</option><option>Bocas del Toro</option><option>Coclé</option>
+          <option>Veraguas</option><option>Los Santos</option><option>Herrera</option><option>Darién</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Sitio web</label><input id="em-web" placeholder="https://www.empresa.com"></div>
+      <div class="form-group"><label>LinkedIn</label><input id="em-linkedin" placeholder="https://linkedin.com/company/..."></div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">💼 Interés Inmobiliario</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Interés principal</label>
+        <select id="em-interes">
+          <option>Compra</option><option>Alquiler</option><option>Inversión</option>
+          <option>Desarrollo</option><option>Co-broking</option><option>Ninguno</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Presupuesto (USD)</label><input id="em-presupuesto" placeholder="500,000"></div>
+      <div class="form-group"><label>Tipo de inmueble buscado</label><input id="em-inmueble" placeholder="Oficinas, locales, apartamentos..."></div>
+      <div class="form-group"><label>Zona preferida</label><input id="em-zona-pref" placeholder="Costa del Este, Marbella..."></div>
+      <div class="form-group form-full"><label>Notas / Observaciones</label><textarea id="em-notas" placeholder="Condiciones especiales, preferencias, urgencia..."></textarea></div>
+    </div>
+    <input type="hidden" id="em-edit-id">
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalEmpresa')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEmpresa()">💾 Guardar Empresa</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1803,7 +2180,7 @@ async function loadSupabaseData(){
         empresa:l.empresa||'', tipo_cliente:l.tipo_cliente||'Comprador',
         interes:l.interes||'Compra', tipo_prop:l.tipo_propiedad_interes||'',
         presupuesto_min:l.presupuesto_min||0, presupuesto_max:l.presupuesto_max||0,
-        presupuesto: l.presupuesto_max ? `$${(l.presupuesto_min||0).toLocaleString()}–$${l.presupuesto_max.toLocaleString()}` : '',
+        presupuesto: fmtBudget(l.presupuesto_min||0, l.presupuesto_max||0),
         zona: Array.isArray(l.zonas_interes)?(l.zonas_interes[0]||''):(l.zonas_interes||''),
         hab_deseadas:l.habitaciones_deseadas||'', status:l.estado||'Nuevo',
         fuente:l.origen||'Web', agente:l.agente_asignado||'J. Castro',
@@ -1873,6 +2250,7 @@ let props = [];
 let leads = [];
 let contacts = [];  // Contactos generales
 let clients = [];   // Clientes activos (compradores, arrendatarios, vendedores, arrendadores)
+let empresas = []; // Empresas / Compañías
 let citas = [];
 let activities = [];
 
@@ -1885,6 +2263,19 @@ let notes = [];
 let tasks = [];
 let emailLogs = [];
 let currentEmail='jelyanrealestate@gmail.com';
+
+
+function fmtPrice(n,unit){
+  if(!n&&n!==0) return '–';
+  var s='$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return unit?s+'/'+unit:s;
+}
+function fmtBudget(min,max){
+  if(!min&&!max) return '–';
+  if(min&&max) return fmtPrice(min)+' – '+fmtPrice(max);
+  if(max) return 'Hasta '+fmtPrice(max);
+  return 'Desde '+fmtPrice(min);
+}
 
 function setActiveEmail(v){
   currentEmail=v;
@@ -1899,7 +2290,7 @@ function showPanel(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  const labels={dashboard:'Dashboard',propiedades:'Propiedades',contactos:'Contactos',leads:'Leads',clientes:'Clientes',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria'};
+  const labels={dashboard:'Dashboard',propiedades:'Propiedades',contactos:'Contactos',leads:'Leads',clientes:'Clientes',empresas:'Empresas',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria',postVenta:'Post-Venta'};
   document.getElementById('topbar-title').textContent=labels[id]||id;
   event.currentTarget.classList.add('active');
   if(id==='propiedades') renderProps();
@@ -1916,6 +2307,8 @@ function showPanel(id){
   if(id==='automatizaciones') renderAutomations();
   if(id==='mls') renderMLS();
   if(id==='redInmo') renderRedInmo();
+  if(id==='empresas') renderEmpresas();
+  if(id==='postVenta') renderPostVenta();
   if(id==='reportes') updateReportKPIs();
 }
 
@@ -1926,23 +2319,40 @@ function renderDashboard(){
   document.getElementById('kpi-props').textContent=props.length;
   document.getElementById('kpi-leads').textContent=leads.filter(l=>!['Cerrado ✅','Perdido ❌','Cerrado','Perdido'].includes(l.status)).length;
   document.getElementById('kpi-citas').textContent=citas.length;
-  // Update module badges
+  document.getElementById('kpi-empresas-dash').textContent=empresas.length;
   updateBadges();
   // Hot leads
-  const hot=leads.filter(l=>['Visita programada','En negociación','Oferta presentada','Visita','Oferta'].includes(l.status)).slice(0,4);
+  const hot=leads.filter(l=>['Visita programada','En negociación','Oferta presentada','Visita','Oferta'].includes(l.status)).slice(0,5);
   const hotEl=document.getElementById('dash-hot-leads');
   hotEl.innerHTML=hot.length?hot.map(l=>`
-    <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <div style="padding:9px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer" onclick="showPanelById('leads')">
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:500">${l.nombre}</div>
         <div style="font-size:11px;color:var(--muted)">${l.interes} · ${l.presupuesto}</div>
       </div>
-      <span class="tag tag-${l.status.toLowerCase()}">${l.status}</span>
-      <div style="display:flex;gap:4px">
-        <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="waLead('${l.id}')" title="WhatsApp">💬</button>
-        <button class="email-btn" style="font-size:10px;padding:3px 7px" onclick="openEmailLead('${l.id}')" title="Enviar email">📧</button>
+      <span class="tag tag-${(l.status||'').toLowerCase().replace(/[^a-z]/g,'')}">${l.status}</span>
+      <div style="display:flex;gap:3px" onclick="event.stopPropagation()">
+        <button class="wa-btn" style="font-size:10px;padding:2px 6px" onclick="waLead('${l.id}')" title="WhatsApp">💬</button>
+        <button class="email-btn" style="font-size:10px;padding:2px 6px" onclick="openEmailLead('${l.id}')" title="Email">📧</button>
+        <button class="btn btn-ghost btn-sm" style="font-size:10px;padding:2px 6px" onclick="editLead('${l.id}')" title="Editar">✏️</button>
       </div>
     </div>`).join(''):`<div class="empty"><div>–</div></div>`;
+
+  // Quick props table
+  const propsEl=document.getElementById('dash-props-quick');
+  if(propsEl) propsEl.innerHTML=props.slice(0,5).map(p=>`<tr style="cursor:pointer" onclick="showPanelById('propiedades')">
+    <td style="font-weight:500">${p.titulo}</td>
+    <td><span class="tag" style="background:var(--card2);color:var(--text)">${p.tipo}</span></td>
+    <td class="price">${p.op==='Alquiler'?fmtPrice(p.precio,'mes'):fmtPrice(p.precio)}</td>
+    <td><span class="tag tag-${(p.status||'').toLowerCase()}">${p.status}</span></td>
+    <td onclick="event.stopPropagation()"><div class="action-btns">
+      <button class="btn btn-ghost btn-sm" title="WhatsApp" onclick="shareWA('${p.id}')">💬</button>
+      <button class="email-btn" title="Email" onclick="shareEmail('${p.id}')">📧</button>
+      <button class="btn btn-ghost btn-sm" title="Ver ficha" onclick="openFicha('${p.id}')">👁️</button>
+      <button class="btn btn-ghost btn-sm" title="Editar" onclick="editProp('${p.id}')">✏️</button>
+    </div></td>
+  </tr>`).join('');
+
   // Dash citas
   const tbody=document.getElementById('dash-citas');
   tbody.innerHTML=citas.slice(0,4).map(c=>`<tr>
@@ -1955,7 +2365,7 @@ function renderDashboard(){
   </tr>`).join('');
   // Activity
   const actEl=document.getElementById('dash-activity');
-  actEl.innerHTML=activities.slice(0,5).map(a=>`
+  actEl.innerHTML=activities.slice(0,6).map(a=>`
     <div class="activity-item" style="padding:8px 14px">
       <div class="activity-icon" style="background:var(--card2)">${a.tipo.split(' ')[0]}</div>
       <div class="activity-body">
@@ -1964,6 +2374,10 @@ function renderDashboard(){
       </div>
     </div>`).join('');
   document.getElementById('badge-leads').textContent=leads.filter(l=>l.status==='Nuevo').length;
+}
+function showPanelById(id){
+  const nav=[...document.querySelectorAll('.nav-item')].find(n=>n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"));
+  if(nav){nav.click();}
 }
 
 // ============================================================
@@ -1979,12 +2393,14 @@ function renderProps(data){
     <td><span class="tag" style="background:var(--card2);color:var(--text)">${propEmoji[p.tipo]||'🏠'} ${p.tipo}</span></td>
     <td><span class="tag tag-${p.op.toLowerCase().replace('-','')}">${p.op}</span></td>
     <td>${p.zona}</td>
-    <td class="price">${p.op==='Venta'||p.op==='Pre-venta'?'$'+p.precio.toLocaleString():'$'+p.precio.toLocaleString()+'/mes'}</td>
+    <td class="price">${p.op==='Venta'||p.op==='Pre-venta'?fmtPrice(p.precio):fmtPrice(p.precio,'mes')}</td>
     <td><span class="tag tag-${p.status.toLowerCase()}">${p.status}</span></td>
     <td><div class="action-btns">
       <button class="btn btn-ghost btn-sm" title="Compartir WhatsApp" onclick="shareWA('${p.id}')">💬</button>
       <button class="email-btn" title="Enviar por email" onclick="sharePropEmail('${p.id}')">📧</button>
-      <button class="btn btn-ghost btn-sm" title="Editar">✏️</button>
+      <button class="btn btn-ghost btn-sm" title="Ver Ficha" onclick="verFicha('${p.id}')">📄</button>
+      <button class="btn btn-ghost btn-sm" title="Archivos" onclick="openArchivosProp('${p.id}')">📎${(p.archivos||[]).length?` ${p.archivos.length}`:''}</button>
+      <button class="btn btn-ghost btn-sm" title="Editar" onclick="editProp('${p.id}')">✏️</button>
       <button class="btn btn-ghost btn-sm" title="Eliminar" onclick="deleteProp('${p.id}')">🗑️</button>
     </div></td>
   </tr>`).join('');
@@ -1992,9 +2408,10 @@ function renderProps(data){
   const grid=document.getElementById('props-grid-container');
   grid.innerHTML=arr.map(p=>`
     <div class="prop-card">
-      <div class="prop-img">
-        ${propEmoji[p.tipo]||'🏠'}
+      <div class="prop-img" style="${p.fotos&&p.fotos.length?`background-image:url(${p.fotos[0]});background-size:cover;background-position:center;font-size:0`:``}">
+        ${p.fotos&&p.fotos.length?'':propEmoji[p.tipo]||'🏠'}
         <div class="prop-img-badge"><span class="tag tag-${p.op.toLowerCase().replace('-','')}">${p.op}</span></div>
+        ${p.fotos&&p.fotos.length>1?`<div style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px">📷 ${p.fotos.length}</div>`:''}
       </div>
       <div class="prop-body">
         <div class="prop-title">${p.titulo}</div>
@@ -2005,7 +2422,7 @@ function renderProps(data){
           <span>📐 ${p.area}m²</span>
           ${p.estac>0?`<span>🚗 ${p.estac}</span>`:''}
         </div>
-        <div class="prop-price">${p.op==='Venta'||p.op==='Pre-venta'?'$'+p.precio.toLocaleString():'$'+p.precio.toLocaleString()+'/mes'}</div>
+        <div class="prop-price">${p.op==='Venta'||p.op==='Pre-venta'?fmtPrice(p.precio):fmtPrice(p.precio,'mes')}</div>
       </div>
     </div>`).join('');
 }
@@ -2019,7 +2436,7 @@ function deleteProp(id){if(confirm('¿Eliminar propiedad?')){props=props.filter(
 function shareWA(id){
   const p=props.find(x=>x.id===id);
   if(!p)return;
-  const txt=encodeURIComponent(`🏠 *${p.titulo}*\n📍 ${p.zona}\n💰 ${p.op==='Alquiler'?'$'+p.precio.toLocaleString()+'/mes':'$'+p.precio.toLocaleString()}\n🛏 ${p.hab} hab · 🚿 ${p.banos} baños · 📐 ${p.area}m²\n\nContacto: +507 64627763 · JAC Realty Panama\nLic. PN-0931`);
+  const txt=encodeURIComponent(`🏠 *${p.titulo}*\n📍 ${p.zona}\n💰 ${p.op==='Alquiler'?fmtPrice(p.precio,'mes'):fmtPrice(p.precio)}\n🛏 ${p.hab} hab · 🚿 ${p.banos} baños · 📐 ${p.area}m²\n\nContacto: +507 64627763 · JAC Realty Panama\nLic. PN-0931`);
   window.open('https://wa.me/?text='+txt);
 }
 
@@ -2027,7 +2444,7 @@ function sharePropEmail(id){
   const p=props.find(x=>x.id===id);
   if(!p)return;
   const sub=encodeURIComponent(`${p.titulo} · ${p.zona} · JAC Realty Panamá`);
-  const body=encodeURIComponent(`🏠 ${p.titulo}\n📍 ${p.zona}\n💰 ${p.op==='Alquiler'?'$'+p.precio.toLocaleString()+'/mes':'$'+p.precio.toLocaleString()}\n🛏 ${p.hab} hab · 🚿 ${p.banos} baños · 📐 ${p.area}m²\n\n${p.desc}\n\nJelyan Castro · JAC Realty Panamá · Lic. PN-0931\n📞 +507 64627763\n✉️ ${currentEmail}`);
+  const body=encodeURIComponent(`🏠 ${p.titulo}\n📍 ${p.zona}\n💰 ${p.op==='Alquiler'?fmtPrice(p.precio,'mes'):fmtPrice(p.precio)}\n🛏 ${p.hab} hab · 🚿 ${p.banos} baños · 📐 ${p.area}m²\n\n${p.desc}\n\nJelyan Castro · JAC Realty Panamá · Lic. PN-0931\n📞 +507 64627763\n✉️ ${currentEmail}`);
   window.open(`mailto:?subject=${sub}&body=${body}`);
 }
 
@@ -2063,7 +2480,7 @@ function matchProps(id){
     (l.interes==='Compra'&&p.op==='Venta')||(l.interes==='Alquiler'&&p.op==='Alquiler')||(l.interes==='Inversión')
   ).slice(0,3);
   if(!matches.length){alert('No se encontraron propiedades compatibles.');return;}
-  alert(`✅ ${matches.length} propiedades para ${l.nombre}:\n\n`+matches.map(p=>`• ${p.titulo} (${p.zona}) - $${p.precio.toLocaleString()}`).join('\n'));
+  alert(`✅ ${matches.length} propiedades para ${l.nombre}:\n\n`+matches.map(p=>`• ${p.titulo} (${p.zona}) - ${fmtPrice(p.precio)}`).join('\n'));
 }
 function deleteLead(id){if(confirm('¿Eliminar lead?')){leads=leads.filter(l=>l.id!==id);renderLeads();updateBadges();toast('Lead eliminado');}}
 
@@ -2365,7 +2782,7 @@ function runAutoMatch(){
         </div>
         <div style="font-size:11px;color:var(--muted)">
           Lead: ${m.lead.interes} · ${m.lead.zona} · ${m.lead.presupuesto||'Sin presupuesto'} &nbsp;|&nbsp;
-          Prop: ${m.prop.tipo} · ${m.prop.zona} · $${m.prop.precio.toLocaleString()}
+          Prop: ${m.prop.tipo} · ${m.prop.zona} · ${fmtPrice(m.prop.precio)}
         </div>
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0">
@@ -2706,13 +3123,18 @@ function saveProp(){
   if(!titulo){alert('Ingresa el título de la propiedad');return;}
   const gv=id=>{const el=document.getElementById(id);return el?el.value:''};
   const gn=id=>+gv(id)||0;
+  const editId=gv('p-edit-id');
   const amenidades=[];
   ['piscina','gym','salon','bbq','playground','lobby','rooftop','spa','generator','vista-mar','amoblado','mascotas']
     .forEach(a=>{if(document.getElementById('am-'+a)&&document.getElementById('am-'+a).checked)amenidades.push(a);});
   const p={
     id:'P'+String(props.length+1).padStart(3,'0'),
-    titulo,tipo:gv('p-tipo'),op:gv('p-op'),zona:gv('p-zona'),
+    titulo,tipo:gv('p-tipo'),op:gv('p-op'),
+    provincia:gv('p-provincia'),distrito:gv('p-distrito'),corregimiento:gv('p-corregimiento'),
+    zona:gv('p-zona'),direccion:gv('p-direccion'),referencia:gv('p-referencia'),
+    lat:parseFloat(gv('p-lat'))||null,lng:parseFloat(gv('p-lng'))||null,
     precio:gn('p-precio'),precio_alquiler:gn('p-precio-alquiler'),mantenimiento:gn('p-mantenimiento'),
+  url_wasi:gv('p-url-wasi'),url_mls:gv('p-url-mls'),url_e24:gv('p-url-e24'),url_c24:gv('p-url-c24'),url_tour:gv('p-url-tour'),url_brochure:gv('p-url-brochure'),
     area:gn('p-area'),area_const:gn('p-area-const'),
     hab:gn('p-hab'),banos:gn('p-banos'),medios_banos:gn('p-medios-banos'),
     estac:gn('p-estac'),piso:gn('p-piso'),anio:gn('p-anio'),
@@ -2720,10 +3142,17 @@ function saveProp(){
     status:gv('p-status'),negociable:gv('p-negociable'),
     amenidades,desc:gv('p-desc'),
     propietario:gv('p-propietario'),tel_propietario:gv('p-tel-propietario'),
-    nota_interna:gv('p-nota-interna')
+    nota_interna:gv('p-nota-interna'),
+    fotos:[..._fotosTemp],
+    archivos:[]
   };
+  if(editId){
+    const idx=props.findIndex(x=>x.id===editId);
+    if(idx>-1){props[idx]={...props[idx],...p,id:editId};toast('✏️ Propiedad actualizada');}
+    closeModal('modalProp');clearFormProp();renderProps();renderDashboard();return;
+  }
   props.push(p);
-  activities.unshift({tipo:'📝 Nota',cliente:'Sistema',desc:`Propiedad ${p.id} "${p.titulo}" agregada. Zona: ${p.zona}. $${p.precio.toLocaleString()}.`,time:'Ahora'});
+  activities.unshift({tipo:'📝 Nota',cliente:'Sistema',desc:`Propiedad ${p.id} "${p.titulo}" agregada. Zona: ${p.zona||p.provincia}. $${p.precio.toLocaleString()}.`,time:'Ahora'});
   // Persist to Supabase
   if(sb){
     sb.from('propiedades').insert({
@@ -2736,11 +3165,42 @@ function saveProp(){
     });
   }
   closeModal('modalProp');
-  // Clear form
-  ['p-titulo','p-precio','p-precio-alquiler','p-mantenimiento','p-area','p-area-const','p-hab','p-banos','p-medios-banos','p-estac','p-piso','p-anio','p-desc','p-propietario','p-tel-propietario','p-nota-interna'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.querySelectorAll('#p-amenidades-grid input[type=checkbox]').forEach(c=>c.checked=false);
+  clearFormProp();
   renderProps();renderDashboard();
   toast('✅ Propiedad guardada: '+p.id);
+}
+
+function editProp(id){
+  const p=props.find(x=>x.id===id);
+  if(!p) return;
+  clearFormProp();
+  const s=(el,v)=>{const e=document.getElementById(el);if(e)e.value=v!=null?v:'';};
+  s('p-titulo',p.titulo); s('p-tipo',p.tipo); s('p-op',p.op);
+  s('p-provincia',p.provincia);
+  updateDistritos(p.provincia);
+  s('p-distrito',p.distrito);
+  updateCorregimientos(p.provincia,p.distrito);
+  s('p-corregimiento',p.corregimiento);
+  s('p-zona',p.zona); s('p-direccion',p.direccion); s('p-referencia',p.referencia);
+  s('p-precio',p.precio); s('p-precio-alquiler',p.precio_alquiler); s('p-mantenimiento',p.mantenimiento);
+  s('p-area',p.area); s('p-area-const',p.area_const);
+  s('p-hab',p.hab); s('p-banos',p.banos); s('p-medios-banos',p.medios_banos);
+  s('p-estac',p.estac); s('p-piso',p.piso); s('p-anio',p.anio);
+  s('p-estado-inmueble',p.estado_inmueble); s('p-status',p.status); s('p-negociable',p.negociable);
+  s('p-desc',p.desc); s('p-propietario',p.propietario); s('p-tel-propietario',p.tel_propietario);
+  s('p-nota-interna',p.nota_interna);
+  (p.amenidades||[]).forEach(a=>{const el=document.getElementById('am-'+a);if(el)el.checked=true;});
+  _fotosTemp=[...(p.fotos||[])];
+  renderFotosGrid();
+  if(p.lat&&p.lng){
+    s('p-lat',p.lat); s('p-lng',p.lng);
+    document.getElementById('prop-mapa-coords').textContent=`📍 ${p.lat}, ${p.lng}`;
+  }
+  // Store edit id in title for detection in saveProp
+  document.querySelector('#modalProp .modal-title').textContent='✏️ Editar Propiedad · '+id;
+  document.getElementById('p-edit-id').value=id;
+  openModal('modalProp');
+  setTimeout(()=>{initPropMap();if(p.lat&&p.lng&&_propMap){_propMap.setView([p.lat,p.lng],15);if(_propMarker)_propMarker.setLatLng([p.lat,p.lng]);else _propMarker=L.marker([p.lat,p.lng],{draggable:true}).addTo(_propMap);}},300);
 }
 
 // ============================================================
@@ -2803,6 +3263,7 @@ function saveLead(){
     // EDIT existing lead
     const idx = leads.findIndex(l=>l.id===editId);
     if(idx>-1){
+      const prevStatus = leads[idx].status;
       leads[idx]={...leads[idx], nombre:nombre+(apellido?' '+apellido:''),
         apellido, tel, tel2, wa:wa||tel, email, cedula, pasaporte,
         nacimiento, nacionalidad, ocupacion, empresa,
@@ -2810,6 +3271,8 @@ function saveLead(){
         presupuesto, hab_deseadas:habDeseadas, zona, status, fuente, fuente_display:fuenteDisplay,
         quien_refirio:quienRefirio, cual_portal:cualPortal, fuente_descripcion:fuenteDesc,
         prioridad, agente, notas, instagram, linkedin};
+      logHistory('lead', editId, '✏️', 'Lead editado', `Datos actualizados. Interés: ${interes}. Estado: ${status}. Agente: ${agente}.`);
+      if(prevStatus !== status) logHistory('lead', editId, '🔄', `Estado: ${prevStatus} → ${status}`, `Cambio de estado registrado.`);
       toast('✏️ Lead actualizado: '+leads[idx].nombre);
     }
   } else {
@@ -2823,14 +3286,17 @@ function saveLead(){
       presupuesto, hab_deseadas:habDeseadas, zona, status, fuente, fuente_display:fuenteDisplay,
       quien_refirio:quienRefirio, cual_portal:cualPortal, fuente_descripcion:fuenteDesc,
       prioridad, agente, notas, instagram, linkedin,
-      fecha:new Date().toISOString().split('T')[0]
+      fecha:new Date().toISOString().split('T')[0],
+      historial:[]
     };
     leads.push(l);
+    logHistory('lead', l.id, '🎯', 'Lead creado', `Fuente: ${fuenteDisplay||'N/A'} · Interés: ${interes} · Presupuesto: ${presupuesto||'N/A'} · Agente: ${agente}`);
     activities.unshift({tipo:'🎯 Nuevo lead',cliente:l.nombre,desc:`Lead creado. Fuente: ${fuenteDisplay||'N/A'}. Interés: ${interes}. Presupuesto: ${presupuesto||'N/A'}.`,time:'Ahora'});
-    toast('✅ Lead guardado: '+l.nombre);
+    toast('✅ Lead guardado: '+l.nombre+' · 💬 Envía un WhatsApp de bienvenida desde el historial');
   }
 
   closeModal('modalLead');
+  clearFormLead();
   renderLeads(); renderDashboard();
   updateBadges();
 }
@@ -2892,7 +3358,10 @@ function renderLeads(filter){
       <td><span style="background:${statusColor[l.status]||'var(--muted)'}22;color:${statusColor[l.status]||'var(--muted)'};padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600">${l.status||'Nuevo'}</span></td>
       <td style="font-size:12px;color:var(--muted)">${l.fecha||'—'}</td>
       <td>
-        <button class="btn btn-sm btn-outline" title="Ver" onclick="viewLead('${l.id}')">👁</button>
+        ${l.tel||l.wa?`<button class="btn btn-sm" style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="WhatsApp" onclick="waLead('${l.id}')">💬</button>`:''}
+        ${l.email?`<button class="btn btn-sm" style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Email" onclick="openEmailLead('${l.id}')">📧</button>`:''}
+        <button class="btn btn-sm" style="background:var(--purple)22;color:var(--purple,#a855f7);border:1px solid var(--purple,#a855f7)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Historial" onclick="viewHistorial('lead','${l.id}')">${(l.historial||[]).length?`📋 ${l.historial.length}`:'📋'}</button>
+        <button class="btn btn-sm" style="background:var(--accent)22;color:var(--accent);border:1px solid var(--accent)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Archivos" onclick="openArchivos('lead','${l.id}')">📎 ${(l.archivos||[]).length||''}</button>
         <button class="btn btn-sm btn-outline" title="Editar" onclick="editLead('${l.id}')">✏️</button>
         <button class="btn btn-sm" style="background:#ef444422;color:var(--red);border:none;border-radius:6px;padding:4px 8px;cursor:pointer" title="Eliminar" onclick="deleteLead('${l.id}')">🗑</button>
       </td>
@@ -2921,10 +3390,13 @@ function renderContacts(filter){
       <td>${c.tel||'—'}<br><span style="font-size:11px;color:var(--muted)">${c.email||''}</span></td>
       <td>${c.empresa||'—'}${c.cargo?`<br><span style="font-size:11px;color:var(--muted)">${c.cargo}</span>`:''}</td>
       <td><span style="background:var(--card2);padding:3px 8px;border-radius:12px;font-size:11px">${c.categoria||'—'}</span></td>
-      <td style="font-size:12px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.notas||'—'}</td>
+      <td style="font-size:12px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.notas||'—'}</td>
       <td style="font-size:12px;color:var(--muted)">${c.fecha||'—'}</td>
       <td>
-        <button class="btn btn-sm btn-outline" title="Ver" onclick="viewContact('${c.id}')">👁</button>
+        ${c.tel||c.wa?`<button class="btn btn-sm" style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="WhatsApp" onclick="waContact('${c.id}')">💬</button>`:''}
+        ${c.email?`<button class="btn btn-sm" style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Email" onclick="openEmailContact('${c.id}')">📧</button>`:''}
+        <button class="btn btn-sm" style="background:var(--purple)22;color:var(--purple,#a855f7);border:1px solid var(--purple,#a855f7)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Historial" onclick="viewHistorial('contact','${c.id}')">${(c.historial||[]).length?`📋 ${c.historial.length}`:'📋'}</button>
+        <button class="btn btn-sm" style="background:var(--accent)22;color:var(--accent);border:1px solid var(--accent)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Archivos" onclick="openArchivos('contact','${c.id}')">📎 ${(c.archivos||[]).length||''}</button>
         <button class="btn btn-sm btn-outline" title="Editar" onclick="editContact('${c.id}')">✏️</button>
         <button class="btn btn-sm" style="background:#ef444422;color:var(--red);border:none;border-radius:6px;padding:4px 8px;cursor:pointer" title="Eliminar" onclick="deleteContact('${c.id}')">🗑</button>
       </td>
@@ -2956,14 +3428,17 @@ function saveContacto(){
   };
   if(editId){
     const idx=contacts.findIndex(c=>c.id===editId);
-    if(idx>-1){contacts[idx]={...contacts[idx],...data};toast('✏️ Contacto actualizado: '+data.nombre);}
+    if(idx>-1){contacts[idx]={...contacts[idx],...data};logHistory('contact',editId,'✏️','Contacto editado',`Datos actualizados. Empresa: ${data.empresa||'—'}. Categoría: ${data.categoria}.`);toast('✏️ Contacto actualizado: '+data.nombre);}
   } else {
     data.id='C'+Date.now();
     data.fecha=new Date().toISOString().split('T')[0];
+    data.historial=[];
     contacts.push(data);
+    logHistory('contact',data.id,'📇','Contacto creado',`Categoría: ${data.categoria} · Empresa: ${data.empresa||'—'} · Cargo: ${data.cargo||'—'}`);
     toast('✅ Contacto guardado: '+data.nombre);
   }
   closeModal('modalContacto');
+  clearFormContacto();
   renderContacts(); updateBadges();
 }
 
@@ -3045,7 +3520,10 @@ function renderClients(filter){
       <td style="font-size:12px;color:var(--muted)">${c.agente||'J. Castro'}</td>
       <td style="font-size:12px;color:var(--muted)">${c.fecha||'—'}</td>
       <td>
-        <button class="btn btn-sm btn-outline" title="Ver" onclick="viewClient('${c.id}')">👁</button>
+        ${c.tel||c.wa?`<button class="btn btn-sm" style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="WhatsApp" onclick="waClient('${c.id}')">💬</button>`:''}
+        ${c.email?`<button class="btn btn-sm" style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Email" onclick="openEmailClient('${c.id}')">📧</button>`:''}
+        <button class="btn btn-sm" style="background:var(--purple)22;color:var(--purple,#a855f7);border:1px solid var(--purple,#a855f7)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Historial" onclick="viewHistorial('client','${c.id}')">${(c.historial||[]).length?`📋 ${c.historial.length}`:'📋'}</button>
+        <button class="btn btn-sm" style="background:var(--accent)22;color:var(--accent);border:1px solid var(--accent)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Archivos" onclick="openArchivos('client','${c.id}')">📎 ${(c.archivos||[]).length||''}</button>
         <button class="btn btn-sm btn-outline" title="Editar" onclick="editClient('${c.id}')">✏️</button>
         <button class="btn btn-sm" style="background:#ef444422;color:var(--red);border:none;border-radius:6px;padding:4px 8px;cursor:pointer" title="Eliminar" onclick="deleteClient('${c.id}')">🗑</button>
       </td>
@@ -3086,15 +3564,23 @@ function saveCliente(){
   };
   if(editId){
     const idx=clients.findIndex(c=>c.id===editId);
-    if(idx>-1){clients[idx]={...clients[idx],...data};toast('✏️ Cliente actualizado: '+data.nombre);}
+    if(idx>-1){
+      const prevStatus=clients[idx].status;
+      clients[idx]={...clients[idx],...data};
+      logHistory('client',editId,'✏️','Cliente editado',`Datos actualizados. Tipo: ${tipo}. Estado: ${data.status}. Agente: ${data.agente}.`);
+      if(prevStatus!==data.status) logHistory('client',editId,'🔄',`Estado: ${prevStatus} → ${data.status}`,'Cambio de estado registrado.');
+      toast('✏️ Cliente actualizado: '+data.nombre);
+    }
   } else {
     data.id='CLI'+Date.now();
     data.fecha=new Date().toISOString().split('T')[0];
+    data.historial=[];
     clients.push(data);
+    logHistory('client',data.id,'👥','Cliente registrado',`Tipo: ${tipo} · Agente: ${data.agente} · Estado: ${data.status}`);
     activities.unshift({tipo:'👥 Nuevo cliente',cliente:data.nombre,desc:`Cliente ${tipo} registrado.`,time:'Ahora'});
     toast('✅ Cliente guardado: '+data.nombre);
   }
-  closeModal('modalCliente'); renderClients(); renderDashboard(); updateBadges();
+  closeModal('modalCliente'); clearFormCliente(); renderClients(); renderDashboard(); updateBadges();
 }
 
 function editClient(id){
@@ -3225,21 +3711,179 @@ function emailCita(cliente,tipo,fecha,hora){
 }
 
 // ============================================================
-// EMAIL
+// HISTORIAL UNIVERSAL — logHistory + viewHistorial
 // ============================================================
-function openEmailLead(leadId){
-  const l=leads.find(x=>x.id===leadId);
+let _historial_ctx = {tipo:'', id:''}; // context for addHistorialNota
+
+function _getRecord(tipo, id){
+  if(tipo==='lead') return leads.find(x=>x.id===id);
+  if(tipo==='contact') return contacts.find(x=>x.id===id);
+  if(tipo==='client') return clients.find(x=>x.id===id);
+  if(tipo==='prop') return props.find(x=>x.id===id);
+  if(tipo==='postventa') return postVentas.find(x=>x.id===id);
+  return null;
+}
+
+function logHistory(tipo, id, icono, titulo, descripcion, extra){
+  const rec = _getRecord(tipo, id);
+  if(!rec) return;
+  if(!rec.historial) rec.historial = [];
+  const now = new Date();
+  rec.historial.unshift({
+    id: 'H'+Date.now(),
+    icono, titulo, descripcion, extra: extra||'',
+    fecha: now.toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'}),
+    hora: now.toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'})
+  });
+}
+
+function _dotClass(icono){
+  if(icono==='📧') return 'email';
+  if(icono==='💬') return 'wa';
+  if(['📞','☎️'].includes(icono)) return 'call';
+  if(['🏠','🔑','👁'].includes(icono)) return 'visit';
+  if(['🎯','⬆️','⬇️','🔄'].includes(icono)) return 'status';
+  if(['✏️','📝'].includes(icono)) return 'note';
+  if(['✅','➕','👤','👥','📇'].includes(icono)) return 'create';
+  return 'note';
+}
+
+function viewHistorial(tipo, id){
+  const rec = _getRecord(tipo, id);
+  if(!rec){toast('Registro no encontrado');return;}
+  _historial_ctx = {tipo, id};
+  document.getElementById('historial-title').textContent = `📋 Historial — ${rec.nombre}`;
+  document.getElementById('historial-filter').value = '';
+  renderHistorialTimeline(rec.historial||[]);
+  renderHistorialSummary(rec, tipo);
+  openModal('modalHistorial');
+}
+
+function renderHistorialFilter(){
+  const ctx = _historial_ctx;
+  const rec = _getRecord(ctx.tipo, ctx.id);
+  if(!rec) return;
+  const f = document.getElementById('historial-filter').value;
+  const list = f ? (rec.historial||[]).filter(h=>h.icono===f||h.titulo.includes(f)) : (rec.historial||[]);
+  renderHistorialTimeline(list);
+}
+
+function renderHistorialTimeline(list){
+  const el = document.getElementById('historial-timeline');
+  if(!list||!list.length){
+    el.innerHTML=`<div style="text-align:center;padding:50px;color:var(--muted)">
+      <div style="font-size:40px;margin-bottom:10px">🗂</div>
+      <div>Sin eventos registrados todavía.</div>
+      <div style="font-size:12px;margin-top:6px">Los emails, WhatsApps, llamadas y cambios aparecerán aquí automáticamente.</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = list.map(h=>`
+    <div class="hs-item">
+      <div class="hs-dot ${_dotClass(h.icono)}">${h.icono}</div>
+      <div class="hs-body">
+        <div class="hs-meta">
+          <span class="hs-tipo">${h.titulo}</span>
+          <span class="hs-fecha">📅 ${h.fecha} · ⏰ ${h.hora}</span>
+        </div>
+        <div class="hs-desc">${h.descripcion||''}</div>
+        ${h.extra?`<div class="hs-extra">${h.extra}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function renderHistorialSummary(rec, tipo){
+  const el = document.getElementById('historial-summary');
+  const hist = rec.historial||[];
+  const emails = hist.filter(h=>h.icono==='📧').length;
+  const was = hist.filter(h=>h.icono==='💬').length;
+  const calls = hist.filter(h=>['📞','☎️'].includes(h.icono)).length;
+  const visits = hist.filter(h=>['🏠','🔑'].includes(h.icono)).length;
+  const statusBadge = rec.status ? `<span style="background:var(--accent)22;color:var(--accent);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">${rec.status}</span>` : '';
+  const tipoBadge = rec.tipo ? `<span style="background:var(--blue)22;color:var(--blue);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">${rec.tipo}</span>` : '';
+  el.innerHTML = `
+    <div class="hs-stat-item"><span class="hs-stat-num">${hist.length}</span><span class="hs-stat-label">Total eventos</span></div>
+    <div class="hs-stat-item"><span class="hs-stat-num" style="color:var(--blue)">${emails}</span><span class="hs-stat-label">Emails</span></div>
+    <div class="hs-stat-item"><span class="hs-stat-num" style="color:var(--green)">${was}</span><span class="hs-stat-label">WhatsApps</span></div>
+    <div class="hs-stat-item"><span class="hs-stat-num" style="color:var(--purple)">${calls}</span><span class="hs-stat-label">Llamadas</span></div>
+    <div class="hs-stat-item"><span class="hs-stat-num" style="color:var(--accent)">${visits}</span><span class="hs-stat-label">Visitas</span></div>
+    <div style="flex:1"></div>
+    ${statusBadge}${tipoBadge}
+    ${rec.tel?`<a href="https://wa.me/${(rec.wa||rec.tel||'').replace(/\D/g,'')}" target="_blank" class="btn btn-sm" style="background:#25d36622;color:#25d366;border:1px solid #25d36644;text-decoration:none;padding:4px 10px;border-radius:8px;font-size:12px">💬 WA</a>`:''}
+    ${rec.email?`<button class="btn btn-sm btn-outline" onclick="closeModal('modalHistorial');openEmailRec('${tipo}','${_historial_ctx.id}')" style="font-size:12px">📧 Email</button>`:''}
+  `;
+}
+
+function addHistorialNota(){
+  const ctx = _historial_ctx;
+  const txt = (document.getElementById('historial-nota-input').value||'').trim();
+  if(!txt){alert('Escribe una nota para agregar al historial.');return;}
+  const tipo_icono = document.getElementById('historial-nota-tipo').value;
+  logHistory(ctx.tipo, ctx.id, tipo_icono, tipo_icono==='📞'?'Llamada':tipo_icono==='🤝'?'Reunión':tipo_icono==='⚡'?'Acción':'Nota manual', txt);
+  document.getElementById('historial-nota-input').value='';
+  const rec = _getRecord(ctx.tipo, ctx.id);
+  renderHistorialTimeline(rec.historial||[]);
+  renderHistorialSummary(rec, ctx.tipo);
+  toast('✅ Anotación agregada al historial');
+}
+
+// ============================================================
+// WhatsApp functions — Leads, Contacts, Clients
+// ============================================================
+function waLead(id){
+  const l=leads.find(x=>x.id===id);
   if(!l)return;
-  document.getElementById('em-to').value=l.email||'';
-  document.getElementById('em-from').value=currentEmail;
-  const refSel=document.getElementById('em-lead-ref');
-  refSel.innerHTML='<option value="">-- Seleccionar lead --</option>'+leads.map(x=>`<option value="${x.id}" ${x.id===leadId?'selected':''}>${x.nombre}</option>`).join('');
+  const txt=encodeURIComponent(`Hola ${l.nombre.split(' ')[0]}, soy Jelyan de JAC Realty. Tenemos propiedades disponibles que se ajustan a su búsqueda de ${(l.interes||'').toLowerCase()} en ${l.zona||'su zona de interés'}. ¿Podríamos coordinar una cita? 🏡`);
+  window.open('https://wa.me/'+((l.wa||l.tel||'').replace(/\D/g,''))+`?text=${txt}`);
+  logHistory('lead',id,'💬','WhatsApp enviado',`Mensaje de presentación enviado vía WhatsApp.`,txt.substring(0,200));
+  toast('💬 WhatsApp abierto · Evento registrado en historial');
+}
+function waContact(id){
+  const c=contacts.find(x=>x.id===id);
+  if(!c)return;
+  const txt=encodeURIComponent(`Hola ${c.nombre.split(' ')[0]}, soy Jelyan de JAC Realty. Me pongo en contacto para coordinar. 🏡`);
+  window.open('https://wa.me/'+((c.wa||c.tel||'').replace(/\D/g,''))+`?text=${txt}`);
+  logHistory('contact',id,'💬','WhatsApp enviado','Mensaje enviado vía WhatsApp.',txt.substring(0,200));
+  toast('💬 WhatsApp abierto · Evento registrado en historial');
+}
+function waClient(id){
+  const c=clients.find(x=>x.id===id);
+  if(!c)return;
+  const base = c.tipo==='Comprador'||c.tipo==='Arrendatario'
+    ? `Hola ${c.nombre.split(' ')[0]}, soy Jelyan de JAC Realty. Tengo novedades sobre propiedades que pueden interesarle. ¿Tiene un momento? 🏡`
+    : `Hola ${c.nombre.split(' ')[0]}, soy Jelyan de JAC Realty. Le escribo con novedades sobre su propiedad. ¿Tiene un momento? 🏠`;
+  const txt=encodeURIComponent(base);
+  window.open('https://wa.me/'+((c.wa||c.tel||'').replace(/\D/g,''))+`?text=${txt}`);
+  logHistory('client',id,'💬','WhatsApp enviado','Mensaje enviado vía WhatsApp.',base);
+  toast('💬 WhatsApp abierto · Evento registrado en historial');
+}
+
+// ============================================================
+// EMAIL — universal para leads, contacts, clients
+// ============================================================
+function openEmailRec(tipo, id){
+  const rec = _getRecord(tipo, id);
+  if(!rec) return;
+  document.getElementById('em-to').value = rec.email||'';
+  document.getElementById('em-from').value = currentEmail;
+  document.getElementById('em-ref-tipo').value = tipo;
+  document.getElementById('em-ref-id').value = id;
+  // Populate lead-ref dropdown
+  const refSel = document.getElementById('em-lead-ref');
+  const allRecs = [...leads.map(x=>({id:x.id,nombre:x.nombre,t:'lead'})),...contacts.map(x=>({id:x.id,nombre:x.nombre,t:'contact'})),...clients.map(x=>({id:x.id,nombre:x.nombre,t:'client'}))];
+  refSel.innerHTML = '<option value="">-- Sin vincular --</option>' + allRecs.map(x=>`<option value="${x.id}" ${x.id===id?'selected':''}>${x.nombre}</option>`).join('');
   openModal('modalEmail');
 }
+function openEmailLead(leadId){ openEmailRec('lead', leadId); }
+function openEmailContact(contactId){ openEmailRec('contact', contactId); }
+function openEmailClient(clientId){ openEmailRec('client', clientId); }
 function openEmailModal(){
   document.getElementById('em-from').value=currentEmail;
+  document.getElementById('em-ref-tipo').value='';
+  document.getElementById('em-ref-id').value='';
   const refSel=document.getElementById('em-lead-ref');
-  refSel.innerHTML='<option value="">-- Seleccionar lead --</option>'+leads.map(x=>`<option value="${x.id}">${x.nombre}</option>`).join('');
+  const allRecs=[...leads.map(x=>({id:x.id,nombre:x.nombre})),...contacts.map(x=>({id:x.id,nombre:x.nombre})),...clients.map(x=>({id:x.id,nombre:x.nombre}))];
+  refSel.innerHTML='<option value="">-- Sin vincular --</option>'+allRecs.map(x=>`<option value="${x.id}">${x.nombre}</option>`).join('');
   openModal('modalEmail');
 }
 const emailTemplates={
@@ -3264,38 +3908,43 @@ function sendEmail(){
   const subject=document.getElementById('em-subject').value.trim();
   const body=document.getElementById('em-body').value.trim();
   const from=document.getElementById('em-from').value;
+  const refTipo=document.getElementById('em-ref-tipo').value;
+  const refId=document.getElementById('em-ref-id').value;
   const leadRef=document.getElementById('em-lead-ref').value;
   if(!to||!subject){alert('Completa destinatario y asunto.');return;}
-  const lead=leads.find(x=>x.id===leadRef);
-  const toName=lead?lead.nombre:to;
+  // Resolve name from linked record
+  const linkedId = refId || leadRef;
+  const linkedTipo = refTipo || 'lead';
+  const rec = _getRecord(linkedTipo, linkedId) || leads.find(x=>x.id===linkedId);
+  const toName = rec ? rec.nombre : to;
   // Open mailto
   window.open(`mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
-  // Log it
+  // Log to emailLogs (legacy)
   const entry={
     id:'E'+String(emailLogs.length+1).padStart(3,'0'),
-    from,to:toName,toEmail:to,subject,body,leadRef,
+    from,to:toName,toEmail:to,subject,body,leadRef:linkedId,
     fecha:new Date().toISOString().split('T')[0],
     status:'Enviado'
   };
   emailLogs.unshift(entry);
   activities.unshift({tipo:'📧 Email',cliente:toName,desc:`Email enviado: "${subject}" desde ${from}`,time:'Ahora'});
+  // Log to record historial
+  if(linkedId && linkedTipo){
+    logHistory(linkedTipo, linkedId, '📧', 'Email enviado', `Para: ${to} · Asunto: "${subject}"`, body.substring(0,300));
+  }
   // Schedule followup toast
   const fu=document.getElementById('em-followup').value;
   if(fu) toast(`✅ Email enviado · Seguimiento en ${fu} día(s) programado`);
   else toast('✅ Email enviado a '+toName);
   closeModal('modalEmail');
-  renderLeads();
+  renderLeads(); renderContacts(); renderClients();
   document.getElementById('em-to').value='';
   document.getElementById('em-subject').value='';
   document.getElementById('em-body').value='';
 }
 function viewEmailHistory(leadId){
-  const l=leads.find(x=>x.id===leadId);
-  const logs=emailLogs.filter(e=>e.leadRef===leadId);
-  if(!logs.length){toast(`Sin historial de email para ${l.nombre}`);return;}
-  const statusMap={Enviado:'📤',Abierto:'👁',Respondido:'↩️',Clicked:'🔗'};
-  const html=logs.map(e=>`• ${statusMap[e.status]||''} ${e.fecha} | ${e.subject} [${e.status}]`).join('\n');
-  alert(`📧 Historial de email — ${l.nombre}:\n\n${html}`);
+  // Redirect to unified historial filtered by email
+  viewHistorial('lead', leadId);
 }
 
 // ============================================================
@@ -3644,6 +4293,655 @@ function toggleSidebar(){
 // Close sidebar when navigating on mobile
 const _origShowPanel = showPanel;
 // Patch nav clicks to auto-close sidebar on mobile
+// ============================================================
+// PANAMA GEOGRAPHY
+// ============================================================
+const PANAMA_GEO = {
+  'Panamá':{
+    'Panamá':['Ancón','Bella Vista','Betania','Calidonia','Curundú','Chilibre','Don Bosco','El Chorrillo','Juan Díaz','Las Mañanitas','Llano Bonito','Parque Lefevre','Pedregal','Pueblo Nuevo','Río Abajo','San Felipe','San Francisco','San Martín','Santa Ana','Tocumen','Victoriano Lorenzo'],
+    'San Miguelito':['Amelia Denis de Icaza','Belisario Frías','Belisario Porras','J.D. Espinar','Mateo Iturralde','Nuevo Veranillo','Río Abajo','Rufina Alfaro','Victoriano Lorenzo'],
+    'Arraiján':['Arraiján','Burunga','J.D. Arosemena','Nuevo Emperador','Veracruz','Vista Alegre'],
+    'Capira':['Capira','Caimito','Cirí Grande','La Trinidad','Lídice','Obaldía','San Carlos','Villa Carmen'],
+    'Chame':['Chame','Bejuco','Buenos Aires','La Ermita','Nueva Gorgona','Punta Chame','San Carlos'],
+    'Chepo':['Chepo','El Llano','Madungandí','San Martín','Tortí'],
+    'Chimán':['La Palma','Brujas','Gonzalo Vásquez','Narganá'],
+    'La Chorrera':['La Chorrera','Amador','Barrio Balboa','Barrio Colón','El Arado','El Coco','Feuillet','Guadalupe','Herrera','Hurtado','Mendoza','Playa Leona','Puerto Caimito'],
+    'Balboa':['Balboa','Ancón'],
+    'Taboga':['Taboga','Otoque Occidente','Otoque Oriente'],
+  },
+  'Panamá Oeste':{
+    'Arraiján':['Arraiján','Burunga','J.D. Arosemena','Nuevo Emperador','Veracruz','Vista Alegre'],
+    'La Chorrera':['La Chorrera','Amador','Barrio Balboa','Barrio Colón','El Arado','Feuillet','Guadalupe','Herrera','Hurtado','Mendoza','Playa Leona','Puerto Caimito'],
+    'Capira':['Capira','El Cacao','Caimito','Cirí Grande','La Trinidad','Lídice','Obaldía','San Carlos'],
+    'Chame':['Chame','Bejuco','Buenos Aires','La Ermita','Nueva Gorgona','Punta Chame','San Carlos'],
+    'San Carlos':['San Carlos','El Espino','El Higo','La Ermita','Lídice','Nueva Gorgona'],
+  },
+  'Chiriquí':{
+    'David':['David','Bijagual','Boquete','Cochea','Las Lomas','Mateo','Pedregal','San Carlos','San Pablo Nuevo','San Pablo Viejo','San Pedro','Tijeras'],
+    'Bugaba':['Concepción','Bugaba','Cerro Punta','El Higo','Gómez','La Estrella','Las Palmas','Palmira','Volcán'],
+    'Boquete':['Boquete','Alto Boquete','Bajo Boquete','Caldera','Jaramillo','Los Naranjos','Palo Alto','Palmira','Potrerillos Arriba'],
+    'Barú':['Puerto Armuelles','Bella Vista','Boca Chica','El Porvenir','Frontera','Limones','Punta Burica'],
+    'Dolega':['Dolega','Dos Ríos','Los Algarrobos','Potrerillos Abajo','Potrerillos Arriba','Tinajas'],
+    'Alanje':['Alanje','Aserrío de Gariché','Bagalá','Bijagual','Boca Chica','Guarumal','San Andrés'],
+    'Renacimiento':['Río Sereno','Aguas Calientes','Cañas','Cerro Punta','Guadalupe','Nueva California'],
+    'Tierras Altas':['Boquete','Cerro Punta','Guadalupe','Jaramillo','Nueva California','Palmira'],
+    'San Félix':['San Félix','Horconcitos','Lajas de Tolé','Remedios'],
+    'Tolé':['Tolé','Alto Caballero','Cerro Caña','El Bebedero','El Palmar'],
+    'Boquerón':['Boquerón','El Nancito','El Palmar','La Concepción'],
+    'Remedios':['Remedios','El Nancito','Gobea','Los Algarrobos'],
+  },
+  'Colón':{
+    'Colón':['Barrio Norte','Barrio Sur','Buena Vista','Cativá','Cristóbal','Nuevo Providencia','Puerto Pilón','Sabanitas','Salamanca'],
+    'Chagres':['La Encantada','Palmas Bellas','Río Indio','Santa Isabel'],
+    'Donoso':['El Guásimo','El Mamey','La Troje','Miguel de la Borda','Toabré'],
+    'Omar Torrijos':['Coclecito','El Copé','La Pintada'],
+    'Portobelo':['Portobelo','Cacique','Garrote','María Chiquita','Nombre de Dios'],
+    'Santa Isabel':['Palmira','Cuango','Gobea','Palenque','Salud'],
+  },
+  'Coclé':{
+    'Penonomé':['Penonomé','Caimito','Coclé del Norte','El Caño','El Chirú','Pajonal','Río Grande','Toabré'],
+    'Aguadulce':['Aguadulce','El Roble','Pocrí'],
+    'Antón':['Antón','El Valle de Antón','Juan Díaz','Natá','Río Hato'],
+    'La Pintada':['La Pintada','El Harino','La Laja','Llano Grande','Tulú'],
+    'Natá':['Natá','El Caño','Las Huacas'],
+    'Olá':['Olá','Gaital','El Palmar'],
+  },
+  'Herrera':{
+    'Chitré':['Chitré','La Arena','Llano Bonito','Monagrillo','San Juan Bautista'],
+    'Las Minas':['Las Minas','Chepo','La Colorada','La Montañuela'],
+    'Los Pozos':['Los Pozos','El Cedro','La Arena','Las Guías','Villa Lourdes'],
+    'Ocú':['Ocú','El Capurí','El Tijera','Llano de La Cruz'],
+    'Parita':['Parita','Cabuya','El Rincón','Los Castillos','París'],
+    'Pesé':['Pesé','Aserrío','Belén','El Ciruelo'],
+    'Santa María':['Santa María','Aguadulce','Leones','Llanito'],
+  },
+  'Los Santos':{
+    'Las Tablas':['Las Tablas','El Caucho','El Ejido','El Manantial','Flores','La Palma','La Tiza','Palmilla','Quisqueya','Río Grande','Santo Domingo'],
+    'Guararé':['Guararé','El Espino','La Enea','La Palma','La Tronosa','Llano Abajo'],
+    'Los Santos':['Los Santos','Agua Buena','La Colorada','Las Cruces','Llano Largo','Medialuna','Mororó','Peña Blanca','Sabana Grande'],
+    'Macaracas':['Macaracas','Bahía Honda','Corozal','El Giral','Lajamina','Mogollón'],
+    'Pedasí':['Pedasí','El Limón','Los Asientos','Oria Arriba'],
+    'Pocrí':['Pocrí','Bayano','El Cacao'],
+    'Tonosí':['Tonosí','Cambutal','El Cortezo','Flores','Guánico','La Tronosa'],
+  },
+  'Veraguas':{
+    'Santiago':['Santiago','Carlos Santana Ávila','Edwin Fábrega','La Colorada','La Peña','La Raya de Santa María','Lotería','Ponuga'],
+    'Calobre':['Calobre','Chiguirí Arriba','El Pantano','El Palmar','La Garceana','Tulú'],
+    'Cañazas':['Cañazas','El Aromillo','El Piro','La Soledad','Los Hatillos','San Bartolo'],
+    'Las Palmas':['Las Palmas','Cerro de Casa','El Balsal','Pixvae','Puerto Vidal'],
+    'Mariato':['Mariato','Arenas','Quebro'],
+    'Montijo':['Montijo','El Rebalsadero','Estero Largo','La Garceana','Puerto Mutis'],
+    'Río de Jesús':['Río de Jesús','Banco','Calovévora','San Pedro del Espino'],
+    'San Francisco':['San Francisco','La Colorada','La Raya','Remance','San Juan'],
+    'Santa Fe':['Santa Fe','Calovébora','El Alto','El Cuay','El Pantano','Gatuncito'],
+    'Soná':['Soná','Bahía Honda','Guarumal','Hicaco','La Soledad','Marañón'],
+  },
+  'Bocas del Toro':{
+    'Bocas del Toro':['Bocas del Toro','Almirante','Bastimentos','Cauchero','Cristóbal','Punta Laurel','Tierra Oscura'],
+    'Changuinola':['Changuinola','Almirante','Boca del Monte','Guabito','Las Delicias','Miramar','Teribe'],
+    'Chiriquí Grande':['Chiriquí Grande','Boca del Drago','Kusapín','Miramar','Mutis','Rambala'],
+  },
+  'Darién':{
+    'La Palma':['La Palma','Cucunatí','Metetí','Puerto Indio','Río Congo','Setegantí','Taimatí'],
+    'Cémaco':['Boca de Cupe','La Marea','Lajas Blancas','Pavarandó','Ucurgantí'],
+    'Metetí':['Metetí','Agua Fría','Puerto América','Santa Fe'],
+    'Pinogana':['El Real','Balsas','Biroquera','Pucuro','Yaviza'],
+    'Sambú':['Sambú','Chapigana','Río Balsa','Río Iglesias'],
+  },
+  'Guna Yala':{
+    'Guna Yala':['Ailigandí','El Llano','Narganá','Puerto Obaldía','Tubualá'],
+  },
+  'Ngäbe-Buglé':{
+    'Besiko':['Bisvalles','Calante','Cerro Pelado','Guariviara','Kankintú'],
+    'Mirono':['Cerro Caña','El Piro','Guariviara','Mironó'],
+    'Müna':['Cerro Iglesias','Hato Pilón','Muna','Soloy'],
+    'Nole Duima':['Cerro Iglesias','Chichica'],
+    'Ñurum':['Cerro Caña','Hato Corotú','Hato Culantro','Hato Jobo'],
+  },
+  'Emberá-Wounaan':{
+    'Cémaco':['Boca de Cupe','Lajas Blancas','Pavarandó','Tucutí','Unión Chocó'],
+    'Sambú':['Chapigana','Río Balsa','Río Iglesias','Sambú'],
+  },
+};
+
+function initProvinciaDropdown(){
+  const sel=document.getElementById('p-provincia');
+  if(!sel) return;
+  Object.keys(PANAMA_GEO).forEach(prov=>{
+    const opt=document.createElement('option');
+    opt.value=prov; opt.textContent=prov;
+    sel.appendChild(opt);
+  });
+}
+function updateDistritos(prov){
+  const selD=document.getElementById('p-distrito');
+  const selC=document.getElementById('p-corregimiento');
+  selD.innerHTML='<option value="">-- Selecciona distrito --</option>';
+  selC.innerHTML='<option value="">-- Selecciona distrito --</option>';
+  if(!prov||!PANAMA_GEO[prov]) return;
+  Object.keys(PANAMA_GEO[prov]).forEach(d=>{
+    const opt=document.createElement('option');
+    opt.value=d; opt.textContent=d; selD.appendChild(opt);
+  });
+}
+function updateCorregimientos(prov, dist){
+  const sel=document.getElementById('p-corregimiento');
+  sel.innerHTML='<option value="">-- Selecciona corregimiento --</option>';
+  if(!prov||!dist||!PANAMA_GEO[prov]||!PANAMA_GEO[prov][dist]) return;
+  PANAMA_GEO[prov][dist].forEach(c=>{
+    const opt=document.createElement('option');
+    opt.value=c; opt.textContent=c; sel.appendChild(opt);
+  });
+}
+
+// ============================================================
+// LEAFLET MAP
+// ============================================================
+let _propMap=null, _propMarker=null;
+function initPropMap(){
+  if(_propMap) return;
+  const el=document.getElementById('prop-mapa');
+  if(!el) return;
+  _propMap = L.map('prop-mapa').setView([8.9936,-79.5197],13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© OpenStreetMap',maxZoom:19
+  }).addTo(_propMap);
+  _propMap.on('click',function(e){
+    const {lat,lng}=e.latlng;
+    if(_propMarker) _propMarker.setLatLng([lat,lng]);
+    else _propMarker=L.marker([lat,lng],{draggable:true}).addTo(_propMap)
+      .on('dragend',function(ev){
+        const p=ev.target.getLatLng();
+        document.getElementById('p-lat').value=p.lat.toFixed(6);
+        document.getElementById('p-lng').value=p.lng.toFixed(6);
+        document.getElementById('prop-mapa-coords').textContent=`📍 ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`;
+      });
+    document.getElementById('p-lat').value=lat.toFixed(6);
+    document.getElementById('p-lng').value=lng.toFixed(6);
+    document.getElementById('prop-mapa-coords').textContent=`📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  });
+  setTimeout(()=>_propMap.invalidateSize(),300);
+}
+
+// ============================================================
+// FOTOS PROPIEDAD
+// ============================================================
+let _fotosTemp = []; // temp storage while modal open
+function addFotosPropiedad(files){
+  Array.from(files).forEach(f=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      _fotosTemp.push(e.target.result);
+      renderFotosGrid();
+    };
+    reader.readAsDataURL(f);
+  });
+}
+function renderFotosGrid(){
+  const grid=document.getElementById('p-fotos-grid');
+  if(!grid) return;
+  grid.innerHTML=_fotosTemp.map((src,i)=>`
+    <div class="foto-thumb">
+      <img src="${src}" alt="foto ${i+1}">
+      ${i===0?'<div class="foto-cover">PORTADA</div>':''}
+      <button class="foto-del" onclick="deleteFotoTemp(${i})">×</button>
+    </div>`).join('');
+}
+function deleteFotoTemp(idx){
+  _fotosTemp.splice(idx,1);
+  renderFotosGrid();
+}
+
+// ============================================================
+// ARCHIVOS (universal: lead, contact, client, prop, postventa)
+// ============================================================
+let _archCtx={tipo:'',id:''};
+function _getRecordUniversal(tipo,id){
+  if(tipo==='lead') return leads.find(x=>x.id===id);
+  if(tipo==='contact') return contacts.find(x=>x.id===id);
+  if(tipo==='client') return clients.find(x=>x.id===id);
+  if(tipo==='prop') return props.find(x=>x.id===id);
+  if(tipo==='postventa') return postVentas.find(x=>x.id===id);
+  return null;
+}
+function openArchivos(tipo,id){
+  _archCtx={tipo,id};
+  const rec=_getRecordUniversal(tipo,id);
+  if(!rec){toast('Registro no encontrado');return;}
+  document.getElementById('archivos-modal-title').textContent=`📎 Archivos — ${rec.nombre||rec.titulo||id}`;
+  renderArchivosModal(rec.archivos||[]);
+  openModal('modalArchivos');
+}
+function openArchivosProp(id){ openArchivos('prop',id); }
+function renderArchivosModal(archivos){
+  const list=document.getElementById('archivos-list');
+  if(!archivos.length){
+    list.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)">Sin archivos. Agrega documentos, contratos, fotos...</div>';
+    return;
+  }
+  list.innerHTML=archivos.map(a=>`
+    <div class="archivo-item">
+      <div class="archivo-icon">${archivoIcono(a.tipo)}</div>
+      <div class="archivo-info">
+        <div class="archivo-nombre">${a.nombre}</div>
+        <div class="archivo-meta">${a.tamaño} · ${a.fecha}</div>
+      </div>
+      <div class="archivo-acciones">
+        <button class="btn btn-sm btn-outline" onclick="viewArchivo('${a.id}')" title="Ver">👁</button>
+        <button class="btn btn-sm btn-outline" onclick="exportArchivo('${a.id}')" title="Descargar">⬇️</button>
+        <button class="btn btn-sm" style="background:#ef444422;color:var(--red);border:none;border-radius:6px;padding:4px 8px;cursor:pointer" onclick="deleteArchivo('${a.id}')" title="Eliminar">🗑</button>
+      </div>
+    </div>`).join('');
+}
+function archivoIcono(tipo){
+  if(!tipo) return '📄';
+  if(tipo.startsWith('image')) return '🖼️';
+  if(tipo.includes('pdf')) return '📕';
+  if(tipo.includes('word')||tipo.includes('document')) return '📘';
+  if(tipo.includes('sheet')||tipo.includes('excel')) return '📗';
+  if(tipo.includes('video')) return '🎥';
+  if(tipo.includes('audio')) return '🎵';
+  if(tipo.includes('zip')||tipo.includes('rar')) return '📦';
+  return '📄';
+}
+function addArchivoFromInput(input){
+  Array.from(input.files).forEach(f=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const rec=_getRecordUniversal(_archCtx.tipo,_archCtx.id);
+      if(!rec) return;
+      if(!rec.archivos) rec.archivos=[];
+      const arch={
+        id:'AR'+Date.now()+Math.random().toString(36).slice(2),
+        nombre:f.name, tipo:f.type,
+        tamaño:formatFileSize(f.size),
+        datos:e.target.result,
+        fecha:new Date().toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'})
+      };
+      rec.archivos.push(arch);
+      logHistory(_archCtx.tipo,_archCtx.id,'📎','Archivo agregado',`${f.name} (${arch.tamaño})`);
+      renderArchivosModal(rec.archivos);
+      toast(`✅ ${f.name} agregado`);
+    };
+    reader.readAsDataURL(f);
+  });
+  input.value='';
+}
+function formatFileSize(bytes){
+  if(bytes<1024) return bytes+'B';
+  if(bytes<1024*1024) return (bytes/1024).toFixed(1)+'KB';
+  return (bytes/(1024*1024)).toFixed(1)+'MB';
+}
+function viewArchivo(archId){
+  const rec=_getRecordUniversal(_archCtx.tipo,_archCtx.id);
+  if(!rec) return;
+  const arch=(rec.archivos||[]).find(a=>a.id===archId);
+  if(!arch) return;
+  const win=window.open('','_blank');
+  if(arch.tipo.startsWith('image')){
+    win.document.write(`<html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="${arch.datos}" style="max-width:100%;max-height:100vh;object-fit:contain"></body></html>`);
+  } else if(arch.tipo.includes('pdf')){
+    win.document.write(`<html><body style="margin:0"><embed src="${arch.datos}" type="application/pdf" width="100%" height="100%" style="position:fixed;top:0;left:0;width:100%;height:100%"></body></html>`);
+  } else {
+    win.document.write(`<html><body style="font-family:sans-serif;padding:40px;text-align:center"><h2>📄 ${arch.nombre}</h2><p>Para ver este archivo, descárgalo.</p><a href="${arch.datos}" download="${arch.nombre}" style="background:#e8a020;color:#000;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:12px">⬇️ Descargar</a></body></html>`);
+  }
+}
+function exportArchivo(archId){
+  const rec=_getRecordUniversal(_archCtx.tipo,_archCtx.id);
+  if(!rec) return;
+  const arch=(rec.archivos||[]).find(a=>a.id===archId);
+  if(!arch) return;
+  const a=document.createElement('a');
+  a.href=arch.datos; a.download=arch.nombre; a.click();
+}
+function deleteArchivo(archId){
+  if(!confirm('¿Eliminar este archivo?')) return;
+  const rec=_getRecordUniversal(_archCtx.tipo,_archCtx.id);
+  if(!rec) return;
+  rec.archivos=(rec.archivos||[]).filter(a=>a.id!==archId);
+  renderArchivosModal(rec.archivos);
+  toast('Archivo eliminado');
+}
+
+// ============================================================
+// FICHA PROPIEDAD — link externo compartible
+// ============================================================
+function verFicha(id){
+  const p=props.find(x=>x.id===id);
+  if(!p){toast('Propiedad no encontrada');return;}
+  document.getElementById('ficha-modal-prop-id').value=id;
+  renderFichaModal(p, document.getElementById('ficha-con-contacto').checked);
+  openModal('modalFicha');
+}
+function renderFichaModal(p, conContacto){
+  if(!p) return;
+  const fotosHtml = p.fotos&&p.fotos.length ?
+    `<div class="ficha-gallery">
+      <div class="main-foto" style="background-image:url(${p.fotos[0]});background-size:cover;background-position:center;border-radius:8px 0 0 8px"></div>
+      ${p.fotos[1]?`<div style="background-image:url(${p.fotos[1]});background-size:cover;background-position:center"></div>`:'<div class="no-foto" style="font-size:30px">🏠</div>'}
+      ${p.fotos[2]?`<div style="background-image:url(${p.fotos[2]});background-size:cover;background-position:center"></div>`:'<div class="no-foto" style="font-size:30px">📷</div>'}
+    </div>` :
+    `<div style="height:200px;display:flex;align-items:center;justify-content:center;font-size:60px;background:var(--card2);border-radius:8px">${propEmoji[p.tipo]||'🏠'}</div>`;
+
+  const amenidadesList=(p.amenidades||[]).map(a=>`<span style="background:var(--card2);padding:2px 8px;border-radius:12px;font-size:11px;margin:2px">✓ ${a}</span>`).join('');
+
+  const mapaHtml = p.lat&&p.lng ?
+    `<div style="margin-top:12px"><div id="ficha-mini-mapa" style="height:180px;border-radius:8px;border:1px solid var(--border)"></div></div>` : '';
+
+  const contactoHtml = conContacto ? `
+    <div style="background:var(--card2);border-radius:10px;padding:14px;margin-top:14px;border:1px solid var(--border)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">📞 Contacto del Agente</div>
+      <div style="font-size:14px;font-weight:600">Jelyan Castro · JAC Realty Panamá</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">📞 +507 6462-7763 · Lic. PN-0931</div>
+      <div style="font-size:12px;color:var(--muted)">✉️ jacrealtypa@gmail.com</div>
+      <div style="font-size:12px;color:var(--muted)">🌐 jacrealtypa.com</div>
+    </div>` : `
+    <div style="background:var(--card2);border-radius:10px;padding:12px;margin-top:14px;text-align:center;color:var(--muted);font-size:12px">
+      Para más información contacte a su agente de confianza.
+    </div>`;
+
+  document.getElementById('ficha-preview').innerHTML = `
+    <div class="ficha-panel" style="padding:0">
+      ${fotosHtml}
+      <div style="padding:14px">
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+          <span class="tag tag-${p.op.toLowerCase().replace('-','')}">${p.op}</span>
+          <span class="tag" style="background:var(--card2)">${propEmoji[p.tipo]||'🏠'} ${p.tipo}</span>
+          <span class="tag tag-${p.status.toLowerCase()}">${p.status}</span>
+          ${p.fotos&&p.fotos.length?`<span class="tag" style="background:var(--card2)">📷 ${p.fotos.length} fotos</span>`:''}
+        </div>
+        <h2 style="font-size:18px;font-weight:700;margin-bottom:6px">${p.titulo}</h2>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px">📍 ${[p.corregimiento,p.distrito,p.provincia].filter(Boolean).join(', ')||p.zona||'Panamá'}</div>
+        <div style="font-size:22px;font-weight:700;color:var(--accent);margin-bottom:12px">
+          ${p.op==='Alquiler'?`$${(p.precio_alquiler||p.precio||0).toLocaleString()}/mes`:`$${(p.precio||0).toLocaleString()}`}
+          ${p.negociable==='si'?'<span style="font-size:11px;color:var(--green);margin-left:6px">NEGOCIABLE</span>':''}
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+          ${p.hab>0?`<div style="text-align:center;background:var(--card2);border-radius:8px;padding:8px"><div style="font-size:18px">🛏</div><div style="font-size:11px">${p.hab} hab</div></div>`:''}
+          ${p.banos>0?`<div style="text-align:center;background:var(--card2);border-radius:8px;padding:8px"><div style="font-size:18px">🚿</div><div style="font-size:11px">${p.banos} baños</div></div>`:''}
+          ${p.area>0?`<div style="text-align:center;background:var(--card2);border-radius:8px;padding:8px"><div style="font-size:18px">📐</div><div style="font-size:11px">${p.area} m²</div></div>`:''}
+          ${p.estac>0?`<div style="text-align:center;background:var(--card2);border-radius:8px;padding:8px"><div style="font-size:18px">🚗</div><div style="font-size:11px">${p.estac} park</div></div>`:''}
+        </div>
+        ${p.desc?`<p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">${p.desc}</p>`:''}
+        ${amenidadesList?`<div style="margin-bottom:10px">${amenidadesList}</div>`:''}
+        ${mapaHtml}
+        ${contactoHtml}
+      </div>
+    </div>`;
+  // Init mini map if needed
+  if(p.lat&&p.lng){
+    setTimeout(()=>{
+      const el=document.getElementById('ficha-mini-mapa');
+      if(!el||el._mapInit) return;
+      el._mapInit=true;
+      const m=L.map('ficha-mini-mapa',{zoomControl:false,scrollWheelZoom:false}).setView([p.lat,p.lng],15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
+      L.marker([p.lat,p.lng]).addTo(m);
+    },200);
+  }
+}
+function fichaToggleContacto(){
+  const id=document.getElementById('ficha-modal-prop-id').value;
+  const p=props.find(x=>x.id===id);
+  if(p) renderFichaModal(p, document.getElementById('ficha-con-contacto').checked);
+}
+function compartirFichaWA(){
+  const id=document.getElementById('ficha-modal-prop-id').value;
+  const p=props.find(x=>x.id===id);
+  if(!p) return;
+  const conContacto=document.getElementById('ficha-con-contacto').checked;
+  const data=btoa(unescape(encodeURIComponent(JSON.stringify({...p,_v:1}))));
+  const url=`${location.origin}${location.pathname}?ficha=${data}`;
+  const txt=encodeURIComponent(`🏠 *${p.titulo}*\n📍 ${p.zona||p.provincia||'Panamá'}\n💰 $${(p.precio||0).toLocaleString()}\n\n📄 Ver ficha completa:\n${url}${conContacto?'\n\n📞 Jelyan Castro · JAC Realty · +507 6462-7763':''}`);
+  window.open('https://wa.me/?text='+txt);
+  toast('📤 Abriendo WhatsApp con el link de la ficha...');
+}
+function compartirFichaEmail(){
+  const id=document.getElementById('ficha-modal-prop-id').value;
+  const p=props.find(x=>x.id===id);
+  if(!p) return;
+  const conContacto=document.getElementById('ficha-con-contacto').checked;
+  const data=btoa(unescape(encodeURIComponent(JSON.stringify({...p,_v:1}))));
+  const url=`${location.origin}${location.pathname}?ficha=${data}`;
+  const sub=encodeURIComponent(`${p.titulo} — JAC Realty Panamá`);
+  const body=encodeURIComponent(`Le comparto esta propiedad:\n\n${p.titulo}\n📍 ${p.zona||p.provincia||'Panamá'}\n💰 $${(p.precio||0).toLocaleString()}\n🛏 ${p.hab} hab · 🚿 ${p.banos} baños · 📐 ${p.area}m²\n\nVer ficha completa: ${url}${conContacto?'\n\nJelyan Castro · JAC Realty Panamá · +507 6462-7763':''}`);
+  window.open(`mailto:?subject=${sub}&body=${body}`);
+}
+function copiarLinkFicha(){
+  const id=document.getElementById('ficha-modal-prop-id').value;
+  const p=props.find(x=>x.id===id);
+  if(!p) return;
+  const data=btoa(unescape(encodeURIComponent(JSON.stringify({...p,_v:1}))));
+  const url=`${location.origin}${location.pathname}?ficha=${data}`;
+  navigator.clipboard.writeText(url).then(()=>toast('📋 Link copiado al portapapeles')).catch(()=>{
+    prompt('Copia este link:',url);
+  });
+}
+
+// ============================================================
+// POST-VENTA MODULE
+// ============================================================
+let postVentas = [];
+
+// ============================================================
+// EMPRESAS
+// ============================================================
+const empStatusColors={Activo:'var(--green)',Prospecto:'var(--accent)',Inactivo:'var(--muted)',VIP:'var(--purple)'};
+function renderEmpresas(data){
+  const arr=data||empresas;
+  const tbody=document.getElementById('empresas-tbody');
+  if(!tbody)return;
+  tbody.innerHTML=arr.length?arr.map(e=>`<tr>
+    <td style="color:var(--muted);font-size:11px">${e.id}</td>
+    <td><div style="font-weight:500">${e.nombre}</div><div style="font-size:11px;color:var(--muted)">${e.comercial||''}</div></td>
+    <td><span class="tag" style="background:var(--card2);color:var(--text)">${e.sector||'–'}</span></td>
+    <td><div style="font-size:13px">${e.contacto||'–'}</div><div style="font-size:11px;color:var(--muted)">${e.cargo||''}</div></td>
+    <td>${e.tel||'–'}</td>
+    <td style="font-size:12px">${e.email||'–'}</td>
+    <td><span class="tag" style="background:var(--card2);color:var(--muted)">${e.tipo||'–'}</span></td>
+    <td><span class="tag" style="background:${empStatusColors[e.status]||'var(--muted)'}22;color:${empStatusColors[e.status]||'var(--muted)'}">${e.status||'–'}</span></td>
+    <td><div class="action-btns">
+      <button class="wa-btn" title="WhatsApp" onclick="waEmpresa('${e.id}')">💬</button>
+      <button class="email-btn" title="Email" onclick="emailEmpresa('${e.id}')">📧</button>
+      <button class="btn btn-ghost btn-sm" title="Editar" onclick="editEmpresa('${e.id}')">✏️</button>
+      <button class="btn btn-ghost btn-sm" title="Eliminar" onclick="deleteEmpresa('${e.id}')" style="color:var(--red)">🗑️</button>
+    </div></td>
+  </tr>`).join(''):`<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">Sin empresas registradas. Haz clic en <strong>+ Nueva Empresa</strong> para agregar.</td></tr>`;
+  document.getElementById('badge-empresas').textContent=arr.filter(e=>e.status==='Activo'||e.status==='VIP').length;
+}
+function filterEmpresas(q){
+  if(!q){renderEmpresas();return;}
+  const ql=q.toLowerCase();
+  renderEmpresas(empresas.filter(e=>(e.nombre||'').toLowerCase().includes(ql)||(e.contacto||'').toLowerCase().includes(ql)||(e.sector||'').toLowerCase().includes(ql)||(e.email||'').toLowerCase().includes(ql)));
+}
+function saveEmpresa(){
+  const gv=id=>document.getElementById(id)?.value||'';
+  const editId=gv('em-edit-id');
+  const data={
+    id:editId||'EMP-'+Date.now(),
+    nombre:gv('em-nombre'),comercial:gv('em-comercial'),ruc:gv('em-ruc'),sector:gv('em-sector'),
+    tipo:gv('em-tipo'),status:gv('em-status'),contacto:gv('em-contacto'),cargo:gv('em-cargo'),
+    tel:gv('em-tel'),wa:gv('em-wa'),email:gv('em-email'),email2:gv('em-email2'),
+    direccion:gv('em-direccion'),zona:gv('em-zona'),web:gv('em-web'),linkedin:gv('em-linkedin'),
+    interes:gv('em-interes'),presupuesto:gv('em-presupuesto'),inmueble:gv('em-inmueble'),
+    zona_pref:gv('em-zona-pref'),notas:gv('em-notas'),fecha:new Date().toISOString().split('T')[0]
+  };
+  if(!data.nombre){toast('❌ Ingresa el nombre de la empresa');return;}
+  if(editId){const idx=empresas.findIndex(e=>e.id===editId);if(idx>-1)empresas[idx]=data;}
+  else{empresas.unshift(data);}
+  closeModal('modalEmpresa');renderEmpresas();updateBadges();
+  activities.unshift({tipo:'🏢 Empresa',cliente:data.nombre,desc:`${editId?'Empresa actualizada':'Nueva empresa registrada'}: ${data.sector}`,time:'Ahora'});
+  toast(editId?'✅ Empresa actualizada':'✅ Empresa registrada');
+  // clear form
+  ['em-nombre','em-comercial','em-ruc','em-contacto','em-cargo','em-tel','em-wa','em-email','em-email2','em-direccion','em-web','em-linkedin','em-presupuesto','em-inmueble','em-zona-pref','em-notas','em-edit-id'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+function editEmpresa(id){
+  const e=empresas.find(x=>x.id===id);if(!e)return;
+  const sv=(eid,v)=>{const el=document.getElementById(eid);if(el)el.value=v||'';};
+  sv('em-nombre',e.nombre);sv('em-comercial',e.comercial);sv('em-ruc',e.ruc);sv('em-sector',e.sector);
+  sv('em-tipo',e.tipo);sv('em-status',e.status);sv('em-contacto',e.contacto);sv('em-cargo',e.cargo);
+  sv('em-tel',e.tel);sv('em-wa',e.wa);sv('em-email',e.email);sv('em-email2',e.email2);
+  sv('em-direccion',e.direccion);sv('em-zona',e.zona);sv('em-web',e.web);sv('em-linkedin',e.linkedin);
+  sv('em-interes',e.interes);sv('em-presupuesto',e.presupuesto);sv('em-inmueble',e.inmueble);
+  sv('em-zona-pref',e.zona_pref);sv('em-notas',e.notas);sv('em-edit-id',e.id);
+  openModal('modalEmpresa');
+}
+function deleteEmpresa(id){
+  if(!confirm('¿Eliminar empresa?'))return;
+  empresas=empresas.filter(e=>e.id!==id);renderEmpresas();updateBadges();toast('🗑️ Empresa eliminada');
+}
+function waEmpresa(id){
+  const e=empresas.find(x=>x.id===id);if(!e)return;
+  const num=(e.wa||e.tel||'').replace(/\D/g,'');
+  if(!num){toast('❌ Sin número de WhatsApp');return;}
+  const txt=encodeURIComponent(`Hola ${e.contacto||e.nombre}, soy Jelyan Castro de JAC Realty Panama (Lic. PN-0931). Me gustaría conversar sobre oportunidades inmobiliarias para ${e.nombre}. ¿Podríamos coordinar una reunión?`);
+  window.open('https://wa.me/'+num+'?text='+txt);
+}
+function emailEmpresa(id){
+  const e=empresas.find(x=>x.id===id);if(!e||!e.email)return;
+  const sub=encodeURIComponent('Propiedades disponibles – JAC Realty Panama');
+  const body=encodeURIComponent(`Estimado/a ${e.contacto||'equipo de '+e.nombre},\n\nMe dirijo a ustedes de parte de JAC Realty Panamá (Lic. PN-0931) para presentarles oportunidades inmobiliarias en Panamá que podrían ser de interés para ${e.nombre}.\n\nQuedo a su disposición.\n\nJelyan Castro\nJAC Realty PA · jacrealtypa.com\n📞 +507 64627763`);
+  window.open('mailto:'+e.email+'?subject='+sub+'&body='+body);
+}
+
+function renderPostVenta(filter){
+  const tbody=document.getElementById('postventa-tbody');
+  if(!tbody) return;
+  let list=filter ? postVentas.filter(p=>(p.cliente||'').toLowerCase().includes(filter.toLowerCase())||(p.propiedad||'').toLowerCase().includes(filter.toLowerCase())) : [...postVentas];
+  if(!list.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">Sin cierres registrados.</td></tr>';return;}
+  const pvColors={'En proceso':'var(--blue)','Con garantías':'var(--purple)','Entregado':'var(--green)','Cerrado':'var(--muted)'};
+  tbody.innerHTML=list.map(pv=>`<tr>
+    <td><div style="font-weight:500">${pv.cliente||'—'}</div><div style="font-size:11px;color:var(--muted)">${pv.email||pv.tel||''}</div></td>
+    <td style="font-size:12px">${pv.propiedad||'—'}</td>
+    <td><span style="background:var(--card2);padding:2px 8px;border-radius:10px;font-size:11px">${pv.tipo||'Venta'}</span></td>
+    <td class="price" style="color:var(--green)">$${(pv.precio_cierre||0).toLocaleString()}</td>
+    <td class="price">$${(pv.comision||0).toLocaleString()}</td>
+    <td style="font-size:12px;color:var(--muted)">${pv.fecha_cierre||'—'}</td>
+    <td><span style="background:${pvColors[pv.estado]||'var(--muted)'}22;color:${pvColors[pv.estado]||'var(--muted)'};padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600">${pv.estado||'En proceso'}</span></td>
+    <td>
+      <button class="btn btn-sm" style="background:var(--purple)22;color:var(--purple,#a855f7);border:1px solid var(--purple,#a855f7)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" onclick="viewHistorialPV('${pv.id}')">📋${pv.historial&&pv.historial.length?' '+pv.historial.length:''}</button>
+      <button class="btn btn-sm" style="background:var(--accent)22;color:var(--accent);border:1px solid var(--accent)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" onclick="openArchivos('postventa','${pv.id}')">📎${(pv.archivos||[]).length?' '+pv.archivos.length:''}</button>
+      <button class="btn btn-sm btn-outline" onclick="editPostVenta('${pv.id}')">✏️</button>
+      <button class="btn btn-sm" style="background:#ef444422;color:var(--red);border:none;border-radius:6px;padding:4px 8px;cursor:pointer" onclick="deletePostVenta('${pv.id}')">🗑</button>
+    </td>
+  </tr>`).join('');
+  // KPIs
+  document.getElementById('pv-kpi-total').textContent=postVentas.length;
+  document.getElementById('pv-kpi-proceso').textContent=postVentas.filter(p=>p.estado==='En proceso').length;
+  document.getElementById('pv-kpi-garantia').textContent=postVentas.filter(p=>p.estado==='Con garantías').length;
+  const totalCom=postVentas.reduce((s,p)=>s+(+p.comision||0),0);
+  document.getElementById('pv-kpi-comision').textContent=fmtPrice(totalCom);
+  document.getElementById('badge-postventa').textContent=postVentas.filter(p=>p.estado!=='Cerrado').length;
+}
+function filterPostVenta(q){ renderPostVenta(q); }
+function viewHistorialPV(id){
+  const pv=postVentas.find(x=>x.id===id);
+  if(pv) viewHistorial('postventa',id);
+}
+function savePostVenta(){
+  const cliente=(document.getElementById('pv-cliente').value||'').trim();
+  if(!cliente){alert('Ingresa el nombre del cliente');return;}
+  const g=id=>(document.getElementById(id)||{value:''}).value||'';
+  const editId=g('pv-edit-id');
+  const data={
+    cliente, tel:g('pv-tel'), email:g('pv-email'),
+    propiedad:g('pv-propiedad'), tipo:g('pv-tipo')||'Venta',
+    precio_cierre:+g('pv-precio-cierre')||0,
+    comision:+g('pv-comision')||0,
+    comision_pct:g('pv-comision-pct'),
+    fecha_cierre:g('pv-fecha-cierre'),
+    fecha_entrega:g('pv-fecha-entrega'),
+    estado:g('pv-estado')||'En proceso',
+    banco:g('pv-banco'),
+    notaria:g('pv-notaria'),
+    escritura:g('pv-escritura'),
+    paz_salvo:g('pv-paz-salvo'),
+    llaves:g('pv-llaves'),
+    notas:g('pv-notas'),
+    nombre:cliente // for history lookup
+  };
+  if(editId){
+    const idx=postVentas.findIndex(p=>p.id===editId);
+    if(idx>-1){
+      const prev=postVentas[idx].estado;
+      postVentas[idx]={...postVentas[idx],...data};
+      logHistory('postventa',editId,'✏️','Post-venta editado',`Estado: ${data.estado}`);
+      if(prev!==data.estado) logHistory('postventa',editId,'🔄',`Estado: ${prev} → ${data.estado}`,'Cambio de estado');
+      toast('✏️ Post-venta actualizado');
+    }
+  } else {
+    data.id='PV'+Date.now();
+    data.fecha=new Date().toISOString().split('T')[0];
+    data.historial=[];
+    data.archivos=[];
+    postVentas.push(data);
+    logHistory('postventa',data.id,'🏆','Cierre registrado',`Cliente: ${cliente} · Propiedad: ${data.propiedad||'—'} · Precio: $${data.precio_cierre.toLocaleString()} · Comisión: $${data.comision.toLocaleString()}`);
+    toast('✅ Post-venta guardado: '+cliente);
+  }
+  closeModal('modalPostVenta');
+  clearFormPostVenta();
+  renderPostVenta(); renderDashboard();
+}
+function clearFormPostVenta(){
+  ['pv-edit-id','pv-cliente','pv-tel','pv-email','pv-propiedad','pv-precio-cierre','pv-comision','pv-comision-pct','pv-fecha-cierre','pv-fecha-entrega','pv-banco','pv-notaria','pv-escritura','pv-paz-salvo','pv-llaves','pv-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const st=document.getElementById('pv-estado');if(st)st.value='En proceso';
+  const tp=document.getElementById('pv-tipo');if(tp)tp.value='Venta';
+  document.getElementById('pv-modal-title').textContent='🏆 Nuevo Cierre / Post-Venta';
+}
+function editPostVenta(id){
+  const pv=postVentas.find(x=>x.id===id);
+  if(!pv) return;
+  const s=(el,v)=>{const e=document.getElementById(el);if(e)e.value=v||'';};
+  s('pv-edit-id',pv.id); s('pv-cliente',pv.cliente); s('pv-tel',pv.tel); s('pv-email',pv.email);
+  s('pv-propiedad',pv.propiedad); s('pv-tipo',pv.tipo); s('pv-precio-cierre',pv.precio_cierre);
+  s('pv-comision',pv.comision); s('pv-comision-pct',pv.comision_pct);
+  s('pv-fecha-cierre',pv.fecha_cierre); s('pv-fecha-entrega',pv.fecha_entrega);
+  s('pv-estado',pv.estado); s('pv-banco',pv.banco); s('pv-notaria',pv.notaria);
+  s('pv-escritura',pv.escritura); s('pv-paz-salvo',pv.paz_salvo); s('pv-llaves',pv.llaves);
+  s('pv-notas',pv.notas);
+  document.getElementById('pv-modal-title').textContent='✏️ Editar Post-Venta';
+  openModal('modalPostVenta');
+}
+function deletePostVenta(id){
+  if(!confirm('¿Eliminar este cierre?')) return;
+  postVentas=postVentas.filter(p=>p.id!==id);
+  renderPostVenta(); toast('Post-venta eliminado');
+}
+
+// ============================================================
+// FIX: LIMPIAR FORMULARIOS al guardar
+// ============================================================
+function clearFormLead(){
+  ['l-edit-id','l-nombre','l-apellido','l-tel','l-tel2','l-wa','l-email','l-cedula','l-pasaporte','l-nacimiento','l-empresa','l-ocupacion','l-instagram','l-linkedin','l-presupuesto-min','l-presupuesto-max','l-hab-deseadas','l-notas','l-quien-refirio','l-cual-portal','l-fuente-descripcion'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['l-interes','l-tipo-prop','l-zona','l-status','l-fuente','l-prioridad','l-agente','l-nacionalidad'].forEach(id=>{const el=document.getElementById(id);if(el&&el.options&&el.options.length)el.selectedIndex=0;});
+  document.getElementById('fuente-referido-wrap')&&(document.getElementById('fuente-referido-wrap').style.display='none');
+  document.getElementById('fuente-portal-wrap')&&(document.getElementById('fuente-portal-wrap').style.display='none');
+  document.getElementById('fuente-otro-wrap')&&(document.getElementById('fuente-otro-wrap').style.display='none');
+  const tit=document.getElementById('lead-modal-title');if(tit)tit.textContent='🎯 Nuevo Lead';
+}
+function clearFormContacto(){
+  ['ct-edit-id','ct-nombre','ct-apellido','ct-tel','ct-wa','ct-email','ct-instagram','ct-cedula','ct-nacimiento','ct-empresa','ct-cargo','ct-linkedin','ct-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const cat=document.getElementById('ct-categoria');if(cat)cat.selectedIndex=0;
+  const tit=document.getElementById('contacto-modal-title');if(tit)tit.textContent='📇 Nuevo Contacto';
+}
+function clearFormCliente(){
+  ['cli-edit-id','cli-nombre','cli-apellido','cli-tel','cli-wa','cli-email','cli-instagram','cli-cedula','cli-pasaporte','cli-nacimiento','cli-tipo-prop','cli-presupuesto-max','cli-habitaciones','cli-zona','cli-deseos','cli-forma-pago','cli-banco','cli-preaprobado','cli-prima','cli-prop-direccion','cli-prop-tipo','cli-prop-precio','cli-prop-area','cli-prop-hab','cli-prop-titulo','cli-prop-descripcion','cli-comision','cli-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['cli-tipo','cli-exclusividad','cli-contrato','cli-status','cli-prioridad','cli-agente','cli-nacionalidad'].forEach(id=>{const el=document.getElementById(id);if(el&&el.options&&el.options.length)el.selectedIndex=0;});
+  const tit=document.getElementById('cliente-modal-title');if(tit)tit.textContent='👥 Nuevo Cliente';
+  showClienteFields('');
+}
+function clearFormProp(){
+  ['p-titulo','p-precio','p-precio-alquiler','p-mantenimiento','p-area','p-area-const','p-hab','p-banos','p-medios-banos','p-estac','p-piso','p-anio','p-desc','p-propietario','p-tel-propietario','p-nota-interna','p-lat','p-lng','p-direccion','p-referencia','p-zona'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['p-tipo','p-op','p-status','p-negociable','p-estado-inmueble','p-provincia','p-distrito','p-corregimiento'].forEach(id=>{const el=document.getElementById(id);if(el&&el.options&&el.options.length)el.selectedIndex=0;});
+  document.querySelectorAll('#p-amenidades-grid input[type=checkbox]').forEach(c=>c.checked=false);
+  _fotosTemp=[];
+  const grid=document.getElementById('p-fotos-grid');if(grid)grid.innerHTML='';
+  document.getElementById('prop-mapa-coords')&&(document.getElementById('prop-mapa-coords').textContent='📍 Sin ubicación marcada');
+  if(_propMarker&&_propMap){_propMap.removeLayer(_propMarker);_propMarker=null;}
+  const dt=document.getElementById('p-distrito');if(dt)dt.innerHTML='<option value="">-- Selecciona provincia --</option>';
+  const dc=document.getElementById('p-corregimiento');if(dc)dc.innerHTML='<option value="">-- Selecciona distrito --</option>';
+}
+
 document.querySelectorAll('.nav-item').forEach(el=>{
   el.addEventListener('click',()=>{
     if(window.innerWidth<=768){
@@ -3656,6 +4954,57 @@ document.querySelectorAll('.nav-item').forEach(el=>{
 // ============================================================
 // INIT
 // ============================================================
+
+// Check for external ficha URL parameter first
+(function(){
+  const params=new URLSearchParams(location.search);
+  const fichaData=params.get('ficha');
+  if(fichaData){
+    try{
+      const p=JSON.parse(decodeURIComponent(escape(atob(fichaData))));
+      // Hide login/CRM, show ficha view
+      document.body.innerHTML='';
+      const conContacto=true; // public ficha always with contact? render both and let user pick via separate static page
+      const wrap=document.createElement('div');
+      wrap.style.cssText='font-family:system-ui,sans-serif;max-width:800px;margin:0 auto;padding:20px;background:#fff;min-height:100vh;color:#111';
+      const imgs=p.fotos&&p.fotos.length?`<div style="display:grid;grid-template-columns:2fr 1fr;gap:4px;height:280px;border-radius:10px;overflow:hidden;margin-bottom:18px"><div style="background:#eee;overflow:hidden">${p.fotos[0]?`<img src="${p.fotos[0]}" style="width:100%;height:100%;object-fit:cover">`:'<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:40px">🏠</div>'}</div><div style="display:grid;grid-template-rows:1fr 1fr;gap:4px">${(p.fotos[1]?`<div style="overflow:hidden"><img src="${p.fotos[1]}" style="width:100%;height:100%;object-fit:cover"></div>`:'<div style="background:#e8e8e8;border-radius:4px"></div>')}${(p.fotos[2]?`<div style="overflow:hidden"><img src="${p.fotos[2]}" style="width:100%;height:100%;object-fit:cover"></div>`:'<div style="background:#e8e8e8;border-radius:4px"></div>')}</div></div>`:`<div style="height:200px;background:#f0f0f0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:60px;margin-bottom:18px">🏠</div>`;
+      wrap.innerHTML=`
+        <div style="text-align:center;margin-bottom:18px">
+          <div style="font-size:22px;font-weight:800;color:#1e293b">JAC REALTY PANAMÁ</div>
+          <div style="font-size:12px;color:#64748b">Ficha de Propiedad</div>
+        </div>
+        ${imgs}
+        <h2 style="font-size:20px;font-weight:700;margin:0 0 6px">${p.titulo||'Propiedad'}</h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+          ${p.tipo?`<span style="background:#f1f5f9;padding:4px 10px;border-radius:20px;font-size:12px">${p.tipo}</span>`:''}
+          ${p.operacion?`<span style="background:#fef3c7;padding:4px 10px;border-radius:20px;font-size:12px">${p.operacion}</span>`:''}
+          ${p.provincia?`<span style="background:#f0fdf4;padding:4px 10px;border-radius:20px;font-size:12px">📍 ${p.provincia}${p.distrito?', '+p.distrito:''}</span>`:''}
+        </div>
+        <div style="font-size:28px;font-weight:800;color:#6366f1;margin-bottom:16px">$${(p.precio||0).toLocaleString()}</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:18px">
+          ${p.hab?`<div style="background:#f8fafc;padding:10px;border-radius:8px;text-align:center"><div style="font-size:20px">🛏</div><div style="font-size:12px;font-weight:600">${p.hab} hab.</div></div>`:''}
+          ${p.banos?`<div style="background:#f8fafc;padding:10px;border-radius:8px;text-align:center"><div style="font-size:20px">🚿</div><div style="font-size:12px;font-weight:600">${p.banos} baños</div></div>`:''}
+          ${p.area?`<div style="background:#f8fafc;padding:10px;border-radius:8px;text-align:center"><div style="font-size:20px">📐</div><div style="font-size:12px;font-weight:600">${p.area} m²</div></div>`:''}
+          ${p.estacionamiento?`<div style="background:#f8fafc;padding:10px;border-radius:8px;text-align:center"><div style="font-size:20px">🚗</div><div style="font-size:12px;font-weight:600">Estac.</div></div>`:''}
+        </div>
+        ${p.descripcion?`<div style="margin-bottom:16px"><div style="font-weight:600;margin-bottom:6px">Descripción</div><div style="font-size:14px;color:#475569;line-height:1.6">${p.descripcion}</div></div>`:''}
+        ${p.lat&&p.lng?`<div style="margin-bottom:16px;background:#f8fafc;padding:12px;border-radius:8px"><div style="font-weight:600;margin-bottom:4px">📍 Ubicación</div><div style="font-size:13px;color:#64748b">${p.direccion||'Ver en mapa'}</div><a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" style="font-size:12px;color:#6366f1">Ver en Google Maps →</a></div>`:''}
+        <div style="background:#f1f5f9;padding:16px;border-radius:10px;text-align:center">
+          <div style="font-weight:700;font-size:16px">Jelyan Castro</div>
+          <div style="font-size:13px;color:#64748b">Asesora Inmobiliaria · JAC Realty Panamá</div>
+          <div style="margin-top:8px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <a href="tel:+50764627763" style="background:#6366f1;color:#fff;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:13px">📞 +507 6462-7763</a>
+            <a href="https://wa.me/50764627763" target="_blank" style="background:#25d366;color:#fff;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:13px">💬 WhatsApp</a>
+            <a href="mailto:jacrealtypa@gmail.com" style="background:#475569;color:#fff;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:13px">📧 Email</a>
+          </div>
+        </div>`;
+      document.body.appendChild(wrap);
+      document.title=`${p.titulo||'Propiedad'} — JAC Realty`;
+    }catch(e){ console.error('Error cargando ficha:',e); }
+    return; // Don't init CRM
+  }
+})();
+
 initTheme();
 renderDashboard();
 renderProps();
@@ -3663,6 +5012,8 @@ renderLeads();
 renderContacts();
 renderClients();
 renderRedInmo();
+renderPostVenta();
+initProvinciaDropdown();
 // Set default date on cita/tarea modals
 document.getElementById('c-fecha').value=new Date().toISOString().split('T')[0];
 document.getElementById('t-vence').value=new Date().toISOString().split('T')[0];
@@ -3679,4 +5030,3 @@ loadSupabaseData().then(()=>initRealtime());
 </script>
 </body>
 </html>
- 
