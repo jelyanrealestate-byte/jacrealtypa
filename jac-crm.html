@@ -1351,17 +1351,20 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <div class="form-group"><label>Operación</label>
         <select id="p-op"><option>Venta</option><option>Alquiler</option><option>Pre-venta</option><option>Venta y Alquiler</option></select>
       </div>
-      <div class="form-group"><label>Provincia</label>
+      <div class="form-group"><label>Provincia / Comarca</label>
         <select id="p-provincia" onchange="updateDistritos(this.value)"><option value="">-- Selecciona --</option></select>
       </div>
       <div class="form-group"><label>Distrito / Municipio</label>
         <select id="p-distrito" onchange="updateCorregimientos(document.getElementById('p-provincia').value, this.value)"><option value="">-- Selecciona provincia --</option></select>
       </div>
-      <div class="form-group"><label>Corregimiento / Área</label>
+      <div class="form-group"><label>Corregimiento</label>
         <select id="p-corregimiento"><option value="">-- Selecciona distrito --</option></select>
       </div>
+      <div class="form-group"><label>Barrio / Comunidad</label>
+        <input id="p-barrio" placeholder="Ej: Punta Pacífica, El Cangrejo, Obarrio...">
+      </div>
       <div class="form-group"><label>Zona / Urbanización</label>
-        <input id="p-zona" placeholder="Ej: Costa del Este, Punta Pacífica, Coronado...">
+        <input id="p-zona" placeholder="Ej: Costa del Este, Coronado, Boquete...">
       </div>
       <div class="form-group"><label>Estado del Inmueble</label>
         <select id="p-estado-inmueble"><option>Nuevo</option><option>En construcción</option><option>Usado en excelente estado</option><option>Usado en buen estado</option><option>Para remodelar</option></select>
@@ -3131,7 +3134,7 @@ function saveProp(){
     id:'P'+String(props.length+1).padStart(3,'0'),
     titulo,tipo:gv('p-tipo'),op:gv('p-op'),
     provincia:gv('p-provincia'),distrito:gv('p-distrito'),corregimiento:gv('p-corregimiento'),
-    zona:gv('p-zona'),direccion:gv('p-direccion'),referencia:gv('p-referencia'),
+    barrio:gv('p-barrio'),zona:gv('p-zona'),direccion:gv('p-direccion'),referencia:gv('p-referencia'),
     lat:parseFloat(gv('p-lat'))||null,lng:parseFloat(gv('p-lng'))||null,
     precio:gn('p-precio'),precio_alquiler:gn('p-precio-alquiler'),mantenimiento:gn('p-mantenimiento'),
   url_wasi:gv('p-url-wasi'),url_mls:gv('p-url-mls'),url_e24:gv('p-url-e24'),url_c24:gv('p-url-c24'),url_tour:gv('p-url-tour'),url_brochure:gv('p-url-brochure'),
@@ -3181,6 +3184,7 @@ function editProp(id){
   s('p-distrito',p.distrito);
   updateCorregimientos(p.provincia,p.distrito);
   s('p-corregimiento',p.corregimiento);
+  s('p-barrio',p.barrio);
   s('p-zona',p.zona); s('p-direccion',p.direccion); s('p-referencia',p.referencia);
   s('p-precio',p.precio); s('p-precio-alquiler',p.precio_alquiler); s('p-mantenimiento',p.mantenimiento);
   s('p-area',p.area); s('p-area-const',p.area_const);
@@ -4297,100 +4301,113 @@ const _origShowPanel = showPanel;
 // PANAMA GEOGRAPHY
 // ============================================================
 const PANAMA_GEO = {
+  /* ── PROVINCIA DE PANAMÁ ─────────────────────────────── */
   'Panamá':{
     'Panamá':['Ancón','Bella Vista','Betania','Calidonia','Curundú','Chilibre','Don Bosco','El Chorrillo','Juan Díaz','Las Mañanitas','Llano Bonito','Parque Lefevre','Pedregal','Pueblo Nuevo','Río Abajo','San Felipe','San Francisco','San Martín','Santa Ana','Tocumen','Victoriano Lorenzo'],
-    'San Miguelito':['Amelia Denis de Icaza','Belisario Frías','Belisario Porras','J.D. Espinar','Mateo Iturralde','Nuevo Veranillo','Río Abajo','Rufina Alfaro','Victoriano Lorenzo'],
-    'Arraiján':['Arraiján','Burunga','J.D. Arosemena','Nuevo Emperador','Veracruz','Vista Alegre'],
-    'Capira':['Capira','Caimito','Cirí Grande','La Trinidad','Lídice','Obaldía','San Carlos','Villa Carmen'],
-    'Chame':['Chame','Bejuco','Buenos Aires','La Ermita','Nueva Gorgona','Punta Chame','San Carlos'],
+    'San Miguelito':['Amelia Denis de Icaza','Belisario Frías','Belisario Porras','José Domingo Espinar','Mateo Iturralde','Nuevo Veranillo','Río Abajo','Rufina Alfaro','Victoriano Lorenzo'],
+    'Arraiján':['Arraiján','Burunga','Juan Demóstenes Arosemena','Nuevo Emperador','Veracruz','Vista Alegre'],
+    'Balboa':['Ancón','Balboa'],
+    'Capira':['Caimito','Capira','Cerro Cama','Cirí de Los Sotos','Cirí Grande','La Trinidad','Lídice','Nueva Arenosa','Obaldía','San Carlos','San Luis','Villa Carmen'],
+    'Chame':['Bejuco','Buenos Aires','Chame','La Ermita','Nueva Gorgona','Punta Chame','San Carlos'],
     'Chepo':['Chepo','El Llano','Madungandí','San Martín','Tortí'],
-    'Chimán':['La Palma','Brujas','Gonzalo Vásquez','Narganá'],
-    'La Chorrera':['La Chorrera','Amador','Barrio Balboa','Barrio Colón','El Arado','El Coco','Feuillet','Guadalupe','Herrera','Hurtado','Mendoza','Playa Leona','Puerto Caimito'],
-    'Balboa':['Balboa','Ancón'],
-    'Taboga':['Taboga','Otoque Occidente','Otoque Oriente'],
+    'Chimán':['Brujas','González Vásquez','La Palma','Narganá'],
+    'La Chorrera':['Amador','Barrio Balboa','Barrio Colón','El Arado','El Coco','Feuillet','Guadalupe','Herrera','Hurtado','La Chorrera','Mendoza','Playa Leona','Puerto Caimito'],
+    'Taboga':['Otoque Occidente','Otoque Oriente','Taboga'],
   },
+  /* ── PROVINCIA DE PANAMÁ OESTE ───────────────────────── */
   'Panamá Oeste':{
-    'Arraiján':['Arraiján','Burunga','J.D. Arosemena','Nuevo Emperador','Veracruz','Vista Alegre'],
-    'La Chorrera':['La Chorrera','Amador','Barrio Balboa','Barrio Colón','El Arado','Feuillet','Guadalupe','Herrera','Hurtado','Mendoza','Playa Leona','Puerto Caimito'],
-    'Capira':['Capira','El Cacao','Caimito','Cirí Grande','La Trinidad','Lídice','Obaldía','San Carlos'],
-    'Chame':['Chame','Bejuco','Buenos Aires','La Ermita','Nueva Gorgona','Punta Chame','San Carlos'],
-    'San Carlos':['San Carlos','El Espino','El Higo','La Ermita','Lídice','Nueva Gorgona'],
+    'Arraiján':['Arraiján','Burunga','Juan Demóstenes Arosemena','Nuevo Emperador','Veracruz','Vista Alegre'],
+    'Capira':['Caimito','Capira','Cirí Grande','La Trinidad','Lídice','Obaldía','San Carlos','Villa Carmen'],
+    'Chame':['Bejuco','Buenos Aires','Chame','La Ermita','Nueva Gorgona','Punta Chame','San Carlos'],
+    'La Chorrera':['Amador','Barrio Balboa','Barrio Colón','El Arado','El Coco','Feuillet','Guadalupe','Herrera','Hurtado','La Chorrera','Mendoza','Playa Leona','Puerto Caimito'],
+    'San Carlos':['El Espino','El Higo','La Ermita','Lídice','Nueva Gorgona','San Carlos'],
   },
+  /* ── PROVINCIA DE CHIRIQUÍ ───────────────────────────── */
   'Chiriquí':{
-    'David':['David','Bijagual','Boquete','Cochea','Las Lomas','Mateo','Pedregal','San Carlos','San Pablo Nuevo','San Pablo Viejo','San Pedro','Tijeras'],
-    'Bugaba':['Concepción','Bugaba','Cerro Punta','El Higo','Gómez','La Estrella','Las Palmas','Palmira','Volcán'],
-    'Boquete':['Boquete','Alto Boquete','Bajo Boquete','Caldera','Jaramillo','Los Naranjos','Palo Alto','Palmira','Potrerillos Arriba'],
-    'Barú':['Puerto Armuelles','Bella Vista','Boca Chica','El Porvenir','Frontera','Limones','Punta Burica'],
+    'Alanje':['Alanje','Aserrío de Gariché','Bagalá','Bijagual','Boca Chica','Guarumal','Guayabal','Querévalo','San Andrés','San Bartolo'],
+    'Barú':['Bella Vista','Boca Chica','El Porvenir','Frontera','Limones','Puerto Armuelles','Punta Burica'],
+    'Boquerón':['Boquerón','El Nancito','El Palmar','La Concepción','Potrerillos Arriba'],
+    'Boquete':['Alto Boquete','Bajo Boquete','Caldera','Jaramillo','Los Naranjos','Palo Alto','Palmira','Potrerillos Abajo'],
+    'Bugaba':['Bugaba','Concepción','El Higo','Gómez','La Estrella','Las Palmas','Palmira','Volcán'],
+    'David':['Bijagual','Cochea','David','Las Lomas','Mateo','Pedregal','San Carlos','San Pablo Nuevo','San Pablo Viejo','San Pedro','Tijeras'],
     'Dolega':['Dolega','Dos Ríos','Los Algarrobos','Potrerillos Abajo','Potrerillos Arriba','Tinajas'],
-    'Alanje':['Alanje','Aserrío de Gariché','Bagalá','Bijagual','Boca Chica','Guarumal','San Andrés'],
-    'Renacimiento':['Río Sereno','Aguas Calientes','Cañas','Cerro Punta','Guadalupe','Nueva California'],
-    'Tierras Altas':['Boquete','Cerro Punta','Guadalupe','Jaramillo','Nueva California','Palmira'],
-    'San Félix':['San Félix','Horconcitos','Lajas de Tolé','Remedios'],
-    'Tolé':['Tolé','Alto Caballero','Cerro Caña','El Bebedero','El Palmar'],
-    'Boquerón':['Boquerón','El Nancito','El Palmar','La Concepción'],
-    'Remedios':['Remedios','El Nancito','Gobea','Los Algarrobos'],
+    'Gualaca':['Gualaca','Hornito','Los Algarrobos','San Félix'],
+    'Remedios':['El Nancito','Gobea','Los Algarrobos','Remedios'],
+    'Renacimiento':['Aguas Calientes','Cañas','Cerro Punta','Guadalupe','Nueva California','Río Sereno'],
+    'San Félix':['Horconcitos','Lajas de Tolé','Remedios','San Félix'],
+    'Tierras Altas':['Cerro Punta','Guadalupe','Jaramillo','Nueva California','Palmira'],
+    'Tolé':['Alto Caballero','Cerro Caña','El Bebedero','El Palmar','Tolé'],
   },
-  'Colón':{
-    'Colón':['Barrio Norte','Barrio Sur','Buena Vista','Cativá','Cristóbal','Nuevo Providencia','Puerto Pilón','Sabanitas','Salamanca'],
-    'Chagres':['La Encantada','Palmas Bellas','Río Indio','Santa Isabel'],
-    'Donoso':['El Guásimo','El Mamey','La Troje','Miguel de la Borda','Toabré'],
-    'Omar Torrijos':['Coclecito','El Copé','La Pintada'],
-    'Portobelo':['Portobelo','Cacique','Garrote','María Chiquita','Nombre de Dios'],
-    'Santa Isabel':['Palmira','Cuango','Gobea','Palenque','Salud'],
+  /* ── PROVINCIA DE BOCAS DEL TORO ────────────────────── */
+  'Bocas del Toro':{
+    'Bocas del Toro':['Almirante','Bastimentos','Bocas del Toro','Cauchero','Cristóbal','Punta Laurel','Tierra Oscura','Valle Escondido'],
+    'Changuinola':['Boca del Monte','Changuinola','El Empalme','Guabito','Las Delicias','Miramar','Punta Peña','Teribe','Willi Mafú'],
+    'Chiriquí Grande':['Boca del Drago','Chiriquí Grande','Kusapín','Miramar','Mutis','Rambala'],
   },
+  /* ── PROVINCIA DE COCLÉ ──────────────────────────────── */
   'Coclé':{
-    'Penonomé':['Penonomé','Caimito','Coclé del Norte','El Caño','El Chirú','Pajonal','Río Grande','Toabré'],
     'Aguadulce':['Aguadulce','El Roble','Pocrí'],
     'Antón':['Antón','El Valle de Antón','Juan Díaz','Natá','Río Hato'],
-    'La Pintada':['La Pintada','El Harino','La Laja','Llano Grande','Tulú'],
-    'Natá':['Natá','El Caño','Las Huacas'],
-    'Olá':['Olá','Gaital','El Palmar'],
+    'La Pintada':['El Harino','La Laja','La Pintada','Llano Grande','Tulú'],
+    'Natá':['El Caño','Las Huacas','Los Castillos','Natá','Posesión'],
+    'Olá':['El Palmar','Gaital','Llano Grande','Olá'],
+    'Penonomé':['Caimito','Coclé del Norte','El Caño','El Chirú','Pajonal','Penonomé','Río Grande','Toabré'],
   },
+  /* ── PROVINCIA DE COLÓN ──────────────────────────────── */
+  'Colón':{
+    'Chagres':['Achiote','La Encantada','Nuevo Chagres','Palmas Bellas','Río Indio','Salud','Santa Rosa'],
+    'Colón':['Barrio Norte','Barrio Sur','Buena Vista','Cativá','Cristóbal','Limón de Chagres','Nuevo Providencia','Puerto Pilón','Sabanitas','Salamanca'],
+    'Donoso':['El Guásimo','El Mamey','La Troje','Miguel de la Borda','Toabré'],
+    'Omar Torrijos':['Coclecito','El Copé','El Harino','La Pintada','Llano Grande'],
+    'Portobelo':['Cacique','Garrote','María Chiquita','Nombre de Dios','Portobelo'],
+    'Santa Isabel':['Cuango','Gobea','Miramar','Palenque','Palmira','Salud'],
+  },
+  /* ── PROVINCIA DE DARIÉN ─────────────────────────────── */
+  'Darién':{
+    'Chepigana':['Cucunatí','Chepigana','La Palma','Metetí','Puerto Indio','Río Congo','Setegantí','Taimatí'],
+    'Metetí':['Agua Fría','Metetí','Puerto América','Santa Fe'],
+    'Pinogana':['Balsas','Biroquera','El Real','Pucuro','Yaviza'],
+    'Sambú':['Chapigana','Río Balsa','Río Iglesias','Sambú'],
+  },
+  /* ── PROVINCIA DE HERRERA ────────────────────────────── */
   'Herrera':{
     'Chitré':['Chitré','La Arena','Llano Bonito','Monagrillo','San Juan Bautista'],
-    'Las Minas':['Las Minas','Chepo','La Colorada','La Montañuela'],
-    'Los Pozos':['Los Pozos','El Cedro','La Arena','Las Guías','Villa Lourdes'],
-    'Ocú':['Ocú','El Capurí','El Tijera','Llano de La Cruz'],
-    'Parita':['Parita','Cabuya','El Rincón','Los Castillos','París'],
-    'Pesé':['Pesé','Aserrío','Belén','El Ciruelo'],
-    'Santa María':['Santa María','Aguadulce','Leones','Llanito'],
+    'Las Minas':['Chepo','La Colorada','La Montañuela','Las Minas'],
+    'Los Pozos':['El Cedro','La Arena','Las Guías','Los Pozos','Villa Lourdes'],
+    'Ocú':['El Capurí','El Tijera','Llano de La Cruz','Ocú'],
+    'Parita':['Cabuya','El Rincón','Los Castillos','París','Parita'],
+    'Pesé':['Aserrío','Belén','El Ciruelo','Pesé'],
+    'Santa María':['Aguadulce','Leones','Llanito','Santa María'],
   },
+  /* ── PROVINCIA DE LOS SANTOS ─────────────────────────── */
   'Los Santos':{
-    'Las Tablas':['Las Tablas','El Caucho','El Ejido','El Manantial','Flores','La Palma','La Tiza','Palmilla','Quisqueya','Río Grande','Santo Domingo'],
-    'Guararé':['Guararé','El Espino','La Enea','La Palma','La Tronosa','Llano Abajo'],
-    'Los Santos':['Los Santos','Agua Buena','La Colorada','Las Cruces','Llano Largo','Medialuna','Mororó','Peña Blanca','Sabana Grande'],
-    'Macaracas':['Macaracas','Bahía Honda','Corozal','El Giral','Lajamina','Mogollón'],
-    'Pedasí':['Pedasí','El Limón','Los Asientos','Oria Arriba'],
-    'Pocrí':['Pocrí','Bayano','El Cacao'],
-    'Tonosí':['Tonosí','Cambutal','El Cortezo','Flores','Guánico','La Tronosa'],
+    'Guararé':['El Espino','El Mensabé','Guararé','La Enea','La Palma','La Tronosa','Llano Abajo','Los Asientos'],
+    'Las Tablas':['El Caucho','El Ejido','El Manantial','Flores','La Palma','La Tiza','Las Tablas','Palmilla','Quisqueya','Río Grande','Santo Domingo'],
+    'Los Santos':['Agua Buena','La Colorada','Las Cruces','Llano Largo','Los Santos','Medialuna','Mororó','Peña Blanca','Sabana Grande'],
+    'Macaracas':['Bahía Honda','Corozal','El Giral','Lajamina','Macaracas','Mogollón'],
+    'Pedasí':['El Limón','Los Asientos','Oria Arriba','Pedasí'],
+    'Pocrí':['Bayano','El Cacao','Pocrí'],
+    'Tonosí':['Cambutal','El Cortezo','Flores','Guánico','La Tronosa','Tonosí'],
   },
+  /* ── PROVINCIA DE VERAGUAS ───────────────────────────── */
   'Veraguas':{
-    'Santiago':['Santiago','Carlos Santana Ávila','Edwin Fábrega','La Colorada','La Peña','La Raya de Santa María','Lotería','Ponuga'],
     'Calobre':['Calobre','Chiguirí Arriba','El Pantano','El Palmar','La Garceana','Tulú'],
     'Cañazas':['Cañazas','El Aromillo','El Piro','La Soledad','Los Hatillos','San Bartolo'],
-    'Las Palmas':['Las Palmas','Cerro de Casa','El Balsal','Pixvae','Puerto Vidal'],
-    'Mariato':['Mariato','Arenas','Quebro'],
-    'Montijo':['Montijo','El Rebalsadero','Estero Largo','La Garceana','Puerto Mutis'],
-    'Río de Jesús':['Río de Jesús','Banco','Calovévora','San Pedro del Espino'],
-    'San Francisco':['San Francisco','La Colorada','La Raya','Remance','San Juan'],
-    'Santa Fe':['Santa Fe','Calovébora','El Alto','El Cuay','El Pantano','Gatuncito'],
-    'Soná':['Soná','Bahía Honda','Guarumal','Hicaco','La Soledad','Marañón'],
+    'La Mesa':['El Barrito','La Mesa','La Raya','San José'],
+    'Las Palmas':['Cerro de Casa','El Balsal','Las Palmas','Pixvae','Puerto Vidal'],
+    'Mariato':['Arenas','Mariato','Quebro'],
+    'Montijo':['El Rebalsadero','Estero Largo','La Garceana','Montijo','Puerto Mutis'],
+    'Río de Jesús':['Banco','Calovébora','Río de Jesús','San Pedro del Espino'],
+    'San Francisco':['La Colorada','La Raya','Remance','San Francisco','San Juan'],
+    'Santa Fe':['Calovébora','El Alto','El Cuay','El Pantano','Gatuncito','Santa Fe'],
+    'Santiago':['Carlos Santana Ávila','Edwin Fábrega','La Colorada','La Peña','La Raya de Santa María','Lotería','Ponuga','Santiago'],
+    'Soná':['Bahía Honda','Guarumal','Hicaco','La Soledad','Marañón','Soná'],
   },
-  'Bocas del Toro':{
-    'Bocas del Toro':['Bocas del Toro','Almirante','Bastimentos','Cauchero','Cristóbal','Punta Laurel','Tierra Oscura'],
-    'Changuinola':['Changuinola','Almirante','Boca del Monte','Guabito','Las Delicias','Miramar','Teribe'],
-    'Chiriquí Grande':['Chiriquí Grande','Boca del Drago','Kusapín','Miramar','Mutis','Rambala'],
-  },
-  'Darién':{
-    'La Palma':['La Palma','Cucunatí','Metetí','Puerto Indio','Río Congo','Setegantí','Taimatí'],
-    'Cémaco':['Boca de Cupe','La Marea','Lajas Blancas','Pavarandó','Ucurgantí'],
-    'Metetí':['Metetí','Agua Fría','Puerto América','Santa Fe'],
-    'Pinogana':['El Real','Balsas','Biroquera','Pucuro','Yaviza'],
-    'Sambú':['Sambú','Chapigana','Río Balsa','Río Iglesias'],
-  },
+  /* ── COMARCA GUNA YALA ───────────────────────────────── */
   'Guna Yala':{
     'Guna Yala':['Ailigandí','El Llano','Narganá','Puerto Obaldía','Tubualá'],
   },
+  /* ── COMARCA NGÄBE-BUGLÉ ─────────────────────────────── */
   'Ngäbe-Buglé':{
     'Besiko':['Bisvalles','Calante','Cerro Pelado','Guariviara','Kankintú'],
     'Mirono':['Cerro Caña','El Piro','Guariviara','Mironó'],
@@ -4398,6 +4415,7 @@ const PANAMA_GEO = {
     'Nole Duima':['Cerro Iglesias','Chichica'],
     'Ñurum':['Cerro Caña','Hato Corotú','Hato Culantro','Hato Jobo'],
   },
+  /* ── COMARCA EMBERÁ-WOUNAAN ──────────────────────────── */
   'Emberá-Wounaan':{
     'Cémaco':['Boca de Cupe','Lajas Blancas','Pavarandó','Tucutí','Unión Chocó'],
     'Sambú':['Chapigana','Río Balsa','Río Iglesias','Sambú'],
@@ -4651,7 +4669,7 @@ function renderFichaModal(p, conContacto){
           ${p.fotos&&p.fotos.length?`<span class="tag" style="background:var(--card2)">📷 ${p.fotos.length} fotos</span>`:''}
         </div>
         <h2 style="font-size:18px;font-weight:700;margin-bottom:6px">${p.titulo}</h2>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:10px">📍 ${[p.corregimiento,p.distrito,p.provincia].filter(Boolean).join(', ')||p.zona||'Panamá'}</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px">📍 ${[p.barrio,p.corregimiento,p.distrito,p.provincia].filter(Boolean).join(', ')||p.zona||'Panamá'}</div>
         <div style="font-size:22px;font-weight:700;color:var(--accent);margin-bottom:12px">
           ${p.op==='Alquiler'?`$${(p.precio_alquiler||p.precio||0).toLocaleString()}/mes`:`$${(p.precio||0).toLocaleString()}`}
           ${p.negociable==='si'?'<span style="font-size:11px;color:var(--green);margin-left:6px">NEGOCIABLE</span>':''}
@@ -4931,7 +4949,7 @@ function clearFormCliente(){
   showClienteFields('');
 }
 function clearFormProp(){
-  ['p-titulo','p-precio','p-precio-alquiler','p-mantenimiento','p-area','p-area-const','p-hab','p-banos','p-medios-banos','p-estac','p-piso','p-anio','p-desc','p-propietario','p-tel-propietario','p-nota-interna','p-lat','p-lng','p-direccion','p-referencia','p-zona'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['p-titulo','p-precio','p-precio-alquiler','p-mantenimiento','p-area','p-area-const','p-hab','p-banos','p-medios-banos','p-estac','p-piso','p-anio','p-desc','p-propietario','p-tel-propietario','p-nota-interna','p-lat','p-lng','p-direccion','p-referencia','p-zona','p-barrio'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['p-tipo','p-op','p-status','p-negociable','p-estado-inmueble','p-provincia','p-distrito','p-corregimiento'].forEach(id=>{const el=document.getElementById(id);if(el&&el.options&&el.options.length)el.selectedIndex=0;});
   document.querySelectorAll('#p-amenidades-grid input[type=checkbox]').forEach(c=>c.checked=false);
   _fotosTemp=[];
