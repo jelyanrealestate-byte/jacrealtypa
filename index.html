@@ -543,104 +543,156 @@ footer{background:#0d0d0d;padding:70px 60px 0}
   </div>
 </div>
 
-<!-- ======= MLS / IDEX PROPERTY SEARCH ======= -->
+<!-- ======= PROPIEDADES MLS / IDEX ======= -->
 <section id="propiedades-mls" style="background:#080d14;padding:80px 0 90px">
-  <div style="max-width:1200px;margin:0 auto;padding:0 24px">
+  <div style="max-width:1240px;margin:0 auto;padding:0 24px">
+
     <!-- Header -->
-    <div style="text-align:center;margin-bottom:48px">
+    <div style="text-align:center;margin-bottom:52px">
       <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(196,30,58,.12);border:1px solid rgba(196,30,58,.25);padding:6px 18px;border-radius:20px;margin-bottom:20px">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C41E3A" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
-        <span style="font-size:11px;color:#C41E3A;letter-spacing:2px;text-transform:uppercase;font-weight:600">MLS ACOBIR · Xposure™</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C41E3A" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+        <span style="font-size:11px;color:#C41E3A;letter-spacing:2px;text-transform:uppercase;font-weight:600">MLS ACOBIR · Miembro Activo</span>
       </div>
       <h2 style="font-family:'Playfair Display',Georgia,serif;font-size:clamp(32px,5vw,54px);font-weight:300;color:#fff;line-height:1.1;margin-bottom:14px">Propiedades <em style="font-style:italic;color:rgba(232,227,223,.8)">Disponibles</em></h2>
-      <p style="font-size:15px;color:rgba(255,255,255,.5);max-width:520px;margin:0 auto 32px;line-height:1.7">Nuestras propiedades en exclusiva y co-exclusiva, conectadas al MLS de ACOBIR Panamá.</p>
-      <a href="https://panama.xposureapp.com/portal/panama/Dashboard" target="_blank"
-        style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);padding:11px 26px;border-radius:4px;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:all .3s">
-        Ver MLS completo ACOBIR →
-      </a>
+      <p style="font-size:15px;color:rgba(255,255,255,.5);max-width:540px;margin:0 auto;line-height:1.7">Propiedades en exclusiva, co-exclusiva y del inventario MLS. Contáctanos — somos tu punto de contacto para cualquier propiedad en Panamá.</p>
     </div>
 
-    <!-- Property cards loaded from Supabase -->
-    <div id="web-props-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;margin-bottom:40px"></div>
-    <div id="web-props-empty" style="display:none;text-align:center;padding:48px;color:rgba(255,255,255,.3)">
-      <div style="font-size:40px;margin-bottom:12px">🏠</div>
-      <div style="font-size:16px;color:rgba(255,255,255,.5)">Cargando propiedades...</div>
-    </div>
-
-    <!-- Search filters -->
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:36px">
-      <select id="web-filter-op" onchange="webFilterProps()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:10px 18px;border-radius:4px;font-size:12px;outline:none;letter-spacing:1px">
+    <!-- Filters -->
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:40px">
+      <select id="web-filter-op" onchange="webFilterProps()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:11px 20px;border-radius:4px;font-size:11px;outline:none;letter-spacing:1.5px;cursor:pointer">
         <option value="">Venta &amp; Alquiler</option>
         <option value="Venta">Venta</option>
         <option value="Alquiler">Alquiler</option>
         <option value="Pre-Venta">Pre-Venta</option>
       </select>
-      <select id="web-filter-tipo" onchange="webFilterProps()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:10px 18px;border-radius:4px;font-size:12px;outline:none;letter-spacing:1px">
+      <select id="web-filter-tipo" onchange="webFilterProps()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:11px 20px;border-radius:4px;font-size:11px;outline:none;letter-spacing:1.5px;cursor:pointer">
         <option value="">Todos los tipos</option>
         <option>Apartamento</option><option>Casa</option><option>Penthouse</option>
         <option>Local Comercial</option><option>Oficina</option><option>Terreno</option>
       </select>
-      <input id="web-filter-zona" oninput="webFilterProps()" placeholder="Zona / Ubicación..." style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:10px 18px;border-radius:4px;font-size:12px;outline:none;width:200px;letter-spacing:.5px" />
+      <input id="web-filter-zona" oninput="webFilterProps()" placeholder="Zona / Corregimiento..." style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:11px 20px;border-radius:4px;font-size:11px;outline:none;width:210px;letter-spacing:.5px" />
+      <select id="web-filter-src" onchange="webFilterProps()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:11px 20px;border-radius:4px;font-size:11px;outline:none;letter-spacing:1.5px;cursor:pointer">
+        <option value="">Todas las fuentes</option>
+        <option value="propia">Exclusivas JAC</option>
+        <option value="mls">MLS ACOBIR</option>
+      </select>
     </div>
+
+    <!-- Loading state -->
+    <div id="web-props-loading" style="text-align:center;padding:60px;display:flex;flex-direction:column;align-items:center;gap:14px">
+      <div style="width:36px;height:36px;border:3px solid rgba(196,30,58,.2);border-top-color:#C41E3A;border-radius:50%;animation:spin .8s linear infinite"></div>
+      <p style="color:rgba(255,255,255,.3);font-size:13px;letter-spacing:.5px">Cargando propiedades...</p>
+    </div>
+
+    <!-- Property grid -->
+    <div id="web-props-grid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px;margin-bottom:40px"></div>
+
+    <!-- Empty state -->
+    <div id="web-props-empty" style="display:none;text-align:center;padding:64px 20px">
+      <div style="font-size:44px;margin-bottom:16px">🏠</div>
+      <h3 style="font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:300;color:#fff;margin-bottom:10px">Tenemos propiedades para ti</h3>
+      <p style="color:rgba(255,255,255,.4);margin-bottom:28px;max-width:400px;margin-left:auto;margin-right:auto;font-size:14px;line-height:1.7">Escríbenos con tu búsqueda y accedemos al inventario completo del MLS de ACOBIR Panamá.</p>
+      <a href="https://wa.me/50764627763?text=Hola%20JAC%20Realty%2C%20busco%20una%20propiedad%20en%20Panam%C3%A1.%20%C2%BFPueden%20ayudarme%3F" target="_blank"
+        style="display:inline-flex;align-items:center;gap:8px;background:#C41E3A;color:#fff;padding:13px 28px;border-radius:4px;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;font-weight:700">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Consultar por WhatsApp
+      </a>
+    </div>
+
+    <!-- Footer note -->
+    <p id="web-props-count" style="display:none;text-align:center;font-size:11px;color:rgba(255,255,255,.2);margin-top:8px;letter-spacing:.5px"></p>
+
   </div>
 </section>
 
 <script>
-// ======= IDEX / MLS Property Loader =======
+// ======= PROPIEDADES WEB — JAC Realty MLS/IDEX =======
+// Carga propiedades propias + importaciones MLS. Contacto siempre es JAC Realty.
 const _SB_URL='https://dskslrlxldnxrglrochv.supabase.co';
 const _ka='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
 const _kb='.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRza3Nscmx4bGRueHJnbHJvY2h2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyOTM2MzMsImV4cCI6MjA5NTg2OTYzM30';
 const _kc='.62U_9hefwe0Jbck-QQ-wzhQm5PygCobXsa3Mql45Ctc';
 const _SB_KEY=_ka+_kb+_kc;
+const _JAC_WA='50764627763';
 let _webProps=[];
 
 async function loadWebProps(){
+  const loading=document.getElementById('web-props-loading');
+  const grid=document.getElementById('web-props-grid');
+  const empty=document.getElementById('web-props-empty');
   try{
-    const r=await fetch(`${_SB_URL}/rest/v1/propiedades?select=id,titulo,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos&estado=eq.Disponible&order=created_at.desc&limit=12`,{
-      headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}
-    });
-    const data=await r.json();
-    if(Array.isArray(data)&&data.length){
-      _webProps=data;
-      webRenderProps(data);
+    // Fetch propiedades propias (estado Disponible)
+    const [r1,r2]=await Promise.all([
+      fetch(`${_SB_URL}/rest/v1/propiedades?select=id,titulo,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos&estado=eq.Disponible&order=created_at.desc&limit=24`,
+        {headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}}),
+      // Fetch importaciones MLS (propiedades_red con tipo='mls')
+      fetch(`${_SB_URL}/rest/v1/propiedades_red?select=id,titulo,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos,tipo_registro&tipo_registro=eq.mls&estado=eq.Disponible&order=created_at.desc&limit=24`,
+        {headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}})
+    ]);
+    const [propias, mls]=await Promise.all([r1.json(), r2.json()]);
+    // Normalizar: agregar _src para el filtro, NO exponer datos de otros corredores
+    const propias2=(Array.isArray(propias)?propias:[]).map(p=>({...p,_src:'propia'}));
+    const mls2=(Array.isArray(mls)?mls:[]).map(p=>({...p,_src:'mls'}));
+    _webProps=[...propias2,...mls2];
+    loading.style.display='none';
+    if(_webProps.length){
+      grid.style.display='grid';
+      webRenderProps(_webProps);
     } else {
-      document.getElementById('web-props-empty').style.display='block';
-      document.getElementById('web-props-empty').innerHTML='<div style="font-size:40px;margin-bottom:12px">🏠</div><div style="font-size:16px;color:rgba(255,255,255,.5)">Contáctanos para ver propiedades disponibles</div>';
+      empty.style.display='block';
     }
   }catch(e){
-    document.getElementById('web-props-empty').style.display='block';
-    document.getElementById('web-props-empty').innerHTML='<div style="font-size:40px;margin-bottom:12px">🏠</div><div style="font-size:16px;color:rgba(255,255,255,.5)">Contáctanos — <a href="tel:+50764627763" style="color:#C41E3A">+507 646-27763</a></div>';
+    loading.style.display='none';
+    empty.style.display='block';
   }
 }
 
 function webRenderProps(list){
   const grid=document.getElementById('web-props-grid');
   const empty=document.getElementById('web-props-empty');
-  if(!list||!list.length){empty.style.display='block';grid.innerHTML='';return;}
-  empty.style.display='none';
+  const countEl=document.getElementById('web-props-count');
+  if(!list||!list.length){
+    grid.style.display='none'; empty.style.display='block';
+    countEl.style.display='none'; return;
+  }
+  empty.style.display='none'; grid.style.display='grid';
+  countEl.style.display='block';
+  countEl.textContent=`${list.length} propiedad${list.length!==1?'es':''} disponible${list.length!==1?'s':''}`;
   grid.innerHTML=list.map(p=>{
-    const img=(p.fotos&&p.fotos[0])||'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80';
+    const img=(p.fotos&&(Array.isArray(p.fotos)?p.fotos[0]:p.fotos))||'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=700&q=80';
     const precio=p.precio?'$'+Number(p.precio).toLocaleString('en-US'):'Consultar';
-    return `<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;transition:transform .2s,border-color .2s;cursor:pointer" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='rgba(196,30,58,.4)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(255,255,255,.08)'">
-      <div style="height:200px;background:url('${img}') center/cover no-repeat;position:relative">
-        <div style="position:absolute;top:12px;left:12px;display:flex;gap:6px">
-          <span style="background:#C41E3A;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:3px;letter-spacing:1px">${(p.operacion||'').toUpperCase()}</span>
-          ${p.tipo?`<span style="background:rgba(0,0,0,.7);color:#fff;font-size:10px;padding:3px 10px;border-radius:3px">${p.tipo}</span>`:''}
+    const opLabel=(p.operacion||'').toUpperCase();
+    const isMLS=p._src==='mls';
+    // WhatsApp message — solo usa datos públicos de la propiedad, contacto siempre JAC Realty
+    const waMsg=encodeURIComponent(`Hola JAC Realty 🏠 Estoy interesado/a en la propiedad:\n*${p.titulo||'Propiedad en '+p.zona}*\n📍 ${p.zona||'Panamá'} · ${p.tipo||''}\n💰 ${precio}\n\n¿Pueden darme más información?`);
+    return `<div class="wpcard" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;transition:transform .25s,border-color .25s" onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='rgba(196,30,58,.35)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(255,255,255,.07)'">
+      <div style="height:210px;background:url('${img}') center/cover no-repeat;position:relative">
+        <div style="position:absolute;top:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap">
+          <span style="background:#C41E3A;color:#fff;font-size:9px;font-weight:800;padding:4px 11px;border-radius:3px;letter-spacing:1.5px">${opLabel}</span>
+          ${p.tipo?`<span style="background:rgba(0,0,0,.72);color:#fff;font-size:9px;padding:4px 10px;border-radius:3px;letter-spacing:.5px">${p.tipo}</span>`:''}
+          ${isMLS?`<span style="background:rgba(196,30,58,.85);color:#fff;font-size:9px;padding:4px 10px;border-radius:3px;letter-spacing:.5px">MLS</span>`:''}
+        </div>
+        <div style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);padding:5px 11px;border-radius:4px">
+          <span style="font-size:13px;font-weight:700;color:#fff;letter-spacing:.5px">${precio}</span>
         </div>
       </div>
-      <div style="padding:18px">
-        <div style="font-size:20px;font-weight:600;color:#C41E3A;margin-bottom:6px;font-family:'Helvetica Neue',sans-serif">${precio}</div>
-        <div style="font-size:14px;color:rgba(255,255,255,.9);font-weight:500;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.titulo||'Propiedad'}</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:12px">📍 ${p.zona||'Panamá'}</div>
-        <div style="display:flex;gap:14px;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:14px;flex-wrap:wrap">
+      <div style="padding:18px 20px 20px">
+        <div style="font-size:14px;color:rgba(255,255,255,.9);font-weight:500;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.titulo||'Propiedad en '+p.zona}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.38);margin-bottom:12px;display:flex;align-items:center;gap:4px">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          ${p.zona||'Panamá'}
+        </div>
+        <div style="display:flex;gap:14px;font-size:11px;color:rgba(255,255,255,.4);margin-bottom:16px;flex-wrap:wrap">
           ${p.habitaciones?`<span>🛏 ${p.habitaciones} hab</span>`:''}
           ${p.banos?`<span>🚿 ${p.banos} baños</span>`:''}
           ${p.area_total?`<span>📐 ${p.area_total} m²</span>`:''}
         </div>
-        <a href="https://wa.me/50764627763?text=${encodeURIComponent('Hola! Me interesa la propiedad: '+p.titulo+' en '+p.zona)}" target="_blank"
-          style="display:block;text-align:center;background:rgba(196,30,58,.15);border:1px solid rgba(196,30,58,.3);color:#C41E3A;padding:9px;border-radius:4px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:background .2s"
-          onmouseover="this.style.background='rgba(196,30,58,.28)'" onmouseout="this.style.background='rgba(196,30,58,.15)'">
-          Consultar →
+        <!-- CONTACTO SIEMPRE JAC REALTY — nunca se muestran datos de otro corredor -->
+        <a href="https://wa.me/${_JAC_WA}?text=${waMsg}" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;justify-content:center;gap:8px;background:#C41E3A;color:#fff;padding:11px;border-radius:4px;font-size:10px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;font-weight:700;transition:opacity .2s"
+          onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Consultar con JAC Realty
         </a>
       </div>
     </div>`;
@@ -650,11 +702,13 @@ function webRenderProps(list){
 function webFilterProps(){
   const op=document.getElementById('web-filter-op').value;
   const tipo=document.getElementById('web-filter-tipo').value;
-  const zona=document.getElementById('web-filter-zona').value.toLowerCase();
+  const zona=document.getElementById('web-filter-zona').value.toLowerCase().trim();
+  const src=document.getElementById('web-filter-src').value;
   let list=_webProps;
   if(op) list=list.filter(p=>(p.operacion||'').toLowerCase().includes(op.toLowerCase()));
   if(tipo) list=list.filter(p=>(p.tipo||'')===tipo);
   if(zona) list=list.filter(p=>(p.zona||'').toLowerCase().includes(zona));
+  if(src) list=list.filter(p=>p._src===src);
   webRenderProps(list);
 }
 

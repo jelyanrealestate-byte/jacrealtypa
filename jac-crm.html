@@ -1380,22 +1380,52 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 
     <!-- Modal: Importar listado MLS -->
     <div class="modal" id="modalMLSImport">
-      <div class="modal-box" style="max-width:520px">
-        <div class="modal-title">📡 Importar Listado MLS</div>
+      <div class="modal-box" style="max-width:640px">
+        <div class="modal-title">📡 Importar Listado MLS · ACOBIR</div>
+
+        <!-- DATOS DE LA PROPIEDAD -->
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--text2);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)">🏠 Datos de la Propiedad</div>
         <div class="form-grid">
-          <div class="form-group"><label class="form-label">Código MLS *</label><input id="mls-i-codigo" class="form-input" placeholder="Ej: MLS-2024-001"></div>
-          <div class="form-group"><label class="form-label">Título / Descripción *</label><input id="mls-i-titulo" class="form-input" placeholder="Ej: Apto 3hab · Paitilla"></div>
-          <div class="form-group"><label class="form-label">Nombre Agente</label><input id="mls-i-agente" class="form-input" placeholder="Nombre del agente"></div>
-          <div class="form-group"><label class="form-label">Agencia</label><input id="mls-i-agencia" class="form-input" placeholder="Nombre de la agencia"></div>
-          <div class="form-group"><label class="form-label">Zona</label><input id="mls-i-zona" class="form-input" placeholder="Ej: Paitilla"></div>
-          <div class="form-group"><label class="form-label">Precio</label><input id="mls-i-precio" class="form-input" placeholder="Ej: $380,000"></div>
-          <div class="form-group"><label class="form-label">% Comisión co-broking</label><input id="mls-i-comision" class="form-input" placeholder="Ej: 3%"></div>
+          <div class="form-group"><label class="form-label">Código MLS *</label><input id="mls-i-codigo" class="form-input" placeholder="Ej: PA-2024-00123"></div>
+          <div class="form-group" style="grid-column:1/-1"><label class="form-label">Título / Descripción *</label><input id="mls-i-titulo" class="form-input" placeholder="Ej: Apartamento 3 habitaciones · Paitilla con vista al mar"></div>
+          <div class="form-group"><label class="form-label">Operación</label>
+            <select id="mls-i-operacion" class="form-input">
+              <option value="Venta">Venta</option><option value="Alquiler">Alquiler</option><option value="Pre-Venta">Pre-Venta</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Tipo de Propiedad</label>
+            <select id="mls-i-tipo-prop" class="form-input">
+              <option value="">Seleccionar...</option>
+              <option>Apartamento</option><option>Casa</option><option>Penthouse</option><option>Local Comercial</option><option>Oficina</option><option>Terreno</option><option>Villa</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Zona / Corregimiento</label><input id="mls-i-zona" class="form-input" placeholder="Ej: Paitilla, San Francisco"></div>
+          <div class="form-group"><label class="form-label">Precio</label><input id="mls-i-precio" class="form-input" placeholder="Ej: 380000" type="number"></div>
+          <div class="form-group"><label class="form-label">Habitaciones</label><input id="mls-i-hab" class="form-input" placeholder="Ej: 3" type="number" min="0"></div>
+          <div class="form-group"><label class="form-label">Baños</label><input id="mls-i-banos" class="form-input" placeholder="Ej: 2" type="number" min="0"></div>
+          <div class="form-group"><label class="form-label">Área (m²)</label><input id="mls-i-area" class="form-input" placeholder="Ej: 120" type="number" min="0"></div>
+          <div class="form-group"><label class="form-label">URL Foto Principal</label><input id="mls-i-foto" class="form-input" placeholder="https://..."></div>
           <div class="form-group"><label class="form-label">Estado</label>
             <select id="mls-i-estado" class="form-input">
               <option>Disponible</option><option>En Negociación</option><option>Vendido</option>
             </select>
           </div>
         </div>
+
+        <!-- DATOS DEL CORREDOR (INTERNO) -->
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--text2);text-transform:uppercase;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)">🔒 Corredor Listing · Uso Interno (Co-broking)</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:12px;padding:8px 12px;background:rgba(var(--yellow-rgb, 251,191,36),.08);border-radius:6px;border-left:3px solid var(--yellow)">
+          Estos datos son <strong>confidenciales</strong> — solo visibles en el CRM. La web pública siempre muestra contacto JAC Realty.
+        </div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">Nombre del Corredor</label><input id="mls-i-agente" class="form-input" placeholder="Nombre completo"></div>
+          <div class="form-group"><label class="form-label">Licencia ACOBIR</label><input id="mls-i-licencia" class="form-input" placeholder="Ej: PN-0000"></div>
+          <div class="form-group"><label class="form-label">Agencia / Inmobiliaria</label><input id="mls-i-agencia" class="form-input" placeholder="Nombre de la agencia"></div>
+          <div class="form-group"><label class="form-label">Teléfono Corredor</label><input id="mls-i-tel-corredor" class="form-input" placeholder="+507 6000-0000" type="tel"></div>
+          <div class="form-group"><label class="form-label">Email Corredor</label><input id="mls-i-email-corredor" class="form-input" placeholder="corredor@agencia.com" type="email"></div>
+          <div class="form-group"><label class="form-label">% Comisión co-broking</label><input id="mls-i-comision" class="form-input" placeholder="Ej: 3%" ></div>
+        </div>
+
         <div class="modal-actions">
           <button class="btn btn-outline" onclick="closeModal('modalMLSImport')">Cancelar</button>
           <button class="btn btn-primary" onclick="mlsSaveListing()">💾 Guardar en CRM</button>
@@ -3328,15 +3358,28 @@ async function mlsSaveListing(){
   const codigo=document.getElementById('mls-i-codigo').value.trim();
   const titulo=document.getElementById('mls-i-titulo').value.trim();
   if(!codigo||!titulo){toast('⚠️ Código MLS y título son obligatorios');return;}
+  const fotoVal=document.getElementById('mls-i-foto').value.trim();
   const rec={
     mls_code: codigo,
     titulo,
-    agente: document.getElementById('mls-i-agente').value.trim(),
-    agencia: document.getElementById('mls-i-agencia').value.trim(),
+    // Propiedad
+    operacion: document.getElementById('mls-i-operacion').value,
+    tipo_prop: document.getElementById('mls-i-tipo-prop').value,
     zona: document.getElementById('mls-i-zona').value.trim(),
-    precio: document.getElementById('mls-i-precio').value.trim(),
-    comision: document.getElementById('mls-i-comision').value.trim(),
+    precio: parseFloat(document.getElementById('mls-i-precio').value)||null,
+    habitaciones: parseInt(document.getElementById('mls-i-hab').value)||null,
+    banos: parseInt(document.getElementById('mls-i-banos').value)||null,
+    area_total: parseFloat(document.getElementById('mls-i-area').value)||null,
+    fotos: fotoVal ? [fotoVal] : null,
     estado: document.getElementById('mls-i-estado').value,
+    // Corredor (interno — nunca se muestra en la web pública)
+    agente: document.getElementById('mls-i-agente').value.trim(),
+    licencia_corredor: document.getElementById('mls-i-licencia').value.trim(),
+    agencia: document.getElementById('mls-i-agencia').value.trim(),
+    tel_corredor: document.getElementById('mls-i-tel-corredor').value.trim(),
+    email_corredor: document.getElementById('mls-i-email-corredor').value.trim(),
+    comision: document.getElementById('mls-i-comision').value.trim(),
+    // Tipo de registro
     tipo: 'mls',
     created_at: new Date().toISOString()
   };
@@ -3346,11 +3389,11 @@ async function mlsSaveListing(){
   }
   mlsListados.push(rec);
   closeModal('modalMLSImport');
-  ['mls-i-codigo','mls-i-titulo','mls-i-agente','mls-i-agencia','mls-i-zona','mls-i-precio','mls-i-comision'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value='';
-  });
+  ['mls-i-codigo','mls-i-titulo','mls-i-zona','mls-i-precio','mls-i-hab','mls-i-banos','mls-i-area','mls-i-foto',
+   'mls-i-agente','mls-i-licencia','mls-i-agencia','mls-i-tel-corredor','mls-i-email-corredor','mls-i-comision'
+  ].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   renderMLS(); updateMlsKpis();
-  toast('✅ Listado MLS guardado en CRM');
+  toast('✅ Listado MLS guardado — Corredor registrado internamente');
 }
 async function loadMlsListados(){
   if(typeof sb==='undefined') return;
@@ -3386,18 +3429,40 @@ function renderMLS(){
     return;
   }
   if(empty) empty.style.display='none';
-  if(tbody) tbody.innerHTML=lista.map(m=>`<tr>
-    <td style="font-family:monospace;font-size:12px;color:var(--text2)">${m.mls_code||'--'}</td>
-    <td style="font-weight:500">${m.titulo}</td>
-    <td>${m.agente||'--'}</td>
-    <td>${m.zona||'--'}</td>
-    <td class="price">${m.precio||'--'}</td>
-    <td style="color:var(--green)">${m.comision||'--'}</td>
-    <td><span class="badge ${m.estado==='Disponible'?'badge-green':m.estado==='En Negociación'?'badge-yellow':'badge-gray'}">${m.estado}</span></td>
-    <td><button class="btn btn-outline btn-sm" onclick="mlsContactarAgente('${(m.agente||'').replace(/'/g,"\\'")}')">Contactar</button></td>
-  </tr>`).join('');
+  if(tbody) tbody.innerHTML=lista.map(m=>{
+    const precioFmt=m.precio?'$'+Number(m.precio).toLocaleString('en-US'):'Consultar';
+    const opBadge=m.operacion?`<span class="badge ${m.operacion==='Venta'?'badge-green':m.operacion==='Alquiler'?'badge-yellow':'badge-gray'}" style="font-size:9px;margin-right:4px">${m.operacion}</span>`:'';
+    // Corredor info — solo visible en CRM, nunca en web
+    const corredor=m.agente||m.agencia?
+      `<div style="font-size:11px;color:var(--text2);margin-top:2px">🔒 ${[m.agente,m.licencia_corredor,m.agencia].filter(Boolean).join(' · ')}</div>` : '';
+    const contactoBtn=m.tel_corredor||m.email_corredor||m.agente?
+      `<button class="btn btn-outline btn-sm" onclick="mlsContactarAgente('${(m.agente||'').replace(/'/g,"\\'")}','${(m.tel_corredor||'').replace(/'/g,"\\'")}','${(m.email_corredor||'').replace(/'/g,"\\'")}')">📞 Co-broking</button>` : '--';
+    return `<tr>
+      <td style="font-family:monospace;font-size:11px;color:var(--text2)">${m.mls_code||'--'}</td>
+      <td style="min-width:180px">
+        <div style="font-weight:500">${opBadge}${m.titulo}</div>
+        <div style="font-size:11px;color:var(--text2)">${m.tipo_prop||m.tipo_prop||''} ${m.zona?'· '+m.zona:''}</div>
+        ${corredor}
+      </td>
+      <td class="price">${precioFmt}</td>
+      <td style="font-size:12px">${m.habitaciones?m.habitaciones+'🛏':''} ${m.banos?m.banos+'🚿':''} ${m.area_total?m.area_total+'m²':''}</td>
+      <td style="color:var(--green);font-size:12px">${m.comision||'--'}</td>
+      <td><span class="badge ${m.estado==='Disponible'?'badge-green':m.estado==='En Negociación'?'badge-yellow':'badge-gray'}">${m.estado}</span></td>
+      <td>${contactoBtn}</td>
+    </tr>`;
+  }).join('');
 }
-function mlsContactarAgente(nombre){toast('📨 Abriendo contacto con '+nombre);}
+function mlsContactarAgente(nombre, tel, email){
+  let msg='';
+  if(tel) msg+=`📞 ${tel}\n`;
+  if(email) msg+=`📧 ${email}`;
+  if(tel){
+    const wa=`https://wa.me/${tel.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Hola '+nombre+'! Te contacto de JAC Realty para coordinar co-broking ACOBIR.')}`;
+    window.open(wa,'_blank');
+  } else {
+    toast('📨 '+nombre+(email?' · '+email:''));
+  }
+}
 function mlsCopyEmbed(){
   const code=document.getElementById('mls-embed-code').textContent;
   navigator.clipboard.writeText(code.replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim()).then(()=>toast('📋 Código IDEX copiado'));
