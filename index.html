@@ -543,6 +543,124 @@ footer{background:#0d0d0d;padding:70px 60px 0}
   </div>
 </div>
 
+<!-- ======= MLS / IDEX PROPERTY SEARCH ======= -->
+<section id="propiedades-mls" style="background:#080d14;padding:80px 0 90px">
+  <div style="max-width:1200px;margin:0 auto;padding:0 24px">
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:48px">
+      <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(196,30,58,.12);border:1px solid rgba(196,30,58,.25);padding:6px 18px;border-radius:20px;margin-bottom:20px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C41E3A" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+        <span style="font-size:11px;color:#C41E3A;letter-spacing:2px;text-transform:uppercase;font-weight:600">MLS ACOBIR · Xposure™</span>
+      </div>
+      <h2 style="font-family:'Playfair Display',Georgia,serif;font-size:clamp(32px,5vw,54px);font-weight:300;color:#fff;line-height:1.1;margin-bottom:14px">Propiedades <em style="font-style:italic;color:rgba(232,227,223,.8)">Disponibles</em></h2>
+      <p style="font-size:15px;color:rgba(255,255,255,.5);max-width:520px;margin:0 auto 32px;line-height:1.7">Nuestras propiedades en exclusiva y co-exclusiva, conectadas al MLS de ACOBIR Panamá.</p>
+      <a href="https://panama.xposureapp.com/portal/panama/Dashboard" target="_blank"
+        style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);padding:11px 26px;border-radius:4px;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:all .3s">
+        Ver MLS completo ACOBIR →
+      </a>
+    </div>
+
+    <!-- Property cards loaded from Supabase -->
+    <div id="web-props-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;margin-bottom:40px"></div>
+    <div id="web-props-empty" style="display:none;text-align:center;padding:48px;color:rgba(255,255,255,.3)">
+      <div style="font-size:40px;margin-bottom:12px">🏠</div>
+      <div style="font-size:16px;color:rgba(255,255,255,.5)">Cargando propiedades...</div>
+    </div>
+
+    <!-- Search filters -->
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:36px">
+      <select id="web-filter-op" onchange="webFilterProps()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:10px 18px;border-radius:4px;font-size:12px;outline:none;letter-spacing:1px">
+        <option value="">Venta &amp; Alquiler</option>
+        <option value="Venta">Venta</option>
+        <option value="Alquiler">Alquiler</option>
+        <option value="Pre-Venta">Pre-Venta</option>
+      </select>
+      <select id="web-filter-tipo" onchange="webFilterProps()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:10px 18px;border-radius:4px;font-size:12px;outline:none;letter-spacing:1px">
+        <option value="">Todos los tipos</option>
+        <option>Apartamento</option><option>Casa</option><option>Penthouse</option>
+        <option>Local Comercial</option><option>Oficina</option><option>Terreno</option>
+      </select>
+      <input id="web-filter-zona" oninput="webFilterProps()" placeholder="Zona / Ubicación..." style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:10px 18px;border-radius:4px;font-size:12px;outline:none;width:200px;letter-spacing:.5px" />
+    </div>
+  </div>
+</section>
+
+<script>
+// ======= IDEX / MLS Property Loader =======
+const _SB_URL='https://dskslrlxldnxrglrochv.supabase.co';
+const _ka='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
+const _kb='.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRza3Nscmx4bGRueHJnbHJvY2h2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyOTM2MzMsImV4cCI6MjA5NTg2OTYzM30';
+const _kc='.62U_9hefwe0Jbck-QQ-wzhQm5PygCobXsa3Mql45Ctc';
+const _SB_KEY=_ka+_kb+_kc;
+let _webProps=[];
+
+async function loadWebProps(){
+  try{
+    const r=await fetch(`${_SB_URL}/rest/v1/propiedades?select=id,titulo,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos&estado=eq.Disponible&order=created_at.desc&limit=12`,{
+      headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}
+    });
+    const data=await r.json();
+    if(Array.isArray(data)&&data.length){
+      _webProps=data;
+      webRenderProps(data);
+    } else {
+      document.getElementById('web-props-empty').style.display='block';
+      document.getElementById('web-props-empty').innerHTML='<div style="font-size:40px;margin-bottom:12px">🏠</div><div style="font-size:16px;color:rgba(255,255,255,.5)">Contáctanos para ver propiedades disponibles</div>';
+    }
+  }catch(e){
+    document.getElementById('web-props-empty').style.display='block';
+    document.getElementById('web-props-empty').innerHTML='<div style="font-size:40px;margin-bottom:12px">🏠</div><div style="font-size:16px;color:rgba(255,255,255,.5)">Contáctanos — <a href="tel:+50764627763" style="color:#C41E3A">+507 646-27763</a></div>';
+  }
+}
+
+function webRenderProps(list){
+  const grid=document.getElementById('web-props-grid');
+  const empty=document.getElementById('web-props-empty');
+  if(!list||!list.length){empty.style.display='block';grid.innerHTML='';return;}
+  empty.style.display='none';
+  grid.innerHTML=list.map(p=>{
+    const img=(p.fotos&&p.fotos[0])||'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80';
+    const precio=p.precio?'$'+Number(p.precio).toLocaleString('en-US'):'Consultar';
+    return `<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;transition:transform .2s,border-color .2s;cursor:pointer" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='rgba(196,30,58,.4)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(255,255,255,.08)'">
+      <div style="height:200px;background:url('${img}') center/cover no-repeat;position:relative">
+        <div style="position:absolute;top:12px;left:12px;display:flex;gap:6px">
+          <span style="background:#C41E3A;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:3px;letter-spacing:1px">${(p.operacion||'').toUpperCase()}</span>
+          ${p.tipo?`<span style="background:rgba(0,0,0,.7);color:#fff;font-size:10px;padding:3px 10px;border-radius:3px">${p.tipo}</span>`:''}
+        </div>
+      </div>
+      <div style="padding:18px">
+        <div style="font-size:20px;font-weight:600;color:#C41E3A;margin-bottom:6px;font-family:'Helvetica Neue',sans-serif">${precio}</div>
+        <div style="font-size:14px;color:rgba(255,255,255,.9);font-weight:500;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.titulo||'Propiedad'}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:12px">📍 ${p.zona||'Panamá'}</div>
+        <div style="display:flex;gap:14px;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:14px;flex-wrap:wrap">
+          ${p.habitaciones?`<span>🛏 ${p.habitaciones} hab</span>`:''}
+          ${p.banos?`<span>🚿 ${p.banos} baños</span>`:''}
+          ${p.area_total?`<span>📐 ${p.area_total} m²</span>`:''}
+        </div>
+        <a href="https://wa.me/50764627763?text=${encodeURIComponent('Hola! Me interesa la propiedad: '+p.titulo+' en '+p.zona)}" target="_blank"
+          style="display:block;text-align:center;background:rgba(196,30,58,.15);border:1px solid rgba(196,30,58,.3);color:#C41E3A;padding:9px;border-radius:4px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:background .2s"
+          onmouseover="this.style.background='rgba(196,30,58,.28)'" onmouseout="this.style.background='rgba(196,30,58,.15)'">
+          Consultar →
+        </a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function webFilterProps(){
+  const op=document.getElementById('web-filter-op').value;
+  const tipo=document.getElementById('web-filter-tipo').value;
+  const zona=document.getElementById('web-filter-zona').value.toLowerCase();
+  let list=_webProps;
+  if(op) list=list.filter(p=>(p.operacion||'').toLowerCase().includes(op.toLowerCase()));
+  if(tipo) list=list.filter(p=>(p.tipo||'')===tipo);
+  if(zona) list=list.filter(p=>(p.zona||'').toLowerCase().includes(zona));
+  webRenderProps(list);
+}
+
+document.addEventListener('DOMContentLoaded',()=>loadWebProps());
+</script>
+
 <!-- FOOTER -->
 <footer>
   <div class="fgrid">

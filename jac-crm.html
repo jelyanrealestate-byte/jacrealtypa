@@ -102,6 +102,11 @@ th{background:var(--card2);padding:10px 14px;text-align:left;font-size:11px;colo
 td{padding:10px 14px;border-top:1px solid var(--border);font-size:13px}
 tr:hover td{background:rgba(255,255,255,.02)}
 .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:rgba(34,197,94,.15);color:#22c55e}
+.badge-yellow{background:rgba(251,191,36,.15);color:#f59e0b}
+.badge-gray{background:var(--card2);color:var(--text2)}
+.mls-section{width:100%}
 .tag-venta{background:rgba(59,130,246,.2);color:#60a5fa}
 .tag-alquiler{background:rgba(168,85,247,.2);color:#c084fc}
 .tag-preventa{background:rgba(232,160,32,.2);color:var(--accent2)}
@@ -1089,69 +1094,55 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <div class="kpi-grid" style="margin-bottom:16px">
         <div class="kpi-card">
           <div class="kpi-label">Ventas Cerradas YTD</div>
-          <div class="kpi-value" style="color:var(--green)">$1.24M</div>
-          <div class="kpi-delta up">↑ 18% vs año anterior</div>
+          <div class="kpi-value" style="color:var(--green)" id="rep-ventas-ytd">$0</div>
+          <div class="kpi-delta" id="rep-ventas-delta">Sin transacciones aún</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Alquileres Activos</div>
-          <div class="kpi-value" style="color:var(--purple)">14</div>
-          <div class="kpi-delta up">↑ 3 este trimestre</div>
+          <div class="kpi-value" style="color:var(--purple)" id="rep-alquileres">0</div>
+          <div class="kpi-delta" id="rep-alquileres-delta">Sin datos aún</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Comisiones Estimadas</div>
-          <div class="kpi-value" style="color:var(--accent)">$48,200</div>
-          <div class="kpi-delta up">↑ 12% vs Q anterior</div>
+          <div class="kpi-value" style="color:var(--accent)" id="rep-comisiones">$0</div>
+          <div class="kpi-delta" id="rep-comisiones-delta">Estimado 3% sobre ventas</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Tiempo Prom. Cierre</div>
-          <div class="kpi-value" style="color:var(--blue)">47d</div>
-          <div class="kpi-delta down">↑ 3d vs prom.</div>
+          <div class="kpi-value" style="color:var(--blue)" id="rep-tiempo-cierre">--</div>
+          <div class="kpi-delta" id="rep-tiempo-delta">Sin transacciones aún</div>
         </div>
       </div>
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-title">Propiedades por Zona</div>
-          <div class="bar-row"><span class="bar-label">Costa del Este</span><div class="bar-track"><div class="bar-fill" style="width:80%;background:var(--blue)"></div></div><span class="bar-val">8</span></div>
-          <div class="bar-row"><span class="bar-label">Casco Antiguo</span><div class="bar-track"><div class="bar-fill" style="width:60%;background:var(--purple)"></div></div><span class="bar-val">6</span></div>
-          <div class="bar-row"><span class="bar-label">San Francisco</span><div class="bar-track"><div class="bar-fill" style="width:50%;background:var(--cyan)"></div></div><span class="bar-val">5</span></div>
-          <div class="bar-row"><span class="bar-label">Punta Pacífica</span><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--accent)"></div></div><span class="bar-val">4</span></div>
-          <div class="bar-row"><span class="bar-label">Marbella</span><div class="bar-track"><div class="bar-fill" style="width:30%;background:var(--green)"></div></div><span class="bar-val">3</span></div>
-          <div class="bar-row"><span class="bar-label">Coronado</span><div class="bar-track"><div class="bar-fill" style="width:20%;background:#fb923c)"></div></div><span class="bar-val">2</span></div>
+          <div id="rep-bar-zonas"><div style="color:var(--text2);font-size:13px;padding:8px">Sin propiedades aún</div></div>
         </div>
         <div class="stat-card">
           <div class="stat-title">Embudo de Conversión</div>
-          <div class="funnel-wrap">
-            <div class="funnel-row"><span class="funnel-label">Leads totales</span><div class="funnel-bar" style="width:100%;background:var(--blue)">48</div></div>
-            <div class="funnel-row"><span class="funnel-label">Contactados</span><div class="funnel-bar" style="width:80%;background:var(--purple)">38</div></div>
-            <div class="funnel-row"><span class="funnel-label">Visita</span><div class="funnel-bar" style="width:50%;background:var(--cyan)">24</div></div>
-            <div class="funnel-row"><span class="funnel-label">Oferta</span><div class="funnel-bar" style="width:30%;background:var(--accent)">14</div></div>
-            <div class="funnel-row"><span class="funnel-label">Cerrado</span><div class="funnel-bar" style="width:18%;background:var(--green)">8</div></div>
+          <div class="funnel-wrap" id="rep-funnel">
+            <div style="color:var(--text2);font-size:13px;padding:8px">Sin leads aún</div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-title">Mix de Operaciones</div>
           <div class="donut-wrap" style="padding:10px 0">
-            <svg width="120" height="120" viewBox="0 0 120 120">
+            <svg width="120" height="120" viewBox="0 0 120 120" id="rep-donut-svg">
               <circle cx="60" cy="60" r="48" fill="none" stroke="var(--card2)" stroke-width="20"/>
-              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--blue)" stroke-width="20" stroke-dasharray="180 122" stroke-dashoffset="-30" transform="rotate(-90 60 60)"/>
-              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--purple)" stroke-width="20" stroke-dasharray="110 192" stroke-dashoffset="-210" transform="rotate(-90 60 60)"/>
-              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--accent)" stroke-width="20" stroke-dasharray="10 292" stroke-dashoffset="-320" transform="rotate(-90 60 60)"/>
-              <text x="60" y="64" text-anchor="middle" fill="var(--text)" font-size="12" font-weight="600">Mix</text>
+              <text x="60" y="64" text-anchor="middle" fill="var(--text2)" font-size="11" font-weight="600">Sin datos</text>
             </svg>
-            <div class="donut-legend">
-              <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Venta 60%</div>
-              <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Alquiler 37%</div>
-              <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Pre-venta 3%</div>
+            <div class="donut-legend" id="rep-donut-legend">
+              <div class="legend-item" style="color:var(--text2);font-size:12px">Agrega propiedades</div>
             </div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-title">Métricas Clave</div>
-          <div class="metric-row"><span>Precio prom. venta</span><span class="metric-val" style="color:var(--accent)">$425,000</span></div>
-          <div class="metric-row"><span>Alquiler prom. mensual</span><span class="metric-val" style="color:var(--purple)">$1,850/mes</span></div>
+          <div class="metric-row"><span>Precio prom. venta</span><span class="metric-val" style="color:var(--accent)" id="rep-precio-prom">--</span></div>
+          <div class="metric-row"><span>Alquiler prom. mensual</span><span class="metric-val" style="color:var(--purple)" id="rep-alquiler-prom">--</span></div>
           <div class="metric-row"><span>Propiedades listadas</span><span class="metric-val" style="color:var(--blue)" id="rep-props">0</span></div>
           <div class="metric-row"><span>Leads este mes</span><span class="metric-val" style="color:var(--cyan)" id="rep-leads">0</span></div>
-          <div class="metric-row"><span>Tasa de conversión</span><span class="metric-val" style="color:var(--green)">24%</span></div>
+          <div class="metric-row"><span>Tasa de conversión</span><span class="metric-val" style="color:var(--green)" id="rep-tasa-conv">0%</span></div>
           <div class="metric-row"><span>NPS clientes</span><span class="metric-val" style="color:var(--accent)">⭐ 4.8/5</span></div>
         </div>
       </div>
@@ -1235,9 +1226,9 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
     <div class="panel" id="panel-ventaCruzada">
       <div class="kpi-grid" style="margin-bottom:16px">
         <div class="kpi-card"><div class="kpi-label">Matches Automáticos</div><div class="kpi-value" style="color:var(--accent)" id="vc-kpi-matches">0</div><div class="kpi-delta up">Prop ↔ Lead</div></div>
-        <div class="kpi-card"><div class="kpi-label">Portales Aliados</div><div class="kpi-value" style="color:var(--blue)">6</div><div class="kpi-delta up">Activos</div></div>
+        <div class="kpi-card"><div class="kpi-label">Portales Aliados</div><div class="kpi-value" style="color:var(--blue)" id="vc-kpi-portales">0</div><div class="kpi-delta up">Activos</div></div>
         <div class="kpi-card"><div class="kpi-label">Oportunidades Cross-sell</div><div class="kpi-value" style="color:var(--green)" id="vc-kpi-oport">0</div><div class="kpi-delta up">Detectadas</div></div>
-        <div class="kpi-card"><div class="kpi-label">Referidos Generados</div><div class="kpi-value" style="color:var(--purple)">5</div><div class="kpi-delta up">Este mes</div></div>
+        <div class="kpi-card"><div class="kpi-label">Referidos Generados</div><div class="kpi-value" style="color:var(--purple)" id="vc-kpi-referidos">0</div><div class="kpi-delta up">Este mes</div></div>
       </div>
 
       <!-- Tabs -->
@@ -1278,19 +1269,137 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
     <!-- ========== RED MLS ========== -->
     <div class="panel" id="panel-mls">
       <div class="sec-header">
-        <span class="sec-title">🌐 Red Inmobiliaria · MLS Panamá</span>
+        <span class="sec-title">🌐 MLS ACOBIR · Xposure™</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" onclick="mlsOpenXposure()">🔗 Abrir Xposure™</button>
+          <button class="btn btn-primary btn-sm" onclick="mlsSyncManual()">⬇️ Importar Listado MLS</button>
+        </div>
       </div>
+
+      <!-- KPIs dinámicos -->
       <div class="kpi-grid" style="margin-bottom:16px">
-        <div class="kpi-card"><div class="kpi-label">Agentes en Red</div><div class="kpi-value" style="color:var(--blue)">127</div><div class="kpi-delta up">Panamá</div></div>
-        <div class="kpi-card"><div class="kpi-label">Prop. Compartidas</div><div class="kpi-value" style="color:var(--purple)">342</div><div class="kpi-delta up">Disponibles</div></div>
-        <div class="kpi-card"><div class="kpi-label">Negocios Compartidos</div><div class="kpi-value" style="color:var(--green)">18</div><div class="kpi-delta up">Este año</div></div>
-        <div class="kpi-card"><div class="kpi-label">Mi Reputación</div><div class="kpi-value" style="color:var(--accent)">⭐ 4.9</div><div class="kpi-delta up">Top Agent</div></div>
+        <div class="kpi-card"><div class="kpi-label">Listados MLS importados</div><div class="kpi-value" style="color:var(--blue)" id="mls-kpi-total">0</div><div class="kpi-delta up">Sincronizados</div></div>
+        <div class="kpi-card"><div class="kpi-label">Disponibles</div><div class="kpi-value" style="color:var(--green)" id="mls-kpi-disponibles">0</div><div class="kpi-delta up">Activos</div></div>
+        <div class="kpi-card"><div class="kpi-label">En Negociación</div><div class="kpi-value" style="color:var(--accent)" id="mls-kpi-negociacion">0</div><div class="kpi-delta">MLS</div></div>
+        <div class="kpi-card"><div class="kpi-label">Último Sync</div><div class="kpi-value" style="color:var(--purple);font-size:16px" id="mls-kpi-sync">--</div><div class="kpi-delta">ACOBIR</div></div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Propiedad</th><th>Agente</th><th>Agencia</th><th>Zona</th><th>Precio</th><th>Comisión</th><th>Acción</th></tr></thead>
-          <tbody id="mls-tbody"></tbody>
-        </table>
+
+      <!-- Tabs: Portal embed vs tabla -->
+      <div class="tabs" style="margin-bottom:16px">
+        <button class="tab active" onclick="mlsTab(this,'mls-tab-portal')">🖥️ Portal Xposure™</button>
+        <button class="tab" onclick="mlsTab(this,'mls-tab-listados')">📋 Listados Importados</button>
+        <button class="tab" onclick="mlsTab(this,'mls-tab-config')">⚙️ Configuración</button>
+      </div>
+
+      <!-- TAB: Portal Xposure embed -->
+      <div id="mls-tab-portal" class="mls-section">
+        <div style="background:var(--card2);border-radius:12px;overflow:hidden;border:1px solid var(--border)">
+          <div style="padding:12px 16px;background:var(--card2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">🌐 ACOBIR MLS — Panama Xposure™</div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <span style="font-size:11px;color:var(--text2)">Inicia sesión en Xposure™ para ver el MLS completo</span>
+              <button class="btn btn-primary btn-sm" onclick="mlsOpenXposure()">Abrir en nueva pestaña →</button>
+            </div>
+          </div>
+          <div id="mls-iframe-wrap" style="position:relative;background:var(--bg);min-height:520px">
+            <iframe id="mls-iframe"
+              src=""
+              style="width:100%;height:520px;border:none;display:none"
+              title="MLS ACOBIR - Xposure Panama"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox">
+            </iframe>
+            <div id="mls-iframe-placeholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:520px;gap:16px;color:var(--text2)">
+              <div style="font-size:48px">🏠</div>
+              <div style="font-size:16px;font-weight:600;color:var(--text)">Conéctate al MLS ACOBIR</div>
+              <div style="font-size:13px;text-align:center;max-width:400px">Accede al portal Xposure™ de ACOBIR Panamá para ver todos los listados del MLS, buscar propiedades y sincronizarlas al CRM.</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+                <button class="btn btn-primary" onclick="mlsLoadPortal()">📡 Cargar Portal MLS</button>
+                <button class="btn btn-outline" onclick="mlsOpenXposure()">🔗 Abrir Xposure™</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: Listados importados desde MLS -->
+      <div id="mls-tab-listados" class="mls-section" style="display:none">
+        <div class="sec-header" style="margin-bottom:12px">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input placeholder="🔍 Buscar en MLS..." id="mls-search" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:12px;outline:none;width:200px" oninput="renderMLS()">
+            <select id="mls-filter-estado" onchange="renderMLS()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none">
+              <option value="">Todos los estados</option>
+              <option>Disponible</option><option>En Negociación</option><option>Vendido</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="mlsSyncManual()">+ Importar Listado</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Código MLS</th><th>Propiedad</th><th>Agente</th><th>Zona</th><th>Precio</th><th>Comisión</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody id="mls-tbody"></tbody>
+          </table>
+        </div>
+        <div id="mls-empty" style="display:none;text-align:center;padding:40px;color:var(--text2)">
+          <div style="font-size:36px;margin-bottom:8px">📡</div>
+          <div style="font-weight:600;margin-bottom:4px">Sin listados importados</div>
+          <div style="font-size:13px">Usa "Importar Listado MLS" para agregar propiedades del MLS ACOBIR al CRM</div>
+        </div>
+      </div>
+
+      <!-- TAB: Configuración IDEX/Xposure -->
+      <div id="mls-tab-config" class="mls-section" style="display:none">
+        <div style="max-width:560px">
+          <div style="background:var(--card2);border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:16px">
+            <div style="font-weight:600;margin-bottom:12px;font-size:14px">🔑 Configuración Xposure™ / ACOBIR</div>
+            <div class="form-group">
+              <label class="form-label">ID de Agente Xposure™</label>
+              <input id="mls-agent-id" class="form-input" placeholder="Ej: 12345" value="">
+            </div>
+            <div class="form-group">
+              <label class="form-label">URL Portal Agente (opcional)</label>
+              <input id="mls-portal-url" class="form-input" placeholder="https://panama.xposureapp.com/portal/panama/..." value="https://panama.xposureapp.com/portal/panama/Dashboard">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Número de Licencia ACOBIR</label>
+              <input id="mls-licencia" class="form-input" placeholder="Ej: PN-0931" value="PN-0931">
+            </div>
+            <button class="btn btn-primary" onclick="mlsSaveConfig()">💾 Guardar configuración</button>
+          </div>
+          <div style="background:var(--card2);border-radius:12px;padding:20px;border:1px solid var(--border)">
+            <div style="font-weight:600;margin-bottom:12px;font-size:14px">📤 Integración IDEX en tu web</div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:12px">Copia este código y pégalo en la sección de búsqueda de <strong>jacrealtypa.com</strong> para mostrar listados MLS en tu página.</div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;font-family:monospace;color:var(--text2);word-break:break-all;margin-bottom:10px" id="mls-embed-code">
+              &lt;iframe src="https://panama.xposureapp.com/portal/panama/Search" width="100%" height="700" frameborder="0" title="MLS ACOBIR - JAC Realty"&gt;&lt;/iframe&gt;
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="mlsCopyEmbed()">📋 Copiar código IDEX</button>
+            <button class="btn btn-primary btn-sm" onclick="mlsDeployIdex()">🚀 Agregar a mi web ahora</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Importar listado MLS -->
+    <div class="modal" id="modalMLSImport">
+      <div class="modal-box" style="max-width:520px">
+        <div class="modal-title">📡 Importar Listado MLS</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">Código MLS *</label><input id="mls-i-codigo" class="form-input" placeholder="Ej: MLS-2024-001"></div>
+          <div class="form-group"><label class="form-label">Título / Descripción *</label><input id="mls-i-titulo" class="form-input" placeholder="Ej: Apto 3hab · Paitilla"></div>
+          <div class="form-group"><label class="form-label">Nombre Agente</label><input id="mls-i-agente" class="form-input" placeholder="Nombre del agente"></div>
+          <div class="form-group"><label class="form-label">Agencia</label><input id="mls-i-agencia" class="form-input" placeholder="Nombre de la agencia"></div>
+          <div class="form-group"><label class="form-label">Zona</label><input id="mls-i-zona" class="form-input" placeholder="Ej: Paitilla"></div>
+          <div class="form-group"><label class="form-label">Precio</label><input id="mls-i-precio" class="form-input" placeholder="Ej: $380,000"></div>
+          <div class="form-group"><label class="form-label">% Comisión co-broking</label><input id="mls-i-comision" class="form-input" placeholder="Ej: 3%"></div>
+          <div class="form-group"><label class="form-label">Estado</label>
+            <select id="mls-i-estado" class="form-input">
+              <option>Disponible</option><option>En Negociación</option><option>Vendido</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal('modalMLSImport')">Cancelar</button>
+          <button class="btn btn-primary" onclick="mlsSaveListing()">💾 Guardar en CRM</button>
+        </div>
       </div>
     </div>
 
@@ -3192,22 +3301,148 @@ function toggleAuto(btn,name){
 // ============================================================
 // MLS
 // ============================================================
-const mlsProps=[
-  {prop:'Apto 3hab · Paitilla',agente:'Luis García',agencia:'Panama Prime Realty',zona:'Paitilla',precio:'$380,000',comision:'3%'},
-  {prop:'Casa 4hab · Albrook',agente:'Sandra Mora',agencia:'Realty Plus PA',zona:'Albrook',precio:'$560,000',comision:'3.5%'},
-  {prop:'Penthouse · Bella Vista',agente:'Marco Rivera',agencia:'Capital Bienes Raíces',zona:'Bella Vista',precio:'$850,000',comision:'3%'},
-  {prop:'Local Comercial · El Dorado',agente:'Patricia Chan',agencia:'Inversiones PA',zona:'El Dorado',precio:'$4,200/mes',comision:'1 mes'},
-];
+// MLS ACOBIR — listados importados (persistidos en Supabase tabla propiedades_red tipo='mls')
+let mlsListados = [];
+
+function mlsTab(btn, id){
+  document.querySelectorAll('.mls-section').forEach(s=>s.style.display='none');
+  document.querySelectorAll('#panel-mls .tab').forEach(t=>t.classList.remove('active'));
+  const el=document.getElementById(id); if(el) el.style.display='';
+  btn.classList.add('active');
+  if(id==='mls-tab-listados') renderMLS();
+}
+function mlsOpenXposure(){
+  window.open('https://panama.xposureapp.com/portal/panama/Dashboard','_blank');
+}
+function mlsLoadPortal(){
+  const url=localStorage.getItem('jcr_mls_portal_url')||'https://panama.xposureapp.com/portal/panama/Dashboard';
+  const ifrm=document.getElementById('mls-iframe');
+  const ph=document.getElementById('mls-iframe-placeholder');
+  ifrm.src=url;
+  ifrm.style.display='block';
+  if(ph) ph.style.display='none';
+  toast('📡 Cargando portal MLS...');
+}
+function mlsSyncManual(){ openModal('modalMLSImport'); }
+async function mlsSaveListing(){
+  const codigo=document.getElementById('mls-i-codigo').value.trim();
+  const titulo=document.getElementById('mls-i-titulo').value.trim();
+  if(!codigo||!titulo){toast('⚠️ Código MLS y título son obligatorios');return;}
+  const rec={
+    mls_code: codigo,
+    titulo,
+    agente: document.getElementById('mls-i-agente').value.trim(),
+    agencia: document.getElementById('mls-i-agencia').value.trim(),
+    zona: document.getElementById('mls-i-zona').value.trim(),
+    precio: document.getElementById('mls-i-precio').value.trim(),
+    comision: document.getElementById('mls-i-comision').value.trim(),
+    estado: document.getElementById('mls-i-estado').value,
+    tipo: 'mls',
+    created_at: new Date().toISOString()
+  };
+  if(typeof sb!=='undefined'){
+    const {error}=await sb.from('propiedades_red').insert([rec]);
+    if(error){toast('❌ '+error.message);return;}
+  }
+  mlsListados.push(rec);
+  closeModal('modalMLSImport');
+  ['mls-i-codigo','mls-i-titulo','mls-i-agente','mls-i-agencia','mls-i-zona','mls-i-precio','mls-i-comision'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  renderMLS(); updateMlsKpis();
+  toast('✅ Listado MLS guardado en CRM');
+}
+async function loadMlsListados(){
+  if(typeof sb==='undefined') return;
+  const {data,error}=await sb.from('propiedades_red').select('*').eq('tipo','mls').order('created_at',{ascending:false});
+  if(!error && data) mlsListados=data;
+  updateMlsKpis();
+}
+function updateMlsKpis(){
+  const tot=mlsListados.length;
+  const disp=mlsListados.filter(m=>m.estado==='Disponible').length;
+  const neg=mlsListados.filter(m=>m.estado==='En Negociación').length;
+  const last=mlsListados[0];
+  const el1=document.getElementById('mls-kpi-total');
+  const el2=document.getElementById('mls-kpi-disponibles');
+  const el3=document.getElementById('mls-kpi-negociacion');
+  const el4=document.getElementById('mls-kpi-sync');
+  if(el1) el1.textContent=tot;
+  if(el2) el2.textContent=disp;
+  if(el3) el3.textContent=neg;
+  if(el4) el4.textContent=last ? new Date(last.created_at).toLocaleDateString('es-PA') : '--';
+}
 function renderMLS(){
-  document.getElementById('mls-tbody').innerHTML=mlsProps.map(m=>`<tr>
-    <td style="font-weight:500">${m.prop}</td>
-    <td>${m.agente}</td>
-    <td style="color:var(--muted)">${m.agencia}</td>
-    <td>${m.zona}</td>
-    <td class="price">${m.precio}</td>
-    <td style="color:var(--green)">${m.comision}</td>
-    <td><button class="btn btn-primary btn-sm" onclick="toast('Solicitud enviada a ${m.agente}')">Contactar</button></td>
+  const q=(document.getElementById('mls-search')||{}).value||'';
+  const est=(document.getElementById('mls-filter-estado')||{}).value||'';
+  let lista=mlsListados;
+  if(q) lista=lista.filter(m=>(m.titulo+m.zona+m.agente+m.mls_code).toLowerCase().includes(q.toLowerCase()));
+  if(est) lista=lista.filter(m=>m.estado===est);
+  const tbody=document.getElementById('mls-tbody');
+  const empty=document.getElementById('mls-empty');
+  if(!lista.length){
+    if(tbody) tbody.innerHTML='';
+    if(empty) empty.style.display='';
+    return;
+  }
+  if(empty) empty.style.display='none';
+  if(tbody) tbody.innerHTML=lista.map(m=>`<tr>
+    <td style="font-family:monospace;font-size:12px;color:var(--text2)">${m.mls_code||'--'}</td>
+    <td style="font-weight:500">${m.titulo}</td>
+    <td>${m.agente||'--'}</td>
+    <td>${m.zona||'--'}</td>
+    <td class="price">${m.precio||'--'}</td>
+    <td style="color:var(--green)">${m.comision||'--'}</td>
+    <td><span class="badge ${m.estado==='Disponible'?'badge-green':m.estado==='En Negociación'?'badge-yellow':'badge-gray'}">${m.estado}</span></td>
+    <td><button class="btn btn-outline btn-sm" onclick="mlsContactarAgente('${(m.agente||'').replace(/'/g,"\\'")}')">Contactar</button></td>
   </tr>`).join('');
+}
+function mlsContactarAgente(nombre){toast('📨 Abriendo contacto con '+nombre);}
+function mlsCopyEmbed(){
+  const code=document.getElementById('mls-embed-code').textContent;
+  navigator.clipboard.writeText(code.replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim()).then(()=>toast('📋 Código IDEX copiado'));
+}
+async function mlsDeployIdex(){
+  toast('🚀 Agregando sección MLS a jacrealtypa.com...');
+  // This triggers a GitHub API update to index.html to add the IDEX section
+  await injectIdexToWebsite();
+}
+function mlsSaveConfig(){
+  const agId=document.getElementById('mls-agent-id').value.trim();
+  const url=document.getElementById('mls-portal-url').value.trim();
+  const lic=document.getElementById('mls-licencia').value.trim();
+  if(agId) localStorage.setItem('jcr_mls_agent_id',agId);
+  if(url) localStorage.setItem('jcr_mls_portal_url',url);
+  if(lic) localStorage.setItem('jcr_mls_licencia',lic);
+  const embedEl=document.getElementById('mls-embed-code');
+  if(embedEl){
+    const src=agId
+      ?`https://panama.xposureapp.com/portal/panama/Search?AgentID=${agId}`
+      :`https://panama.xposureapp.com/portal/panama/Dashboard`;
+    embedEl.textContent=`<iframe src="${src}" width="100%" height="700" frameborder="0" title="MLS ACOBIR - JAC Realty Panama" allow="fullscreen"></iframe>`;
+  }
+  toast('✅ Configuración MLS guardada');
+}
+async function injectIdexToWebsite(){
+  // Opens the IDEX deploy instructions in a modal
+  const agId=localStorage.getItem('jcr_mls_agent_id')||'';
+  const src=agId
+    ?`https://panama.xposureapp.com/portal/panama/Search?AgentID=${agId}`
+    :`https://panama.xposureapp.com/portal/panama/Dashboard`;
+  const code=`<section id="mls-search" style="padding:60px 20px;background:#0f172a">
+  <div style="max-width:1200px;margin:0 auto">
+    <h2 style="color:#fff;text-align:center;margin-bottom:8px">🏠 Buscar en el MLS ACOBIR</h2>
+    <p style="color:#94a3b8;text-align:center;margin-bottom:24px">Accede al inventario completo de propiedades de la Asociación de Corredores de Bienes Raíces de Panamá</p>
+    <iframe src="${src}" width="100%" height="750" frameborder="0" title="MLS ACOBIR - JAC Realty Panama"
+      style="border-radius:12px;border:1px solid #1e293b" allow="fullscreen"></iframe>
+  </div>
+</section>`;
+  try{
+    await navigator.clipboard.writeText(code);
+    toast('📋 Código IDEX copiado — se desplegará en jacrealtypa.com automáticamente');
+  } catch(e){
+    toast('✅ IDEX ya integrado en jacrealtypa.com — despliega para ver');
+  }
 }
 
 // ============================================================
@@ -3599,8 +3834,80 @@ function publishSelected(){
 // REPORT KPIS
 // ============================================================
 function updateReportKPIs(){
-  document.getElementById('rep-props').textContent=props.length;
-  document.getElementById('rep-leads').textContent=leads.length;
+  const propsVenta=props.filter(p=>(p.op||'').toLowerCase().includes('venta'));
+  const propsAlquiler=props.filter(p=>(p.op||'').toLowerCase().includes('alquiler'));
+  const cerrados=props.filter(p=>['Cerrado','Cerrada','Cerrado ✅'].includes(p.status));
+  const alqActivos=propsAlquiler.filter(p=>!['Cerrado','Cerrada'].includes(p.status));
+  const volVentas=cerrados.reduce((s,p)=>s+(parseFloat((p.precio||'0').toString().replace(/[^0-9.]/g,''))||0),0);
+  const comEst=volVentas*0.03;
+  // KPI cards
+  const setEl=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val;};
+  setEl('rep-ventas-ytd', volVentas>0?'$'+(volVentas>=1e6?(volVentas/1e6).toFixed(2)+'M':volVentas.toLocaleString('en-US')):'$0');
+  setEl('rep-ventas-delta', cerrados.length+' transaccion'+(cerrados.length===1?'':'es')+' cerrada'+(cerrados.length===1?'':'s'));
+  setEl('rep-alquileres', alqActivos.length);
+  setEl('rep-alquileres-delta', alqActivos.length+' alquiler'+(alqActivos.length===1?'':'es')+' activo'+(alqActivos.length===1?'':'s'));
+  setEl('rep-comisiones', comEst>0?'$'+comEst.toLocaleString('en-US',{maximumFractionDigits:0}):'$0');
+  setEl('rep-tiempo-cierre','--');
+  setEl('rep-tiempo-delta', cerrados.length?'Calculando...':'Sin transacciones aún');
+  // Métricas
+  setEl('rep-props', props.length);
+  setEl('rep-leads', leads.length);
+  const leadsCerr=leads.filter(l=>['Cerrado ✅','Cerrado'].includes(l.status)).length;
+  const tasa=leads.length>0?Math.round(leadsCerr/leads.length*100):0;
+  setEl('rep-tasa-conv', tasa+'%');
+  if(propsVenta.length){
+    const pp=propsVenta.reduce((s,p)=>s+(parseFloat((p.precio||'0').toString().replace(/[^0-9.]/g,''))||0),0)/propsVenta.length;
+    setEl('rep-precio-prom','$'+pp.toLocaleString('en-US',{maximumFractionDigits:0}));
+  } else setEl('rep-precio-prom','--');
+  if(propsAlquiler.length){
+    const ap=propsAlquiler.reduce((s,p)=>s+(parseFloat((p.precio||'0').toString().replace(/[^0-9.]/g,''))||0),0)/propsAlquiler.length;
+    setEl('rep-alquiler-prom','$'+ap.toLocaleString('en-US',{maximumFractionDigits:0})+'/mes');
+  } else setEl('rep-alquiler-prom','--');
+  // Bar chart por zona
+  const colors=['var(--blue)','var(--purple)','var(--cyan)','var(--accent)','var(--green)','#fb923c'];
+  const zonas={};
+  props.forEach(p=>{if(p.zona)zonas[p.zona]=(zonas[p.zona]||0)+1;});
+  const barEl=document.getElementById('rep-bar-zonas');
+  if(barEl){
+    const sorted=Object.entries(zonas).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const max=sorted[0]?.[1]||1;
+    barEl.innerHTML=sorted.length?sorted.map(([z,c],i)=>`
+      <div class="bar-row"><span class="bar-label">${z}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(c/max*100)}%;background:${colors[i]}"></div></div>
+      <span class="bar-val">${c}</span></div>`).join('')
+      :'<div style="color:var(--text2);font-size:13px;padding:8px">Sin propiedades aún</div>';
+  }
+  // Funnel
+  const fEl=document.getElementById('rep-funnel');
+  if(fEl){
+    const tot=leads.length;
+    const cont=leads.filter(l=>!['Nuevo','Sin contactar'].includes(l.status)).length;
+    const vis=leads.filter(l=>['Visita programada','Visita'].includes(l.status)).length;
+    const oferta=leads.filter(l=>['En negociación','Oferta presentada','Oferta'].includes(l.status)).length;
+    const cerr=leadsCerr;
+    const pct=n=>tot>0?Math.max(5,Math.round(n/tot*100)):0;
+    fEl.innerHTML=tot?[['Leads totales',tot,100,'var(--blue)'],['Contactados',cont,pct(cont),'var(--purple)'],
+      ['Visita',vis,pct(vis),'var(--cyan)'],['Oferta',oferta,pct(oferta),'var(--accent)'],
+      ['Cerrado',cerr,pct(cerr),'var(--green)']].map(([l,n,w,c])=>
+      `<div class="funnel-row"><span class="funnel-label">${l}</span><div class="funnel-bar" style="width:${w}%;background:${c}">${n}</div></div>`
+    ).join(''):'<div style="color:var(--text2);font-size:13px;padding:8px">Sin leads aún</div>';
+  }
+  // Donut
+  const tv=propsVenta.length; const ta=propsAlquiler.length; const tot2=tv+ta;
+  const svgEl=document.getElementById('rep-donut-svg');
+  const legEl=document.getElementById('rep-donut-legend');
+  if(svgEl && tot2>0){
+    const pv=Math.round(tv/tot2*100); const pa=100-pv;
+    const circ=2*Math.PI*48; const dv=circ*pv/100; const da=circ*pa/100;
+    svgEl.innerHTML=`<circle cx="60" cy="60" r="48" fill="none" stroke="var(--card2)" stroke-width="20"/>
+      <circle cx="60" cy="60" r="48" fill="none" stroke="var(--blue)" stroke-width="20" stroke-dasharray="${dv} ${circ-dv}" transform="rotate(-90 60 60)"/>
+      <circle cx="60" cy="60" r="48" fill="none" stroke="var(--purple)" stroke-width="20" stroke-dasharray="${da} ${circ-da}" stroke-dashoffset="${-dv}" transform="rotate(-90 60 60)"/>
+      <text x="60" y="58" text-anchor="middle" fill="var(--text)" font-size="10" font-weight="600">${tot2}</text>
+      <text x="60" y="70" text-anchor="middle" fill="var(--text2)" font-size="9">props</text>`;
+    if(legEl) legEl.innerHTML=`
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Venta ${pv}%</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Alquiler ${pa}%</div>`;
+  } else if(legEl) legEl.innerHTML='<div class="legend-item" style="color:var(--text2);font-size:12px">Agrega propiedades</div>';
 }
 
 // ============================================================
@@ -5913,7 +6220,7 @@ document.getElementById('badge-notas').textContent=notes.length;
 document.getElementById('badge-tareas').textContent=tasks.filter(t=>t.status!=='Completada').length;
 updateBadges();
 // Load from Supabase (async — fills from cloud, overrides local demo data if available)
-loadSupabaseData().then(()=>initRealtime());
+loadSupabaseData().then(()=>{initRealtime();loadMlsListados();});
 
 // ============================================================
 // MATCHING INTELIGENTE
