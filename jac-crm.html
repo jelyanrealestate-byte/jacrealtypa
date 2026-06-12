@@ -414,6 +414,9 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
   .kpi-grid{grid-template-columns:repeat(2,1fr)!important}
   .prop-grid{grid-template-columns:repeat(2,1fr)!important}
   .cal-grid{grid-template-columns:1fr!important}
+  .stats-grid{grid-template-columns:1fr!important}
+  .ficha-gallery{grid-template-columns:1fr!important;height:auto!important}
+  .ficha-gallery .main-foto{grid-row:auto!important}
 }
 
 /* ============================================================
@@ -422,6 +425,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 @media(max-width:768px){
   body{overflow:auto}
 
+  /* ---- Sidebar drawer ---- */
   #sidebar{
     position:fixed;top:0;left:0;height:100%;width:260px;z-index:300;
     transform:translateX(-100%);transition:transform .25s ease;overflow-y:auto;
@@ -431,58 +435,164 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
   #sidebar-close{display:flex}
   .hamburger{display:flex}
 
+  /* ---- Main layout ---- */
   #main{height:100vh;display:flex;flex-direction:column;overflow:hidden}
-  #content{flex:1;overflow-y:auto;padding:14px}
+  #content{flex:1;overflow-y:auto;padding:12px}
 
-  .topbar{padding:10px 14px;flex-wrap:nowrap;gap:8px}
-  .topbar h2{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .topbar-actions{gap:5px}
-  .email-selector select{max-width:140px;font-size:10px}
+  /* ---- Topbar ---- */
+  .topbar{padding:9px 12px;flex-wrap:nowrap;gap:6px;min-height:48px}
+  .topbar h2{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+  .topbar-actions{gap:4px;flex-shrink:0}
+  /* Hide secondary topbar buttons on mobile */
+  .topbar-secondary{display:none!important}
+  /* Email selector compact */
+  .email-selector{padding:3px 7px}
+  .email-selector select{max-width:100px;font-size:10px}
 
+  /* ---- KPI grid ---- */
   .kpi-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
   .kpi-value{font-size:20px!important}
+  .kpi-card{padding:12px!important}
+
+  /* ---- Property grid ---- */
   .prop-grid{grid-template-columns:1fr!important}
+
+  /* ---- Calendar ---- */
   .cal-grid{grid-template-columns:1fr!important}
+  .cal-day{min-height:50px!important}
+
+  /* ---- Stats ---- */
   .stats-grid{grid-template-columns:1fr!important}
 
-  /* pipeline horizontal scroll */
+  /* ---- Pipeline Kanban (Leads) ---- */
   .pipeline{
     display:flex!important;gap:12px!important;
     overflow-x:auto;padding-bottom:8px;
-    scrollbar-width:thin;
+    scrollbar-width:thin;-webkit-overflow-scrolling:touch;
   }
-  .pipeline-col{min-width:230px;flex-shrink:0}
+  .pipeline-col{min-width:220px;flex-shrink:0}
 
-  /* tables scroll */
-  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table{min-width:540px}
+  /* ---- Co-Broking Kanban (Red Inmobiliaria) ---- */
+  #cobrok-kanban{
+    display:flex!important;flex-direction:row!important;
+    overflow-x:auto;gap:12px;padding-bottom:8px;
+    scrollbar-width:thin;-webkit-overflow-scrolling:touch;
+    min-height:auto!important;
+  }
+  #cobrok-kanban>div{min-width:210px;flex-shrink:0}
 
-  /* modals full-width */
-  .modal{width:96vw!important;max-width:none!important;padding:18px!important;border-radius:14px!important}
+  /* ---- Red Inmobiliaria tabs ---- */
+  #red-tabs-bar{overflow-x:auto;white-space:nowrap;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  #red-tabs-bar .tab{flex-shrink:0;white-space:nowrap}
+
+  /* ---- General tabs ---- */
+  .tabs{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .tab{white-space:nowrap;flex-shrink:0}
+
+  /* ---- Tables ---- */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px!important}
+  table{min-width:520px}
+  th,td{padding:8px 10px!important;font-size:12px!important}
+
+  /* ---- Action buttons in tables ---- */
+  .action-btns{gap:3px;flex-wrap:wrap}
+  .action-btns .btn-ghost,.action-btns .wa-btn,.action-btns button{padding:4px 6px!important;font-size:11px!important}
+
+  /* ---- Modals (bottom sheet on mobile) ---- */
+  .modal-bg{align-items:flex-end!important;padding:0!important}
+  .modal{
+    width:100vw!important;max-width:100vw!important;
+    padding:18px 16px 28px!important;
+    border-radius:18px 18px 0 0!important;
+    max-height:90vh!important;
+  }
+  /* Modal drag handle */
+  .modal-header::before{
+    content:'';display:block;width:36px;height:4px;
+    background:var(--border);border-radius:2px;
+    margin:0 auto 14px;
+  }
   .form-grid{grid-template-columns:1fr!important}
   .form-full{grid-column:1!important}
+  .form-group input,.form-group select,.form-group textarea{
+    padding:10px 12px!important;font-size:14px!important;
+    min-height:44px;
+  }
+  .modal-footer{flex-direction:column-reverse;gap:8px}
+  .modal-footer .btn{
+    width:100%!important;text-align:center;
+    justify-content:center;padding:12px!important;font-size:14px!important;
+  }
 
-  /* dashboard double column → single */
-  #panel-dashboard>div{grid-template-columns:1fr!important}
+  /* ---- Dashboard panels ---- */
+  #panel-dashboard .kpi-grid{margin-bottom:12px}
+  .sec-header{flex-wrap:wrap;gap:8px}
+  .sec-header .btn,.sec-header button{font-size:11px!important;padding:5px 10px!important}
 
-  .btn-sm{padding:5px 8px;font-size:11px}
-  .sec-header{flex-wrap:wrap;gap:6px}
+  /* ---- Ficha propiedad ---- */
+  .ficha-panel{padding:12px!important}
+  .ficha-gallery{grid-template-columns:1fr!important;height:auto!important}
+  .ficha-gallery .main-foto{grid-row:auto!important}
+  .ficha-share-btns{flex-direction:column;gap:6px}
+  .ficha-share-btns button,.ficha-share-btns a{width:100%!important;text-align:center}
 
-  .note-cards-grid{grid-template-columns:1fr!important}
+  /* ---- Search bars ---- */
+  .search-bar{flex-direction:column;gap:6px}
+  .search-bar input,.search-bar select{width:100%!important;min-width:unset!important}
+
+  /* ---- Red Inmobiliaria search area ---- */
+  #tab-aliados .search-bar,
+  #tab-redprops .search-bar{flex-direction:row;flex-wrap:wrap}
+  #tab-aliados .search-bar input,
+  #tab-redprops .search-bar input{min-width:140px!important}
+
+  /* ---- Portales & multipost ---- */
   .portales-grid{grid-template-columns:1fr!important}
-  .multipost-banner{flex-direction:column;gap:8px}
+  .multipost-banner{flex-direction:column;gap:8px;padding:12px!important}
+
+  /* ---- Notes cards ---- */
+  .note-cards-grid{grid-template-columns:1fr!important}
+
+  /* ---- Matching ---- */
+  #matching-results{grid-template-columns:1fr!important}
+
+  /* ---- Automatizaciones cards ---- */
+  #tab-automate>div{grid-template-columns:1fr!important}
+
+  /* ---- Post-venta search row ---- */
+  #panel-postVenta>div:nth-child(2){flex-direction:column;align-items:stretch!important}
+  #panel-postVenta>div:nth-child(2) input{width:100%!important}
+
+  /* ---- Misc ---- */
+  .btn-sm{padding:5px 8px;font-size:11px}
+  .agent-sig{display:none}
+  .hs-meta{flex-direction:column;gap:2px!important}
+  .bar-label{width:80px!important}
 }
 
 /* ============================================================
-   RESPONSIVE — SMALL PHONES (≤400px)
+   RESPONSIVE — SMALL PHONES (≤480px)
+   ============================================================ */
+@media(max-width:480px){
+  .topbar h2{max-width:70px}
+  .email-selector{display:none!important}
+  /* Compact + Propiedad on tiny screens */
+  .topbar-actions .btn-outline.btn-sm:not(.topbar-secondary){
+    padding:5px 8px;font-size:11px
+  }
+}
+
+/* ============================================================
+   RESPONSIVE — VERY SMALL PHONES (≤400px)
    ============================================================ */
 @media(max-width:400px){
   .kpi-grid{grid-template-columns:1fr!important}
   .kpi-value{font-size:18px!important}
-  .login-box{padding:22px 18px}
+  .login-box{padding:22px 16px}
   .login-brand{font-size:18px;letter-spacing:2px}
   .login-logo-badge{width:58px;height:58px;font-size:20px}
-  .topbar-actions .btn-sm:not(.btn-primary){display:none}
+  #content{padding:10px!important}
+  .topbar{padding:8px 10px}
 }
 
 /* ===== FOTOS PROPIEDAD ===== */
@@ -679,8 +789,8 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
         </select>
       </div>
       <button id="theme-toggle" class="btn btn-outline btn-sm" onclick="toggleTheme()" title="Alternar modo claro / oscuro">🌙</button>
-      <button class="btn btn-outline btn-sm" title="Configurar Supabase DB" onclick="openModal('modalSetupDB')">🗄️ DB Setup</button>
-      <button class="btn btn-outline btn-sm" onclick="openModal('modalImportExcel')">📊 Importar</button>
+      <button class="btn btn-outline btn-sm topbar-secondary" title="Configurar Supabase DB" onclick="openModal('modalSetupDB')">🗄️ DB Setup</button>
+      <button class="btn btn-outline btn-sm topbar-secondary" onclick="openModal('modalImportExcel')">📊 Importar</button>
       <button class="btn btn-outline btn-sm" onclick="openModal('modalProp')">+ Propiedad</button>
       <button class="btn btn-primary btn-sm" onclick="openModal('modalLead')">+ Lead</button>
     </div>
@@ -1584,13 +1694,13 @@ CREATE POLICY "allow_all_tareas_crm" ON tareas_crm FOR ALL USING (true) WITH CHE
         <select id="p-op"><option>Venta</option><option>Alquiler</option><option>Pre-venta</option><option>Venta y Alquiler</option></select>
       </div>
       <div class="form-group"><label>Provincia / Comarca</label>
-        <select id="p-provincia" onchange="updateDistritos(this.value)"><option value="">-- Selecciona --</option></select>
+        <select id="p-provincia"><option value="">-- Selecciona --</option></select>
       </div>
       <div class="form-group"><label>Distrito / Municipio</label>
-        <select id="p-distrito" onchange="updateCorregimientos(document.getElementById('p-provincia').value, this.value)"><option value="">-- Selecciona provincia --</option></select>
+        <select id="p-distrito"><option value="">-- Selecciona distrito --</option></select>
       </div>
       <div class="form-group"><label>Corregimiento</label>
-        <select id="p-corregimiento"><option value="">-- Selecciona distrito --</option></select>
+        <select id="p-corregimiento"><option value="">-- Selecciona corregimiento --</option></select>
       </div>
       <div class="form-group"><label>Barrio / Comunidad</label>
         <input id="p-barrio" placeholder="Ej: Punta Pacífica, El Cangrejo, Obarrio...">
@@ -2640,7 +2750,15 @@ function showPanel(id){
   const labels={dashboard:'Dashboard',propiedades:'Propiedades',contactos:'Contactos',leads:'Leads',clientes:'Clientes',empresas:'Empresas',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria',postVenta:'Post-Venta',matching:'🎯 Matching Inteligente'};
   if(id==='matching') populateMatchingSelect();
   document.getElementById('topbar-title').textContent=labels[id]||id;
-  event.currentTarget.classList.add('active');
+  // Mark active nav item (works both from onclick and programmatic calls)
+  if(typeof event!=='undefined'&&event&&event.currentTarget&&event.currentTarget.classList){
+    event.currentTarget.classList.add('active');
+  } else {
+    document.querySelectorAll('.nav-item').forEach(n=>{
+      const oc=n.getAttribute('onclick')||'';
+      if(oc.includes("'"+id+"'")||oc.includes('"'+id+'"')) n.classList.add('active');
+    });
+  }
   if(id==='propiedades') renderProps();
   if(id==='contactos') renderContacts();
   if(id==='leads') renderLeads();
@@ -2695,8 +2813,8 @@ function renderDashboard(){
     <td><span class="tag tag-${(p.status||'').toLowerCase()}">${p.status}</span></td>
     <td onclick="event.stopPropagation()"><div class="action-btns">
       <button class="btn btn-ghost btn-sm" title="WhatsApp" onclick="shareWA('${p.id}')">💬</button>
-      <button class="email-btn" title="Email" onclick="shareEmail('${p.id}')">📧</button>
-      <button class="btn btn-ghost btn-sm" title="Ver ficha" onclick="openFicha('${p.id}')">👁️</button>
+      <button class="email-btn" title="Email" onclick="sharePropEmail('${p.id}')">📧</button>
+      <button class="btn btn-ghost btn-sm" title="Ver ficha" onclick="verFicha('${p.id}')">👁️</button>
       <button class="btn btn-ghost btn-sm" title="Editar" onclick="editProp('${p.id}')">✏️</button>
     </div></td>
   </tr>`).join('');
@@ -3490,6 +3608,13 @@ function updateReportKPIs(){
 // ============================================================
 function openModal(id){
   // Reset modals to "new" state when opened fresh (not via edit functions)
+  if(id==='modalProp'){
+    const editId=document.getElementById('p-edit-id');
+    if(editId && !editId.value){
+      clearFormProp();
+      document.querySelector('#modalProp .modal-title').textContent='🏠 Nueva Propiedad';
+    }
+  }
   if(id==='modalLead'){
     const editId=document.getElementById('l-edit-id');
     if(editId && !editId.value){
@@ -3513,7 +3638,7 @@ function openModal(id){
 function closeModal(id){
   document.getElementById(id).classList.remove('open');
   // Clear edit IDs so next open is "new"
-  const editMap={modalLead:'l-edit-id',modalContacto:'ct-edit-id',modalCliente:'cli-edit-id'};
+  const editMap={modalProp:'p-edit-id',modalLead:'l-edit-id',modalContacto:'ct-edit-id',modalCliente:'cli-edit-id'};
   if(editMap[id]){const el=document.getElementById(editMap[id]);if(el)el.value='';}
 }
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
@@ -5159,18 +5284,25 @@ const PANAMA_GEO = {
 
 function initProvinciaDropdown(){
   const sel=document.getElementById('p-provincia');
-  if(!sel) return;
+  if(!sel||sel._geoInited) return;
   Object.keys(PANAMA_GEO).forEach(prov=>{
     const opt=document.createElement('option');
     opt.value=prov; opt.textContent=prov;
     sel.appendChild(opt);
+  });
+  sel._geoInited=true;
+  // Wire up cascading selects via addEventListener (more reliable on iOS/mobile)
+  sel.addEventListener('change',function(){updateDistritos(this.value);});
+  const selD=document.getElementById('p-distrito');
+  if(selD) selD.addEventListener('change',function(){
+    updateCorregimientos(document.getElementById('p-provincia').value, this.value);
   });
 }
 function updateDistritos(prov){
   const selD=document.getElementById('p-distrito');
   const selC=document.getElementById('p-corregimiento');
   selD.innerHTML='<option value="">-- Selecciona distrito --</option>';
-  selC.innerHTML='<option value="">-- Selecciona distrito --</option>';
+  selC.innerHTML='<option value="">-- Selecciona corregimiento --</option>';
   if(!prov||!PANAMA_GEO[prov]) return;
   Object.keys(PANAMA_GEO[prov]).forEach(d=>{
     const opt=document.createElement('option');
@@ -5693,8 +5825,8 @@ function clearFormProp(){
   const grid=document.getElementById('p-fotos-grid');if(grid)grid.innerHTML='';
   document.getElementById('prop-mapa-coords')&&(document.getElementById('prop-mapa-coords').textContent='📍 Sin ubicación marcada');
   if(_propMarker&&_propMap){_propMap.removeLayer(_propMarker);_propMarker=null;}
-  const dt=document.getElementById('p-distrito');if(dt)dt.innerHTML='<option value="">-- Selecciona provincia --</option>';
-  const dc=document.getElementById('p-corregimiento');if(dc)dc.innerHTML='<option value="">-- Selecciona distrito --</option>';
+  const dt=document.getElementById('p-distrito');if(dt)dt.innerHTML='<option value="">-- Selecciona distrito --</option>';
+  const dc=document.getElementById('p-corregimiento');if(dc)dc.innerHTML='<option value="">-- Selecciona corregimiento --</option>';
 }
 
 document.querySelectorAll('.nav-item').forEach(el=>{
@@ -5890,7 +6022,7 @@ function runMatching(){
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         <button class="btn btn-primary btn-sm" onclick="matchingSendWA('${p.id}','${persona.id||''}','${persona.wa||persona.tel||''}')" style="font-size:11px">💬 Enviar x WA</button>
-        <button class="btn btn-outline btn-sm" onclick="viewFicha('${p.id}')" style="font-size:11px">📄 Ver Ficha</button>
+        <button class="btn btn-outline btn-sm" onclick="verFicha('${p.id}')" style="font-size:11px">📄 Ver Ficha</button>
         <button class="btn btn-outline btn-sm" onclick="matchingSendEmail('${p.id}','${persona.id||''}','${persona.email||''}')" style="font-size:11px">📧 Enviar x Email</button>
       </div>
     </div>`;
