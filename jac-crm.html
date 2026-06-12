@@ -621,6 +621,10 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <span class="icon">✅</span> Tareas
       <span class="nav-badge" id="badge-tareas">0</span>
     </div>
+    <div class="nav-item" onclick="showPanel('matching')">
+      <span class="icon">🎯</span> Matching
+      <span class="nav-badge" id="badge-matching" style="background:var(--purple)">0</span>
+    </div>
     <div class="nav-section">Análisis</div>
     <div class="nav-item" onclick="showPanel('reportes')">
       <span class="icon">📈</span> Reportes
@@ -675,6 +679,8 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
         </select>
       </div>
       <button id="theme-toggle" class="btn btn-outline btn-sm" onclick="toggleTheme()" title="Alternar modo claro / oscuro">🌙</button>
+      <button class="btn btn-outline btn-sm" title="Configurar Supabase DB" onclick="openModal('modalSetupDB')">🗄️ DB Setup</button>
+      <button class="btn btn-outline btn-sm" onclick="openModal('modalImportExcel')">📊 Importar</button>
       <button class="btn btn-outline btn-sm" onclick="openModal('modalProp')">+ Propiedad</button>
       <button class="btn btn-primary btn-sm" onclick="openModal('modalLead')">+ Lead</button>
     </div>
@@ -1233,10 +1239,144 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       </div>
     </div>
 
+    <!-- ========== MATCHING INTELIGENTE ========== -->
+    <div class="panel" id="panel-matching">
+      <div style="background:linear-gradient(135deg,rgba(168,85,247,.12),rgba(59,130,246,.08));border:1px solid rgba(168,85,247,.25);border-radius:14px;padding:16px 20px;margin-bottom:18px">
+        <div style="font-size:15px;font-weight:700;color:var(--purple);margin-bottom:4px">🎯 Matching Inteligente</div>
+        <div style="font-size:12px;color:var(--muted)">Selecciona un lead o cliente y el sistema buscará automáticamente las propiedades que coinciden con sus criterios de búsqueda: zona, presupuesto, tipo y habitaciones.</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px">
+        <div style="flex:1;min-width:200px">
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Seleccionar Lead / Cliente</label>
+          <select id="matching-cliente-sel" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none">
+            <option value="">— Elige un lead o cliente —</option>
+          </select>
+        </div>
+        <div style="min-width:130px">
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Operación</label>
+          <select id="matching-op-sel" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none">
+            <option value="">Cualquiera</option>
+            <option value="Venta">Venta</option>
+            <option value="Alquiler">Alquiler</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="runMatching()">🔍 Buscar Matches</button>
+        <button class="btn btn-outline btn-sm" onclick="matchingShareAll()" id="matching-share-btn" style="display:none">💬 Enviar Todo x WA</button>
+      </div>
+      <div id="matching-perfil" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12px"></div>
+      <div id="matching-results" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
 <!-- ===== MODALS ===== -->
+
+<!-- Modal Setup Supabase DB -->
+<div class="modal-bg" id="modalSetupDB">
+  <div class="modal" style="width:720px">
+    <div class="modal-header">
+      <span class="modal-title">🗄️ Configurar Base de Datos Supabase</span>
+      <button class="modal-close" onclick="closeModal('modalSetupDB')">✕</button>
+    </div>
+    <div style="padding:4px">
+      <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--green)">
+        ✅ Tablas existentes: <strong>propiedades</strong>, <strong>clientes</strong>, <strong>agenda</strong>, <strong>red_inmobiliaria</strong>, <strong>propiedades_red</strong><br>
+        ⚠️ Para sincronización completa, ejecuta el SQL de abajo en <strong>Supabase → SQL Editor</strong>
+      </div>
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">SQL — Copiar y pegar en Supabase SQL Editor:</label>
+      <textarea readonly style="width:100%;height:260px;background:#0d1117;color:#7ee787;border:1px solid var(--border);border-radius:8px;padding:12px;font-family:monospace;font-size:11px;line-height:1.6;resize:none;outline:none" id="setup-sql-text">-- JAC Realty CRM v6 · Tablas nuevas (ejecutar en Supabase SQL Editor)
+-- Formato JSONB flexible: id TEXT PRIMARY KEY, payload JSONB, created_at TIMESTAMP
+
+CREATE TABLE IF NOT EXISTS clientes_activos (
+  id TEXT PRIMARY KEY,
+  payload JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS contactos_crm (
+  id TEXT PRIMARY KEY,
+  payload JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS empresas_crm (
+  id TEXT PRIMARY KEY,
+  payload JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS notas_crm (
+  id TEXT PRIMARY KEY,
+  payload JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS tareas_crm (
+  id TEXT PRIMARY KEY,
+  payload JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Habilitar Row Level Security (RLS) y acceso anon para todas las tablas
+ALTER TABLE clientes_activos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contactos_crm ENABLE ROW LEVEL SECURITY;
+ALTER TABLE empresas_crm ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notas_crm ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tareas_crm ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "allow_all_clientes_activos" ON clientes_activos FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all_contactos_crm" ON contactos_crm FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all_empresas_crm" ON empresas_crm FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all_notas_crm" ON notas_crm FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all_tareas_crm" ON tareas_crm FOR ALL USING (true) WITH CHECK (true);</textarea>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('setup-sql-text').value).then(()=>toast('✅ SQL copiado al portapapeles'))">📋 Copiar SQL</button>
+        <a href="https://supabase.com/dashboard/project/dskslrlxldnxrglrochv/sql/new" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none">🔗 Abrir Supabase SQL Editor</a>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalSetupDB')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Importar Excel -->
+<div class="modal-bg" id="modalImportExcel">
+  <div class="modal" style="width:580px">
+    <div class="modal-header">
+      <span class="modal-title">📊 Importar desde Excel / CSV</span>
+      <button class="modal-close" onclick="closeModal('modalImportExcel')">✕</button>
+    </div>
+    <div style="padding:4px">
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">¿Qué deseas importar?</label>
+        <select id="import-type" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none">
+          <option value="leads">Leads / Prospectos</option>
+          <option value="clientes">Clientes Activos</option>
+          <option value="contactos">Contactos</option>
+        </select>
+      </div>
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;font-size:11px;color:var(--muted);line-height:1.7">
+        <strong style="color:var(--text)">Formato CSV esperado (leads):</strong><br>
+        <code style="color:var(--accent)">nombre,apellido,telefono,email,interes,zona,presupuesto_min,presupuesto_max,fuente,notas</code><br><br>
+        <strong style="color:var(--text)">Formato CSV esperado (clientes):</strong><br>
+        <code style="color:var(--accent)">nombre,apellido,telefono,email,tipo_prop,zona,presupuesto,notas</code>
+      </div>
+      <div class="arch-drop-zone" onclick="document.getElementById('excel-input').click()" style="border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:28px;margin-bottom:6px">📂</div>
+        <div style="font-size:13px">Arrastra tu archivo .CSV o haz clic para seleccionar</div>
+        <div style="font-size:11px;margin-top:4px;color:var(--muted)">Exporta tu Excel a .CSV (UTF-8) antes de importar</div>
+      </div>
+      <input type="file" id="excel-input" accept=".csv,.txt" style="display:none" onchange="importarCSV(this)">
+      <div id="import-preview" style="margin-top:12px;max-height:200px;overflow-y:auto;font-size:11px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalImportExcel')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarImport()" id="import-confirm-btn" style="display:none">✅ Importar Registros</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal Archivos Universal -->
 <div class="modal-bg" id="modalArchivos">
@@ -1412,9 +1552,13 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="am-mascotas"> Acepta mascotas</label>
     </div>
     <!-- Descripción -->
-    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📝 Descripción y Propietario</div>
+    <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📝 Descripción</div>
     <div class="form-grid">
       <div class="form-group form-full"><label>Descripción adicional</label><textarea id="p-desc" placeholder="Características especiales, vista, acabados, ubicación exacta..."></textarea></div>
+    </div>
+    <!-- Datos privados propietario -->
+    <div style="font-size:11px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:rgba(239,68,68,.07);border-radius:6px;border:1px solid rgba(239,68,68,.25)">🔒 Datos Privados del Propietario — Solo uso interno · No se comparte con clientes</div>
+    <div class="form-grid">
       <div class="form-group"><label>Propietario / Contacto</label><input id="p-propietario" placeholder="Nombre del propietario"></div>
       <div class="form-group"><label>Teléfono del propietario</label><input id="p-tel-propietario" placeholder="+507 6000-0000"></div>
       <div class="form-group form-full"><label>Nota interna (no visible al cliente)</label><textarea id="p-nota-interna" placeholder="Condiciones especiales, urgencia de venta, motivación..."></textarea></div>
@@ -2153,6 +2297,16 @@ const _sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 let sb = null;
 try { if(window.supabase) sb = window.supabase.createClient(_sbUrl, _sbKey); } catch(e){}
 
+// Helper to load optional tables (graceful if table doesn't exist yet)
+async function _sbLoad(table, opts={}){
+  try {
+    let q = sb.from(table).select('*');
+    if(opts.order) q = q.order(opts.order, {ascending: opts.asc!==false});
+    const r = await q;
+    return r.data || [];
+  } catch(e){ return []; }
+}
+
 async function loadSupabaseData(){
   if(!sb) return;
   try {
@@ -2163,6 +2317,22 @@ async function loadSupabaseData(){
       sb.from('red_inmobiliaria').select('*').order('created_at',{ascending:false}),
       sb.from('propiedades_red').select('*').order('created_at',{ascending:false})
     ]);
+
+    // Load new tables (silently skip if tables don't exist yet — show setup hint)
+    const [clientesActivosData, contactosData, empresasData, notasData, tareasData] = await Promise.all([
+      _sbLoad('clientes_activos',{order:'created_at',asc:false}),
+      _sbLoad('contactos_crm',{order:'created_at',asc:false}),
+      _sbLoad('empresas_crm',{order:'created_at',asc:false}),
+      _sbLoad('notas_crm',{order:'created_at',asc:false}),
+      _sbLoad('tareas_crm',{order:'created_at',asc:false})
+    ]);
+
+    // Populate in-memory arrays from Supabase
+    if(clientesActivosData.length) clients = clientesActivosData.map(r=>({...r.payload, id:r.id, _sbId:r.id}));
+    if(contactosData.length) contacts = contactosData.map(r=>({...r.payload, id:r.id, _sbId:r.id}));
+    if(empresasData.length) empresas = empresasData.map(r=>({...r.payload, id:r.id, _sbId:r.id}));
+    if(notasData.length) notes = notasData.map(r=>({...r.payload, id:r.id, _sbId:r.id}));
+    if(tareasData.length) tasks = tareasData.map(r=>({...r.payload, id:r.id, _sbId:r.id}));
     if(propsRes.data && propsRes.data.length){
       props = propsRes.data.map(p=>({
         id: p.id, titulo:p.titulo||'', tipo:p.tipo||'Apartamento',
@@ -2201,11 +2371,14 @@ async function loadSupabaseData(){
     if(redContactsRes.data) redContacts = redContactsRes.data;
     if(redPropsRes.data) redProps = redPropsRes.data;
 
-    // Re-render
+    // Re-render all modules
     renderDashboard(); renderProps(); renderLeads(); renderCalendar(); updateBadges();
+    renderClients(); renderContacts(); renderNotas(); renderTareas();
     if(document.getElementById('panel-redInmo').classList.contains('active')) renderRedInmo();
     document.getElementById('badge-leads').textContent=leads.filter(l=>l.status==='Nuevo').length;
     document.getElementById('badge-red').textContent=redContacts.length;
+    document.getElementById('badge-notas').textContent=notes.length;
+    document.getElementById('badge-tareas').textContent=tasks.filter(t=>t.status!=='Completada').length;
     toast('🟢 Sincronizado con la nube');
   } catch(e){ console.warn('Supabase load error:',e); }
 }
@@ -2293,7 +2466,8 @@ function showPanel(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  const labels={dashboard:'Dashboard',propiedades:'Propiedades',contactos:'Contactos',leads:'Leads',clientes:'Clientes',empresas:'Empresas',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria',postVenta:'Post-Venta'};
+  const labels={dashboard:'Dashboard',propiedades:'Propiedades',contactos:'Contactos',leads:'Leads',clientes:'Clientes',empresas:'Empresas',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria',postVenta:'Post-Venta',matching:'🎯 Matching Inteligente'};
+  if(id==='matching') populateMatchingSelect();
   document.getElementById('topbar-title').textContent=labels[id]||id;
   event.currentTarget.classList.add('active');
   if(id==='propiedades') renderProps();
@@ -2402,7 +2576,9 @@ function renderProps(data){
       <button class="btn btn-ghost btn-sm" title="Compartir WhatsApp" onclick="shareWA('${p.id}')">💬</button>
       <button class="email-btn" title="Enviar por email" onclick="sharePropEmail('${p.id}')">📧</button>
       <button class="btn btn-ghost btn-sm" title="Ver Ficha" onclick="verFicha('${p.id}')">📄</button>
-      <button class="btn btn-ghost btn-sm" title="Archivos" onclick="openArchivosProp('${p.id}')">📎${(p.archivos||[]).length?` ${p.archivos.length}`:''}</button>
+      <button class="btn btn-ghost btn-sm" title="Reporte al Propietario · WhatsApp" onclick="reportePropietarioWA('${p.id}')" style="color:var(--purple)">📊💬</button>
+      <button class="btn btn-ghost btn-sm" title="Reporte al Propietario · Email" onclick="reportePropietarioEmail('${p.id}')" style="color:var(--purple)">📊📧</button>
+      <button class="btn btn-ghost btn-sm" title="Archivos" onclick="openArchivosProp('${p.id}')">���${(p.archivos||[]).length?` ${p.archivos.length}`:''}</button>
       <button class="btn btn-ghost btn-sm" title="Editar" onclick="editProp('${p.id}')">✏️</button>
       <button class="btn btn-ghost btn-sm" title="Eliminar" onclick="deleteProp('${p.id}')">🗑️</button>
     </div></td>
@@ -2435,7 +2611,13 @@ function filterProps(q){
 function filterPropsType(v){renderProps(v?props.filter(p=>p.tipo===v):props)}
 function filterPropsOp(v){renderProps(v?props.filter(p=>p.op===v):props)}
 function filterPropsStatus(v){renderProps(v?props.filter(p=>p.status===v):props)}
-function deleteProp(id){if(confirm('¿Eliminar propiedad?')){props=props.filter(p=>p.id!==id);renderProps();toast('Propiedad eliminada');}}
+function deleteProp(id){
+  if(!confirm('¿Eliminar propiedad?'))return;
+  const p=props.find(x=>x.id===id);
+  props=props.filter(x=>x.id!==id);
+  renderProps();toast('Propiedad eliminada');
+  if(sb&&p&&p._sbId) sb.from('propiedades').delete().eq('id',p._sbId).then(({error})=>{if(error)console.warn('Prop delete SB:',error);});
+}
 function shareWA(id){
   const p=props.find(x=>x.id===id);
   if(!p)return;
@@ -2449,6 +2631,44 @@ function sharePropEmail(id){
   const sub=encodeURIComponent(`${p.titulo} · ${p.zona} · JAC Realty Panamá`);
   const body=encodeURIComponent(`🏠 ${p.titulo}\n📍 ${p.zona}\n💰 ${p.op==='Alquiler'?fmtPrice(p.precio,'mes'):fmtPrice(p.precio)}\n🛏 ${p.hab} hab · 🚿 ${p.banos} baños · 📐 ${p.area}m²\n\n${p.desc}\n\nJelyan Castro · JAC Realty Panamá · Lic. PN-0931\n📞 +507 64627763\n✉️ ${currentEmail}`);
   window.open(`mailto:?subject=${sub}&body=${body}`);
+}
+
+function _buildReportePropietario(p){
+  const propNotas=notes.filter(n=>n.ref===p.id);
+  const propTareas=tasks.filter(t=>t.ref===p.id);
+  const propLeads=leads.filter(l=>(l.zona||'').toLowerCase().includes((p.zona||'').split(',')[0].trim().toLowerCase())&&l.status!=='Archivado');
+  const hoy=new Date().toLocaleDateString('es-PA',{year:'numeric',month:'long',day:'numeric'});
+  return {
+    texto:`📊 *REPORTE DE SU PROPIEDAD*\n*${p.titulo}*\nFecha: ${hoy}\n\n`+
+      `📍 Zona: ${p.zona||'—'}\n`+
+      `💰 Precio: ${fmtPrice(p.precio)}${p.op==='Alquiler'?' /mes':''}\n`+
+      `🏷️ Estado: ${p.status||'Activo'}\n`+
+      `📐 Área: ${p.area||'—'}m² · 🛏 ${p.hab||'—'} hab · 🚿 ${p.banos||'—'} baños\n\n`+
+      `📌 *Notas recientes:*\n`+
+      (propNotas.length?propNotas.slice(0,3).map(n=>`• ${n.fecha}: ${n.titulo}`).join('\n'):'• Sin notas recientes')+'\n\n'+
+      `🎯 *Interesados en zona ${p.zona||'—'}:* ${propLeads.length} leads activos\n`+
+      (propLeads.length?`(${propLeads.slice(0,3).map(l=>l.nombre+(l.apellido?' '+l.apellido:'')).join(', ')}${propLeads.length>3?' y más..':''})\n`:'')+'\n'+
+      `✅ *Tareas activas sobre esta propiedad:* ${propTareas.filter(t=>t.status!=='Completada').length}\n\n`+
+      `Agente: Jelyan Castro · JAC Realty Panama · Lic. PN-0931\n📞 +507 64627763`,
+    hoy, propLeads
+  };
+}
+function reportePropietarioWA(id){
+  const p=props.find(x=>x.id===id); if(!p)return;
+  const {texto}=_buildReportePropietario(p);
+  const tel=(p.tel_propietario||'').replace(/\D/g,'');
+  window.open('https://wa.me/'+(tel||'')+'?text='+encodeURIComponent(texto));
+  toast('📊💬 Reporte enviado al propietario por WhatsApp');
+}
+function reportePropietarioEmail(id){
+  const p=props.find(x=>x.id===id); if(!p)return;
+  const {texto,hoy}=_buildReportePropietario(p);
+  const emailDest=p.email_propietario||prompt('Email del propietario:','');
+  if(!emailDest)return;
+  const sub=encodeURIComponent(`Reporte de su propiedad: ${p.titulo} · ${hoy}`);
+  const body=encodeURIComponent(texto.replace(/\*/g,''));
+  window.open('mailto:'+emailDest+'?subject='+sub+'&body='+body);
+  toast('📊📧 Reporte enviado al propietario por Email');
 }
 
 // ============================================================
@@ -2485,7 +2705,13 @@ function matchProps(id){
   if(!matches.length){alert('No se encontraron propiedades compatibles.');return;}
   alert(`✅ ${matches.length} propiedades para ${l.nombre}:\n\n`+matches.map(p=>`• ${p.titulo} (${p.zona}) - ${fmtPrice(p.precio)}`).join('\n'));
 }
-function deleteLead(id){if(confirm('¿Eliminar lead?')){leads=leads.filter(l=>l.id!==id);renderLeads();updateBadges();toast('Lead eliminado');}}
+function deleteLead(id){
+  if(!confirm('¿Eliminar lead?')) return;
+  const l=leads.find(x=>x.id===id);
+  leads=leads.filter(x=>x.id!==id);
+  renderLeads();updateBadges();toast('Lead eliminado');
+  if(sb&&l&&l._sbId) sb.from('clientes').delete().eq('id',l._sbId).then(({error})=>{if(error)console.warn('Lead delete SB:',error);});
+}
 
 // ============================================================
 // PIPELINE
@@ -3278,6 +3504,19 @@ function saveLead(){
       logHistory('lead', editId, '✏️', 'Lead editado', `Datos actualizados. Interés: ${interes}. Estado: ${status}. Agente: ${agente}.`);
       if(prevStatus !== status) logHistory('lead', editId, '🔄', `Estado: ${prevStatus} → ${status}`, `Cambio de estado registrado.`);
       toast('✏️ Lead actualizado: '+leads[idx].nombre);
+      // Persist edit to Supabase
+      if(sb && leads[idx]._sbId){
+        sb.from('clientes').update({
+          nombre:leads[idx].nombre.split(' ')[0], apellido:leads[idx].apellido||'',
+          telefono:leads[idx].tel||null, whatsapp:leads[idx].wa||null,
+          email:leads[idx].email||null, estado:leads[idx].status,
+          interes:leads[idx].interes, notas:leads[idx].notas||null,
+          agente_asignado:leads[idx].agente, origen:leads[idx].fuente||null,
+          presupuesto_min:leads[idx].presupuesto_min||null,
+          presupuesto_max:leads[idx].presupuesto_max||null
+        }).eq('id', leads[idx]._sbId)
+        .then(({error})=>{ if(error) console.warn('Lead update SB:',error); });
+      }
     }
   } else {
     // NEW lead
@@ -3297,6 +3536,26 @@ function saveLead(){
     logHistory('lead', l.id, '🎯', 'Lead creado', `Fuente: ${fuenteDisplay||'N/A'} · Interés: ${interes} · Presupuesto: ${presupuesto||'N/A'} · Agente: ${agente}`);
     activities.unshift({tipo:'🎯 Nuevo lead',cliente:l.nombre,desc:`Lead creado. Fuente: ${fuenteDisplay||'N/A'}. Interés: ${interes}. Presupuesto: ${presupuesto||'N/A'}.`,time:'Ahora'});
     toast('✅ Lead guardado: '+l.nombre+' · 💬 Envía un WhatsApp de bienvenida desde el historial');
+    // Persist new lead to Supabase
+    if(sb){
+      sb.from('clientes').insert({
+        nombre:l.nombre.split(' ')[0], apellido:l.apellido||'',
+        telefono:l.tel||null, telefono2:l.tel2||null, whatsapp:l.wa||null,
+        email:l.email||null, cedula:l.cedula||null, pasaporte:l.pasaporte||null,
+        fecha_nacimiento:l.nacimiento||null, nacionalidad:l.nacionalidad||null,
+        ocupacion:l.ocupacion||null, empresa:l.empresa||null,
+        tipo_cliente:l.tipo_cliente||null, interes:l.interes,
+        tipo_propiedad_interes:l.tipo_prop||null,
+        presupuesto_min:l.presupuesto_min||null, presupuesto_max:l.presupuesto_max||null,
+        zonas_interes:l.zona||null, habitaciones_deseadas:l.hab_deseadas||null,
+        estado:l.status, origen:l.fuente||null, agente_asignado:l.agente||null,
+        notas:l.notas||null
+      }).select()
+      .then(({data,error})=>{
+        if(error) console.warn('Lead save SB:',error);
+        else if(data&&data[0]) l._sbId=data[0].id;
+      });
+    }
   }
 
   closeModal('modalLead');
@@ -3432,7 +3691,12 @@ function saveContacto(){
   };
   if(editId){
     const idx=contacts.findIndex(c=>c.id===editId);
-    if(idx>-1){contacts[idx]={...contacts[idx],...data};logHistory('contact',editId,'✏️','Contacto editado',`Datos actualizados. Empresa: ${data.empresa||'—'}. Categoría: ${data.categoria}.`);toast('✏️ Contacto actualizado: '+data.nombre);}
+    if(idx>-1){
+      contacts[idx]={...contacts[idx],...data};
+      logHistory('contact',editId,'✏️','Contacto editado',`Datos actualizados. Empresa: ${data.empresa||'—'}. Categoría: ${data.categoria}.`);
+      toast('✏️ Contacto actualizado: '+data.nombre);
+      if(sb) sb.from('contactos_crm').upsert({id:editId,payload:contacts[idx]}).then(({error})=>{if(error)console.warn('Contact update SB:',error);});
+    }
   } else {
     data.id='C'+Date.now();
     data.fecha=new Date().toISOString().split('T')[0];
@@ -3440,6 +3704,7 @@ function saveContacto(){
     contacts.push(data);
     logHistory('contact',data.id,'📇','Contacto creado',`Categoría: ${data.categoria} · Empresa: ${data.empresa||'—'} · Cargo: ${data.cargo||'—'}`);
     toast('✅ Contacto guardado: '+data.nombre);
+    if(sb) sb.from('contactos_crm').upsert({id:data.id,payload:data}).then(({error})=>{if(error)console.warn('Contact save SB:',error);});
   }
   closeModal('modalContacto');
   clearFormContacto();
@@ -3472,6 +3737,7 @@ function deleteContact(id){
   contacts=contacts.filter(c=>c.id!==id);
   renderContacts(); updateBadges();
   toast('Contacto eliminado');
+  if(sb) sb.from('contactos_crm').delete().eq('id',id).then(({error})=>{if(error)console.warn('Contact delete SB:',error);});
 }
 
 // ============================================================
@@ -3574,6 +3840,7 @@ function saveCliente(){
       logHistory('client',editId,'✏️','Cliente editado',`Datos actualizados. Tipo: ${tipo}. Estado: ${data.status}. Agente: ${data.agente}.`);
       if(prevStatus!==data.status) logHistory('client',editId,'🔄',`Estado: ${prevStatus} → ${data.status}`,'Cambio de estado registrado.');
       toast('✏️ Cliente actualizado: '+data.nombre);
+      if(sb) sb.from('clientes_activos').upsert({id:editId,payload:clients[idx]}).then(({error})=>{if(error)console.warn('Cliente update SB:',error);});
     }
   } else {
     data.id='CLI'+Date.now();
@@ -3583,6 +3850,7 @@ function saveCliente(){
     logHistory('client',data.id,'👥','Cliente registrado',`Tipo: ${tipo} · Agente: ${data.agente} · Estado: ${data.status}`);
     activities.unshift({tipo:'👥 Nuevo cliente',cliente:data.nombre,desc:`Cliente ${tipo} registrado.`,time:'Ahora'});
     toast('✅ Cliente guardado: '+data.nombre);
+    if(sb) sb.from('clientes_activos').upsert({id:data.id,payload:data}).then(({error})=>{if(error)console.warn('Cliente save SB:',error);});
   }
   closeModal('modalCliente'); clearFormCliente(); renderClients(); renderDashboard(); updateBadges();
 }
@@ -3624,6 +3892,7 @@ function deleteClient(id){
   clients=clients.filter(c=>c.id!==id);
   renderClients(); updateBadges(); renderDashboard();
   toast('Cliente eliminado');
+  if(sb) sb.from('clientes_activos').delete().eq('id',id).then(({error})=>{if(error)console.warn('Client delete SB:',error);});
 }
 
 // ============================================================
@@ -3986,20 +4255,22 @@ function saveNota(){
   const refVal=document.getElementById('n-ref').value;
   const allRefs=[...leads.map(l=>({id:l.id,name:l.nombre,tipo:'lead'})),...props.map(p=>({id:p.id,name:p.id+' · '+p.titulo,tipo:'propiedad'}))];
   const refObj=allRefs.find(x=>x.id===refVal);
-  notes.unshift({
+  const notaData={
     id:'N'+String(notes.length+1).padStart(3,'0'),
     titulo,cuerpo,tipo,
     ref:refVal,refName:refObj?refObj.name:'',
     fecha:new Date().toISOString().split('T')[0]
-  });
+  };
+  notes.unshift(notaData);
   activities.unshift({tipo:'📝 Nota',cliente:refObj?refObj.name:'General',desc:`Nota creada: "${titulo}"`,time:'Ahora'});
   closeModal('modalNota');
   renderNotas();
   document.getElementById('n-titulo').value='';
   document.getElementById('n-cuerpo').value='';
   toast('✅ Nota guardada');
+  if(sb) sb.from('notas_crm').upsert({id:notaData.id,payload:notaData}).then(({error})=>{if(error)console.warn('Nota save SB:',error);});
 }
-function deleteNota(id){if(confirm('¿Eliminar nota?')){notes=notes.filter(n=>n.id!==id);renderNotas();toast('Nota eliminada');}}
+function deleteNota(id){if(confirm('¿Eliminar nota?')){notes=notes.filter(n=>n.id!==id);renderNotas();toast('Nota eliminada');if(sb)sb.from('notas_crm').delete().eq('id',id).then(({error})=>{if(error)console.warn('Nota delete SB:',error);});}}
 function shareNotaWA(id){
   const n=notes.find(x=>x.id===id);
   if(!n)return;
@@ -4062,8 +4333,9 @@ function toggleTarea(id){
   if(t.status==='Completada'){activities.unshift({tipo:'✅ Tarea',cliente:t.refName||'General',desc:`Tarea completada: "${t.titulo}"`,time:'Ahora'});}
   renderTareas();
   renderDashboard();
+  if(sb) sb.from('tareas_crm').upsert({id:t.id,payload:t}).then(({error})=>{if(error)console.warn('Tarea toggle SB:',error);});
 }
-function deleteTarea(id){if(confirm('¿Eliminar tarea?')){tasks=tasks.filter(t=>t.id!==id);renderTareas();toast('Tarea eliminada');}}
+function deleteTarea(id){if(confirm('¿Eliminar tarea?')){tasks=tasks.filter(t=>t.id!==id);renderTareas();toast('Tarea eliminada');if(sb)sb.from('tareas_crm').delete().eq('id',id).then(({error})=>{if(error)console.warn('Tarea delete SB:',error);});}}
 function saveTarea(){
   const titulo=document.getElementById('t-titulo').value.trim();
   if(!titulo){alert('Ingresa el título de la tarea');return;}
@@ -4071,20 +4343,22 @@ function saveTarea(){
   const refVal=document.getElementById('t-ref').value;
   const allRefs=[...leads.map(l=>({id:l.id,name:l.nombre})),...props.map(p=>({id:p.id,name:p.id+' · '+p.titulo}))];
   const refObj=allRefs.find(x=>x.id===refVal);
-  tasks.unshift({
+  const tareaData={
     id:'T'+String(tasks.length+1).padStart(3,'0'),
     titulo,prioridad:document.getElementById('t-prioridad').value,
     status:'Pendiente',
     vence:document.getElementById('t-vence').value||new Date().toISOString().split('T')[0],
     tipo,ref:refVal,refName:refObj?refObj.name:'',
     desc:document.getElementById('t-desc').value
-  });
+  };
+  tasks.unshift(tareaData);
   activities.unshift({tipo:'✅ Tarea',cliente:refObj?refObj.name:'General',desc:`Nueva tarea: "${titulo}"`,time:'Ahora'});
   closeModal('modalTarea');
   renderTareas();
   document.getElementById('t-titulo').value='';
   document.getElementById('t-desc').value='';
   toast('✅ Tarea guardada');
+  if(sb) sb.from('tareas_crm').upsert({id:tareaData.id,payload:tareaData}).then(({error})=>{if(error)console.warn('Tarea save SB:',error);});
 }
 function notifyTareaWA(id){
   const t=tasks.find(x=>x.id===id);
@@ -4790,6 +5064,7 @@ function saveEmpresa(){
   closeModal('modalEmpresa');renderEmpresas();updateBadges();
   activities.unshift({tipo:'🏢 Empresa',cliente:data.nombre,desc:`${editId?'Empresa actualizada':'Nueva empresa registrada'}: ${data.sector}`,time:'Ahora'});
   toast(editId?'✅ Empresa actualizada':'✅ Empresa registrada');
+  if(sb) sb.from('empresas_crm').upsert({id:data.id,payload:data}).then(({error})=>{if(error)console.warn('Empresa save SB:',error);});
   // clear form
   ['em-nombre','em-comercial','em-ruc','em-contacto','em-cargo','em-tel','em-wa','em-email','em-email2','em-direccion','em-web','em-linkedin','em-presupuesto','em-inmueble','em-zona-pref','em-notas','em-edit-id'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
@@ -4807,6 +5082,7 @@ function editEmpresa(id){
 function deleteEmpresa(id){
   if(!confirm('¿Eliminar empresa?'))return;
   empresas=empresas.filter(e=>e.id!==id);renderEmpresas();updateBadges();toast('🗑️ Empresa eliminada');
+  if(sb) sb.from('empresas_crm').delete().eq('id',id).then(({error})=>{if(error)console.warn('Empresa delete SB:',error);});
 }
 function waEmpresa(id){
   const e=empresas.find(x=>x.id===id);if(!e)return;
@@ -5045,6 +5321,243 @@ document.getElementById('badge-tareas').textContent=tasks.filter(t=>t.status!=='
 updateBadges();
 // Load from Supabase (async — fills from cloud, overrides local demo data if available)
 loadSupabaseData().then(()=>initRealtime());
+
+// ============================================================
+// MATCHING INTELIGENTE
+// ============================================================
+function populateMatchingSelect(){
+  const sel=document.getElementById('matching-cliente-sel');
+  if(!sel)return;
+  const current=sel.value;
+  sel.innerHTML='<option value="">— Elige un lead o cliente —</option>';
+  leads.forEach(l=>{
+    const opt=document.createElement('option');
+    opt.value='lead:'+l.id;
+    opt.textContent='🎯 '+l.nombre+(l.apellido?' '+l.apellido:'')+(l.status?' ['+l.status+']':'');
+    sel.appendChild(opt);
+  });
+  clients.forEach(c=>{
+    const opt=document.createElement('option');
+    opt.value='cli:'+c.id;
+    opt.textContent='👤 '+(c.nombre||'')+(c.apellido?' '+c.apellido:'');
+    sel.appendChild(opt);
+  });
+  if(current) sel.value=current;
+  document.getElementById('badge-matching').textContent=leads.length+clients.length;
+}
+
+function runMatching(){
+  const sel=document.getElementById('matching-cliente-sel').value;
+  if(!sel){toast('⚠️ Elige un lead o cliente primero');return;}
+  const opFilt=document.getElementById('matching-op-sel').value;
+  let persona=null;
+  if(sel.startsWith('lead:')){persona=leads.find(l=>l.id===sel.replace('lead:',''));}
+  else{persona=clients.find(c=>c.id===sel.replace('cli:',''));}
+  if(!persona){toast('❌ Persona no encontrada');return;}
+
+  // Build criteria
+  const pMin=parseFloat(persona.presupuesto_min||persona.presupuesto||0)||0;
+  const pMax=parseFloat(persona.presupuesto_max||persona.presupuesto||Infinity)||Infinity;
+  const zonaInt=(persona.zona||persona.zona_pref||'').toLowerCase();
+  const tipoInt=(persona.tipo_prop||persona.tipo_propiedad_interes||'').toLowerCase();
+  const habDes=parseInt(persona.hab_deseadas||persona.habitaciones||0)||0;
+  const interes=(persona.interes||'').toLowerCase();
+
+  // Show perfil
+  const perfil=document.getElementById('matching-perfil');
+  perfil.style.display='block';
+  perfil.innerHTML=`<strong style="color:var(--accent)">📋 Criterios de búsqueda para: ${persona.nombre||''} ${persona.apellido||''}</strong>
+    <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:10px;color:var(--muted)">
+      ${pMin||pMax<Infinity?`<span>💰 Presupuesto: $${pMin.toLocaleString()} – ${pMax===Infinity?'sin límite':'$'+pMax.toLocaleString()}</span>`:''}
+      ${zonaInt?`<span>📍 Zona: ${persona.zona||persona.zona_pref}</span>`:''}
+      ${tipoInt?`<span>🏠 Tipo: ${persona.tipo_prop||persona.tipo_propiedad_interes}</span>`:''}
+      ${habDes?`<span>🛏 Habitaciones: ${habDes}+</span>`:''}
+      ${interes?`<span>🔖 Interés: ${persona.interes}</span>`:''}
+    </div>`;
+
+  // Score properties
+  const scored=props.filter(p=>p.status==='Disponible'||p.status==='Activo'||!p.status).map(p=>{
+    let score=0; const reasons=[];
+    const precio=parseFloat(p.precio||0)||0;
+    // Budget match
+    if(pMin||pMax<Infinity){
+      if(precio>=pMin&&precio<=pMax){score+=40;reasons.push('✅ Precio en presupuesto');}
+      else if(precio>0&&precio<=pMax*1.1&&precio>=pMin*.9){score+=20;reasons.push('🟡 Precio cercano al presupuesto');}
+      else if(precio>0){reasons.push('❌ Precio fuera de presupuesto');}
+    } else {score+=20;}
+    // Zone match
+    if(zonaInt&&p.zona&&p.zona.toLowerCase().includes(zonaInt.split(',')[0].trim())){score+=25;reasons.push('✅ Zona coincide');}
+    else if(zonaInt&&zonaInt.split(',').some(z=>p.zona&&p.zona.toLowerCase().includes(z.trim()))){score+=15;reasons.push('🟡 Zona similar');}
+    // Type match
+    if(tipoInt&&p.tipo&&p.tipo.toLowerCase()===tipoInt){score+=20;reasons.push('✅ Tipo de propiedad coincide');}
+    else if(tipoInt&&p.tipo&&p.tipo.toLowerCase().includes(tipoInt.split(' ')[0])){score+=10;}
+    // Rooms match
+    if(habDes&&p.hab){
+      const ph=parseInt(p.hab)||0;
+      if(ph===habDes){score+=15;reasons.push('✅ Habitaciones exactas');}
+      else if(ph>habDes){score+=8;reasons.push('🟡 Más habitaciones que las buscadas');}
+    }
+    // Operation match
+    if(opFilt&&p.op&&p.op!==opFilt) return null;
+    return {...p,score,reasons};
+  }).filter(Boolean).sort((a,b)=>b.score-a.score);
+
+  const res=document.getElementById('matching-results');
+  if(!scored.length){res.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">No se encontraron propiedades disponibles con esos criterios.<br>Prueba ampliar el presupuesto o cambiar la zona.</div>';document.getElementById('matching-share-btn').style.display='none';return;}
+  document.getElementById('matching-share-btn').style.display='';
+  document.getElementById('matching-share-btn')._scored=scored.slice(0,10);
+  document.getElementById('matching-share-btn')._persona=persona;
+
+  res.innerHTML=scored.slice(0,20).map(p=>{
+    const pct=Math.min(100,p.score);
+    const col=pct>=70?'var(--green)':pct>=40?'var(--accent)':'var(--red)';
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;height:3px;width:${pct}%;background:${col};border-radius:12px 12px 0 0"></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <div style="font-size:13px;font-weight:600">${p.titulo||p.id}</div>
+          <div style="font-size:11px;color:var(--muted)">${p.zona||'—'} · ${p.tipo||'—'} · ${p.hab||'?'} hab · ${p.banos||'?'} baños</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:10px">
+          <div style="font-size:18px;font-weight:700;color:${col}">${pct}%</div>
+          <div style="font-size:10px;color:var(--muted)">match</div>
+        </div>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px">${fmtPrice(p.precio)}${p.op==='Alquiler'?'/mes':''}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">
+        ${(p.reasons||[]).map(r=>`<span style="font-size:10px;background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:2px 8px">${r}</span>`).join('')}
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="matchingSendWA('${p.id}','${persona.id||''}','${persona.wa||persona.tel||''}')" style="font-size:11px">💬 Enviar x WA</button>
+        <button class="btn btn-outline btn-sm" onclick="viewFicha('${p.id}')" style="font-size:11px">📄 Ver Ficha</button>
+        <button class="btn btn-outline btn-sm" onclick="matchingSendEmail('${p.id}','${persona.id||''}','${persona.email||''}')" style="font-size:11px">📧 Enviar x Email</button>
+      </div>
+    </div>`;
+  }).join('');
+  toast(`🎯 ${scored.length} propiedades encontradas`);
+}
+
+function matchingSendWA(propId,personaId,tel){
+  const p=props.find(x=>x.id===propId);
+  if(!p)return;
+  const num=(tel||'').replace(/\D/g,'');
+  const txt=encodeURIComponent(`🏠 *${p.titulo}*\n📍 ${p.zona}\n💰 ${fmtPrice(p.precio)}${p.op==='Alquiler'?'/mes':''}\n🛏 ${p.hab} hab · 🚿 ${p.banos} baños · 📐 ${p.area}m²\n\nContacto: +507 64627763 · JAC Realty Panama\nLic. PN-0931`);
+  window.open('https://wa.me/'+(num?num:'')+'?text='+txt);
+}
+
+function matchingSendEmail(propId,personaId,email){
+  const p=props.find(x=>x.id===propId);
+  if(!p||!email)return;
+  const sub=encodeURIComponent('Propiedad que podría interesarte: '+p.titulo);
+  const body=encodeURIComponent(`Estimado/a,\n\nBasándonos en tus criterios de búsqueda, tenemos esta propiedad que podría interesarte:\n\n🏠 ${p.titulo}\n📍 ${p.zona}\n💰 ${fmtPrice(p.precio)}${p.op==='Alquiler'?'/mes':''}\n🛏 ${p.hab} hab · 🚿 ${p.banos} baños · 📐 ${p.area}m²\n\n${p.desc||''}\n\nMe gustaría coordinar una visita. ¿Cuándo le viene bien?\n\nJelyan Castro · JAC Realty Panama · Lic. PN-0931\n+507 64627763`);
+  window.open('mailto:'+email+'?subject='+sub+'&body='+body);
+}
+
+function matchingShareAll(){
+  const btn=document.getElementById('matching-share-btn');
+  const scored=btn._scored||[];const persona=btn._persona||{};
+  const tel=(persona.wa||persona.tel||'').replace(/\D/g,'');
+  const resumen=scored.slice(0,5).map((p,i)=>`${i+1}. *${p.titulo}* · ${p.zona} · ${fmtPrice(p.precio)}${p.op==='Alquiler'?'/mes':''} · ${p.hab} hab`).join('\n');
+  const txt=encodeURIComponent(`Hola ${persona.nombre||''}, aquí tienes propiedades seleccionadas para ti:\n\n${resumen}\n\n¿Te gustaría ver alguna? Contáctame para coordinar visita.\n\n— Jelyan Castro · JAC Realty · +507 64627763 · Lic. PN-0931`);
+  window.open('https://wa.me/'+(tel?tel:'')+'?text='+txt);
+}
+
+// ============================================================
+// IMPORTAR DESDE CSV/EXCEL
+// ============================================================
+let _importParsed=[];
+function importarCSV(input){
+  const file=input.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.split(/\r?\n/).filter(l=>l.trim());
+    if(lines.length<2){toast('❌ Archivo vacío o sin datos');return;}
+    const headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/['"]/g,''));
+    const rows=lines.slice(1).map(line=>{
+      const vals=line.split(',').map(v=>v.trim().replace(/^"|"$/g,''));
+      const obj={};
+      headers.forEach((h,i)=>{ obj[h]=vals[i]||''; });
+      return obj;
+    }).filter(r=>Object.values(r).some(v=>v));
+    _importParsed=rows;
+    const tipo=document.getElementById('import-type').value;
+    const preview=document.getElementById('import-preview');
+    preview.innerHTML=`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:4px">
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--green)">✅ ${rows.length} registros encontrados · Tipo: ${tipo}</div>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">
+        <thead><tr>${headers.map(h=>`<th style="padding:4px 8px;border:1px solid var(--border);background:var(--card2);text-align:left">${h}</th>`).join('')}</tr></thead>
+        <tbody>${rows.slice(0,5).map(r=>`<tr>${headers.map(h=>`<td style="padding:4px 8px;border:1px solid var(--border)">${r[h]||''}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table></div>
+      ${rows.length>5?`<div style="font-size:10px;color:var(--muted);margin-top:6px">... y ${rows.length-5} registros más</div>`:''}
+    </div>`;
+    document.getElementById('import-confirm-btn').style.display='';
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+function confirmarImport(){
+  const tipo=document.getElementById('import-type').value;
+  if(!_importParsed.length){toast('❌ No hay datos para importar');return;}
+  let count=0;
+  _importParsed.forEach(row=>{
+    if(tipo==='leads'){
+      const l={
+        id:'L'+Date.now()+Math.random().toString(36).slice(2,6),
+        nombre:row.nombre||row.name||'Sin nombre',
+        apellido:row.apellido||row.lastname||'',
+        tel:row.telefono||row.tel||row.phone||'',
+        email:row.email||'',
+        interes:row.interes||row.interest||'Compra',
+        zona:row.zona||row.zone||'',
+        presupuesto_min:row.presupuesto_min||row.budget_min||'',
+        presupuesto_max:row.presupuesto_max||row.budget_max||row.presupuesto||'',
+        fuente:row.fuente||row.source||'Importado',
+        notas:row.notas||row.notes||'',
+        status:'Nuevo',
+        fecha:new Date().toISOString().split('T')[0]
+      };
+      leads.unshift(l);
+      if(sb) sb.from('clientes').insert({nombre:l.nombre,apellido:l.apellido,telefono:l.tel||null,email:l.email||null,interes:l.interes,zonas_interes:l.zona||null,presupuesto_min:l.presupuesto_min||null,presupuesto_max:l.presupuesto_max||null,estado:l.status,origen:l.fuente,notas:l.notas||null}).then(()=>{});
+    } else if(tipo==='clientes'){
+      const c={
+        id:'CLI'+Date.now()+Math.random().toString(36).slice(2,6),
+        nombre:row.nombre||row.name||'Sin nombre',
+        apellido:row.apellido||row.lastname||'',
+        tel:row.telefono||row.tel||'',
+        email:row.email||'',
+        tipo_prop:row.tipo_prop||row.tipo||'',
+        zona:row.zona||'',
+        presupuesto_max:row.presupuesto||row.presupuesto_max||'',
+        notas:row.notas||'',
+        status:'Activo',fecha:new Date().toISOString().split('T')[0]
+      };
+      clients.unshift(c);
+      if(sb) sb.from('clientes_activos').upsert({id:c.id,payload:c}).then(()=>{});
+    } else if(tipo==='contactos'){
+      const ct={
+        id:'CT'+Date.now()+Math.random().toString(36).slice(2,6),
+        nombre:row.nombre||row.name||'Sin nombre',
+        apellido:row.apellido||'',
+        tel:row.telefono||row.tel||'',
+        email:row.email||'',
+        empresa:row.empresa||row.company||'',
+        cargo:row.cargo||row.position||'',
+        categoria:row.categoria||'Contacto',
+        notas:row.notas||''
+      };
+      contacts.unshift(ct);
+      if(sb) sb.from('contactos_crm').upsert({id:ct.id,payload:ct}).then(()=>{});
+    }
+    count++;
+  });
+  renderLeads(); renderClients(); renderContacts(); updateBadges();
+  closeModal('modalImportExcel');
+  toast(`✅ ${count} registros importados correctamente`);
+  activities.unshift({tipo:'📊 Importación',cliente:'Sistema',desc:`${count} registros importados desde CSV (${tipo})`,time:'Ahora'});
+  _importParsed=[];
+  document.getElementById('import-preview').innerHTML='';
+  document.getElementById('import-confirm-btn').style.display='none';
+}
 </script>
 </body>
 </html>
