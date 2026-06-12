@@ -1184,38 +1184,130 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       </div>
     </div>
 
-    <!-- ========== RED INMOBILIARIA ========== -->
+    <!-- ========== RED INMOBILIARIA v2 ========== -->
     <div class="panel" id="panel-redInmo">
-      <div class="kpi-grid" style="margin-bottom:16px">
-        <div class="kpi-card"><div class="kpi-label">Agentes en Mi Red</div><div class="kpi-value" style="color:var(--purple)" id="red-kpi-agentes">0</div><div class="kpi-delta up">Registrados</div></div>
+      <div class="kpi-grid" style="margin-bottom:18px">
+        <div class="kpi-card"><div class="kpi-label">Aliados en Red</div><div class="kpi-value" style="color:var(--purple)" id="red-kpi-agentes">0</div><div class="kpi-delta up">Registrados</div></div>
         <div class="kpi-card"><div class="kpi-label">Prop. Compartidas</div><div class="kpi-value" style="color:var(--blue)" id="red-kpi-props">0</div><div class="kpi-delta up">Co-broking</div></div>
-        <div class="kpi-card"><div class="kpi-label">Negocios Co-Broker</div><div class="kpi-value" style="color:var(--green)" id="red-kpi-negocios">–</div><div class="kpi-delta up">Este año</div></div>
-        <div class="kpi-card"><div class="kpi-label">Comisión Promedio</div><div class="kpi-value" style="color:var(--accent)">3%</div><div class="kpi-delta up">Compartida</div></div>
+        <div class="kpi-card"><div class="kpi-label">Co-Brokings Activos</div><div class="kpi-value" style="color:var(--green)" id="red-kpi-cobrok">0</div><div class="kpi-delta up">En proceso</div></div>
+        <div class="kpi-card"><div class="kpi-label">Cerrados Este Año</div><div class="kpi-value" style="color:var(--accent)" id="red-kpi-cerrados">0</div><div class="kpi-delta up">Operaciones</div></div>
       </div>
 
-      <div class="sec-header" style="margin-bottom:12px">
-        <span class="sec-title">🤝 Contactos de la Red</span>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <input placeholder="🔍 Buscar agente..." style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:12px;outline:none;width:200px" oninput="filterRedContacts(this.value)">
-          <button class="btn btn-primary btn-sm" onclick="openModal('modalRedContacto')">+ Agregar Agente / Corredor</button>
+      <div style="display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:18px;overflow-x:auto;padding-bottom:2px" id="red-tabs-bar">
+        <button class="tab active" onclick="switchRedTab(this,'tab-aliados')" id="rtab-aliados">🤝 Aliados</button>
+        <button class="tab" onclick="switchRedTab(this,'tab-cobrokings')" id="rtab-cobrokings">📋 Co-Brokings</button>
+        <button class="tab" onclick="switchRedTab(this,'tab-redprops')" id="rtab-redprops">🏠 Propiedades Red</button>
+        <button class="tab" onclick="switchRedTab(this,'tab-automate')" id="rtab-automate">⚡ Automatizaciones</button>
+      </div>
+
+      <!-- TAB: Aliados -->
+      <div id="tab-aliados" class="red-tab">
+        <div class="sec-header" style="margin-bottom:12px">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input id="red-search-input" placeholder="🔍 Buscar aliado..." style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:12px;outline:none;width:180px" oninput="filterRedContacts(this.value)">
+            <select id="filtro-red-tipo" onchange="filterRedContacts(document.getElementById('red-search-input').value)" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none">
+              <option value="">Todos los tipos</option>
+              <option>Agente Inmobiliario</option><option>Corredor</option><option>Broker</option><option>Desarrollador</option><option>Propietario</option><option>Inversionista</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" onclick="blastWaAllAliados()" title="WhatsApp masivo a todos">📢 WA Masivo</button>
+            <button class="btn btn-primary btn-sm" onclick="openModal('modalRedContacto')">+ Agregar Aliado</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Aliado / Agencia</th><th>Tipo</th><th>Zona</th><th>Contacto</th><th>Licencia</th><th>Rating</th><th>Ops.</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="red-tbody"><tr><td colspan="9" style="text-align:center;padding:32px;color:var(--muted)">Sin aliados. Agrega tu primer agente o corredor.</td></tr></tbody>
+          </table>
         </div>
       </div>
-      <div class="table-wrap" style="margin-bottom:28px">
-        <table>
-          <thead><tr><th>Nombre / Agencia</th><th>Tipo</th><th>Zona</th><th>Contacto</th><th>Licencia</th><th>Estado</th><th>Acciones</th></tr></thead>
-          <tbody id="red-tbody"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Sin contactos. Agrega tu primer agente o corredor.</td></tr></tbody>
-        </table>
+
+      <!-- TAB: Co-Brokings -->
+      <div id="tab-cobrokings" class="red-tab" style="display:none">
+        <div class="sec-header" style="margin-bottom:14px">
+          <span style="font-size:13px;font-weight:600;color:var(--text)">Pipeline de Operaciones Co-Broking</span>
+          <button class="btn btn-primary btn-sm" onclick="populateBlastSelects();openModal('modalCoBroking')">+ Nueva Operación</button>
+        </div>
+        <div id="cobrok-kanban" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;min-height:180px"></div>
       </div>
 
-      <div class="sec-header" style="margin-bottom:12px">
-        <span class="sec-title">🏠 Propiedades Compartidas — Co-Broking</span>
-        <button class="btn btn-outline btn-sm" onclick="openModal('modalRedPropiedad')">+ Compartir Propiedad</button>
+      <!-- TAB: Propiedades Red -->
+      <div id="tab-redprops" class="red-tab" style="display:none">
+        <div class="sec-header" style="margin-bottom:12px">
+          <span style="font-size:13px;font-weight:600;color:var(--text)">Propiedades Compartidas · Co-Broking</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" onclick="populateBlastSelects();openModal('modalBlastProp')">📢 Blast WA a Red</button>
+            <button class="btn btn-primary btn-sm" onclick="openModal('modalRedPropiedad')">+ Compartir Propiedad</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Propiedad</th><th>Tipo</th><th>Operación</th><th>Precio</th><th>Área</th><th>Comisión</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="red-props-tbody"><tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">Sin propiedades compartidas aún.</td></tr></tbody>
+          </table>
+        </div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Propiedad</th><th>Tipo</th><th>Operación</th><th>Precio</th><th>Área</th><th>Comisión Compartida</th><th>Estado</th><th>Acciones</th></tr></thead>
-          <tbody id="red-props-tbody"><tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">Sin propiedades compartidas aún.</td></tr></tbody>
-        </table>
+
+      <!-- TAB: Automatizaciones -->
+      <div id="tab-automate" class="red-tab" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;padding:2px">
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px">
+            <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:var(--text)">📩 Bienvenida a Nuevo Aliado</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">WA automático al agregar un aliado nuevo a la red.</div>
+            <div style="font-size:11px;background:var(--card2);border-radius:6px;padding:8px 10px;color:var(--text);margin-bottom:12px;line-height:1.6;font-style:italic">
+              "Hola [Nombre], soy J. Castro de JAC Realty Panamá (Lic. PN-0931). Queda registrado/a como aliado/a en nuestra red. Comparto propiedades exclusivas y comisiones 50/50. ¡Bienvenido/a! 🤝 jacrealtypa.com"
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="autoWelcomeAliado()">▶ Enviar a Último Aliado</button>
+          </div>
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px">
+            <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:var(--text)">🏠 Blast Nueva Propiedad</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Notifica a TODA la red al compartir una propiedad nueva.</div>
+            <div style="font-size:11px;background:var(--card2);border-radius:6px;padding:8px 10px;color:var(--text);margin-bottom:12px;line-height:1.6;font-style:italic">
+              "Hola [Nombre], nueva propiedad para co-broking: [Título] · [Zona] · $[Precio] · Comisión: [%]. ¿Te interesa? JAC Realty 🏠"
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('modalBlastProp')">▶ Seleccionar y Enviar</button>
+          </div>
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px">
+            <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:var(--text)">🔄 Follow-up 7 Días</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Lista aliados sin contacto reciente para hacer seguimiento.</div>
+            <div style="font-size:11px;background:var(--card2);border-radius:6px;padding:8px 10px;color:var(--text);margin-bottom:12px;line-height:1.6;font-style:italic">
+              "Hola [Nombre], ¿cómo vas? Quería preguntar si tienes clientes buscando propiedades. Tengo disponibles para co-broking. ¡Conversemos! JAC Realty 🤝"
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="blastFollowupAliados()">▶ Enviar a Todos</button>
+          </div>
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px">
+            <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:var(--text)">💼 Propuesta Co-Broking</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Envía propuesta formal de co-broking a un aliado específico.</div>
+            <div style="font-size:11px;background:var(--card2);border-radius:6px;padding:8px 10px;color:var(--text);margin-bottom:12px;line-height:1.6;font-style:italic">
+              "Hola [Nombre], tengo un cliente para [zona]. ¿Tienes propiedades disponibles para co-broking? Ofrezco 3% compartido. ¿Coordinamos? JAC Realty PN-0931"
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="propuestaCoBroking()">▶ Seleccionar Aliado</button>
+          </div>
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px">
+            <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:var(--text)">📊 Reporte Mensual</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Envía resumen mensual de propiedades activas a toda la red.</div>
+            <div style="font-size:11px;background:var(--card2);border-radius:6px;padding:8px 10px;color:var(--text);margin-bottom:12px;line-height:1.6;font-style:italic">
+              "¡Hola [Nombre]! Resumen JAC Realty: [N] propiedades en co-broking en [zonas]. Comisiones 50/50. ¿Tienes clientes interesados? 🏠 JAC Realty"
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="reporteMensualRed()">▶ Generar y Enviar</button>
+          </div>
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px">
+            <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:var(--text)">🎉 Felicitación por Cierre</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Mensaje al cerrar una operación co-broking con un aliado.</div>
+            <div style="font-size:11px;background:var(--card2);border-radius:6px;padding:8px 10px;color:var(--text);margin-bottom:12px;line-height:1.6;font-style:italic">
+              "¡Felicitaciones [Nombre]! Cerramos exitosamente [Propiedad]. Su comisión de [%] está en proceso. ¡Fue un placer! Hasta la próxima. JAC Realty 🎉"
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="felicitacionCierre()">▶ Seleccionar Operación</button>
+          </div>
+
+        </div>
       </div>
     </div>
 
@@ -2131,11 +2223,11 @@ CREATE POLICY "allow_all_tareas_crm" ON tareas_crm FOR ALL USING (true) WITH CHE
   </div>
 </div>
 
-<!-- Modal Contacto Red Inmobiliaria -->
+<!-- Modal Contacto Red Inmobiliaria v2 -->
 <div class="modal-bg" id="modalRedContacto">
-  <div class="modal">
+  <div class="modal" style="max-width:640px">
     <div class="modal-header">
-      <span class="modal-title">🤝 Agregar Contacto a la Red</span>
+      <span class="modal-title">🤝 Agregar Aliado a la Red</span>
       <button class="modal-close" onclick="closeModal('modalRedContacto')">✕</button>
     </div>
     <div class="form-grid">
@@ -2147,23 +2239,30 @@ CREATE POLICY "allow_all_tareas_crm" ON tareas_crm FOR ALL USING (true) WITH CHE
       <div class="form-group"><label>Licencia</label><input id="rc-licencia" placeholder="PN-XXXX"></div>
       <div class="form-group"><label>Teléfono</label><input id="rc-tel" placeholder="+507 6000-0000"></div>
       <div class="form-group"><label>WhatsApp</label><input id="rc-wa" placeholder="+507 6000-0000"></div>
-      <div class="form-group form-full"><label>Email</label><input id="rc-email" type="email" placeholder="correo@agencia.com"></div>
+      <div class="form-group"><label>Email</label><input id="rc-email" type="email" placeholder="correo@agencia.com"></div>
+      <div class="form-group"><label>Instagram / Red Social</label><input id="rc-instagram" placeholder="@usuario"></div>
       <div class="form-group"><label>Zona principal</label>
-        <select id="rc-zona"><option>Costa del Este</option><option>Casco Antiguo</option><option>San Francisco</option><option>Punta Pacífica</option><option>Marbella</option><option>Bella Vista</option><option>El Cangrejo</option><option>Coronado</option><option>Chiriquí</option><option>Todo Panamá</option></select>
+        <select id="rc-zona"><option>Costa del Este</option><option>Casco Antiguo</option><option>San Francisco</option><option>Punta Pacífica</option><option>Marbella</option><option>Bella Vista</option><option>El Cangrejo</option><option>Coronado</option><option>Chiriquí</option><option>Colón</option><option>Todo Panamá</option></select>
       </div>
-      <div class="form-group"><label>Especialidades</label><input id="rc-especialidades" placeholder="Lujo, Alquiler, Comercial..."></div>
-      <div class="form-group form-full"><label>Notas</label><textarea id="rc-notas" placeholder="Áreas de trabajo, condiciones de co-broking..."></textarea></div>
+      <div class="form-group"><label>% Comisión Co-Broking</label>
+        <select id="rc-comision-pct"><option>50/50 del total</option><option>3% al referidor</option><option>2.5% al referidor</option><option>2% al referidor</option><option>A negociar</option></select>
+      </div>
+      <div class="form-group"><label>Rating inicial</label>
+        <select id="rc-rating"><option value="5">⭐⭐⭐⭐⭐ Excelente</option><option value="4">⭐⭐⭐⭐ Muy Bueno</option><option value="3" selected>⭐⭐⭐ Nuevo</option><option value="2">⭐⭐ Regular</option><option value="1">⭐ Bajo</option></select>
+      </div>
+      <div class="form-group"><label>Especialidades</label><input id="rc-especialidades" placeholder="Lujo, Alquiler, Comercial, Residencial..."></div>
+      <div class="form-group form-full"><label>Notas / Condiciones</label><textarea id="rc-notas" placeholder="Áreas de trabajo, condiciones preferidas, observaciones..."></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalRedContacto')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveRedContact()">➕ Agregar a la Red</button>
+      <button class="btn btn-primary" onclick="saveRedContact()">➕ Agregar Aliado</button>
     </div>
   </div>
 </div>
 
 <!-- Modal Propiedad Red — Co-Broking -->
 <div class="modal-bg" id="modalRedPropiedad">
-  <div class="modal">
+  <div class="modal" style="max-width:640px">
     <div class="modal-header">
       <span class="modal-title">🏠 Compartir Propiedad en la Red</span>
       <button class="modal-close" onclick="closeModal('modalRedPropiedad')">✕</button>
@@ -2186,11 +2285,80 @@ CREATE POLICY "allow_all_tareas_crm" ON tareas_crm FOR ALL USING (true) WITH CHE
       <div class="form-group"><label>Comisión compartida</label>
         <select id="rp-comision"><option>2%</option><option>2.5%</option><option>3%</option><option>3.5%</option><option>4%</option><option>50/50 del total</option><option>A negociar</option></select>
       </div>
-      <div class="form-group form-full"><label>Descripción / Condiciones</label><textarea id="rp-desc" placeholder="Amenidades, condiciones, documentación, observaciones..."></textarea></div>
+      <div class="form-group"><label>Contacto para coordinar</label><input id="rp-contacto" placeholder="+507 6000-0000 · WhatsApp"></div>
+      <div class="form-group form-full"><label>Descripción / Condiciones</label><textarea id="rp-desc" placeholder="Amenidades, condiciones de co-broking, documentación disponible..."></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalRedPropiedad')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveRedProp()">🤝 Compartir en la Red</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Co-Broking — Nueva Operación -->
+<div class="modal-bg" id="modalCoBroking">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <span class="modal-title">📋 Nueva Operación Co-Broking</span>
+      <button class="modal-close" onclick="closeModal('modalCoBroking')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Propiedad *</label><input id="cb-propiedad" placeholder="Título de la propiedad"></div>
+      <div class="form-group"><label>Aliado Co-Broker *</label>
+        <select id="cb-aliado"><option value="">— Seleccionar aliado —</option></select>
+      </div>
+      <div class="form-group"><label>Cliente / Comprador</label><input id="cb-cliente" placeholder="Nombre del cliente"></div>
+      <div class="form-group"><label>Precio de venta (USD)</label><input id="cb-precio" type="number" placeholder="350000" oninput="calcCoBrokComision()"></div>
+      <div class="form-group"><label>Comisión total (%)</label><input id="cb-comision-total" type="number" step="0.5" placeholder="5" oninput="calcCoBrokComision()"></div>
+      <div class="form-group"><label>Mi parte (%)</label><input id="cb-mi-parte" type="number" step="0.5" placeholder="2.5" oninput="calcCoBrokComision()"></div>
+      <div class="form-group"><label>Parte del aliado (%)</label><input id="cb-aliado-parte" type="number" step="0.5" placeholder="2.5" oninput="calcCoBrokComision()"></div>
+      <div class="form-group"><label>Etapa</label>
+        <select id="cb-etapa">
+          <option value="Prospecto">🔵 Prospecto</option>
+          <option value="Contactado">🟡 Contactado</option>
+          <option value="En Negociación">🟠 En Negociación</option>
+          <option value="Acuerdo Firmado">🟣 Acuerdo Firmado</option>
+          <option value="Cerrado">🟢 Cerrado</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Fecha estimada cierre</label><input id="cb-fecha" type="date"></div>
+      <div class="form-group form-full"><label>Notas</label><textarea id="cb-notas" placeholder="Observaciones, condiciones, próximos pasos..."></textarea></div>
+    </div>
+    <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:10px 14px;margin:0 0 14px;font-size:12px;color:var(--text)" id="cb-comision-preview">
+      💰 Comisión estimada: <strong id="cb-mi-comision-val">–</strong> para mí · <strong id="cb-aliado-comision-val">–</strong> para el aliado
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalCoBroking')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCoBroking()">💼 Registrar Operación</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Blast WA Propiedad a Red -->
+<div class="modal-bg" id="modalBlastProp">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-header">
+      <span class="modal-title">📢 Blast WA · Propiedad a Toda la Red</span>
+      <button class="modal-close" onclick="closeModal('modalBlastProp')">✕</button>
+    </div>
+    <div style="padding:4px">
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Seleccionar propiedad a enviar</label>
+        <select id="blast-prop-sel" onchange="previewBlastMsg()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none">
+          <option value="">— Seleccionar propiedad compartida —</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Vista previa del mensaje</label>
+        <textarea id="blast-prop-preview" rows="5" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:12px;line-height:1.6;resize:vertical;outline:none" placeholder="Selecciona una propiedad para ver el mensaje..."></textarea>
+      </div>
+      <div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);margin-bottom:14px">
+        📱 Se abrirá WhatsApp Web para cada aliado de la red. Tienes <strong id="blast-aliados-count">0</strong> aliados registrados.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalBlastProp')">Cancelar</button>
+      <button class="btn btn-primary" onclick="executePropBlast()">📢 Enviar a Toda la Red</button>
     </div>
   </div>
 </div>
@@ -2310,12 +2478,13 @@ async function _sbLoad(table, opts={}){
 async function loadSupabaseData(){
   if(!sb) return;
   try {
-    const [propsRes, leadsRes, agendaRes, redContactsRes, redPropsRes] = await Promise.all([
+    const [propsRes, leadsRes, agendaRes, redContactsRes, redPropsRes, coBrokRes] = await Promise.all([
       sb.from('propiedades').select('*').order('created_at',{ascending:false}),
       sb.from('clientes').select('*').order('created_at',{ascending:false}),
       sb.from('agenda').select('*').order('fecha',{ascending:true}),
       sb.from('red_inmobiliaria').select('*').order('created_at',{ascending:false}),
-      sb.from('propiedades_red').select('*').order('created_at',{ascending:false})
+      sb.from('propiedades_red').select('*').order('created_at',{ascending:false}),
+      sb.from('co_brokings').select('*').order('created_at',{ascending:false})
     ]);
 
     // Load new tables (silently skip if tables don't exist yet — show setup hint)
@@ -2370,6 +2539,7 @@ async function loadSupabaseData(){
     }
     if(redContactsRes.data) redContacts = redContactsRes.data;
     if(redPropsRes.data) redProps = redPropsRes.data;
+    if(coBrokRes&&coBrokRes.data) coBrokings = coBrokRes.data;
 
     // Re-render all modules
     renderDashboard(); renderProps(); renderLeads(); renderCalendar(); updateBadges();
@@ -2421,6 +2591,7 @@ function initRealtime(){
 // ============================================================
 let redContacts = [];
 let redProps = [];
+let coBrokings = [];
 
 let props = [];
 let leads = [];
@@ -4383,87 +4554,190 @@ function updateTareaRef(tipo){
 // ============================================================
 // RED INMOBILIARIA
 // ============================================================
+// ============================================================
+// RED INMOBILIARIA v2 — Sistema completo de aliados y co-broking
+// ============================================================
+function switchRedTab(btn,tabId){
+  document.querySelectorAll('#panel-redInmo .tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.red-tab').forEach(t=>t.style.display='none');
+  btn.classList.add('active');
+  const t=document.getElementById(tabId);
+  if(t) t.style.display='';
+  if(tabId==='tab-cobrokings') renderCoBrokingKanban();
+  if(tabId==='tab-redprops') renderRedProps();
+  if(tabId==='tab-automate') populateBlastSelects();
+}
+
 function renderRedInmo(){
+  renderRedAliados(redContacts);
+  renderRedProps();
+  renderCoBrokingKanban();
+  // KPIs
+  const activos=coBrokings.filter(c=>c.etapa&&c.etapa!=='Cerrado').length;
+  const cerrados=coBrokings.filter(c=>c.etapa==='Cerrado').length;
+  const ka=document.getElementById('red-kpi-agentes'); if(ka) ka.textContent=redContacts.length;
+  const kp=document.getElementById('red-kpi-props'); if(kp) kp.textContent=redProps.length;
+  const kc=document.getElementById('red-kpi-cobrok'); if(kc) kc.textContent=activos;
+  const kce=document.getElementById('red-kpi-cerrados'); if(kce) kce.textContent=cerrados;
+  const b=document.getElementById('badge-red'); if(b) b.textContent=redContacts.length;
+}
+
+function renderRedAliados(list){
   const tbody=document.getElementById('red-tbody');
-  if(tbody){
-    tbody.innerHTML=redContacts.length?redContacts.map(c=>`<tr>
+  if(!tbody) return;
+  if(!list.length){
+    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--muted)">Sin aliados. Agrega tu primer agente o corredor.</td></tr>';
+    return;
+  }
+  tbody.innerHTML=list.map(c=>{
+    const stars='⭐'.repeat(+(c.rating||3));
+    const ops=coBrokings.filter(b=>b.aliado_nombre===c.nombre).length;
+    return `<tr>
       <td><div style="font-weight:500">${c.nombre||''}</div><div style="font-size:11px;color:var(--muted)">${c.empresa||'Independiente'}</div></td>
-      <td><span class="tag" style="background:var(--card2);color:var(--text)">${c.tipo||'Agente'}</span></td>
-      <td>${c.zona||'–'}</td>
-      <td><div style="font-size:12px">${c.telefono||c.whatsapp||'–'}</div><div style="font-size:11px;color:var(--muted)">${c.email||''}</div></td>
-      <td>${c.licencia||'–'}</td>
-      <td><span class="tag tag-${(c.estado||'activo').toLowerCase()}">${c.estado||'Activo'}</span></td>
+      <td><span class="tag" style="background:var(--card2);color:var(--text);font-size:10px">${c.tipo||'Agente'}</span></td>
+      <td style="font-size:12px">${c.zona||'–'}</td>
+      <td><div style="font-size:12px">${c.whatsapp||c.telefono||'–'}</div><div style="font-size:10px;color:var(--muted)">${c.email||''}</div></td>
+      <td style="font-size:12px">${c.licencia||'–'}</td>
+      <td style="font-size:13px;white-space:nowrap">${stars}</td>
+      <td style="text-align:center;font-weight:600;color:var(--blue)">${ops}</td>
+      <td><span class="tag tag-${(c.estado||'activo').toLowerCase()}" style="font-size:10px">${c.estado||'Activo'}</span></td>
       <td><div class="action-btns">
-        <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="waRedContact('${c.nombre}')" title="WhatsApp">💬</button>
-        <button class="email-btn" style="font-size:10px;padding:3px 7px" onclick="emailRedContact('${c.nombre}')" title="Email">📧</button>
-        <button class="btn btn-ghost btn-sm" onclick="deleteRedContact('${c.nombre}')">🗑️</button>
+        <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="waRedContact('${(c.nombre||'').replace(/'/g,"\\\'")}')" title="WhatsApp">💬</button>
+        <button class="email-btn" style="font-size:10px;padding:3px 7px" onclick="emailRedContact('${(c.nombre||'').replace(/'/g,"\\\'")}')" title="Email">📧</button>
+        <button class="btn btn-primary btn-sm" style="font-size:10px;padding:3px 8px" onclick="propuestaCoBrokingAliado('${(c.nombre||'').replace(/'/g,"\\\'")}')" title="Co-broking">💼</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteRedContact('${(c.nombre||'').replace(/'/g,"\\\'")}')" style="font-size:10px">🗑️</button>
       </div></td>
-    </tr>`).join('')
-    :'<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Sin contactos. Agrega tu primer agente o corredor.</td></tr>';
+    </tr>`;
+  }).join('');
+}
+
+function renderRedProps(){
+  const tbody=document.getElementById('red-props-tbody');
+  if(!tbody) return;
+  if(!redProps.length){
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">Sin propiedades compartidas aún.</td></tr>';
+    return;
   }
-  const tbody2=document.getElementById('red-props-tbody');
-  if(tbody2){
-    tbody2.innerHTML=redProps.length?redProps.map(p=>`<tr>
-      <td><div style="font-weight:500">${p.titulo||''}</div><div style="font-size:11px;color:var(--muted)">📍 ${p.ubicacion||p.zona||''}</div></td>
-      <td>${p.tipo||'–'}</td>
-      <td><span class="tag tag-${(p.operacion||'venta').toLowerCase()}">${p.operacion||'–'}</span></td>
-      <td class="price">$${(p.precio||0).toLocaleString()}</td>
-      <td>${p.area||'–'}m²</td>
-      <td style="color:var(--accent);font-weight:600">${p.comision_compartida||'–'}</td>
-      <td><span class="tag tag-${(p.estado||'disponible').toLowerCase()}">${p.estado||'Disponible'}</span></td>
-      <td><div class="action-btns">
-        <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="toast('Enviando por WhatsApp...')" title="Compartir">💬</button>
-        <button class="btn btn-ghost btn-sm" onclick="deleteRedProp('${p.titulo||p.id}')">🗑️</button>
-      </div></td>
-    </tr>`).join('')
-    :'<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">Sin propiedades compartidas aún.</td></tr>';
+  tbody.innerHTML=redProps.map(p=>`<tr>
+    <td><div style="font-weight:500">${p.titulo||''}</div><div style="font-size:11px;color:var(--muted)">📍 ${p.ubicacion||p.zona||''}</div></td>
+    <td style="font-size:12px">${p.tipo||'–'}</td>
+    <td><span class="tag tag-${(p.operacion||'venta').toLowerCase()}" style="font-size:10px">${p.operacion||'–'}</span></td>
+    <td class="price">$${(+(p.precio||0)).toLocaleString()}</td>
+    <td style="font-size:12px">${p.area||'–'}m²</td>
+    <td style="color:var(--accent);font-weight:600;font-size:12px">${p.comision_compartida||'–'}</td>
+    <td><span class="tag tag-${(p.estado||'disponible').toLowerCase()}" style="font-size:10px">${p.estado||'Disponible'}</span></td>
+    <td><div class="action-btns">
+      <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="blastSingleProp('${(p.titulo||'').replace(/'/g,"\\\'")}')" title="WA Blast">📢</button>
+      <button class="btn btn-ghost btn-sm" onclick="deleteRedProp('${(p.titulo||p.id||'').replace(/'/g,"\\\'")}')" style="font-size:10px">🗑️</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+function renderCoBrokingKanban(){
+  const kanban=document.getElementById('cobrok-kanban');
+  if(!kanban) return;
+  const etapas=[
+    {id:'Prospecto',label:'🔵 Prospecto',color:'#3b82f6'},
+    {id:'Contactado',label:'🟡 Contactado',color:'#eab308'},
+    {id:'En Negociación',label:'🟠 Negociación',color:'#f97316'},
+    {id:'Acuerdo Firmado',label:'🟣 Acuerdo',color:'#a855f7'},
+    {id:'Cerrado',label:'🟢 Cerrado',color:'#22c55e'}
+  ];
+  kanban.innerHTML=etapas.map(e=>{
+    const items=coBrokings.filter(c=>(c.etapa||'Prospecto')===e.id);
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;min-height:100px">
+      <div style="font-size:11px;font-weight:700;margin-bottom:10px;color:${e.color};display:flex;justify-content:space-between">
+        <span>${e.label}</span><span style="background:${e.color}22;border-radius:10px;padding:1px 7px">${items.length}</span>
+      </div>
+      ${items.length?items.map(cb=>`
+        <div style="background:var(--card2);border-radius:7px;padding:9px 10px;margin-bottom:7px;font-size:11px;cursor:pointer;border-left:3px solid ${e.color}" onclick="editCoBroking('${(cb.id||cb.propiedad||'').replace(/'/g,"\\\'")}')" title="Click para editar">
+          <div style="font-weight:600;margin-bottom:2px;color:var(--text)">${cb.propiedad||'Sin título'}</div>
+          <div style="color:var(--muted)">${cb.aliado_nombre||cb.aliado||'–'}</div>
+          ${cb.precio?`<div style="color:var(--green);font-weight:600;margin-top:3px">$${(+cb.precio).toLocaleString()}</div>`:''}
+          ${cb.mi_parte?`<div style="color:var(--accent);font-size:10px">Mi parte: ${cb.mi_parte}%</div>`:''}
+        </div>`).join('')
+      :'<div style="text-align:center;color:var(--muted);font-size:11px;padding:12px 0">Sin operaciones</div>'}
+    </div>`;
+  }).join('');
+}
+
+function populateBlastSelects(){
+  const sel=document.getElementById('blast-prop-sel');
+  if(sel){
+    sel.innerHTML='<option value="">— Seleccionar propiedad —</option>'+
+      redProps.map(p=>`<option value="${(p.titulo||'').replace(/"/g,'&quot;')}">${p.titulo||'Sin título'} · $${(+(p.precio||0)).toLocaleString()}</option>`).join('');
   }
-  const ka=document.getElementById('red-kpi-agentes');
-  const kp=document.getElementById('red-kpi-props');
-  if(ka) ka.textContent=redContacts.length;
-  if(kp) kp.textContent=redProps.length;
-  document.getElementById('badge-red').textContent=redContacts.length;
+  const cnt=document.getElementById('blast-aliados-count');
+  if(cnt) cnt.textContent=redContacts.length;
+
+  const alSel=document.getElementById('cb-aliado');
+  if(alSel){
+    alSel.innerHTML='<option value="">— Seleccionar aliado —</option>'+
+      redContacts.map(c=>`<option value="${(c.nombre||'').replace(/"/g,'&quot;')}">${c.nombre||''} · ${c.empresa||'Independiente'}</option>`).join('');
+  }
+}
+
+// Preview blast message
+function previewBlastMsg(){
+  const sel=document.getElementById('blast-prop-sel');
+  const p=redProps.find(x=>x.titulo===sel.value);
+  const prev=document.getElementById('blast-prop-preview');
+  if(!prev) return;
+  if(!p){prev.value='';return;}
+  prev.value=`Hola [Nombre], nueva propiedad disponible en co-broking 🏠\n\n${p.titulo||''}\n📍 ${p.ubicacion||p.zona||'Panamá'} | ${p.tipo||''} | ${p.operacion||''}\n💰 $${(+(p.precio||0)).toLocaleString()}\n📐 ${p.area||'–'}m²\n🤝 Comisión: ${p.comision_compartida||'A negociar'}\n\n¿Le interesa presentársela a algún cliente?\nJAC Realty Panamá · +507 64627763 · jacrealtypa.com`;
+}
+
+// Calculate commission preview in co-broking modal
+function calcCoBrokComision(){
+  const precio=+(document.getElementById('cb-precio')||{value:0}).value||0;
+  const miParte=+(document.getElementById('cb-mi-parte')||{value:0}).value||0;
+  const aliParte=+(document.getElementById('cb-aliado-parte')||{value:0}).value||0;
+  const miVal=document.getElementById('cb-mi-comision-val');
+  const aliVal=document.getElementById('cb-aliado-comision-val');
+  if(miVal) miVal.textContent=precio?'$'+(precio*miParte/100).toLocaleString():'–';
+  if(aliVal) aliVal.textContent=precio?'$'+(precio*aliParte/100).toLocaleString():'–';
 }
 
 function filterRedContacts(q){
-  if(!q){renderRedInmo();return;}
-  const filtered=redContacts.filter(c=>
+  const tipo=(document.getElementById('filtro-red-tipo')||{value:''}).value;
+  let list=redContacts;
+  if(q) list=list.filter(c=>
     (c.nombre||'').toLowerCase().includes(q.toLowerCase())||
     (c.empresa||'').toLowerCase().includes(q.toLowerCase())||
-    (c.zona||'').toLowerCase().includes(q.toLowerCase())
+    (c.zona||'').toLowerCase().includes(q.toLowerCase())||
+    (c.especialidades||'').toLowerCase().includes(q.toLowerCase())
   );
-  const tbody=document.getElementById('red-tbody');
-  if(tbody) tbody.innerHTML=filtered.map(c=>`<tr>
-    <td><div style="font-weight:500">${c.nombre||''}</div><div style="font-size:11px;color:var(--muted)">${c.empresa||''}</div></td>
-    <td>${c.tipo||''}</td><td>${c.zona||''}</td>
-    <td>${c.telefono||''}</td><td>${c.licencia||'–'}</td>
-    <td><span class="tag">${c.estado||'Activo'}</span></td>
-    <td><button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="waRedContact('${c.nombre}')">💬</button></td>
-  </tr>`).join('')||'<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted)">Sin resultados</td></tr>';
+  if(tipo) list=list.filter(c=>(c.tipo||'')=== tipo);
+  renderRedAliados(list);
 }
 
 function saveRedContact(){
   const nombre=(document.getElementById('rc-nombre').value||'').trim();
-  if(!nombre){alert('Ingresa el nombre del contacto');return;}
+  if(!nombre){alert('Ingresa el nombre del aliado');return;}
   const g=id=>(document.getElementById(id)||{value:''}).value||'';
   const c={
     nombre, tipo:g('rc-tipo'), empresa:g('rc-empresa'), licencia:g('rc-licencia'),
     telefono:g('rc-tel'), email:g('rc-email'), whatsapp:g('rc-wa')||g('rc-tel'),
-    zona:g('rc-zona'), especialidades:g('rc-especialidades'), notas:g('rc-notas'), estado:'Activo'
+    instagram:g('rc-instagram'), zona:g('rc-zona'), comision_pct:g('rc-comision-pct'),
+    rating:+(document.getElementById('rc-rating')||{value:3}).value||3,
+    especialidades:g('rc-especialidades'), notas:g('rc-notas'), estado:'Activo'
   };
   redContacts.unshift(c);
   if(sb){
     sb.from('red_inmobiliaria').insert({
       nombre:c.nombre, tipo:c.tipo, empresa:c.empresa, licencia:c.licencia,
       telefono:c.telefono, email:c.email, whatsapp:c.whatsapp,
-      zona:c.zona, especialidades:c.especialidades?[c.especialidades]:[], notas:c.notas, estado:'Activo'
-    }).then(({error,data})=>{ if(error) console.warn('Red contact save error:',error); else if(data&&data[0]) c._sbId=data[0].id; });
+      instagram:c.instagram, zona:c.zona, comision_pct:c.comision_pct,
+      rating:c.rating, especialidades:c.especialidades?[c.especialidades]:[], notas:c.notas, estado:'Activo'
+    }).then(({error,data})=>{ if(error) console.warn('Red contact save:',error); else if(data&&data[0]) c._sbId=data[0].id; });
   }
   closeModal('modalRedContacto');
   renderRedInmo();
-  activities.unshift({tipo:'🤝 Red',cliente:c.nombre,desc:`Nuevo contacto en la red: ${c.tipo} · ${c.empresa||'Independiente'}`,time:'Ahora'});
-  ['rc-nombre','rc-empresa','rc-licencia','rc-tel','rc-wa','rc-email','rc-especialidades','rc-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  toast('✅ Contacto agregado a la red: '+c.nombre);
+  activities.unshift({tipo:'🤝 Red',cliente:c.nombre,desc:`Nuevo aliado: ${c.tipo} · ${c.empresa||'Independiente'}`,time:'Ahora'});
+  ['rc-nombre','rc-empresa','rc-licencia','rc-tel','rc-wa','rc-email','rc-instagram','rc-especialidades','rc-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  toast('✅ Aliado agregado: '+c.nombre);
+  // Auto-welcome WA
+  setTimeout(()=>{ if(confirm(`¿Enviar mensaje de bienvenida por WhatsApp a ${c.nombre}?`)) waWelcomeAliado(c); }, 600);
 }
 
 function saveRedProp(){
@@ -4474,7 +4748,7 @@ function saveRedProp(){
   const p={
     titulo, tipo:gs('rp-tipo'), operacion:gs('rp-op'),
     precio:g('rp-precio'), area:g('rp-area'), habitaciones:g('rp-hab'), banos:g('rp-banos'),
-    ubicacion:gs('rp-zona'), descripcion:gs('rp-desc'),
+    ubicacion:gs('rp-zona'), descripcion:gs('rp-desc'), contacto:gs('rp-contacto'),
     comision_compartida:gs('rp-comision'), estado:'Disponible'
   };
   redProps.unshift(p);
@@ -4482,21 +4756,66 @@ function saveRedProp(){
     sb.from('propiedades_red').insert({
       titulo:p.titulo, tipo:p.tipo, operacion:p.operacion, precio:p.precio,
       area:p.area, habitaciones:p.habitaciones, banos:p.banos,
-      ubicacion:p.ubicacion, descripcion:p.descripcion,
+      ubicacion:p.ubicacion, descripcion:p.descripcion, contacto:p.contacto,
       comision_compartida:p.comision_compartida, estado:'Disponible'
-    }).then(({error,data})=>{ if(error) console.warn('Red prop save error:',error); else if(data&&data[0]) p._sbId=data[0].id; });
+    }).then(({error,data})=>{ if(error) console.warn('Red prop save:',error); else if(data&&data[0]) p._sbId=data[0].id; });
   }
   closeModal('modalRedPropiedad');
   renderRedInmo();
-  ['rp-titulo','rp-precio','rp-area','rp-hab','rp-banos','rp-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['rp-titulo','rp-precio','rp-area','rp-hab','rp-banos','rp-desc','rp-contacto'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   toast('✅ Propiedad compartida en la red: '+p.titulo);
+  setTimeout(()=>{ if(redContacts.length>0&&confirm(`¿Notificar a toda la red (${redContacts.length} aliados) sobre esta propiedad por WhatsApp?`)) blastSingleProp(p.titulo); }, 600);
 }
 
+function saveCoBroking(){
+  const propiedad=(document.getElementById('cb-propiedad').value||'').trim();
+  if(!propiedad){alert('Ingresa la propiedad');return;}
+  const g=id=>(document.getElementById(id)||{value:''}).value||'';
+  const aliado=g('cb-aliado');
+  const cb={
+    id:'cb_'+Date.now(), propiedad, aliado_nombre:aliado,
+    cliente:g('cb-cliente'), precio:+(g('cb-precio'))||0,
+    comision_total:+(g('cb-comision-total'))||0, mi_parte:+(g('cb-mi-parte'))||0,
+    aliado_parte:+(g('cb-aliado-parte'))||0, etapa:g('cb-etapa')||'Prospecto',
+    fecha_cierre:g('cb-fecha'), notas:g('cb-notas'), created_at:new Date().toISOString()
+  };
+  coBrokings.unshift(cb);
+  if(sb){
+    sb.from('co_brokings').insert({
+      propiedad:cb.propiedad, aliado_nombre:cb.aliado_nombre, cliente:cb.cliente,
+      precio:cb.precio, comision_total:cb.comision_total, mi_parte:cb.mi_parte,
+      aliado_parte:cb.aliado_parte, etapa:cb.etapa, fecha_cierre:cb.fecha_cierre, notas:cb.notas
+    }).then(({error,data})=>{ if(error) console.warn('Co-broking save:',error); else if(data&&data[0]) cb._sbId=data[0].id; });
+  }
+  closeModal('modalCoBroking');
+  renderCoBrokingKanban();
+  renderRedInmo();
+  toast(`✅ Co-broking registrado: ${propiedad}`);
+  ['cb-propiedad','cb-cliente','cb-precio','cb-comision-total','cb-mi-parte','cb-aliado-parte','cb-notas','cb-fecha'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+
+function editCoBroking(id){
+  const cb=coBrokings.find(x=>x.id===id||x.propiedad===id);
+  if(!cb) return;
+  const etapas=['Prospecto','Contactado','En Negociación','Acuerdo Firmado','Cerrado'];
+  const next=etapas[Math.min(etapas.indexOf(cb.etapa||'Prospecto')+1,etapas.length-1)];
+  if(confirm(`Operación: ${cb.propiedad}\nEtapa actual: ${cb.etapa||'Prospecto'}\n\n¿Avanzar a "${next}"?`)){
+    cb.etapa=next;
+    if(sb&&cb._sbId) sb.from('co_brokings').update({etapa:next}).eq('id',cb._sbId).then(()=>{});
+    renderCoBrokingKanban(); renderRedInmo();
+    toast(`📋 Co-broking avanzado a: ${next}`);
+    if(next==='Cerrado'){
+      setTimeout(()=>{ felicitacionCierreAliado(cb); }, 800);
+    }
+  }
+}
+
+// ─── WA / Email functions ────────────────────────────────────
 function waRedContact(nombre){
   const c=redContacts.find(x=>x.nombre===nombre);
   if(!c) return;
   const num=(c.whatsapp||c.telefono||'').replace(/\D/g,'');
-  const txt=encodeURIComponent(`Hola ${c.nombre}, soy J. Castro de JAC Realty (Lic. PN-0931). Me comunico para explorar oportunidades de co-broking y propiedades compartidas. ¿Tiene un momento? 🤝\n+507 64627763 · jacrealtypa.com`);
+  const txt=encodeURIComponent(`Hola ${c.nombre}, soy J. Castro de JAC Realty Panamá (Lic. PN-0931). Me comunico para explorar oportunidades de co-broking y propiedades compartidas. ¿Tiene un momento? 🤝\n+507 64627763 · jacrealtypa.com`);
   if(num) window.open('https://wa.me/'+num+'?text='+txt);
   else toast('Sin número de WhatsApp registrado');
 }
@@ -4505,16 +4824,158 @@ function emailRedContact(nombre){
   const c=redContacts.find(x=>x.nombre===nombre);
   if(!c||!c.email){toast('Sin email registrado');return;}
   const sub=encodeURIComponent('Colaboración inmobiliaria · JAC Realty Panamá');
-  const body=encodeURIComponent(`Estimado/a ${c.nombre},\n\nMe comunico desde JAC Realty Panamá (Lic. PN-0931).\n\nMe gustaría explorar oportunidades de colaboración y co-broking en la industria inmobiliaria panameña.\n\nSaludos,\nJelyan Castro\nJAC Realty Panamá · +507 64627763\njacrealtypa.com`);
+  const body=encodeURIComponent(`Estimado/a ${c.nombre},\n\nMe comunico desde JAC Realty Panamá (Lic. PN-0931).\n\nMe gustaría explorar oportunidades de colaboración y co-broking.\n\nSaludos,\nJelyan Castro\nJAC Realty Panamá · +507 64627763\njacrealtypa.com`);
   window.open(`mailto:${c.email}?subject=${sub}&body=${body}`);
 }
 
+function waWelcomeAliado(c){
+  const num=(c.whatsapp||c.telefono||'').replace(/\D/g,'');
+  if(!num){toast('Sin número WA para bienvenida');return;}
+  const txt=encodeURIComponent(`Hola ${c.nombre}, soy J. Castro de JAC Realty Panamá (Lic. PN-0931). Queda registrado/a como aliado/a en nuestra red de co-broking. Comparto propiedades exclusivas y comisiones. ¡Bienvenido/a! 🤝\njacrealtypa.com · +507 64627763`);
+  window.open('https://wa.me/'+num+'?text='+txt);
+  toast('📩 Bienvenida enviada a '+c.nombre);
+}
+
+function autoWelcomeAliado(){
+  if(!redContacts.length){toast('Sin aliados registrados');return;}
+  const c=redContacts[0];
+  waWelcomeAliado(c);
+}
+
+function blastWaAllAliados(){
+  if(!redContacts.length){toast('Sin aliados en la red');return;}
+  const activos=redContacts.filter(c=>c.estado!=='Inactivo');
+  if(!confirm(`¿Enviar WhatsApp a los ${activos.length} aliados activos?\n\nSe abrirá WhatsApp para cada uno. Recomendado: seleccionar uno a la vez.`)) return;
+  let i=0;
+  function sendNext(){
+    if(i>=activos.length) return;
+    const c=activos[i++];
+    const num=(c.whatsapp||c.telefono||'').replace(/\D/g,'');
+    if(num){
+      const msg=redProps.length>0
+        ? `Hola ${c.nombre}! Soy J. Castro de JAC Realty. Tenemos ${redProps.length} propiedad(es) disponible(s) para co-broking. ¿Le interesa coordinar? +507 64627763 🤝`
+        : `Hola ${c.nombre}! Soy J. Castro de JAC Realty Panamá (PN-0931). ¿Cómo podemos colaborar hoy? +507 64627763 🏠`;
+      window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg));
+    }
+    if(i<activos.length) setTimeout(sendNext,1800);
+  }
+  sendNext();
+}
+
+function blastSingleProp(titulo){
+  const p=redProps.find(x=>x.titulo===titulo);
+  if(!p||!redContacts.length){toast('Sin propiedad o sin aliados');return;}
+  const activos=redContacts.filter(c=>c.estado!=='Inactivo');
+  if(!confirm(`¿Enviar esta propiedad a ${activos.length} aliados por WhatsApp?`)) return;
+  let i=0;
+  function sendNext(){
+    if(i>=activos.length) return;
+    const c=activos[i++];
+    const num=(c.whatsapp||c.telefono||'').replace(/\D/g,'');
+    if(num){
+      const msg=`Hola ${c.nombre}! Nueva propiedad para co-broking 🏠\n\n${p.titulo}\n📍 ${p.ubicacion||p.zona||'Panamá'} | ${p.tipo||''} | ${p.operacion||''}\n💰 $${(+(p.precio||0)).toLocaleString()}\n🤝 Comisión: ${p.comision_compartida||'A negociar'}\n\n¿Tiene clientes interesados? JAC Realty · +507 64627763`;
+      window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg));
+    }
+    if(i<activos.length) setTimeout(sendNext,1800);
+  }
+  sendNext();
+  toast(`📢 Enviando propiedad a ${activos.length} aliados...`);
+}
+
+function executePropBlast(){
+  const sel=document.getElementById('blast-prop-sel');
+  if(!sel||!sel.value){toast('Selecciona una propiedad');return;}
+  closeModal('modalBlastProp');
+  blastSingleProp(sel.value);
+}
+
+function blastFollowupAliados(){
+  const activos=redContacts.filter(c=>c.estado!=='Inactivo');
+  if(!activos.length){toast('Sin aliados en la red');return;}
+  if(!confirm(`¿Enviar follow-up a ${activos.length} aliados?`)) return;
+  let i=0;
+  function sendNext(){
+    if(i>=activos.length) return;
+    const c=activos[i++];
+    const num=(c.whatsapp||c.telefono||'').replace(/\D/g,'');
+    if(num){
+      const msg=`Hola ${c.nombre}! ¿Cómo vas? Soy J. Castro de JAC Realty. Quería preguntar si tienes clientes buscando propiedades. Tenemos disponibles para co-broking en Panamá. ¡Conversemos! 🤝 +507 64627763`;
+      window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg));
+    }
+    if(i<activos.length) setTimeout(sendNext,1800);
+  }
+  sendNext();
+  toast('🔄 Enviando follow-up...');
+}
+
+function propuestaCoBroking(){
+  if(!redContacts.length){toast('Sin aliados en la red');return;}
+  const names=redContacts.map((c,i)=>`${i+1}. ${c.nombre} (${c.empresa||'Independiente'})`).join('\n');
+  const idx=prompt(`Selecciona aliado (número):\n\n${names}`);
+  if(!idx) return;
+  const c=redContacts[+idx-1];
+  if(!c){toast('Aliado no encontrado');return;}
+  propuestaCoBrokingAliado(c.nombre);
+}
+
+function propuestaCoBrokingAliado(nombre){
+  const c=redContacts.find(x=>x.nombre===nombre);
+  if(!c) return;
+  const num=(c.whatsapp||c.telefono||'').replace(/\D/g,'');
+  if(!num){toast('Sin número WA');return;}
+  const msg=`Hola ${c.nombre}, soy J. Castro de JAC Realty Panamá (Lic. PN-0931). Tengo un cliente interesado en propiedades en ${c.zona||'Panamá'}. ¿Tienes listados disponibles para co-broking? Ofrezco ${c.comision_pct||'50/50 del total'}. ¿Coordinamos esta semana? 🤝`;
+  window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg));
+  toast('💼 Propuesta enviada a '+c.nombre);
+}
+
+function reporteMensualRed(){
+  const activos=redContacts.filter(c=>c.estado!=='Inactivo');
+  if(!activos.length){toast('Sin aliados en la red');return;}
+  const mes=new Date().toLocaleString('es',{month:'long'});
+  const zonas=[...new Set(redProps.map(p=>p.ubicacion||p.zona||'').filter(Boolean))].slice(0,3).join(', ')||'Panamá';
+  if(!confirm(`¿Enviar reporte de ${mes} a ${activos.length} aliados?`)) return;
+  let i=0;
+  function sendNext(){
+    if(i>=activos.length) return;
+    const c=activos[i++];
+    const num=(c.whatsapp||c.telefono||'').replace(/\D/g,'');
+    if(num){
+      const msg=`¡Hola ${c.nombre}! Reporte JAC Realty - ${mes} 📊\n\n🏠 ${redProps.length} propiedad(es) disponible(s) para co-broking\n📍 Zonas: ${zonas}\n🤝 Comisiones compartidas disponibles\n\n¿Tienes clientes interesados? ¡Con gusto coordinamos!\nJAC Realty · +507 64627763 · jacrealtypa.com`;
+      window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg));
+    }
+    if(i<activos.length) setTimeout(sendNext,1800);
+  }
+  sendNext();
+  toast('📊 Reporte mensual enviado...');
+}
+
+function felicitacionCierre(){
+  const cerrados=coBrokings.filter(c=>c.etapa==='Cerrado');
+  if(!cerrados.length){toast('Sin operaciones cerradas');return;}
+  const names=cerrados.map((c,i)=>`${i+1}. ${c.propiedad} · ${c.aliado_nombre||'–'}`).join('\n');
+  const idx=prompt(`Selecciona operación:\n\n${names}`);
+  if(!idx) return;
+  felicitacionCierreAliado(cerrados[+idx-1]);
+}
+
+function felicitacionCierreAliado(cb){
+  if(!cb||!cb.aliado_nombre) return;
+  const c=redContacts.find(x=>x.nombre===cb.aliado_nombre);
+  if(!c){toast('Aliado no encontrado');return;}
+  const num=(c.whatsapp||c.telefono||'').replace(/\D/g,'');
+  if(!num){toast('Sin número WA');return;}
+  const comVal=cb.precio&&cb.aliado_parte?'$'+(cb.precio*cb.aliado_parte/100).toLocaleString():`${cb.aliado_parte||'–'}%`;
+  const msg=`¡Felicitaciones ${c.nombre}! 🎉\n\nCerramos exitosamente: ${cb.propiedad}\n💰 Comisión para ti: ${comVal}\n\n¡Fue un placer trabajar juntos! Espero que sigamos colaborando.\nJAC Realty · J. Castro · +507 64627763`;
+  window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg));
+  toast('🎉 Felicitación enviada a '+c.nombre);
+}
+
 function deleteRedContact(nombre){
-  if(!confirm('¿Eliminar contacto de la red?')) return;
+  if(!confirm('¿Eliminar aliado de la red?')) return;
   const c=redContacts.find(x=>x.nombre===nombre);
   redContacts=redContacts.filter(x=>x.nombre!==nombre);
   if(sb&&c&&c._sbId) sb.from('red_inmobiliaria').delete().eq('id',c._sbId).then(()=>{});
-  renderRedInmo();toast('Contacto eliminado de la red');
+  renderRedInmo(); toast('Aliado eliminado');
 }
 
 function deleteRedProp(titleOrId){
@@ -4522,7 +4983,7 @@ function deleteRedProp(titleOrId){
   const p=redProps.find(x=>x.titulo===titleOrId||x.id===titleOrId);
   redProps=redProps.filter(x=>x.titulo!==titleOrId&&x.id!==titleOrId);
   if(sb&&p&&p._sbId) sb.from('propiedades_red').delete().eq('id',p._sbId).then(()=>{});
-  renderRedInmo();toast('Propiedad eliminada de la red');
+  renderRedInmo(); toast('Propiedad eliminada de la red');
 }
 
 // ============================================================
