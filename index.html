@@ -497,14 +497,14 @@ async function loadWebProps(){
   const empty=document.getElementById('web-props-empty');
   try{
     const [r1,r2]=await Promise.all([
-      fetch(`${_SB_URL}/rest/v1/propiedades?select=id,titulo,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos&estado=eq.Disponible&order=created_at.desc&limit=48`,
+      fetch(`${_SB_URL}/rest/v1/propiedades?select=id,titulo,tipo,operacion,corregimiento,distrito,precio,area_total,habitaciones,banos,estado,fotos&estado=eq.Disponible&order=created_at.desc&limit=48`,
         {headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}}),
-      fetch(`${_SB_URL}/rest/v1/propiedades_red?select=id,titulo,tipo_prop,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos&tipo=eq.mls&estado=eq.Disponible&order=created_at.desc&limit=48`,
+      fetch(`${_SB_URL}/rest/v1/propiedades_red?select=id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos&estado=eq.Disponible&order=created_at.desc&limit=48`,
         {headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}})
     ]);
     const [propias,mls]=await Promise.all([r1.json(),r2.json()]);
-    const propias2=(Array.isArray(propias)?propias:[]).map(p=>({...p,tipo:p.tipo,_src:'propia'}));
-    const mls2=(Array.isArray(mls)?mls:[]).map(p=>({...p,tipo:p.tipo_prop||p.tipo,_src:'mls'}));
+    const propias2=(Array.isArray(propias)?propias:[]).map(p=>({...p,tipo:p.tipo,zona:p.corregimiento||p.distrito||'Panamá',_src:'propia'}));
+    const mls2=(Array.isArray(mls)?mls:[]).map(p=>({...p,tipo:p.tipo_prop||p.tipo,zona:p.zona||'Panamá',_src:'mls'}));
     _webProps=[...propias2,...mls2];
     loading.style.display='none';
     // Update stats live count
