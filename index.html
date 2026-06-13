@@ -571,9 +571,9 @@ async function loadWebProps(){
   const empty=document.getElementById('web-props-empty');
   try{
     const [r1,r2]=await Promise.all([
-      fetch(`${_SB_URL}/rest/v1/propiedades?select=id,titulo,tipo,operacion,corregimiento,distrito,precio,area_total,habitaciones,banos,estado,fotos,descripcion&estado=eq.Disponible&order=created_at.desc&limit=100`,
+      fetch(`${_SB_URL}/rest/v1/propiedades?select=id,titulo,tipo,operacion,corregimiento,distrito,precio,area_total,area_construida,habitaciones,banos,estacionamientos,nivel,estado,fotos,descripcion,caracteristicas,notas&estado=eq.Disponible&order=created_at.desc&limit=100`,
         {headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}}),
-      fetch(`${_SB_URL}/rest/v1/propiedades_red?select=id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos,mls_code,descripcion&estado=eq.Disponible&order=created_at.desc&limit=${_mlsPageSize}&offset=0`,
+      fetch(`${_SB_URL}/rest/v1/propiedades_red?select=id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,area_construida,habitaciones,banos,estacionamientos,nivel,estado,fotos,mls_code,descripcion,caracteristicas,comision,agente,agencia,licencia_corredor,tel_corredor,email_corredor&estado=eq.Disponible&order=created_at.desc&limit=${_mlsPageSize}&offset=0`,
         {headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}})
     ]);
     const [propias,mls]=await Promise.all([r1.json(),r2.json()]);
@@ -801,7 +801,7 @@ async function loadMoreMLS(){
   if(btn){ btn.textContent='Cargando...'; btn.disabled=true; }
   try {
     const resp=await fetch(
-      `${_SB_URL}/rest/v1/propiedades_red?select=id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos,mls_code,descripcion&estado=eq.Disponible&order=created_at.desc&limit=${_mlsPageSize}&offset=${_mlsOffset}`,
+      `${_SB_URL}/rest/v1/propiedades_red?select=id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,area_construida,habitaciones,banos,estacionamientos,nivel,estado,fotos,mls_code,descripcion,caracteristicas,comision,agente,agencia,licencia_corredor,tel_corredor,email_corredor&estado=eq.Disponible&order=created_at.desc&limit=${_mlsPageSize}&offset=${_mlsOffset}`,
       {headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}}
     );
     const newMls=await resp.json();
@@ -839,11 +839,45 @@ function openWebPropModal(p){
 
   // Specs grid
   const specItems=[
-    p.habitaciones?`<div style="text-align:center;padding:14px 10px;background:#f5f3f1;border-radius:6px"><div style="font-size:22px;font-weight:600;color:#111">🛏 ${p.habitaciones}</div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#9B8E85;margin-top:3px">Habitaciones</div></div>`:'',
-    p.banos?`<div style="text-align:center;padding:14px 10px;background:#f5f3f1;border-radius:6px"><div style="font-size:22px;font-weight:600;color:#111">🚿 ${p.banos}</div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#9B8E85;margin-top:3px">Baños</div></div>`:'',
-    p.area_total?`<div style="text-align:center;padding:14px 10px;background:#f5f3f1;border-radius:6px"><div style="font-size:20px;font-weight:600;color:#111">📐 ${p.area_total}</div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#9B8E85;margin-top:3px">m²</div></div>`:'',
-    p.mls_code?`<div style="text-align:center;padding:14px 10px;background:rgba(196,30,58,.06);border:1px solid rgba(196,30,58,.2);border-radius:6px"><div style="font-size:13px;font-weight:700;color:#C41E3A">${p.mls_code}</div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#9B8E85;margin-top:3px">Código MLS</div></div>`:''
+    p.habitaciones?`<div style="text-align:center;padding:12px 8px;background:#f5f3f1;border-radius:6px"><div style="font-size:20px;font-weight:600;color:#111">🛏 ${p.habitaciones}</div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#9B8E85;margin-top:3px">Habitaciones</div></div>`:'',
+    p.banos?`<div style="text-align:center;padding:12px 8px;background:#f5f3f1;border-radius:6px"><div style="font-size:20px;font-weight:600;color:#111">🚿 ${p.banos}</div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#9B8E85;margin-top:3px">Baños</div></div>`:'',
+    p.area_total?`<div style="text-align:center;padding:12px 8px;background:#f5f3f1;border-radius:6px"><div style="font-size:18px;font-weight:600;color:#111">📐 ${p.area_total} m²</div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#9B8E85;margin-top:3px">Área Total</div></div>`:'',
+    p.area_construida?`<div style="text-align:center;padding:12px 8px;background:#f5f3f1;border-radius:6px"><div style="font-size:18px;font-weight:600;color:#111">🏗 ${p.area_construida} m²</div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#9B8E85;margin-top:3px">Área Construida</div></div>`:'',
+    p.estacionamientos?`<div style="text-align:center;padding:12px 8px;background:#f5f3f1;border-radius:6px"><div style="font-size:20px;font-weight:600;color:#111">🚗 ${p.estacionamientos}</div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#9B8E85;margin-top:3px">Estacionamientos</div></div>`:'',
+    p.nivel?`<div style="text-align:center;padding:12px 8px;background:#f5f3f1;border-radius:6px"><div style="font-size:20px;font-weight:600;color:#111">🏢 ${p.nivel}</div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#9B8E85;margin-top:3px">Piso / Nivel</div></div>`:'',
+    p.mls_code?`<div style="text-align:center;padding:12px 8px;background:rgba(196,30,58,.06);border:1px solid rgba(196,30,58,.2);border-radius:6px"><div style="font-size:13px;font-weight:700;color:#C41E3A">${p.mls_code}</div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#9B8E85;margin-top:3px">Código MLS</div></div>`:''
   ].filter(Boolean);
+
+  // Características / amenidades
+  let caracHtml='';
+  if(p.caracteristicas){
+    let carac=p.caracteristicas;
+    if(typeof carac==='string'){try{carac=JSON.parse(carac);}catch(e){carac=carac.split(',').map(s=>s.trim()).filter(Boolean);}}
+    if(Array.isArray(carac)&&carac.length){
+      caracHtml=`<div style="border-top:1px solid #E8E3DF;padding-top:14px;margin-bottom:16px">
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#9B8E85;margin-bottom:10px;font-weight:700">✨ Características</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">${carac.map(c=>`<span style="background:#f5f3f1;border:1px solid #E8E3DF;padding:4px 10px;border-radius:20px;font-size:11px;color:#555">✓ ${c}</span>`).join('')}</div>
+      </div>`;
+    }
+  }
+
+  // MLS agent contact block
+  let agentHtml='';
+  if(p._src==='mls'&&(p.agente||p.agencia)){
+    const agWa=p.tel_corredor?(p.tel_corredor.replace(/\D/g,'')):'';
+    const agMsg=encodeURIComponent(`Hola, vi la propiedad *${p.titulo||p.mls_code}* en JAC Realty y quisiera más información.`);
+    agentHtml=`<div style="background:#f8f7f5;border:1px solid #E8E3DF;border-radius:6px;padding:13px 15px;margin-bottom:14px">
+      <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#9B8E85;margin-bottom:8px;font-weight:700">🏢 Agente MLS</div>
+      <div style="font-size:13px;font-weight:600;color:#111">${p.agente||''}</div>
+      ${p.agencia?`<div style="font-size:12px;color:#6b6b6b">${p.agencia}</div>`:''}
+      ${p.licencia_corredor?`<div style="font-size:11px;color:#9B8E85">Lic. ${p.licencia_corredor}</div>`:''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        ${agWa?`<a href="https://wa.me/${agWa}?text=${agMsg}" target="_blank" style="font-size:11px;background:#25D366;color:#fff;padding:5px 12px;border-radius:4px;text-decoration:none;font-weight:600">💬 WA Agente</a>`:''}
+        ${p.email_corredor?`<a href="mailto:${p.email_corredor}" style="font-size:11px;background:#f5f3f1;border:1px solid #ddd;color:#333;padding:5px 12px;border-radius:4px;text-decoration:none">✉ ${p.email_corredor}</a>`:''}
+        ${p.comision?`<span style="font-size:11px;background:rgba(196,30,58,.08);color:#C41E3A;padding:5px 12px;border-radius:4px;font-weight:600">Co-broke: ${p.comision}%</span>`:''}
+      </div>
+    </div>`;
+  }
 
   const modal=document.getElementById('propModal');
   modal.querySelector('.pm-inner').innerHTML=`
@@ -869,7 +903,9 @@ function openWebPropModal(p){
         <span style="font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:300;color:#111">${precio}</span>
         ${p.operacion==='Alquiler'?'<span style="font-size:13px;color:#9B8E85">/ mes</span>':''}
       </div>
-      ${p.descripcion?`<div style="border-top:1px solid #E8E3DF;padding-top:16px;margin-bottom:20px"><p style="font-size:13px;color:#6b6b6b;line-height:1.85">${p.descripcion}</p></div>`:''}
+      ${p.descripcion?`<div style="border-top:1px solid #E8E3DF;padding-top:16px;margin-bottom:16px"><p style="font-size:13px;color:#6b6b6b;line-height:1.85">${p.descripcion}</p></div>`:''}
+      ${caracHtml}
+      ${agentHtml}
       <div style="background:#f8f7f5;border:1px solid rgba(196,30,58,.18);border-left:3px solid #C41E3A;padding:13px 16px;border-radius:4px;margin-bottom:18px;display:flex;align-items:center;gap:10px">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C41E3A" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         <div>
