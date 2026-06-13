@@ -441,8 +441,12 @@ footer{background:#0d0d0d;padding:70px 60px 0}
         <option>Apartamento</option><option>Casa</option><option>Penthouse</option>
         <option>Local Comercial</option><option>Oficina</option><option>Terreno</option>
       </select>
-      <input id="web-filter-zona" list="zona-options" oninput="webFilterProps()" onkeydown="if(event.key==='Enter')webFilterProps()" placeholder="🔍 Zona / Corregimiento..." class="wf-inp" style="width:220px" autocomplete="off" />
-      <datalist id="zona-options"></datalist>
+      <select id="web-filter-zona" onchange="webFilterProps();_cascadeDistritos()" class="wf-sel">
+        <option value="">📍 Corregimiento / Zona</option>
+      </select>
+      <select id="web-filter-distrito" onchange="webFilterProps()" class="wf-sel">
+        <option value="">🗺 Distrito</option>
+      </select>
       <select id="web-filter-src" onchange="webFilterProps()" class="wf-sel">
         <option value="">⭐ Todas las fuentes</option>
         <option value="propia">🏆 Exclusivas JAC</option>
@@ -543,17 +547,70 @@ async function loadWebProps(){
   }
 }
 
+// Known Panama districts for matching against MLS zona strings
+const _DISTRITOS_PA=['Panamá','San Miguelito','Arraiján','La Chorrera','San Carlos','Chame','Capira','Balboa',
+  'Chepo','Taboga','Chimán','David','Boquete','Bugaba','Barú','Chorrera','Colón','Portobelo','Santa Isabel',
+  'Chagres','Penonomé','Natá','Antón','La Pintada','Chitré','Las Tablas','Los Santos','Santiago','Soná',
+  'Bocas del Toro','Changuinola','Almirante','La Chorrera'];
+const _CORREGS_EXTRA=['Costa del Este','Punta Pacífica','Casco Antiguo','San Francisco','Paitilla','Marbella',
+  'Bella Vista','El Cangrejo','Obarrio','Betania','Río Abajo','Juan Díaz','Albrook','Clayton','Ancón',
+  'Calidonia','Santa Ana','La Exposición','Curundú','El Chorrillo','Pueblo Nuevo','Parque Lefevre',
+  'Las Cumbres','Chilibre','Tocumen','Pedregal','Pacora','Brisas del Golf','Villa Zaita','El Dorado',
+  'Punta Paitilla','La Cresta','Chanis','Condado del Rey','Villa del Rey','Las Praderas'];
+
 function _populateZonasDatalist(){
-  // Extract unique zona values from loaded props and sort alphabetically
-  const dl=document.getElementById('zona-options');
-  if(!dl) return;
-  const raw=_webProps.map(p=>p.zona||'').filter(z=>z&&z!=='Panamá'&&z.length>2);
-  // For MLS zones (full addresses like "Calle X, Panamá"), extract the corregimiento/city part
-  const zonas=[...new Set(raw.map(z=>{
-    // If it's a comma-separated address, clean & use full string (searchable)
-    return z.replace(/\s{2,}/g,' ').trim();
-  }))].sort();
-  dl.innerHTML=zonas.map(z=>`<option value="${z.replace(/"/g,'&quot;')}"></option>`).join('');
+  const selZ=document.getElementById('web-filter-zona');
+  const selD=document.getElementById('web-filter-distrito');
+  if(!selZ||!selD) return;
+
+  // --- Corregimientos: collect from loaded props ---
+  const rawZonas=_webProps.map(p=>p.zona||'').filter(z=>z&&z.length>2);
+  // For MLS full addresses (e.g. "Calle 50, San Francisco, Panamá"),
+  // split by comma and grab each meaningful fragment
+  const frags=new Set();
+  rawZonas.forEach(z=>{
+    z.split(',').forEach(part=>{
+      const clean=part.replace(/\d+/g,'').replace(/calle|ave|avenida|carretera|con|entre|y\s/gi,'').trim();
+      if(clean.length>3&&clean.length<50) frags.add(clean.trim());
+    });
+    // Also add full zona as-is for exact-match filtering
+    frags.add(z.trim());
+  });
+  // Add known corregimientos for discoverability
+  _CORREGS_EXTRA.forEach(c=>frags.add(c));
+  const zonasSorted=[...frags].filter(z=>z.length>2).sort((a,b)=>a.localeCompare(b,'es'));
+
+  // Rebuild zona select (keep first placeholder option)
+  selZ.innerHTML='<option value="">📍 Corregimiento / Zona</option>';
+  zonasSorted.forEach(z=>{
+    const o=document.createElement('option');
+    o.value=z; o.textContent=z;
+    selZ.appendChild(o);
+  });
+
+  // --- Distritos: collect from loaded props ---
+  const distritos=new Set();
+  _webProps.forEach(p=>{
+    if(p.distrito) distritos.add(p.distrito);
+    // Try to match known districts in MLS zona string
+    if(p.zona){
+      const zl=p.zona.toLowerCase();
+      _DISTRITOS_PA.forEach(d=>{ if(zl.includes(d.toLowerCase())) distritos.add(d); });
+    }
+  });
+  const distritosSorted=[...distritos].sort((a,b)=>a.localeCompare(b,'es'));
+  selD.innerHTML='<option value="">🗺 Distrito</option>';
+  distritosSorted.forEach(d=>{
+    const o=document.createElement('option');
+    o.value=d; o.textContent=d;
+    selD.appendChild(o);
+  });
+}
+
+function _cascadeDistritos(){
+  // When corregimiento changes, pre-filter distritos to those relevant
+  // (for now just trigger filter refresh)
+  webFilterProps();
 }
 
 function webRenderProps(list){
@@ -575,7 +632,7 @@ function webRenderProps(list){
     const isMLS=p._src==='mls';
     const waMsg=encodeURIComponent(`Hola JAC Realty 🏠 Me interesa la propiedad:\n*${p.titulo||'Propiedad en '+p.zona}*\n📍 ${p.zona||'Panamá'} · ${p.tipo||''}\n💰 ${precio}\n\n¿Pueden darme más información?`);
     return `<div onclick="openWebPropModal(_currentList[${i}])" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .25s,border-color .25s" onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='rgba(196,30,58,.4)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(255,255,255,.07)'">
-      <div style="height:210px;position:relative;overflow:hidden;background:#1a1a1a"><img src="${img}" loading="lazy" referrerpolicy="no-referrer" alt="${p.titulo||''}" onerror="this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=700&q=80'" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s">
+      <div style="aspect-ratio:16/9;position:relative;overflow:hidden;background:#1a1a1a"><img src="${img}" loading="lazy" referrerpolicy="no-referrer" alt="${p.titulo||''}" onerror="this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=700&q=80'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;transition:transform .3s">
         <div style="position:absolute;top:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap">
           ${opLabel?`<span style="background:#C41E3A;color:#fff;font-size:9px;font-weight:800;padding:4px 11px;border-radius:3px;letter-spacing:1.5px">${opLabel}</span>`:''}
           ${p.tipo?`<span style="background:rgba(0,0,0,.72);color:#fff;font-size:9px;padding:4px 10px;border-radius:3px;letter-spacing:.5px">${p.tipo}</span>`:''}
@@ -609,20 +666,28 @@ function webRenderProps(list){
 function webFilterProps(){
   const op=document.getElementById('web-filter-op').value;
   const tipo=document.getElementById('web-filter-tipo').value;
-  const zona=document.getElementById('web-filter-zona').value.toLowerCase().trim();
+  const zona=(document.getElementById('web-filter-zona')||{}).value||'';
+  const distrito=(document.getElementById('web-filter-distrito')||{}).value||'';
   const src=document.getElementById('web-filter-src').value;
   const precio=document.getElementById('web-filter-precio').value;
   let list=_webProps;
   if(op) list=list.filter(p=>(p.operacion||'').toLowerCase()===op.toLowerCase());
   if(tipo) list=list.filter(p=>(p.tipo||'')===tipo);
-  if(zona) list=list.filter(p=>(p.zona||'').toLowerCase().includes(zona));
+  if(zona){
+    const zl=zona.toLowerCase();
+    list=list.filter(p=>(p.zona||'').toLowerCase().includes(zl)||(p.corregimiento||'').toLowerCase().includes(zl));
+  }
+  if(distrito){
+    const dl=distrito.toLowerCase();
+    list=list.filter(p=>(p.distrito||'').toLowerCase().includes(dl)||(p.zona||'').toLowerCase().includes(dl));
+  }
   if(src) list=list.filter(p=>p._src===src);
   if(precio){ const max=Number(precio); list=list.filter(p=>!p.precio||Number(p.precio)<=max); }
   webRenderProps(list);
-  // When filtering, hide load-more (filter works on loaded set)
+  const hasFilter=op||tipo||zona||distrito||src||precio;
   const lm=document.getElementById('web-load-more');
-  if(lm) lm.style.display=(op||tipo||zona||src||precio)?'none':'';
-  if(!op&&!tipo&&!zona&&!src&&!precio) updateLoadMoreBtn();
+  if(lm) lm.style.display=hasFilter?'none':'';
+  if(!hasFilter) updateLoadMoreBtn();
 }
 
 function updateLoadMoreBtn(){
@@ -696,7 +761,7 @@ function openWebPropModal(p){
   modal.querySelector('.pm-inner').innerHTML=`
     <button onclick="closePropModal()" style="position:absolute;top:14px;right:14px;z-index:10;background:rgba(0,0,0,.55);color:white;border:none;width:34px;height:34px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
     <div style="position:relative">
-      <img id="pmMainImg" src="${img}" style="width:100%;height:300px;object-fit:cover;display:block" alt="${p.titulo||''}" onerror="this.src='${fallback}'">
+      <img id="pmMainImg" src="${img}" referrerpolicy="no-referrer" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block" alt="${p.titulo||''}" onerror="this.src='${fallback}'">
       <div style="position:absolute;top:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap">
         ${opUpper?`<span style="background:#C41E3A;color:#fff;font-size:10px;font-weight:700;padding:5px 12px;border-radius:4px;letter-spacing:1px">${opUpper}</span>`:''}
         ${tipo?`<span style="background:rgba(0,0,0,.72);color:#fff;font-size:10px;padding:5px 10px;border-radius:4px">${tipo}</span>`:''}
