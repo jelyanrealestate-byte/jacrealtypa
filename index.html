@@ -149,7 +149,7 @@ section{padding:100px 60px}
 
 /* BLOG */
 .blog{background:var(--gray)}
-.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.bgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px}
 .bcard{background:white;overflow:hidden;transition:box-shadow .3s}
 .bcard:hover{box-shadow:0 8px 40px rgba(0,0,0,.08)}
 .bimg{height:210px;background:var(--taupe-light);overflow:hidden}
@@ -158,8 +158,8 @@ section{padding:100px 60px}
 .bbody{padding:26px 26px 30px}
 .bcat{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--red);margin-bottom:9px}
 .btit{font-family:var(--serif);font-size:20px;font-weight:400;color:var(--black);line-height:1.35;margin-bottom:12px}
-.bexc{font-size:13px;color:var(--taupe);line-height:1.82;max-height:0;overflow:hidden;transition:max-height .5s ease,opacity .4s;opacity:0;margin-bottom:0}
-.bcard.open .bexc{max-height:400px;opacity:1;margin-bottom:14px}
+.bexc{font-size:13px;color:var(--taupe);line-height:1.82;max-height:0;overflow:hidden;transition:max-height 1.2s ease,opacity .6s;opacity:0;margin-bottom:0}
+.bcard.open .bexc{max-height:3200px;opacity:1;margin-bottom:14px}
 .bmeta{display:flex;align-items:center;justify-content:space-between}
 .bdate{font-size:11px;color:var(--taupe)}
 .btog{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--red);cursor:pointer;background:none;border:none;font-family:var(--sans);font-weight:500;display:flex;align-items:center;gap:5px;transition:gap .3s}
@@ -381,7 +381,48 @@ footer{background:#0d0d0d;padding:70px 60px 0}
       </div>
       <div class="hsb-field">
         <label class="hsb-label">Zona / Sector</label>
-        <input class="hsb-input" id="hsb-zona" placeholder="Ej: Casco Antiguo, Marbella…" onkeydown="if(event.key==='Enter')heroSearch()">
+        <select class="hsb-select" id="hsb-zona">
+          <option value="">Todas las zonas</option>
+          <optgroup label="Ciudad de Panamá">
+            <option>Casco Antiguo</option><option>San Felipe</option><option>Santa Ana</option>
+            <option>Calidonia</option><option>La Exposición</option><option>El Chorrillo</option>
+            <option>Curundú</option><option>Bella Vista</option><option>Marbella</option>
+            <option>Paitilla</option><option>Punta Paitilla</option><option>Punta Pacífica</option>
+            <option>San Francisco</option><option>El Cangrejo</option><option>Obarrio</option>
+            <option>Betania</option><option>Río Abajo</option><option>Pueblo Nuevo</option>
+            <option>Parque Lefevre</option><option>Juan Díaz</option><option>Tocumen</option>
+            <option>Pacora</option><option>Pedregal</option><option>Las Cumbres</option>
+            <option>Chilibre</option><option>Alcalde Díaz</option><option>Las Mañanitas</option>
+            <option>24 de Diciembre</option><option>Ancón</option><option>Clayton</option>
+            <option>Albrook</option><option>Amador</option><option>Costa del Este</option>
+            <option>Chanis</option><option>El Dorado</option><option>La Cresta</option>
+            <option>Villa del Rey</option><option>Condado del Rey</option><option>Brisas del Golf</option>
+          </optgroup>
+          <optgroup label="San Miguelito">
+            <option>Amelia Denis de Icaza</option><option>Belisario Frías</option>
+            <option>Belisario Porras</option><option>José Domingo Espinar</option>
+            <option>Mateo Iturralde</option><option>Rufina Alfaro</option>
+            <option>Victoriano Lorenzo</option><option>Omar Torrijos</option>
+          </optgroup>
+          <optgroup label="Panamá Oeste">
+            <option>Vista Alegre</option><option>Arraiján Cabecera</option>
+            <option>Burunga</option><option>Cerro Silvestre</option><option>Veracruz</option>
+            <option>La Chorrera</option><option>Barrio Balboa</option><option>Guadalupe</option>
+            <option>Hormiguero</option><option>Playa Leona</option>
+          </optgroup>
+          <optgroup label="Playas y Suburbios">
+            <option>San Carlos</option><option>Chame</option><option>Gorgona</option>
+            <option>Punta Chame</option><option>Coronado</option><option>Capira</option>
+            <option>Chepo</option><option>Taboga</option>
+          </optgroup>
+          <optgroup label="Interior del País">
+            <option>David</option><option>Boquete</option><option>Volcán</option>
+            <option>Cerro Punta</option><option>Chitré</option><option>Las Tablas</option>
+            <option>Los Santos</option><option>Santiago</option><option>Penonomé</option>
+            <option>Antón</option><option>El Valle de Antón</option><option>Colón</option>
+            <option>Bocas del Toro</option><option>Changuinola</option>
+          </optgroup>
+        </select>
       </div>
       <div class="hsb-field">
         <label class="hsb-label">Precio Máximo</label>
@@ -617,9 +658,42 @@ function _populateZonasDatalist(){
   });
 }
 
+// Map corregimientos to their parent district for smart cascade
+const _CORREG_TO_DIST = {
+  'Casco Antiguo':'Panamá','San Felipe':'Panamá','Santa Ana':'Panamá','Calidonia':'Panamá',
+  'La Exposición':'Panamá','El Chorrillo':'Panamá','Curundú':'Panamá','Bella Vista':'Panamá',
+  'Marbella':'Panamá','Paitilla':'Panamá','Punta Paitilla':'Panamá','Punta Pacífica':'Panamá',
+  'San Francisco':'Panamá','El Cangrejo':'Panamá','Obarrio':'Panamá','Betania':'Panamá',
+  'Río Abajo':'Panamá','Pueblo Nuevo':'Panamá','Parque Lefevre':'Panamá','Juan Díaz':'Panamá',
+  'Tocumen':'Panamá','Pacora':'Panamá','Pedregal':'Panamá','Las Cumbres':'Panamá',
+  'Chilibre':'Panamá','Alcalde Díaz':'Panamá','Las Mañanitas':'Panamá','24 de Diciembre':'Panamá',
+  'Ancón':'Panamá','Clayton':'Panamá','Albrook':'Panamá','Amador':'Panamá',
+  'Costa del Este':'Panamá','Chanis':'Panamá','El Dorado':'Panamá','La Cresta':'Panamá',
+  'Villa del Rey':'Panamá','Condado del Rey':'Panamá','Brisas del Golf':'Panamá',
+  'Amelia Denis de Icaza':'San Miguelito','Belisario Frías':'San Miguelito',
+  'Belisario Porras':'San Miguelito','José Domingo Espinar':'San Miguelito',
+  'Mateo Iturralde':'San Miguelito','Rufina Alfaro':'San Miguelito',
+  'Victoriano Lorenzo':'San Miguelito','Omar Torrijos':'San Miguelito',
+  'Vista Alegre':'Arraiján','Arraiján Cabecera':'Arraiján','Burunga':'Arraiján',
+  'Cerro Silvestre':'Arraiján','Veracruz':'Arraiján',
+  'La Chorrera':'La Chorrera','Barrio Balboa':'La Chorrera','Guadalupe':'La Chorrera',
+  'Hormiguero':'La Chorrera','Playa Leona':'La Chorrera',
+  'San Carlos':'San Carlos','Chame':'Chame','Gorgona':'Chame','Punta Chame':'Chame',
+  'Coronado':'San Carlos','Capira':'Capira','Chepo':'Chepo','Taboga':'Taboga',
+  'David':'David','Boquete':'Boquete','Volcán':'Bugaba','Cerro Punta':'Bugaba',
+  'Chitré':'Chitré','Las Tablas':'Las Tablas','Los Santos':'Los Santos',
+  'Santiago':'Santiago','Penonomé':'Penonomé','Antón':'Antón',
+  'El Valle de Antón':'Antón','Colón':'Colón','Bocas del Toro':'Bocas del Toro',
+  'Changuinola':'Changuinola'
+};
 function _cascadeDistritos(){
-  // When corregimiento changes, pre-filter distritos to those relevant
-  // (for now just trigger filter refresh)
+  const zona=document.getElementById('web-filter-zona').value;
+  if(zona && _CORREG_TO_DIST[zona]){
+    const selD=document.getElementById('web-filter-distrito');
+    const dist=_CORREG_TO_DIST[zona];
+    const opt=Array.from(selD.options).find(o=>o.value===dist);
+    if(opt) selD.value=dist;
+  }
   webFilterProps();
 }
 
@@ -827,13 +901,21 @@ function heroSearch(){
   if(op) document.getElementById('web-filter-op').value=op;
   if(tipo) document.getElementById('web-filter-tipo').value=tipo;
   if(precio) document.getElementById('web-filter-precio').value=precio;
-  // Zona is a text input — try to match in select options, else use text search directly
-  _heroZonaText=zona;
+  // Zona is now a select — try to match against zona filter, then distrito filter
+  _heroZonaText='';
   if(zona){
-    const sel=document.getElementById('web-filter-zona');
-    const opts=Array.from(sel.options);
-    const match=opts.find(o=>o.value.toLowerCase()===zona.toLowerCase()||o.text.toLowerCase().includes(zona.toLowerCase()));
-    if(match) sel.value=match.value; else sel.value=''; // clear select, text search handles it
+    const selZ=document.getElementById('web-filter-zona');
+    const selD=document.getElementById('web-filter-distrito');
+    const optsZ=Array.from(selZ.options);
+    const matchZ=optsZ.find(o=>o.value.toLowerCase()===zona.toLowerCase()||o.text.toLowerCase().includes(zona.toLowerCase()));
+    if(matchZ){selZ.value=matchZ.value;}
+    else{
+      // Try distrito match
+      const optsD=Array.from(selD.options);
+      const matchD=optsD.find(o=>o.value.toLowerCase()===zona.toLowerCase()||o.text.toLowerCase().includes(zona.toLowerCase()));
+      if(matchD) selD.value=matchD.value;
+      else _heroZonaText=zona; // fallback to text search
+    }
   }
   document.getElementById('propiedades-mls').scrollIntoView({behavior:'smooth',block:'start'});
   setTimeout(()=>webFilterProps(),400);
@@ -887,12 +969,127 @@ document.addEventListener('DOMContentLoaded',()=>loadWebProps());
 <section class="blog" id="blog">
   <div class="sh"><span class="sey">Conocimiento e Información</span><h2 class="st">Blog Inmobiliario</h2><p class="ss">Artículos relevantes sobre el mercado inmobiliario de Panamá, tendencias, legislación y consejos de inversión.</p><div class="div"></div></div>
   <div class="bgrid">
-    <div class="bcard" id="b1"><div class="bimg"><img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&q=80" alt="Mercado 2025" loading="lazy"></div><div class="bbody"><div class="bcat">Mercado · Tendencias</div><h3 class="btit">El Mercado Inmobiliario en Panamá 2025: Perspectivas y Oportunidades</h3><p class="bexc">El mercado inmobiliario panameño continúa mostrando solidez y resiliencia. Con un crecimiento del PIB estimado en 4.5% para 2025, la demanda de propiedades residenciales de mediana y alta gama mantiene su tendencia positiva. Zonas como Costa del Este, San Francisco y el Casco Antiguo lideran la apreciación de valor, con incrementos de hasta el 8% anual.<br><br>La llegada de empresas multinacionales y el fortalecimiento del hub logístico del Canal siguen impulsando la demanda de oficinas y propiedades corporativas. Para inversores, los segmentos de alquiler a corto plazo en Casco Antiguo y Amador han mostrado rentabilidades del 7% al 12% anual, superando ampliamente los depósitos bancarios tradicionales.</p><div class="bmeta"><span class="bdate">15 Mayo 2025</span><button class="btog" onclick="tog('b1',this)">Leer más <span class="arr">→</span></button></div></div></div>
-    <div class="bcard" id="b2"><div class="bimg"><img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&q=80" alt="Guía extranjeros" loading="lazy"></div><div class="bbody"><div class="bcat">Guías · Legal</div><h3 class="btit">Guía Completa para Comprar una Propiedad en Panamá como Extranjero</h3><p class="bexc">Panamá es uno de los destinos más atractivos del mundo para la inversión inmobiliaria internacional. Los extranjeros tienen los mismos derechos que los ciudadanos panameños para adquirir bienes raíces. El proceso incluye promesa de compraventa (5-10% depósito), due diligence legal y escritura ante notario.<br><br>Costos típicos de cierre: 2% impuesto de transferencia, 0.1-0.3% honorarios notariales, $300-600 registro público y 1-2% honorarios de abogado. Los extranjeros pueden obtener residencia permanente invirtiendo desde $300,000 USD. Siempre trabaje con un agente certificado (Junta Técnica) y abogado independiente.</p><div class="bmeta"><span class="bdate">28 Abril 2025</span><button class="btog" onclick="tog('b2',this)">Leer más <span class="arr">→</span></button></div></div></div>
-    <div class="bcard" id="b3"><div class="bimg"><img src="https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=600&q=80" alt="ROI Inversión" loading="lazy"></div><div class="bbody"><div class="bcat">Inversión · Finanzas</div><h3 class="btit">¿Cómo Calcular el Retorno de tu Inversión Inmobiliaria en Panamá?</h3><p class="bexc">El ROI inmobiliario en Panamá debe contemplar varios factores. Apartamentos de 1-2 habitaciones en áreas premium generan rentas de $800 a $2,500/mes, con rendimientos brutos del 5% al 9%. Para el ROI neto, descuente: impuesto sobre la renta del alquiler (15-25%), mantenimiento (1-2% anual), honorarios de administración (8-12%) y seguros.<br><br>Zonas de alto rendimiento: Casco Antiguo (alquiler vacacional, 8-12% bruto), Vía España (corporativo, 7-9%), Santa Ana (clase media, 8-10%). La apreciación histórica es del 3-7% anual en zonas consolidadas.</p><div class="bmeta"><span class="bdate">10 Abril 2025</span><button class="btog" onclick="tog('b3',this)">Leer más <span class="arr">→</span></button></div></div></div>
-    <div class="bcard" id="b4"><div class="bimg"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80" alt="Zonas Panamá" loading="lazy"></div><div class="bbody"><div class="bcat">Zonas · Lifestyle</div><h3 class="btit">Las 5 Mejores Zonas para Vivir en Ciudad de Panamá en 2025</h3><p class="bexc">1) CASCO ANTIGUO: Patrimonio Mundial UNESCO. Ideal para cultura y comunidad cosmopolita. Desde $180,000. 2) COSTA DEL ESTE: Corredor financiero moderno, malls y colegios internacionales. Desde $250,000. 3) PUNTA PACÍFICA: Mayor precio/m², rascacielos frente al mar. 4) SAN FRANCISCO: Equilibrio perfecto entre ubicación y precio accesible, alta demanda. 5) CORONADO / LAS CUMBRES: Opciones suburbanas con más espacio y calidad de vida para familias.</p><div class="bmeta"><span class="bdate">2 Abril 2025</span><button class="btog" onclick="tog('b4',this)">Leer más <span class="arr">→</span></button></div></div></div>
-    <div class="bcard" id="b5"><div class="bimg"><img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&q=80" alt="Ley bienes raices" loading="lazy"></div><div class="bbody"><div class="bcat">Legal · Regulación</div><h3 class="btit">Todo sobre la Ley de Bienes Raíces en Panamá — Ley 84 de 2013</h3><p class="bexc">La actividad de corretaje está regulada por la Ley 84 de 2013. Todos los agentes deben estar inscritos en la Junta Técnica de Bienes Raíces y renovar su licencia cada 3 años. La comisión estándar varía entre 3% y 5% del valor de la transacción. En arrendamientos, equivale típicamente a un mes de alquiler.<br><br>Los contratos deben registrarse en el Registro Público. El Impuesto de Transferencia es del 2%. Las propiedades nuevas disfrutan de exoneración del impuesto de inmueble por 20 años bajo la Ley de Vivienda.</p><div class="bmeta"><span class="bdate">20 Marzo 2025</span><button class="btog" onclick="tog('b5',this)">Leer más <span class="arr">→</span></button></div></div></div>
-    <div class="bcard" id="b6"><div class="bimg"><img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&q=80" alt="Hipotecas Panama" loading="lazy"></div><div class="bbody"><div class="bcat">Financiamiento · Hipotecas</div><h3 class="btit">Opciones de Financiamiento Hipotecario en Panamá: Bancos y Tasas 2025</h3><p class="bexc">Tasas actuales: 5.5% a 7.5% anual en dólares. Principales prestamistas: Banco General (desde 5.75%), BAC Credomatic, Banistmo, Global Bank y Multibank. Requisitos: enganche del 10-20% para vivienda principal (30% para inversión), ingresos demostrables 3-4x la cuota, historial crediticio limpio.<br><br>Plazos de 15 a 30 años. Extranjeros pueden acceder con documentación migratoria en regla (enganche mayor, 20-30%). Líneas especiales FHIS para compradores primerizos disponibles.</p><div class="bmeta"><span class="bdate">5 Marzo 2025</span><button class="btog" onclick="tog('b6',this)">Leer más <span class="arr">→</span></button></div></div></div>
+    <!-- BLOG CARD 1: COMPRADORES -->
+    <div class="bcard" id="b1">
+      <div class="bimg"><img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=700&q=80" alt="Guía Compradores Panamá 2025" loading="lazy"></div>
+      <div class="bbody">
+        <div class="bcat">🏠 Compradores · Guía Completa 2025</div>
+        <h3 class="btit">Todo lo que necesitas saber para comprar una propiedad en Panamá</h3>
+        <p class="bexc">
+          <strong>¿Por dónde empezar?</strong> Comprar una propiedad es una de las decisiones más importantes de tu vida. En Panamá, el proceso es seguro y bien regulado — pero conocerlo a fondo te ahorra tiempo y dinero.<br><br>
+          <strong>📋 El Proceso Paso a Paso:</strong><br>
+          <strong>1. Define tu presupuesto real.</strong> El precio de lista no es el costo total. Suma: precio de compra + 2% impuesto de transferencia + 0.5-1% gastos notariales + honorarios de abogado (1-2%) + registro público ($300–600). Para propiedades financiadas, agrega el enganche (mínimo 10-20%).<br><br>
+          <strong>2. Elige la zona correcta para ti.</strong> ¿Trabajo en el corredor bancario? Considera San Francisco, Obarrio o Costa del Este. ¿Buscas tranquilidad y espacio? Las Cumbres, Altos de Chilibre o La Chorrera. ¿Inversión o lifestyle urbano? Casco Antiguo, Marbella o Punta Pacífica. ¿Playa accesible? Gorgona, Coronado o Chame.<br><br>
+          <strong>3. Verifica el estado legal de la propiedad.</strong> Pide el certificado de libertad de gravamen del Registro Público. Confirma que no tenga hipotecas, embargos ni deudas de mantenimiento. Un abogado independiente es imprescindible para revisar la escritura y el contrato de promesa.<br><br>
+          <strong>4. La Promesa de Compraventa.</strong> Este contrato se firma con un depósito del 5-10% del precio. Establece condiciones, plazos y penalidades. Si el vendedor incumple, te devuelve el doble del depósito. Si tú incumples, pierdes el depósito. Léalo con su abogado antes de firmar.<br><br>
+          <strong>5. Financiamiento hipotecario.</strong> Los principales bancos ofrecen tasas del 5.5% al 7.5% anual en dólares, plazos de 15 a 30 años. Banco General, BAC, Banistmo, Global Bank y Multibank son los más activos en hipotecas. Extranjeros también pueden calificar con documentación migratoria en regla.<br><br>
+          <strong>6. Propiedades nuevas vs. usadas.</strong> Las propiedades nuevas gozan de exoneración del impuesto de inmueble por 20 años (Ley de Vivienda). Las usadas pueden negociarse mejor en precio pero requieren más due diligence técnico. Siempre visita la propiedad en diferentes momentos del día.<br><br>
+          <strong>💡 Consejo JAC Realty:</strong> Trabajar con un agente certificado (Licencia Junta Técnica de Bienes Raíces) te da acceso al inventario completo del MLS, asesoría legal de primer nivel y poder de negociación. Nuestros honorarios en compra los paga el vendedor — para ti es gratis contar con representación profesional.
+        </p>
+        <div class="bmeta"><span class="bdate">Actualizado Junio 2025</span><button class="btog" onclick="tog('b1',this)">Leer guía completa <span class="arr">→</span></button></div>
+      </div>
+    </div>
+
+    <!-- BLOG CARD 2: VENDEDORES -->
+    <div class="bcard" id="b2">
+      <div class="bimg"><img src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=700&q=80" alt="Guía Vendedores Panamá 2025" loading="lazy"></div>
+      <div class="bbody">
+        <div class="bcat">🔑 Vendedores · Estrategia de Venta 2025</div>
+        <h3 class="btit">Cómo vender tu propiedad al mejor precio y en el menor tiempo posible</h3>
+        <p class="bexc">
+          <strong>El mercado te da la oportunidad — la preparación te da el precio.</strong> Vender bien no es solo poner un cartel. Es estrategia, presentación, precio correcto y el canal adecuado.<br><br>
+          <strong>📊 ¿Cuánto vale realmente tu propiedad?</strong><br>
+          El valor de mercado lo determina lo que compradores similares han pagado recientemente por propiedades comparables en tu zona. No lo que dice el portal, no el valor catastral, no lo que necesitas recuperar. Un Análisis Comparativo de Mercado (CMA) con datos reales del MLS ACOBIR te da el precio objetivo con respaldo de datos.<br><br>
+          <strong>🏡 Preparación antes de publicar:</strong><br>
+          — <strong>Home staging:</strong> Propiedades staging bien presentadas se venden hasta 23% más rápido. Despejar espacios, luz natural, colores neutros y fotos profesionales son inversiones que se recuperan.<br>
+          — <strong>Documentos listos:</strong> Escritura, paz y salvo de mantenimiento, certificado de libertad de gravamen, planos y permisos. Tenerlos listos evita retrasos que enfrían negociaciones.<br>
+          — <strong>Precio de entrada:</strong> Ingresar al mercado con el precio correcto desde el día 1 genera competencia entre compradores. Los precios sobrevaluados "queman" la propiedad — lleva meses de exposición sin resultados, y entonces sí se baja el precio desde una posición débil.<br><br>
+          <strong>📢 Canales de promoción que funcionan en Panamá 2025:</strong><br>
+          MLS ACOBIR (acceso de toda la red de agentes ACOBIR), portales digitales (Encuentra24, MetroCuadrado, OLX), redes sociales con campañas segmentadas, base de compradores activos del agente, y co-broking con la red inmobiliaria. Un agente activo en MLS expone tu propiedad a cientos de agentes y sus clientes simultáneamente.<br><br>
+          <strong>💰 Costos del vendedor en Panamá:</strong><br>
+          — Impuesto de transferencia: 2% del precio de venta<br>
+          — Ganancia de capital: 3% sobre el precio total o 10% sobre la ganancia neta (el menor)<br>
+          — Comisión del agente: 3-5% (negociable, cubre toda la gestión)<br>
+          — Cancelación de hipoteca (si aplica): costo bancario variable<br><br>
+          <strong>⏰ ¿Cuánto tarda una venta?</strong><br>
+          En zonas de alta demanda (San Francisco, Costa del Este, Casco Antiguo) propiedades bien presentadas y correctamente valuadas se venden entre 30 y 90 días. En zonas de menor liquidez puede tomar de 3 a 9 meses. La diferencia clave: precio de mercado desde el primer día.<br><br>
+          <strong>💡 Consejo JAC Realty:</strong> Con nuestra Licencia PN-0931 y acceso al MLS ACOBIR, publicamos tu propiedad simultáneamente en todo el inventario compartido de la red. Agenda tu valoración gratuita — sin compromiso.
+        </p>
+        <div class="bmeta"><span class="bdate">Actualizado Junio 2025</span><button class="btog" onclick="tog('b2',this)">Leer guía completa <span class="arr">→</span></button></div>
+      </div>
+    </div>
+
+    <!-- BLOG CARD 3: ARRENDADORES -->
+    <div class="bcard" id="b3">
+      <div class="bimg"><img src="https://images.unsplash.com/photo-1554224154-22dec7ec8818?w=700&q=80" alt="Guía Arrendadores Panamá 2025" loading="lazy"></div>
+      <div class="bbody">
+        <div class="bcat">🏢 Arrendadores · Gestión de Alquiler 2025</div>
+        <h3 class="btit">Cómo alquilar tu propiedad, proteger tu inversión y maximizar tu rentabilidad</h3>
+        <p class="bexc">
+          <strong>Tu propiedad es un activo — que trabaje para ti.</strong> El alquiler bien gestionado en Panamá puede generar rendimientos del 5% al 12% anual sobre el valor del inmueble. La clave está en el inquilino correcto, el contrato adecuado y la administración profesional.<br><br>
+          <strong>📈 ¿Cuánto puedo pedir de alquiler en 2025?</strong><br>
+          Las rentas varían significativamente por zona y tipo de propiedad:<br>
+          — Apartamento 1 hab. en San Francisco/Bella Vista: $700–$1,200/mes<br>
+          — Apartamento 2 hab. en Costa del Este: $1,200–$2,200/mes<br>
+          — Penthouse o vista al mar en Punta Pacífica: $2,500–$6,000/mes<br>
+          — Casa en Las Cumbres o condominios suburbanos: $900–$1,800/mes<br>
+          — Locales comerciales en Vía España o Calle 50: $15–$35/m²/mes<br>
+          — Alquiler vacacional en Casco Antiguo: $80–$250/noche (plataformas tipo Airbnb)<br><br>
+          <strong>📋 El Contrato de Arrendamiento — lo que debe incluir:</strong><br>
+          Según la Ley 93 de 1973 y sus reformas, el contrato debe especificar: monto del alquiler, duración, depósito de garantía (máximo 1 mes), inventario de bienes incluidos, condiciones de uso y cláusulas de terminación. Se recomienda registrar el contrato ante el Ministerio de Vivienda y Ordenamiento Territorial (MIVIOT) para mayor protección legal.<br><br>
+          <strong>✅ Selección de inquilinos — el paso más importante:</strong><br>
+          — Verificación de ingresos: el alquiler no debe superar el 30-35% de los ingresos del solicitante<br>
+          — Referencias laborales y personales verificadas<br>
+          — Consulta en centrales de riesgo crediticio (BG, Equifax, Dicom)<br>
+          — Visita previa del inquilino a la propiedad y recorrido documentado<br>
+          — Inventario fotográfico firmado al inicio del contrato<br><br>
+          <strong>💵 Obligaciones fiscales del arrendador:</strong><br>
+          Los ingresos por alquiler tributan en Panamá. Si superas $11,000 anuales, debes declarar renta. La tasa efectiva varía según tramos (15% hasta $50K, 25% sobre eso). Si la propiedad está a nombre de persona jurídica, aplica tasa corporativa del 25%. Consulte con un contador para optimizar su estructura.<br><br>
+          <strong>🔧 Mantenimiento preventivo:</strong><br>
+          Reserve el 1-2% anual del valor del inmueble para mantenimiento. Los problemas no atendidos reducen el valor del activo y generan conflictos con inquilinos. Defina por contrato quién asume qué reparaciones (típicamente: estructurales/instalaciones → propietario; consumibles/daños por uso → inquilino).<br><br>
+          <strong>💡 Consejo JAC Realty:</strong> Nuestro servicio de gestión de alquiler incluye: búsqueda y selección de inquilinos, contrato estandarizado, cobro mensual, seguimiento y renovaciones. Sin dolores de cabeza.
+        </p>
+        <div class="bmeta"><span class="bdate">Actualizado Junio 2025</span><button class="btog" onclick="tog('b3',this)">Leer guía completa <span class="arr">→</span></button></div>
+      </div>
+    </div>
+
+    <!-- BLOG CARD 4: ARRENDATARIOS -->
+    <div class="bcard" id="b4">
+      <div class="bimg"><img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=700&q=80" alt="Guía Arrendatarios Panamá 2025" loading="lazy"></div>
+      <div class="bbody">
+        <div class="bcat">🗝️ Arrendatarios · Tus Derechos y Cómo Alquilar Bien</div>
+        <h3 class="btit">Guía completa para alquilar en Panamá: derechos, proceso y zonas</h3>
+        <p class="bexc">
+          <strong>Alquilar bien es más que encontrar el precio más bajo.</strong> Es encontrar el lugar correcto, con las condiciones correctas, sabiendo tus derechos y obligaciones desde el día uno.<br><br>
+          <strong>🔍 ¿Cómo encontrar la propiedad ideal?</strong><br>
+          Define primero tus prioridades reales: ¿cercanía al trabajo o colegios? ¿parking incluido? ¿permite mascotas? ¿amueblado o sin amueblar? El 80% de los conflictos entre propietario e inquilino surgen de expectativas mal comunicadas antes de firmar.<br><br>
+          <strong>📍 ¿Qué zona se adapta a tu estilo de vida?</strong><br>
+          — <strong>Joven profesional / sin hijos:</strong> Marbella, El Cangrejo, San Francisco, Casco Antiguo<br>
+          — <strong>Familia con hijos:</strong> Costa del Este, Clayton, Albrook, Condado del Rey, Las Cumbres<br>
+          — <strong>Ejecutivo expatriado:</strong> Punta Pacífica, Punta Paitilla, Costa del Este<br>
+          — <strong>Presupuesto ajustado / estudiante:</strong> Betania, Río Abajo, Calidonia, Juan Díaz<br>
+          — <strong>Tranquilidad suburbana:</strong> La Chorrera, Arraiján, Chilibre, San Carlos<br><br>
+          <strong>📋 Lo que debes revisar antes de firmar el contrato:</strong><br>
+          — Lee TODO el contrato. Si no lo entiendes, pide explicación o consulta a un abogado.<br>
+          — Verifica que el monto del alquiler, duración y monto del depósito estén claramente indicados.<br>
+          — Exige y firma un inventario detallado del estado de la propiedad y los muebles (con fotos).<br>
+          — Confirma quién paga qué servicios: agua, electricidad, gas, mantenimiento del edificio, internet.<br>
+          — Revisa las cláusulas de terminación anticipada — ¿hay penalidad? ¿cuánto tiempo de aviso previo?<br><br>
+          <strong>⚖️ Tus derechos como inquilino en Panamá (Ley 93/1973):</strong><br>
+          — El propietario NO puede aumentar el alquiler durante la vigencia del contrato sin tu acuerdo.<br>
+          — El depósito de garantía NO puede exceder 1 mes de alquiler.<br>
+          — Tienes derecho a recibir recibos de pago por cada mensualidad.<br>
+          — Ante desahucio, el propietario debe seguir un proceso legal (no puede lanzarte ni cortar servicios sin orden judicial).<br>
+          — Tienes derecho a la devolución del depósito en un plazo razonable si no hay daños comprobados.<br><br>
+          <strong>📊 ¿Cuánto debo pagar de alquiler?</strong><br>
+          La regla general: el alquiler no debería superar el 30-35% de tus ingresos netos. Si ganas $2,000/mes, tu alquiler "saludable" está entre $600 y $700. Zonas alternativas en buen estado y con buena conectividad como Betania o San Miguelito ofrecen apartamentos desde $550/mes.<br><br>
+          <strong>🔧 Antes de mudarte:</strong><br>
+          Documenta todo con fotos y video el día que recibes las llaves. Reporta por escrito (WhatsApp o correo) cualquier defecto pre-existente dentro de las primeras 48 horas. Esto te protege al momento de devolver la propiedad.<br><br>
+          <strong>💡 Consejo JAC Realty:</strong> Como arrendatario que trabaja con nosotros, te presentamos propiedades verificadas, contratos claros y te acompañamos en cada paso sin costo adicional para ti. Contáctanos — el servicio al inquilino es nuestra especialidad.
+        </p>
+        <div class="bmeta"><span class="bdate">Actualizado Junio 2025</span><button class="btog" onclick="tog('b4',this)">Leer guía completa <span class="arr">→</span></button></div>
+      </div>
+    </div>
   </div>
 </section>
 
