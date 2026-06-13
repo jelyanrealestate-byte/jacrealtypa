@@ -637,6 +637,42 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 /* ===== MAPA ===== */
 #prop-mapa{height:260px;border-radius:10px;border:1px solid var(--border);margin-top:8px;z-index:1}
 .map-coords{font-size:11px;color:var(--muted);margin-top:4px;font-family:monospace}
+
+/* ── MÓDULO AGENTES ──────────────────────────────────── */
+.agentes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;padding:4px 0}
+.agente-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;transition:.2s;position:relative}
+.agente-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.agente-avatar-lg{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#c47a10);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#111;flex-shrink:0}
+.agente-avatar-lg img{width:56px;height:56px;border-radius:50%;object-fit:cover}
+.agente-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.agente-info{flex:1;min-width:0}
+.agente-nombre{font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agente-email{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.role-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase}
+.role-badge.admin{background:rgba(232,160,32,.18);color:var(--accent);border:1px solid rgba(232,160,32,.3)}
+.role-badge.supervisor{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+.role-badge.agente{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+.role-badge.asistente{background:rgba(168,85,247,.12);color:#c084fc;border:1px solid rgba(168,85,247,.3)}
+.agente-stats{display:flex;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.agente-stat{flex:1;text-align:center}
+.agente-stat-val{font-size:16px;font-weight:700;color:var(--accent)}
+.agente-stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+.agente-actions{display:flex;gap:8px;margin-top:14px}
+.agente-status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px}
+.agente-status-dot.inactivo{background:var(--red)}
+/* Permission matrix */
+.perm-matrix{background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.perm-module{border-bottom:1px solid var(--border)}
+.perm-module:last-child{border-bottom:none}
+.perm-module-header{padding:10px 16px;background:rgba(255,255,255,.03);font-size:12px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.perm-module-body{padding:6px 16px 12px;display:flex;flex-wrap:wrap;gap:8px}
+.perm-check-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text);white-space:nowrap;background:rgba(255,255,255,.03);padding:5px 10px;border-radius:6px;border:1px solid var(--border);cursor:pointer;transition:.15s}
+.perm-check-item:hover{border-color:var(--accent)}
+.perm-check-item input{accent-color:var(--accent);cursor:pointer}
+/* Login agent badge */
+#login-agent-badge{display:none;position:absolute;top:10px;right:10px;background:rgba(232,160,32,.15);border:1px solid rgba(232,160,32,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--accent)}
+.agent-topbar-badge{display:flex;align-items:center;gap:8px;padding:5px 12px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:20px;font-size:12px;cursor:default}
+.agent-topbar-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#c47a10);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#111}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -658,17 +694,18 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <div class="login-tagline">Portal Agentes · Licencia PN-0931 · Panamá</div>
     </div>
     <p class="login-title">Acceso al Sistema CRM</p>
-    <div class="login-form">
+    <div id="login-loading" style="display:none;text-align:center;padding:18px 0;color:var(--muted);font-size:13px">⏳ Verificando acceso…</div>
+    <div class="login-form" id="login-form-inner">
       <div class="form-group">
-        <label>Usuario</label>
-        <input type="text" id="login-user" placeholder="Ingresa tu usuario" autocomplete="username">
+        <label>Email o Usuario</label>
+        <input type="text" id="login-user" placeholder="email@dominio.com o usuario" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <div class="form-group">
         <label>Contraseña</label>
         <input type="password" id="login-pass" placeholder="••••••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
-      <div class="login-error" id="login-error">❌ Usuario o contraseña incorrectos</div>
-      <button class="btn-login" onclick="doLogin()">Entrar al CRM →</button>
+      <div class="login-error" id="login-error">❌ Email, usuario o contraseña incorrectos</div>
+      <button class="btn-login" id="login-btn" onclick="doLogin()">Entrar al CRM →</button>
     </div>
     <div class="login-footer-bar">
       <div class="login-sig">
@@ -765,13 +802,18 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <span class="icon">🏆</span> Post-Venta
       <span class="nav-badge" id="badge-postventa" style="background:var(--green)">0</span>
     </div>
+    <div class="nav-section" id="nav-sec-admin" style="display:none">Admin</div>
+    <div class="nav-item" id="nav-agentes" onclick="showPanel('agentes')" style="display:none">
+      <span class="icon">👤</span> Equipo / Agentes
+      <span class="nav-badge" id="badge-agentes" style="background:var(--accent);color:#111">0</span>
+    </div>
   </nav>
   <div class="sidebar-footer">
     <div class="agent-info">
-      <div class="agent-avatar">JC</div>
+      <div class="agent-avatar" id="sidebar-agent-av">JC</div>
       <div>
-        <div class="agent-name">J. Castro</div>
-        <div class="agent-lic">Agente Inmobiliaria · PN-0931</div>
+        <div class="agent-name" id="sidebar-agent-name">J. Castro</div>
+        <div class="agent-lic" id="sidebar-agent-role">Agente Inmobiliaria · PN-0931</div>
       </div>
     </div>
     <div class="agent-sig">JAC Realty PA · jacrealtypa.com</div>
@@ -793,6 +835,11 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
         </select>
       </div>
       <button id="theme-toggle" class="btn btn-outline btn-sm" onclick="toggleTheme()" title="Alternar modo claro / oscuro">🌙</button>
+      <div class="agent-topbar-badge" id="topbar-agent-badge" title="Agente activo">
+        <div class="agent-topbar-av" id="topbar-av">JC</div>
+        <span id="topbar-agent-name">J. Castro</span>
+        <span id="topbar-agent-role-tag" class="role-badge admin" style="margin-left:2px;font-size:9px;padding:2px 7px">Admin</span>
+      </div>
       <button class="btn btn-outline btn-sm topbar-secondary" title="Configurar Supabase DB" onclick="openModal('modalSetupDB')">🗄️ DB Setup</button>
       <button class="btn btn-outline btn-sm topbar-secondary" onclick="openModal('modalImportExcel')">📊 Importar</button>
       <button class="btn btn-outline btn-sm" onclick="openModal('modalProp')">+ Propiedad</button>
@@ -1772,7 +1819,39 @@ CREATE TABLE IF NOT EXISTS mls_seguimiento (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ALTER TABLE mls_seguimiento ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "allow_all_mls_seguimiento" ON mls_seguimiento FOR ALL USING (true) WITH CHECK (true);</textarea>
+CREATE POLICY "allow_all_mls_seguimiento" ON mls_seguimiento FOR ALL USING (true) WITH CHECK (true);
+
+-- ══════════════════════════════════════════════
+-- TABLA AGENTES — Multi-agente login (ejecutar)
+-- ══════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS agentes_crm (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre TEXT NOT NULL,
+  apellido TEXT DEFAULT '',
+  email TEXT UNIQUE NOT NULL,
+  username TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  licencia TEXT DEFAULT '',
+  telefono TEXT DEFAULT '',
+  whatsapp TEXT DEFAULT '',
+  foto_url TEXT DEFAULT '',
+  rol TEXT DEFAULT 'agente' CHECK (rol IN ('admin','supervisor','agente','asistente')),
+  permisos JSONB DEFAULT '{}'::jsonb,
+  activo BOOLEAN DEFAULT true,
+  notas_internas TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  last_login TIMESTAMPTZ
+);
+ALTER TABLE agentes_crm ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all_agentes_crm" ON agentes_crm FOR ALL USING (true) WITH CHECK (true);
+
+-- Admin por defecto: email=jcastro@jacrealtypa.com | contraseña=jacrealtypа2026
+INSERT INTO agentes_crm (nombre,apellido,email,username,password_hash,licencia,telefono,whatsapp,rol,activo)
+VALUES ('Jely','Castro','jcastro@jacrealtypa.com','jcastro',
+  '5e154b017f873b16a14903cf04b6293a0e725dfbd8c147ef87c2bc39227d3c76',
+  'PN-0931','50764627763','50764627763','admin',true)
+ON CONFLICT (email) DO NOTHING;</textarea>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('setup-sql-text').value).then(()=>toast('✅ SQL copiado al portapapeles'))">📋 Copiar SQL</button>
         <a href="https://supabase.com/dashboard/project/dskslrlxldnxrglrochv/sql/new" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none">🔗 Abrir Supabase SQL Editor</a>
@@ -2831,6 +2910,96 @@ CREATE POLICY "allow_all_mls_seguimiento" ON mls_seguimiento FOR ALL USING (true
   </div>
 </div>
 
+<!-- ========== AGENTES ========== -->
+<div class="panel" id="panel-agentes">
+  <div class="search-bar" style="gap:10px;flex-wrap:wrap">
+    <input type="text" id="agente-search" placeholder="🔍 Buscar agente..." oninput="renderAgentes()" style="flex:1;min-width:180px">
+    <select id="agente-filter-rol" onchange="renderAgentes()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none">
+      <option value="">Todos los roles</option>
+      <option value="admin">Admin</option>
+      <option value="supervisor">Supervisor</option>
+      <option value="agente">Agente</option>
+      <option value="asistente">Asistente</option>
+    </select>
+    <select id="agente-filter-status" onchange="renderAgentes()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none">
+      <option value="">Todos</option>
+      <option value="activo">Activos</option>
+      <option value="inactivo">Inactivos</option>
+    </select>
+    <button class="btn btn-primary" onclick="openModalAgente(null)">+ Nuevo Agente</button>
+  </div>
+  <div class="agentes-grid" id="agentes-grid"></div>
+</div>
+
+<!-- Modal Agente -->
+<div class="modal-bg" id="modalAgente" onclick="if(event.target===this)closeModal('modalAgente')">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-agente-title">👤 Nuevo Agente</span>
+      <button class="modal-close" onclick="closeModal('modalAgente')">✕</button>
+    </div>
+    <!-- Tabs -->
+    <div style="display:flex;gap:6px;margin-bottom:18px">
+      <button id="tab-datos" onclick="switchAgentTab('datos')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--accent);color:#111;font-weight:600;cursor:pointer;font-size:12px">👤 Datos</button>
+      <button id="tab-permisos" onclick="switchAgentTab('permisos')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-weight:600;cursor:pointer;font-size:12px">🔐 Permisos</button>
+    </div>
+    <!-- Tab Datos -->
+    <div id="agente-tab-datos">
+      <div class="form-grid">
+        <div class="form-group"><label>Nombre *</label><input id="ag-nombre" placeholder="Nombre"></div>
+        <div class="form-group"><label>Apellido</label><input id="ag-apellido" placeholder="Apellido"></div>
+        <div class="form-group"><label>Email *</label><input id="ag-email" type="email" placeholder="email@ejemplo.com"></div>
+        <div class="form-group"><label>Usuario *</label><input id="ag-username" placeholder="usuario_login"></div>
+        <div class="form-group"><label>Contraseña <small id="pass-hint" style="color:var(--muted)">(requerida)</small></label><input id="ag-password" type="password" placeholder="Contraseña"></div>
+        <div class="form-group"><label>Confirmar contraseña</label><input id="ag-password2" type="password" placeholder="Repetir contraseña"></div>
+        <div class="form-group"><label>Teléfono</label><input id="ag-telefono" placeholder="+507 6000-0000"></div>
+        <div class="form-group"><label>WhatsApp</label><input id="ag-whatsapp" placeholder="50760000000"></div>
+        <div class="form-group"><label>Licencia</label><input id="ag-licencia" placeholder="PN-XXXX"></div>
+        <div class="form-group"><label>Rol *</label>
+          <select id="ag-rol" onchange="loadRoleDefaults()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);width:100%">
+            <option value="admin">👑 Admin</option>
+            <option value="supervisor">🔭 Supervisor</option>
+            <option value="agente" selected>🏠 Agente</option>
+            <option value="asistente">✏️ Asistente</option>
+          </select>
+        </div>
+        <div class="form-group form-full"><label>Foto URL</label><input id="ag-foto" placeholder="https://...jpg"></div>
+        <div class="form-group form-full"><label>Notas internas</label><textarea id="ag-notas" rows="2" placeholder="Notas sobre el agente..." style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);width:100%;resize:vertical"></textarea></div>
+        <div class="form-group form-full" style="display:flex;align-items:center;gap:10px">
+          <input type="checkbox" id="ag-activo" checked style="width:16px;height:16px">
+          <label for="ag-activo" style="margin:0;cursor:pointer">Agente activo</label>
+        </div>
+      </div>
+    </div>
+    <!-- Tab Permisos -->
+    <div id="agente-tab-permisos" style="display:none">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Los permisos se cargan según el rol seleccionado. Puedes personalizarlos.</div>
+      <div class="perm-matrix" id="perm-matrix-container"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+      <button class="btn btn-outline" onclick="closeModal('modalAgente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveAgente()">💾 Guardar Agente</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cambiar Contraseña -->
+<div class="modal-bg" id="modalChangePass" onclick="if(event.target===this)closeModal('modalChangePass')">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <span class="modal-title">🔑 Cambiar Contraseña</span>
+      <button class="modal-close" onclick="closeModal('modalChangePass')">✕</button>
+    </div>
+    <div style="margin-bottom:14px;color:var(--muted);font-size:13px">Agente: <strong id="chpass-agent-name" style="color:var(--text)"></strong></div>
+    <div class="form-group"><label>Nueva contraseña</label><input id="chpass-new" type="password" placeholder="Mín. 6 caracteres"></div>
+    <div class="form-group"><label>Confirmar contraseña</label><input id="chpass-conf" type="password" placeholder="Repetir contraseña"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
+      <button class="btn btn-outline" onclick="closeModal('modalChangePass')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveNewPassword()">🔑 Actualizar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal Nueva Empresa -->
 <div class="modal-bg" id="modalEmpresa">
   <div class="modal" style="max-width:700px">
@@ -3094,7 +3263,7 @@ function showPanel(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  const labels={dashboard:'Dashboard',propiedades:'Propiedades',contactos:'Contactos',leads:'Leads',clientes:'Clientes',empresas:'Empresas',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria',postVenta:'Post-Venta',matching:'🎯 Matching Inteligente'};
+  const labels={dashboard:'Dashboard',propiedades:'Propiedades',contactos:'Contactos',leads:'Leads',clientes:'Clientes',empresas:'Empresas',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria',postVenta:'Post-Venta',matching:'🎯 Matching Inteligente',agentes:'👥 Equipo de Agentes',configuracion:'⚙️ Configuración'};
   if(id==='matching') populateMatchingSelect();
   document.getElementById('topbar-title').textContent=labels[id]||id;
   // Mark active nav item (works both from onclick and programmatic calls)
@@ -3136,6 +3305,7 @@ function showPanel(id){
   if(id==='empresas') renderEmpresas();
   if(id==='postVenta') renderPostVenta();
   if(id==='reportes') updateReportKPIs();
+  if(id==='agentes') renderAgentes();
 }
 
 // ============================================================
@@ -6524,40 +6694,158 @@ function deleteRedProp(titleOrId){
   renderRedInmo(); toast('Propiedad eliminada de la red');
 }
 
-// ============================================================
-// AUTH — LOGIN / LOGOUT
-// Credentials obfuscated; not stored as plain text
-// ============================================================
+// ════════════════════════════════════════════════════════
+// AUTH — MULTI-AGENTE LOGIN / LOGOUT
+// Autenticación contra tabla agentes_crm en Supabase
+// Fallback a credenciales legacy si tabla no existe
+// ════════════════════════════════════════════════════════
 (function(){
-  // Base64-encoded values only — no plain text visible in source
-  const _a = ['\x6a\x61\x63','\x72\x65\x61\x6c\x74','\x79\x70\x61\x32\x30\x32\x36'].join('');
-  const _u = atob('amNhc3Rybw==');   // encoded username
-  const _p = atob('amFj') + _a.slice(3); // split to avoid simple search
-  // Check existing session
-  if(sessionStorage.getItem('_jcr_s')==='ok'){
-    document.getElementById('login-screen').classList.add('hidden');
+  // ── SHA-256 helper (Web Crypto API) ──
+  async function sha256hex(str){
+    const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
   }
-  window.doLogin = function(){
-    const u = (document.getElementById('login-user').value||'').trim();
-    const p = document.getElementById('login-pass').value||'';
-    const err = document.getElementById('login-error');
-    if(u===_u && p===_p){
-      sessionStorage.setItem('_jcr_s','ok');
+
+  // ── Legacy admin fallback (encoded) ──
+  const _la=[atob('amNhc3Rybw==')];
+  const _lp=atob('amFj')+['\x72\x65\x61\x6c\x74','\x79\x70\x61\x32\x30\x32\x36'].join('');
+
+  // ── Default admin permissions ──
+  const PERM_ADMIN={
+    propiedades:{ver_propias:true,ver_todas:true,crear:true,editar_propias:true,editar_todas:true,eliminar:true,publicar:true,ver_propietario:true},
+    contactos:{ver_propios:true,ver_todos:true,crear:true,editar_propios:true,editar_todos:true,eliminar:true},
+    leads:{ver_propios:true,ver_todos:true,crear:true,editar:true,eliminar:true},
+    clientes:{ver_propios:true,ver_todos:true,crear:true,editar:true,eliminar:true},
+    pipeline:{ver:true,gestionar:true},agenda:{ver_propia:true,ver_todas:true,crear:true,editar:true,eliminar:true},
+    mls:{ver:true,guardar:true,cobroking:true},reportes:{ver_propios:true,ver_todos:true},
+    automatizaciones:{ver:true,activar:true,configurar:true},portales:{ver:true,publicar:true},
+    red_inmobiliaria:{ver:true,gestionar:true},post_venta:{ver:true,gestionar:true},
+    agentes:{ver:true,crear:true,editar:true,eliminar:true},configuracion:{ver:true,editar:true}
+  };
+
+  // ── Apply permissions to nav ──
+  function applyPermissions(agent){
+    const P=agent.permisos||PERM_ADMIN;
+    // Agentes module: only if admin/supervisor
+    const canSeeAgents=P.agentes&&P.agentes.ver;
+    document.getElementById('nav-agentes').style.display=canSeeAgents?'flex':'none';
+    document.getElementById('nav-sec-admin').style.display=canSeeAgents?'block':'none';
+    // Update topbar badge
+    const initials=(agent.nombre||'J').charAt(0)+(agent.apellido||agent.nombre||'C').charAt(1)||'C';
+    const roleMap={admin:'Admin',supervisor:'Supervisor',agente:'Agente',asistente:'Asistente'};
+    const roleLbl=roleMap[agent.rol]||agent.rol||'Agente';
+    document.getElementById('topbar-av').textContent=initials.toUpperCase();
+    document.getElementById('topbar-agent-name').textContent=(agent.nombre||'')+(agent.apellido?' '+agent.apellido:'');
+    const roleTag=document.getElementById('topbar-agent-role-tag');
+    roleTag.textContent=roleLbl;
+    roleTag.className='role-badge '+(agent.rol||'agente');
+    // Sidebar
+    document.getElementById('sidebar-agent-av').textContent=initials.toUpperCase();
+    document.getElementById('sidebar-agent-name').textContent=(agent.nombre||'')+(agent.apellido?' '+agent.apellido:'');
+    document.getElementById('sidebar-agent-role').textContent=(agent.licencia?'Lic. '+agent.licencia+' · ':'')+roleLbl;
+  }
+
+  // ── Restore existing session ──
+  const savedAgent=sessionStorage.getItem('_jcr_agent');
+  if(savedAgent){
+    try{
+      window._crm_agent=JSON.parse(savedAgent);
       document.getElementById('login-screen').classList.add('hidden');
-      err.classList.remove('show');
-    } else {
-      err.classList.add('show');
-      document.getElementById('login-pass').value='';
-      document.getElementById('login-pass').focus();
+      applyPermissions(window._crm_agent);
+    }catch(e){sessionStorage.removeItem('_jcr_agent');}
+  } else if(sessionStorage.getItem('_jcr_s')==='ok'){
+    // Legacy session
+    window._crm_agent={nombre:'J.',apellido:'Castro',email:'jcastro@jacrealtypa.com',username:'jcastro',rol:'admin',licencia:'PN-0931',permisos:PERM_ADMIN};
+    sessionStorage.setItem('_jcr_agent',JSON.stringify(window._crm_agent));
+    sessionStorage.removeItem('_jcr_s');
+    document.getElementById('login-screen').classList.add('hidden');
+    applyPermissions(window._crm_agent);
+  }
+
+  // ── Login ──
+  window.doLogin = async function(){
+    const u=(document.getElementById('login-user').value||'').trim();
+    const p=document.getElementById('login-pass').value||'';
+    const err=document.getElementById('login-error');
+    const btn=document.getElementById('login-btn');
+    const loading=document.getElementById('login-loading');
+    const form=document.getElementById('login-form-inner');
+    if(!u||!p){err.textContent='❌ Completa todos los campos';err.classList.add('show');return;}
+    err.classList.remove('show');
+    btn.disabled=true;btn.textContent='Verificando…';
+    form.style.opacity='.5';loading.style.display='block';
+    try{
+      const hash=await sha256hex(p);
+      // Try Supabase agentes_crm
+      let agent=null;
+      if(sb){
+        const isEmail=u.includes('@');
+        let q=sb.from('agentes_crm').select('*').eq(isEmail?'email':'username',u).eq('password_hash',hash).eq('activo',true);
+        const {data,error}=await q.limit(1);
+        if(!error&&data&&data.length>0) agent=data[0];
+      }
+      if(agent){
+        // Parse permisos if string
+        if(typeof agent.permisos==='string'){try{agent.permisos=JSON.parse(agent.permisos);}catch(e){agent.permisos=PERM_ADMIN;}}
+        if(!agent.permisos||!Object.keys(agent.permisos).length) agent.permisos=PERM_ADMIN;
+        window._crm_agent=agent;
+        sessionStorage.setItem('_jcr_agent',JSON.stringify(agent));
+        // Update last_login
+        if(sb) sb.from('agentes_crm').update({last_login:new Date().toISOString()}).eq('id',agent.id).then(()=>{});
+        document.getElementById('login-screen').classList.add('hidden');
+        applyPermissions(agent);
+        err.classList.remove('show');
+      } else {
+        // Legacy fallback
+        const legacyOk=(u===_la[0]||u===atob('amNhc3Rybw==')+'@'+atob('amFjcmVhbHR5cGE=')+'.com')&&(await sha256hex(_lp))===hash;
+        if(legacyOk||p===_lp&&(_la.includes(u)||u.includes('jcastro'))){
+          const legAgent={nombre:'J.',apellido:'Castro',email:'jcastro@jacrealtypa.com',username:'jcastro',rol:'admin',licencia:'PN-0931',permisos:PERM_ADMIN};
+          window._crm_agent=legAgent;
+          sessionStorage.setItem('_jcr_agent',JSON.stringify(legAgent));
+          document.getElementById('login-screen').classList.add('hidden');
+          applyPermissions(legAgent);
+        } else {
+          err.textContent='❌ Email, usuario o contraseña incorrectos';
+          err.classList.add('show');
+          document.getElementById('login-pass').value='';
+          document.getElementById('login-pass').focus();
+        }
+      }
+    } catch(ex){
+      console.warn('Login error:',ex);
+      // Ultra-fallback: check legacy synchronously
+      if(u===_la[0]&&p===_lp){
+        const legAgent={nombre:'J.',apellido:'Castro',email:'jcastro@jacrealtypa.com',username:'jcastro',rol:'admin',licencia:'PN-0931',permisos:PERM_ADMIN};
+        window._crm_agent=legAgent;
+        sessionStorage.setItem('_jcr_agent',JSON.stringify(legAgent));
+        document.getElementById('login-screen').classList.add('hidden');
+        applyPermissions(legAgent);
+      } else {
+        err.textContent='❌ Error de conexión — intenta de nuevo';
+        err.classList.add('show');
+      }
+    } finally{
+      btn.disabled=false;btn.textContent='Entrar al CRM →';
+      form.style.opacity='1';loading.style.display='none';
     }
   };
+
+  // ── Logout ──
   window.doLogout = function(){
+    sessionStorage.removeItem('_jcr_agent');
     sessionStorage.removeItem('_jcr_s');
+    window._crm_agent=null;
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('login-user').value='';
     document.getElementById('login-pass').value='';
     document.getElementById('login-error').classList.remove('show');
+    document.getElementById('login-form-inner').style.opacity='1';
+    document.getElementById('login-loading').style.display='none';
   };
+
+  // ── Expose for other modules ──
+  window._PERM_ADMIN=PERM_ADMIN;
+  window._applyPermissions=applyPermissions;
 })();
 
 // ============================================================
@@ -7840,6 +8128,372 @@ function emailPipelineJcastro(leadId){
 function emailPipelineJelyan(leadId){
   emailLeadJelyan(leadId);
 }
-\n</script>
+\n
+// ════════════════════════════════════════════════════════════════
+// MÓDULO AGENTES — CRUD completo con permisos estilo Wasi
+// ════════════════════════════════════════════════════════════════
+let _agentes_cache = [];
+let _agente_editing_id = null;
+
+const PERM_STRUCTURE = [
+  {key:'propiedades',label:'🏠 Propiedades',perms:[
+    {k:'ver_propias',l:'Ver propias'},
+    {k:'ver_todas',l:'Ver todas'},
+    {k:'crear',l:'Crear'},
+    {k:'editar_propias',l:'Editar propias'},
+    {k:'editar_todas',l:'Editar todas'},
+    {k:'eliminar',l:'Eliminar'},
+    {k:'publicar',l:'Publicar en portales'},
+    {k:'ver_propietario',l:'Ver datos propietario'}
+  ]},
+  {key:'contactos',label:'📇 Contactos',perms:[
+    {k:'ver_propios',l:'Ver propios'},
+    {k:'ver_todos',l:'Ver todos'},
+    {k:'crear',l:'Crear'},
+    {k:'editar_propios',l:'Editar propios'},
+    {k:'editar_todos',l:'Editar todos'},
+    {k:'eliminar',l:'Eliminar'}
+  ]},
+  {key:'leads',label:'🎯 Leads',perms:[
+    {k:'ver_propios',l:'Ver propios'},
+    {k:'ver_todos',l:'Ver todos'},
+    {k:'crear',l:'Crear'},
+    {k:'editar',l:'Editar'},
+    {k:'eliminar',l:'Eliminar'}
+  ]},
+  {key:'clientes',label:'👥 Clientes',perms:[
+    {k:'ver_propios',l:'Ver propios'},
+    {k:'ver_todos',l:'Ver todos'},
+    {k:'crear',l:'Crear'},
+    {k:'editar',l:'Editar'},
+    {k:'eliminar',l:'Eliminar'}
+  ]},
+  {key:'pipeline',label:'📋 Pipeline',perms:[{k:'ver',l:'Ver'},{k:'gestionar',l:'Gestionar'}]},
+  {key:'agenda',label:'📅 Agenda',perms:[
+    {k:'ver_propia',l:'Ver propia'},
+    {k:'ver_todas',l:'Ver todas'},
+    {k:'crear',l:'Crear'},
+    {k:'editar',l:'Editar'},
+    {k:'eliminar',l:'Eliminar'}
+  ]},
+  {key:'mls',label:'🌐 Red MLS',perms:[{k:'ver',l:'Ver'},{k:'guardar',l:'Guardar propiedades'},{k:'cobroking',l:'Co-broking'}]},
+  {key:'reportes',label:'📈 Reportes',perms:[{k:'ver_propios',l:'Ver propios'},{k:'ver_todos',l:'Ver todos'}]},
+  {key:'automatizaciones',label:'🤖 Automatizaciones',perms:[{k:'ver',l:'Ver'},{k:'activar',l:'Activar/Pausar'},{k:'configurar',l:'Configurar'}]},
+  {key:'portales',label:'📡 Portales',perms:[{k:'ver',l:'Ver'},{k:'publicar',l:'Publicar/Despublicar'}]},
+  {key:'red_inmobiliaria',label:'🤝 Red Inmobiliaria',perms:[{k:'ver',l:'Ver'},{k:'gestionar',l:'Gestionar'}]},
+  {key:'post_venta',label:'🏆 Post-Venta',perms:[{k:'ver',l:'Ver'},{k:'gestionar',l:'Gestionar'}]},
+  {key:'agentes',label:'👤 Agentes (Admin)',perms:[{k:'ver',l:'Ver módulo'},{k:'crear',l:'Crear'},{k:'editar',l:'Editar'},{k:'eliminar',l:'Eliminar'}]},
+  {key:'configuracion',label:'⚙️ Configuración',perms:[{k:'ver',l:'Ver'},{k:'editar',l:'Editar'}]}
+];
+
+const ROLE_PERMISSIONS = {
+  admin: {
+    propiedades:{ver_propias:true,ver_todas:true,crear:true,editar_propias:true,editar_todas:true,eliminar:true,publicar:true,ver_propietario:true},
+    contactos:{ver_propios:true,ver_todos:true,crear:true,editar_propios:true,editar_todos:true,eliminar:true},
+    leads:{ver_propios:true,ver_todos:true,crear:true,editar:true,eliminar:true},
+    clientes:{ver_propios:true,ver_todos:true,crear:true,editar:true,eliminar:true},
+    pipeline:{ver:true,gestionar:true},
+    agenda:{ver_propia:true,ver_todas:true,crear:true,editar:true,eliminar:true},
+    mls:{ver:true,guardar:true,cobroking:true},
+    reportes:{ver_propios:true,ver_todos:true},
+    automatizaciones:{ver:true,activar:true,configurar:true},
+    portales:{ver:true,publicar:true},
+    red_inmobiliaria:{ver:true,gestionar:true},
+    post_venta:{ver:true,gestionar:true},
+    agentes:{ver:true,crear:true,editar:true,eliminar:true},
+    configuracion:{ver:true,editar:true}
+  },
+  supervisor: {
+    propiedades:{ver_propias:true,ver_todas:true,crear:true,editar_propias:true,editar_todas:true,eliminar:false,publicar:true,ver_propietario:true},
+    contactos:{ver_propios:true,ver_todos:true,crear:true,editar_propios:true,editar_todos:true,eliminar:false},
+    leads:{ver_propios:true,ver_todos:true,crear:true,editar:true,eliminar:false},
+    clientes:{ver_propios:true,ver_todos:true,crear:true,editar:true,eliminar:false},
+    pipeline:{ver:true,gestionar:true},
+    agenda:{ver_propia:true,ver_todas:true,crear:true,editar:true,eliminar:false},
+    mls:{ver:true,guardar:true,cobroking:true},
+    reportes:{ver_propios:true,ver_todos:true},
+    automatizaciones:{ver:true,activar:true,configurar:false},
+    portales:{ver:true,publicar:true},
+    red_inmobiliaria:{ver:true,gestionar:true},
+    post_venta:{ver:true,gestionar:true},
+    agentes:{ver:true,crear:false,editar:false,eliminar:false},
+    configuracion:{ver:true,editar:false}
+  },
+  agente: {
+    propiedades:{ver_propias:true,ver_todas:false,crear:true,editar_propias:true,editar_todas:false,eliminar:false,publicar:true,ver_propietario:false},
+    contactos:{ver_propios:true,ver_todos:false,crear:true,editar_propios:true,editar_todos:false,eliminar:false},
+    leads:{ver_propios:true,ver_todos:false,crear:true,editar:true,eliminar:false},
+    clientes:{ver_propios:true,ver_todos:false,crear:true,editar:true,eliminar:false},
+    pipeline:{ver:true,gestionar:false},
+    agenda:{ver_propia:true,ver_todas:false,crear:true,editar:true,eliminar:false},
+    mls:{ver:true,guardar:true,cobroking:false},
+    reportes:{ver_propios:true,ver_todos:false},
+    automatizaciones:{ver:true,activar:false,configurar:false},
+    portales:{ver:true,publicar:true},
+    red_inmobiliaria:{ver:true,gestionar:false},
+    post_venta:{ver:true,gestionar:false},
+    agentes:{ver:false,crear:false,editar:false,eliminar:false},
+    configuracion:{ver:false,editar:false}
+  },
+  asistente: {
+    propiedades:{ver_propias:true,ver_todas:false,crear:false,editar_propias:false,editar_todas:false,eliminar:false,publicar:false,ver_propietario:false},
+    contactos:{ver_propios:true,ver_todos:false,crear:true,editar_propios:true,editar_todos:false,eliminar:false},
+    leads:{ver_propios:true,ver_todos:false,crear:true,editar:false,eliminar:false},
+    clientes:{ver_propios:true,ver_todos:false,crear:false,editar:false,eliminar:false},
+    pipeline:{ver:true,gestionar:false},
+    agenda:{ver_propia:true,ver_todas:false,crear:true,editar:false,eliminar:false},
+    mls:{ver:true,guardar:false,cobroking:false},
+    reportes:{ver_propios:true,ver_todos:false},
+    automatizaciones:{ver:false,activar:false,configurar:false},
+    portales:{ver:false,publicar:false},
+    red_inmobiliaria:{ver:false,gestionar:false},
+    post_venta:{ver:false,gestionar:false},
+    agentes:{ver:false,crear:false,editar:false,eliminar:false},
+    configuracion:{ver:false,editar:false}
+  }
+};
+
+// ── Render agents list ──
+async function renderAgentes(){
+  const grid=document.getElementById('agentes-grid');
+  if(!grid) return;
+  grid.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">⏳ Cargando agentes…</div>';
+  const search=(document.getElementById('agente-search')?.value||'').toLowerCase();
+  const filterRol=document.getElementById('agente-filter-rol')?.value||'';
+  const filterStatus=document.getElementById('agente-filter-status')?.value||'';
+  let agents=[];
+  if(sb){
+    const {data,error}=await sb.from('agentes_crm').select('*').order('nombre',{ascending:true});
+    if(!error&&data) agents=data;
+    else { grid.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">⚠️ Tabla agentes_crm no existe aún.<br><small>Ejecuta el SQL en <strong>DB Setup → Copiar SQL</strong></small></div>'; return; }
+  }
+  _agentes_cache=agents;
+  document.getElementById('badge-agentes').textContent=agents.filter(a=>a.activo).length;
+  // Filter
+  let list=agents.filter(a=>{
+    if(filterRol&&a.rol!==filterRol) return false;
+    if(filterStatus==='activo'&&!a.activo) return false;
+    if(filterStatus==='inactivo'&&a.activo) return false;
+    if(search&&!(a.nombre+' '+a.apellido+' '+a.email+' '+a.username).toLowerCase().includes(search)) return false;
+    return true;
+  });
+  if(!list.length){grid.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">No hay agentes que coincidan</div>';return;}
+  const roleLabels={admin:'👑 Admin',supervisor:'🔭 Supervisor',agente:'🏠 Agente',asistente:'✏️ Asistente'};
+  const canEdit=window._crm_agent?.permisos?.agentes?.editar||window._crm_agent?.rol==='admin';
+  const canDelete=window._crm_agent?.permisos?.agentes?.eliminar||false;
+  grid.innerHTML=list.map(a=>{
+    const initials=((a.nombre||'?').charAt(0)+(a.apellido||a.nombre||'').charAt(1)||'?').toUpperCase();
+    const avatarHtml=a.foto_url
+      ?`<div class="agente-avatar-lg"><img src="${a.foto_url}" alt="" onerror="this.parentElement.textContent='${initials}'"></div>`
+      :`<div class="agente-avatar-lg">${initials}</div>`;
+    const roleBadge=`<span class="role-badge ${a.rol||'agente'}">${roleLabels[a.rol]||a.rol}</span>`;
+    const statusDot=`<span class="agente-status-dot${a.activo?'':' inactivo'}"></span>${a.activo?'Activo':'Inactivo'}`;
+    return `<div class="agente-card">
+      <div class="agente-header">
+        ${avatarHtml}
+        <div class="agente-info">
+          <div class="agente-nombre">${a.nombre||''} ${a.apellido||''}</div>
+          <div class="agente-email">${a.email||''}</div>
+          <div style="margin-top:5px">${roleBadge}</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.9">
+        ${a.licencia?`🪪 Licencia: <strong style="color:var(--accent)">${a.licencia}</strong><br>`:''}
+        ${a.telefono?`📞 ${a.telefono}<br>`:''}
+        ${a.whatsapp?`💬 WA: ${a.whatsapp}<br>`:''}
+        <span style="color:${a.activo?'var(--green)':'var(--red)'}">${statusDot}</span>
+        ${a.last_login?`<br>⏱ Último acceso: ${new Date(a.last_login).toLocaleDateString('es-PA')}`:''}
+      </div>
+      <div class="agente-actions">
+        ${canEdit?`<button class="btn btn-sm btn-outline" style="flex:1" onclick="openModalAgente('${a.id}')">✏️ Editar</button>`:''}
+        <button class="btn btn-sm btn-outline" onclick="openChangePass('${a.id}','${(a.nombre||'')+' '+(a.apellido||'')}')">🔑</button>
+        <button class="btn btn-sm btn-outline" onclick="toggleAgenteStatus('${a.id}',${!a.activo})" title="${a.activo?'Desactivar':'Activar'}">${a.activo?'⏸':'▶'}</button>
+        ${canDelete?`<button class="btn btn-sm" style="background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)" onclick="deleteAgente('${a.id}','${a.nombre}')">🗑</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Open modal create/edit ──
+async function openModalAgente(id){
+  _agente_editing_id=id;
+  const isNew=!id;
+  document.getElementById('modal-agente-title').textContent=isNew?'👤 Nuevo Agente':'✏️ Editar Agente';
+  document.getElementById('pass-hint').textContent=isNew?'(requerida)':'(dejar vacío = no cambiar)';
+  // Clear form
+  ['ag-nombre','ag-apellido','ag-email','ag-username','ag-password','ag-password2','ag-telefono','ag-whatsapp','ag-licencia','ag-foto','ag-notas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ag-rol').value='agente';
+  document.getElementById('ag-activo').checked=true;
+  if(!isNew){
+    const agent=_agentes_cache.find(a=>a.id===id);
+    if(agent){
+      document.getElementById('ag-nombre').value=agent.nombre||'';
+      document.getElementById('ag-apellido').value=agent.apellido||'';
+      document.getElementById('ag-email').value=agent.email||'';
+      document.getElementById('ag-username').value=agent.username||'';
+      document.getElementById('ag-telefono').value=agent.telefono||'';
+      document.getElementById('ag-whatsapp').value=agent.whatsapp||'';
+      document.getElementById('ag-licencia').value=agent.licencia||'';
+      document.getElementById('ag-foto').value=agent.foto_url||'';
+      document.getElementById('ag-notas').value=agent.notas_internas||'';
+      document.getElementById('ag-rol').value=agent.rol||'agente';
+      document.getElementById('ag-activo').checked=agent.activo!==false;
+      // Load perms into matrix
+      const perms=typeof agent.permisos==='string'?JSON.parse(agent.permisos||'{}'):agent.permisos||{};
+      buildPermMatrix(perms);
+    }
+  } else {
+    loadRoleDefaults();
+  }
+  switchAgentTab('datos');
+  openModal('modalAgente');
+}
+
+// ── Switch agent modal tab ──
+function switchAgentTab(tab){
+  document.getElementById('agente-tab-datos').style.display=tab==='datos'?'block':'none';
+  document.getElementById('agente-tab-permisos').style.display=tab==='permisos'?'block':'none';
+  document.getElementById('tab-datos').style.background=tab==='datos'?'var(--accent)':'transparent';
+  document.getElementById('tab-datos').style.color=tab==='datos'?'#111':'var(--text)';
+  document.getElementById('tab-permisos').style.background=tab==='permisos'?'var(--accent)':'transparent';
+  document.getElementById('tab-permisos').style.color=tab==='permisos'?'#111':'var(--text)';
+  if(tab==='permisos'&&!document.getElementById('perm-matrix-container').innerHTML){
+    loadRoleDefaults();
+  }
+}
+
+// ── Build permission matrix UI ──
+function buildPermMatrix(perms){
+  const container=document.getElementById('perm-matrix-container');
+  container.innerHTML=PERM_STRUCTURE.map(mod=>`
+    <div class="perm-module">
+      <div class="perm-module-header">
+        <span>${mod.label}</span>
+      </div>
+      <div class="perm-module-body">
+        ${mod.perms.map(p=>{
+          const checked=(perms[mod.key]&&perms[mod.key][p.k])?'checked':'';
+          return `<label class="perm-check-item">
+            <input type="checkbox" id="perm_${mod.key}_${p.k}" ${checked}>
+            ${p.l}
+          </label>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Load role default permissions ──
+function loadRoleDefaults(){
+  const rol=document.getElementById('ag-rol')?.value||'agente';
+  const defaults=ROLE_PERMISSIONS[rol]||ROLE_PERMISSIONS.agente;
+  buildPermMatrix(defaults);
+}
+
+// ── Read permission matrix from UI ──
+function readPermMatrix(){
+  const perms={};
+  PERM_STRUCTURE.forEach(mod=>{
+    perms[mod.key]={};
+    mod.perms.forEach(p=>{
+      const el=document.getElementById(`perm_${mod.key}_${p.k}`);
+      perms[mod.key][p.k]=el?el.checked:false;
+    });
+  });
+  return perms;
+}
+
+// ── SHA-256 helper (sync version via SubtleCrypto) ──
+async function hashPassword(p){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(p));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── Save agent ──
+async function saveAgente(){
+  if(!sb){toast('❌ Supabase no conectado');return;}
+  const nombre=document.getElementById('ag-nombre').value.trim();
+  const email=document.getElementById('ag-email').value.trim();
+  const username=document.getElementById('ag-username').value.trim().toLowerCase().replace(/\s+/g,'');
+  const pass=document.getElementById('ag-password').value;
+  const pass2=document.getElementById('ag-password2').value;
+  if(!nombre){toast('❌ El nombre es requerido');return;}
+  if(!email){toast('❌ El email es requerido');return;}
+  if(!username){toast('❌ El usuario es requerido');return;}
+  if(!_agente_editing_id&&!pass){toast('❌ La contraseña es requerida para nuevos agentes');return;}
+  if(pass&&pass!==pass2){toast('❌ Las contraseñas no coinciden');return;}
+  if(pass&&pass.length<6){toast('❌ La contraseña debe tener al menos 6 caracteres');return;}
+  const permisos=readPermMatrix();
+  const record={
+    nombre,
+    apellido:document.getElementById('ag-apellido').value.trim(),
+    email,username,
+    licencia:document.getElementById('ag-licencia').value.trim(),
+    telefono:document.getElementById('ag-telefono').value.trim(),
+    whatsapp:document.getElementById('ag-whatsapp').value.trim(),
+    foto_url:document.getElementById('ag-foto').value.trim(),
+    rol:document.getElementById('ag-rol').value,
+    permisos,
+    activo:document.getElementById('ag-activo').checked,
+    notas_internas:document.getElementById('ag-notas').value.trim(),
+    updated_at:new Date().toISOString()
+  };
+  if(pass) record.password_hash=await hashPassword(pass);
+  let error;
+  if(_agente_editing_id){
+    const res=await sb.from('agentes_crm').update(record).eq('id',_agente_editing_id);
+    error=res.error;
+  } else {
+    if(!record.password_hash){toast('❌ Error al generar hash');return;}
+    const res=await sb.from('agentes_crm').insert([record]);
+    error=res.error;
+  }
+  if(error){toast('❌ Error: '+error.message);return;}
+  closeModal('modalAgente');
+  toast(_agente_editing_id?'✅ Agente actualizado':'✅ Agente creado');
+  renderAgentes();
+}
+
+// ── Toggle active status ──
+async function toggleAgenteStatus(id,activo){
+  if(!sb) return;
+  await sb.from('agentes_crm').update({activo}).eq('id',id);
+  toast(activo?'✅ Agente activado':'Agente desactivado');
+  renderAgentes();
+}
+
+// ── Delete agent ──
+async function deleteAgente(id,nombre){
+  if(!confirm(`¿Eliminar al agente ${nombre}? Esta acción no se puede deshacer.`)) return;
+  if(!sb) return;
+  const {error}=await sb.from('agentes_crm').delete().eq('id',id);
+  if(error){toast('❌ Error: '+error.message);return;}
+  toast('🗑 Agente eliminado');
+  renderAgentes();
+}
+
+// ── Change password modal ──
+let _chpass_agent_id=null;
+function openChangePass(id,nombre){
+  _chpass_agent_id=id;
+  document.getElementById('chpass-agent-name').textContent=nombre;
+  document.getElementById('chpass-new').value='';
+  document.getElementById('chpass-conf').value='';
+  openModal('modalChangePass');
+}
+async function saveNewPassword(){
+  if(!sb||!_chpass_agent_id) return;
+  const np=document.getElementById('chpass-new').value;
+  const cp=document.getElementById('chpass-conf').value;
+  if(!np||np.length<6){toast('❌ Contraseña mínimo 6 caracteres');return;}
+  if(np!==cp){toast('❌ Las contraseñas no coinciden');return;}
+  const hash=await hashPassword(np);
+  const {error}=await sb.from('agentes_crm').update({password_hash:hash,updated_at:new Date().toISOString()}).eq('id',_chpass_agent_id);
+  if(error){toast('❌ Error: '+error.message);return;}
+  closeModal('modalChangePass');
+  toast('🔑 Contraseña actualizada');
+}
+
+</script>
 </body>
 </html>
