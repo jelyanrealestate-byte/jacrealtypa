@@ -441,7 +441,8 @@ footer{background:#0d0d0d;padding:70px 60px 0}
         <option>Apartamento</option><option>Casa</option><option>Penthouse</option>
         <option>Local Comercial</option><option>Oficina</option><option>Terreno</option>
       </select>
-      <input id="web-filter-zona" oninput="webFilterProps()" onkeydown="if(event.key==='Enter')webFilterProps()" placeholder="🔍 Buscar zona, sector..." class="wf-inp" style="width:220px" />
+      <input id="web-filter-zona" list="zona-options" oninput="webFilterProps()" onkeydown="if(event.key==='Enter')webFilterProps()" placeholder="🔍 Zona / Corregimiento..." class="wf-inp" style="width:220px" autocomplete="off" />
+      <datalist id="zona-options"></datalist>
       <select id="web-filter-src" onchange="webFilterProps()" class="wf-sel">
         <option value="">⭐ Todas las fuentes</option>
         <option value="propia">🏆 Exclusivas JAC</option>
@@ -533,13 +534,26 @@ async function loadWebProps(){
       statEl.removeAttribute('data-target');
       statEl.innerHTML='1305<span>+</span>';
     }
-    if(_webProps.length){ grid.style.display='grid'; webRenderProps(_webProps); updateLoadMoreBtn(); }
+    if(_webProps.length){ grid.style.display='grid'; webRenderProps(_webProps); updateLoadMoreBtn(); _populateZonasDatalist(); }
     else { empty.style.display='block'; }
   }catch(e){
     loading.style.display='none';
     empty.style.display='block';
     console.warn('loadWebProps error:',e);
   }
+}
+
+function _populateZonasDatalist(){
+  // Extract unique zona values from loaded props and sort alphabetically
+  const dl=document.getElementById('zona-options');
+  if(!dl) return;
+  const raw=_webProps.map(p=>p.zona||'').filter(z=>z&&z!=='Panamá'&&z.length>2);
+  // For MLS zones (full addresses like "Calle X, Panamá"), extract the corregimiento/city part
+  const zonas=[...new Set(raw.map(z=>{
+    // If it's a comma-separated address, clean & use full string (searchable)
+    return z.replace(/\s{2,}/g,' ').trim();
+  }))].sort();
+  dl.innerHTML=zonas.map(z=>`<option value="${z.replace(/"/g,'&quot;')}"></option>`).join('');
 }
 
 function webRenderProps(list){
@@ -555,13 +569,13 @@ function webRenderProps(list){
   countEl.textContent=`${list.length} propiedad${list.length!==1?'es':''} disponible${list.length!==1?'s':''}`;
   _currentList=list;
   grid.innerHTML=list.map((p,i)=>{
-    const img=(p.fotos&&(Array.isArray(p.fotos)?p.fotos[0]:p.fotos))||'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=700&q=80';
+    const _f=p.fotos;const _fa=Array.isArray(_f)?_f:(()=>{try{return JSON.parse(_f||'[]');}catch(e){return[];}})();const img=(_fa[0]&&!_fa[0].startsWith('['))?_fa[0]:'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=700&q=80';
     const precio=p.precio?'$'+Number(p.precio).toLocaleString('en-US'):'Consultar';
     const opLabel=(p.operacion||'').toUpperCase();
     const isMLS=p._src==='mls';
     const waMsg=encodeURIComponent(`Hola JAC Realty 🏠 Me interesa la propiedad:\n*${p.titulo||'Propiedad en '+p.zona}*\n📍 ${p.zona||'Panamá'} · ${p.tipo||''}\n💰 ${precio}\n\n¿Pueden darme más información?`);
     return `<div onclick="openWebPropModal(_currentList[${i}])" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .25s,border-color .25s" onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='rgba(196,30,58,.4)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(255,255,255,.07)'">
-      <div style="height:210px;position:relative;overflow:hidden;background:#1a1a1a"><img src="${img}" loading="lazy" alt="${p.titulo||''}" onerror="this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=700&q=80'" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s">
+      <div style="height:210px;position:relative;overflow:hidden;background:#1a1a1a"><img src="${img}" loading="lazy" referrerpolicy="no-referrer" alt="${p.titulo||''}" onerror="this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=700&q=80'" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s">
         <div style="position:absolute;top:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap">
           ${opLabel?`<span style="background:#C41E3A;color:#fff;font-size:9px;font-weight:800;padding:4px 11px;border-radius:3px;letter-spacing:1.5px">${opLabel}</span>`:''}
           ${p.tipo?`<span style="background:rgba(0,0,0,.72);color:#fff;font-size:9px;padding:4px 10px;border-radius:3px;letter-spacing:.5px">${p.tipo}</span>`:''}

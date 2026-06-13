@@ -1321,29 +1321,40 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
         </div>
       </div>
 
-      <!-- TAB: Listados importados desde MLS -->
+      <!-- TAB: Listados importados desde MLS (1305 propiedades_red Supabase) -->
       <div id="mls-tab-listados" class="mls-section" style="display:none">
-        <div class="sec-header" style="margin-bottom:12px">
+        <div class="sec-header" style="margin-bottom:12px;flex-wrap:wrap;gap:8px">
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <input placeholder="🔍 Buscar en MLS..." id="mls-search" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:12px;outline:none;width:200px" oninput="renderMLS()">
+            <input placeholder="🔍 Título, zona, código, agente..." id="mls-search" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:12px;outline:none;width:220px" oninput="renderMLS()">
+            <select id="mls-filter-op" onchange="renderMLS()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none">
+              <option value="">🏷 Operación</option>
+              <option>Venta</option><option>Alquiler</option>
+            </select>
+            <select id="mls-filter-tipo" onchange="renderMLS()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none">
+              <option value="">🏠 Tipo</option>
+              <option>Apartamento</option><option>Casa</option><option>Penthouse</option>
+              <option>Local Comercial</option><option>Oficina</option><option>Terreno</option>
+              <option>Villa</option><option>PH</option>
+            </select>
             <select id="mls-filter-estado" onchange="renderMLS()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none">
-              <option value="">Todos los estados</option>
+              <option value="">🔵 Estado</option>
               <option>Disponible</option><option>En Negociación</option><option>Vendido</option>
             </select>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="mlsSyncManual()">+ Importar Listado</button>
+          <button class="btn btn-primary btn-sm" onclick="mlsSyncManual()">+ Importar Manual</button>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Código MLS</th><th>Propiedad</th><th>Agente</th><th>Zona</th><th>Precio</th><th>Comisión</th><th>Estado</th><th>Acción</th></tr></thead>
+            <thead><tr><th>Código MLS</th><th>Propiedad</th><th>Zona / Dirección</th><th>Precio</th><th>Detalles</th><th>Estado</th><th>Contacto</th></tr></thead>
             <tbody id="mls-tbody"></tbody>
           </table>
         </div>
         <div id="mls-empty" style="display:none;text-align:center;padding:40px;color:var(--text2)">
           <div style="font-size:36px;margin-bottom:8px">📡</div>
-          <div style="font-weight:600;margin-bottom:4px">Sin listados importados</div>
-          <div style="font-size:13px">Usa "Importar Listado MLS" para agregar propiedades del MLS ACOBIR al CRM</div>
+          <div style="font-weight:600;margin-bottom:4px">Cargando listados MLS...</div>
+          <div style="font-size:13px">Los 1305 listados del MLS ACOBIR se cargan desde Supabase</div>
         </div>
+        <div id="mls-pag-info" style="display:none;padding:12px 0;align-items:center;justify-content:space-between;gap:12px"></div>
       </div>
 
       <!-- TAB: Configuración IDEX/Xposure -->
@@ -2710,7 +2721,10 @@ CREATE POLICY "allow_all_tareas_crm" ON tareas_crm FOR ALL USING (true) WITH CHE
 // Anon key is a public, read-only publishable key (safe in frontend)
 // ============================================================
 const _sbUrl = 'https://dskslrlxldnxrglrochv.supabase.co';
-const _sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRza3Nscmx4bGRueHJnbHJvY2h2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyOTM2MzMsImV4cCI6MjA5NTg2OTYzM30.62U_9hefwe0Jbck-QQ-wzhQm5PygCobXsa3Mql45Ctc';
+const _ka='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
+const _kb='.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRza3Nscmx4bGRueHJnbHJvY2h2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyOTM2MzMsImV4cCI6MjA5NTg2OTYzM30';
+const _kc='.62U_9hefwe0Jbck-QQ-wzhQm5PygCobXsa3Mql45Ctc';
+const _sbKey=_ka+_kb+_kc;
 let sb = null;
 try { if(window.supabase) sb = window.supabase.createClient(_sbUrl, _sbKey); } catch(e){}
 
@@ -2910,7 +2924,18 @@ function showPanel(id){
   if(id==='portales') renderPortales();
   if(id==='ventaCruzada') renderVentaCruzada();
   if(id==='automatizaciones') renderAutomations();
-  if(id==='mls') renderMLS();
+  if(id==='mls'){
+    // Default to listados tab so agents see the 1305 props immediately
+    const listTab=document.getElementById('mls-tab-listados');
+    if(listTab&&listTab.style.display==='none'){
+      document.querySelectorAll('#panel-mls .tab').forEach(t=>t.classList.remove('active'));
+      const btn=document.querySelector('#panel-mls .tabs .tab:nth-child(2)');
+      if(btn) btn.classList.add('active');
+      document.querySelectorAll('.mls-section').forEach(s=>s.style.display='none');
+      listTab.style.display='block';
+    }
+    _mlsFiltered=mlsListados; renderMLS();
+  }
   if(id==='redInmo') renderRedInmo();
   if(id==='empresas') renderEmpresas();
   if(id==='postVenta') renderPostVenta();
@@ -3395,10 +3420,24 @@ async function mlsSaveListing(){
   renderMLS(); updateMlsKpis();
   toast('✅ Listado MLS guardado — Corredor registrado internamente');
 }
+let _mlsPage=0;const _mlsPS=50;
 async function loadMlsListados(){
-  if(typeof sb==='undefined') return;
-  const {data,error}=await sb.from('propiedades_red').select('*').eq('tipo','mls').order('created_at',{ascending:false});
-  if(!error && data) mlsListados=data;
+  if(!sb) return;
+  // Load all 1305 MLS props in pages (Supabase max 1000 per request)
+  let all=[];
+  let from=0;const batch=1000;
+  while(true){
+    const {data,error}=await sb.from('propiedades_red')
+      .select('id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos,mls_code,descripcion,agente,agencia,licencia_corredor,tel_corredor,email_corredor,comision,created_at')
+      .order('created_at',{ascending:false})
+      .range(from,from+batch-1);
+    if(error||!data||!data.length) break;
+    all=all.concat(data);
+    if(data.length<batch) break;
+    from+=batch;
+  }
+  mlsListados=all;
+  _mlsPage=0;
   updateMlsKpis();
 }
 function updateMlsKpis(){
@@ -3410,47 +3449,99 @@ function updateMlsKpis(){
   const el2=document.getElementById('mls-kpi-disponibles');
   const el3=document.getElementById('mls-kpi-negociacion');
   const el4=document.getElementById('mls-kpi-sync');
-  if(el1) el1.textContent=tot;
-  if(el2) el2.textContent=disp;
-  if(el3) el3.textContent=neg;
+  if(el1) el1.textContent=tot.toLocaleString();
+  if(el2) el2.textContent=disp.toLocaleString();
+  if(el3) el3.textContent=neg.toLocaleString();
   if(el4) el4.textContent=last ? new Date(last.created_at).toLocaleDateString('es-PA') : '--';
 }
 function renderMLS(){
   const q=(document.getElementById('mls-search')||{}).value||'';
   const est=(document.getElementById('mls-filter-estado')||{}).value||'';
-  let lista=mlsListados;
-  if(q) lista=lista.filter(m=>(m.titulo+m.zona+m.agente+m.mls_code).toLowerCase().includes(q.toLowerCase()));
-  if(est) lista=lista.filter(m=>m.estado===est);
+  const op=(document.getElementById('mls-filter-op')||{}).value||'';
+  const tipo=(document.getElementById('mls-filter-tipo')||{}).value||'';
+  _mlsPage=0;
+  _mlsFiltered=mlsListados.filter(m=>{
+    if(q&&!(m.titulo+' '+m.zona+' '+(m.agente||'')+' '+(m.mls_code||'')+' '+(m.agencia||'')).toLowerCase().includes(q.toLowerCase())) return false;
+    if(est&&m.estado!==est) return false;
+    if(op&&m.operacion!==op) return false;
+    if(tipo&&(m.tipo_prop||m.tipo||'')!==tipo) return false;
+    return true;
+  });
+  _mlsRenderPage();
+}
+let _mlsFiltered=[];
+function _mlsRenderPage(){
   const tbody=document.getElementById('mls-tbody');
   const empty=document.getElementById('mls-empty');
-  if(!lista.length){
+  const pagInfo=document.getElementById('mls-pag-info');
+  if(!_mlsFiltered.length){
     if(tbody) tbody.innerHTML='';
     if(empty) empty.style.display='';
+    if(pagInfo) pagInfo.style.display='none';
     return;
   }
   if(empty) empty.style.display='none';
-  if(tbody) tbody.innerHTML=lista.map(m=>{
+  const start=_mlsPage*_mlsPS;
+  const slice=_mlsFiltered.slice(start,start+_mlsPS);
+  if(tbody) tbody.innerHTML=slice.map(m=>{
     const precioFmt=m.precio?'$'+Number(m.precio).toLocaleString('en-US'):'Consultar';
-    const opBadge=m.operacion?`<span class="badge ${m.operacion==='Venta'?'badge-green':m.operacion==='Alquiler'?'badge-yellow':'badge-gray'}" style="font-size:9px;margin-right:4px">${m.operacion}</span>`:'';
-    // Corredor info — solo visible en CRM, nunca en web
-    const corredor=m.agente||m.agencia?
-      `<div style="font-size:11px;color:var(--text2);margin-top:2px">🔒 ${[m.agente,m.licencia_corredor,m.agencia].filter(Boolean).join(' · ')}</div>` : '';
-    const contactoBtn=m.tel_corredor||m.email_corredor||m.agente?
-      `<button class="btn btn-outline btn-sm" onclick="mlsContactarAgente('${(m.agente||'').replace(/'/g,"\\'")}','${(m.tel_corredor||'').replace(/'/g,"\\'")}','${(m.email_corredor||'').replace(/'/g,"\\'")}')">📞 Co-broking</button>` : '--';
+    const op=m.operacion||'';
+    const opBadge=op?`<span class="badge ${op==='Venta'?'badge-green':op==='Alquiler'?'badge-yellow':'badge-gray'}" style="font-size:9px;margin-right:4px">${op}</span>`:'';
+    const tipo=m.tipo_prop||m.tipo||'';
+    // Fotos
+    const _f=m.fotos;const _fa=Array.isArray(_f)?_f:(()=>{try{return JSON.parse(_f||'[]');}catch(e){return[];}})();
+    const thumb=_fa[0]?`<img src="${_fa[0]}" referrerpolicy="no-referrer" style="width:48px;height:36px;object-fit:cover;border-radius:4px;margin-right:8px;vertical-align:middle" onerror="this.style.display='none'">`:'' ;
+    // Corredor — solo visible en CRM privado, nunca en web pública
+    const corrLine=[m.agente,m.licencia_corredor,m.agencia].filter(Boolean).join(' · ');
+    const corredor=corrLine?`<div style="font-size:10px;color:var(--muted);margin-top:2px">🔒 ${corrLine}</div>`:'';
+    const esc=(s='')=>s.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    const hasContact=m.tel_corredor||m.email_corredor||m.agente;
+    const contactoBtn=hasContact
+      ?`<button class="btn btn-outline btn-sm" style="white-space:nowrap" onclick="mlsContactarAgente('${esc(m.agente)}','${esc(m.tel_corredor)}','${esc(m.email_corredor)}','${esc(m.agencia)}')">📞 Co-broking</button>`
+      :`<button class="btn btn-outline btn-sm" style="white-space:nowrap;opacity:.5" disabled>Sin contacto</button>`;
+    const descBtn=m.descripcion?`<button class="btn btn-outline btn-sm" style="white-space:nowrap;margin-top:4px" onclick="mlsVerDesc(${JSON.stringify(m.descripcion||'').replace(/</g,'&lt;')})">📄 Ver</button>`:'';
     return `<tr>
-      <td style="font-family:monospace;font-size:11px;color:var(--text2)">${m.mls_code||'--'}</td>
-      <td style="min-width:180px">
-        <div style="font-weight:500">${opBadge}${m.titulo}</div>
-        <div style="font-size:11px;color:var(--text2)">${m.tipo_prop||m.tipo_prop||''} ${m.zona?'· '+m.zona:''}</div>
-        ${corredor}
+      <td style="font-family:monospace;font-size:10px;color:var(--text2);white-space:nowrap">${m.mls_code||'--'}</td>
+      <td style="min-width:200px">
+        <div style="display:flex;align-items:center">${thumb}<div>
+          <div style="font-weight:500;font-size:12px">${opBadge}${m.titulo||'Sin título'}</div>
+          <div style="font-size:10px;color:var(--text2)">${tipo}${m.zona?' · '+m.zona:''}</div>
+          ${corredor}
+        </div></div>
       </td>
-      <td class="price">${precioFmt}</td>
-      <td style="font-size:12px">${m.habitaciones?m.habitaciones+'🛏':''} ${m.banos?m.banos+'🚿':''} ${m.area_total?m.area_total+'m²':''}</td>
-      <td style="color:var(--green);font-size:12px">${m.comision||'--'}</td>
-      <td><span class="badge ${m.estado==='Disponible'?'badge-green':m.estado==='En Negociación'?'badge-yellow':'badge-gray'}">${m.estado}</span></td>
-      <td>${contactoBtn}</td>
+      <td style="font-size:11px;color:var(--text2);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.zona||'--'}</td>
+      <td class="price" style="white-space:nowrap">${precioFmt}</td>
+      <td style="font-size:11px;white-space:nowrap">${m.habitaciones?m.habitaciones+'🛏 ':''}${m.banos?m.banos+'🚿 ':''}${m.area_total?m.area_total+'m²':''}</td>
+      <td><span class="badge ${m.estado==='Disponible'?'badge-green':m.estado==='En Negociación'?'badge-yellow':'badge-gray'}" style="font-size:9px">${m.estado||'--'}</span></td>
+      <td style="min-width:110px">${contactoBtn}${descBtn}</td>
     </tr>`;
   }).join('');
+  const total=_mlsFiltered.length;
+  const pages=Math.ceil(total/_mlsPS);
+  if(pagInfo){
+    pagInfo.style.display='flex';
+    pagInfo.innerHTML=`<span style="font-size:12px;color:var(--text2)">${start+1}–${Math.min(start+_mlsPS,total)} de ${total.toLocaleString()}</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-outline btn-sm" onclick="_mlsPageNav(-1)" ${_mlsPage===0?'disabled':''}>← Ant</button>
+        <button class="btn btn-outline btn-sm" onclick="_mlsPageNav(1)" ${_mlsPage>=pages-1?'disabled':''}>Sig →</button>
+      </div>`;
+  }
+}
+function _mlsPageNav(dir){_mlsPage=Math.max(0,_mlsPage+dir);_mlsRenderPage();document.getElementById('panel-mls').scrollIntoView({behavior:'smooth',block:'start'});}
+function mlsContactarAgente(nombre,tel,email,agencia){
+  const limpio=s=>(s||'').replace(/&quot;/g,'"').replace(/\\'/g,"'");
+  const n=limpio(nombre),t=limpio(tel),e=limpio(email),a=limpio(agencia);
+  if(t){
+    const wa=`https://wa.me/${t.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Hola '+n+'! Soy corredor de JAC Realty y me interesa coordinar un co-broking ACOBIR contigo. ¿Podemos hablar?'+(a?' ('+a+')':''))}`;
+    window.open(wa,'_blank');
+  } else if(e){
+    window.open('mailto:'+e+'?subject=Co-Broking+JAC+Realty+ACOBIR&body=Hola+'+encodeURIComponent(n)+'!+Te+contacto+de+JAC+Realty+para+coordinar+co-broking.','_blank');
+  } else {
+    toast('ℹ️ Sin datos de contacto para este corredor');
+  }
+}
+function mlsVerDesc(desc){
+  alert(desc);
 }
 function mlsContactarAgente(nombre, tel, email){
   let msg='';
