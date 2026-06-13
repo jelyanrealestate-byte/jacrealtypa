@@ -198,12 +198,12 @@ section{padding:100px 60px}
 .portal-inner{position:relative;z-index:1;max-width:760px;margin:0 auto}
 .portal-eyebrow{display:flex;align-items:center;gap:16px;justify-content:center;margin-bottom:24px}
 .portal-eyebrow span{display:block;width:40px;height:1px;background:rgba(196,30,58,.5)}
-.portal-eyebrow p{color:rgba(155,142,133,.7);font-size:10px;letter-spacing:3.5px;text-transform:uppercase}
-.portal-title{font-family:var(--serif);font-size:clamp(32px,4vw,52px);font-weight:300;color:white;line-height:1.1;margin-bottom:16px}
-.portal-title em{font-style:italic;color:rgba(232,227,223,.7)}
-.portal-sub{font-size:14px;color:rgba(255,255,255,.45);line-height:1.85;max-width:520px;margin:0 auto 42px}
+.portal-eyebrow p{color:rgba(220,210,200,.85);font-size:10px;letter-spacing:3.5px;text-transform:uppercase}
+.portal-title{font-family:var(--serif);font-size:clamp(32px,4vw,52px);font-weight:300;color:#ffffff;line-height:1.1;margin-bottom:16px;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+.portal-title em{font-style:italic;color:rgba(240,230,220,.9)}
+.portal-sub{font-size:14px;color:rgba(255,255,255,.72);line-height:1.85;max-width:520px;margin:0 auto 42px}
 .portal-features{display:flex;gap:0;justify-content:center;margin-bottom:42px;flex-wrap:wrap}
-.portal-feat{display:flex;align-items:center;gap:8px;padding:12px 22px;border:1px solid rgba(155,142,133,.15);color:rgba(255,255,255,.55);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:500;margin:-1px}
+.portal-feat{display:flex;align-items:center;gap:8px;padding:12px 22px;border:1px solid rgba(196,30,58,.25);color:rgba(255,255,255,.82);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:500;margin:-1px}
 .portal-feat svg{color:var(--red);flex-shrink:0}
 .portal-btn{display:inline-flex;align-items:center;gap:12px;background:var(--red);color:white;padding:18px 52px;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;text-decoration:none;transition:all .35s;border:1px solid var(--red)}
 .portal-btn:hover{background:transparent;color:var(--red);letter-spacing:3px}
@@ -413,9 +413,19 @@ footer{background:#0d0d0d;padding:70px 60px 0}
 
     <!-- Header -->
     <div style="text-align:center;margin-bottom:52px">
-      <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(196,30,58,.12);border:1px solid rgba(196,30,58,.25);padding:6px 18px;border-radius:20px;margin-bottom:20px">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C41E3A" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
-        <span style="font-size:11px;color:#C41E3A;letter-spacing:2px;text-transform:uppercase;font-weight:600">MLS ACOBIR · Miembro Activo</span>
+      <div style="display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:20px">
+        <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(196,30,58,.12);border:1px solid rgba(196,30,58,.25);padding:6px 18px;border-radius:20px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C41E3A" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+          <span style="font-size:11px;color:#C41E3A;letter-spacing:2px;text-transform:uppercase;font-weight:600">MLS ACOBIR · Miembro Activo</span>
+        </div>
+        <!-- ACOBIR Logo badge -->
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);padding:5px 14px;border-radius:20px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          <span style="font-size:10px;color:rgba(255,255,255,.6);letter-spacing:1.5px;text-transform:uppercase;font-weight:600">ACOBIR</span>
+          <span style="width:1px;height:14px;background:rgba(255,255,255,.2)"></span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+          <span style="font-size:10px;color:rgba(255,255,255,.6);letter-spacing:1.5px;text-transform:uppercase;font-weight:600">MLS Panamá</span>
+        </div>
       </div>
       <h2 style="font-family:'Playfair Display',Georgia,serif;font-size:clamp(32px,5vw,54px);font-weight:300;color:#fff;line-height:1.1;margin-bottom:14px">Propiedades <em style="font-style:italic;color:rgba(232,227,223,.8)">Disponibles</em></h2>
       <p style="font-size:15px;color:rgba(255,255,255,.5);max-width:540px;margin:0 auto;line-height:1.7">Propiedades en exclusiva, co-exclusiva y del inventario MLS. Contáctanos — somos tu punto de contacto para cualquier propiedad en Panamá.</p>
@@ -647,11 +657,12 @@ function webRenderProps(list){
         <div style="font-size:12px;color:rgba(255,255,255,.38);margin-bottom:12px;display:flex;align-items:center;gap:4px">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${p.zona||'Panamá'}
         </div>
-        <div style="display:flex;gap:14px;font-size:11px;color:rgba(255,255,255,.4);margin-bottom:16px;flex-wrap:wrap">
+        <div style="display:flex;gap:14px;font-size:11px;color:rgba(255,255,255,.4);margin-bottom:10px;flex-wrap:wrap">
           ${p.habitaciones?`<span>🛏 ${p.habitaciones} hab</span>`:''}
           ${p.banos?`<span>🚿 ${p.banos} baños</span>`:''}
           ${p.area_total?`<span>📐 ${p.area_total} m²</span>`:''}
         </div>
+        ${p.descripcion?`<div style="font-size:11px;color:rgba(255,255,255,.38);line-height:1.6;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${p.descripcion}</div>`:''}
         <a href="https://wa.me/${_JAC_WA}?text=${waMsg}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
           style="display:flex;align-items:center;justify-content:center;gap:8px;background:#C41E3A;color:#fff;padding:11px;border-radius:4px;font-size:10px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;font-weight:700"
           onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
@@ -670,12 +681,15 @@ function webFilterProps(){
   const distrito=(document.getElementById('web-filter-distrito')||{}).value||'';
   const src=document.getElementById('web-filter-src').value;
   const precio=document.getElementById('web-filter-precio').value;
+  // Hero search text zona takes priority when select has no match
+  const zonaText=(!zona&&typeof _heroZonaText!=='undefined')?_heroZonaText:'';
+  const zonaFilter=zona||zonaText;
   let list=_webProps;
   if(op) list=list.filter(p=>(p.operacion||'').toLowerCase()===op.toLowerCase());
   if(tipo) list=list.filter(p=>(p.tipo||'')===tipo);
-  if(zona){
-    const zl=zona.toLowerCase();
-    list=list.filter(p=>(p.zona||'').toLowerCase().includes(zl)||(p.corregimiento||'').toLowerCase().includes(zl));
+  if(zonaFilter){
+    const zl=zonaFilter.toLowerCase();
+    list=list.filter(p=>(p.zona||'').toLowerCase().includes(zl)||(p.corregimiento||'').toLowerCase().includes(zl)||(p.titulo||'').toLowerCase().includes(zl));
   }
   if(distrito){
     const dl=distrito.toLowerCase();
@@ -804,15 +818,23 @@ function openWebPropModal(p){
   document.body.style.overflow='hidden';
 }
 
+let _heroZonaText='';
 function heroSearch(){
   const op=document.getElementById('hsb-op').value;
   const tipo=document.getElementById('hsb-tipo').value;
-  const zona=document.getElementById('hsb-zona').value;
+  const zona=document.getElementById('hsb-zona').value.trim();
   const precio=document.getElementById('hsb-precio').value;
   if(op) document.getElementById('web-filter-op').value=op;
   if(tipo) document.getElementById('web-filter-tipo').value=tipo;
-  if(zona) document.getElementById('web-filter-zona').value=zona;
   if(precio) document.getElementById('web-filter-precio').value=precio;
+  // Zona is a text input — try to match in select options, else use text search directly
+  _heroZonaText=zona;
+  if(zona){
+    const sel=document.getElementById('web-filter-zona');
+    const opts=Array.from(sel.options);
+    const match=opts.find(o=>o.value.toLowerCase()===zona.toLowerCase()||o.text.toLowerCase().includes(zona.toLowerCase()));
+    if(match) sel.value=match.value; else sel.value=''; // clear select, text search handles it
+  }
   document.getElementById('propiedades-mls').scrollIntoView({behavior:'smooth',block:'start'});
   setTimeout(()=>webFilterProps(),400);
 }

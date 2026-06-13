@@ -107,6 +107,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .badge-yellow{background:rgba(251,191,36,.15);color:#f59e0b}
 .badge-gray{background:var(--card2);color:var(--text2)}
 .mls-section{width:100%}
+.guardada-board{display:flex;gap:14px;overflow-x:auto;padding-bottom:14px}
+.guardada-stage-col{min-width:190px;flex-shrink:0;background:var(--card2);border-radius:12px;padding:10px;border:1px solid var(--border)}
 .tag-venta{background:rgba(59,130,246,.2);color:#60a5fa}
 .tag-alquiler{background:rgba(168,85,247,.2);color:#c084fc}
 .tag-preventa{background:rgba(232,160,32,.2);color:var(--accent2)}
@@ -639,6 +641,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -1285,6 +1288,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
         <button class="tab active" onclick="mlsTab(this,'mls-tab-portal')">🖥️ Portal Xposure™</button>
         <button class="tab" onclick="mlsTab(this,'mls-tab-listados')">📋 Listados Importados</button>
         <button class="tab" onclick="mlsTab(this,'mls-tab-config')">⚙️ Configuración</button>
+        <button class="tab" onclick="mlsTab(this,'mls-tab-guardadas')">📌 Mis Guardadas <span id='badge-guardadas' style='background:var(--accent);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px'>0</span></button>
       </div>
 
       <!-- TAB: Portal Xposure embed -->
@@ -1422,7 +1426,106 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       </div>
     </div>
 
-    <!-- ========== RED INMOBILIARIA v2 ========== -->
+    <!-- ========== MODAL MLS GUARDAR ========== -->
+    <div class="modal-bg" id="modalMlsGuardar" onclick="if(event.target===this)closeModal('modalMlsGuardar')">
+      <div class="modal" style="width:600px;max-width:98vw">
+        <div class="modal-header">
+          <span class="modal-title">💾 Guardar en CRM / Seguimiento MLS</span>
+          <button class="modal-close" onclick="closeModal('modalMlsGuardar')">✕</button>
+        </div>
+        <input type="hidden" id="mg-idx">
+        <div id="mg-prop-resumen" style="background:var(--card2);border-radius:8px;padding:12px;margin-bottom:14px;border:1px solid var(--border);font-size:12px;color:var(--text2)"></div>
+        <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;padding:6px 10px;background:var(--card2);border-radius:6px">📋 Clasificación en CRM</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Tipo de gestión</label>
+            <select id="mg-tipo">
+              <option value="co-broking">Co-Broking ACOBIR</option>
+              <option value="presentar-cliente">Presentar a Cliente</option>
+              <option value="interesado">Propiedad de Interés</option>
+              <option value="seguimiento">En Seguimiento</option>
+              <option value="negociacion">En Negociación</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Prioridad</label>
+            <select id="mg-prioridad">
+              <option value="alta">🔴 Alta</option>
+              <option value="media" selected>🟡 Media</option>
+              <option value="baja">🟢 Baja</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Lead / Cliente vinculado</label>
+            <input id="mg-cliente" placeholder="Nombre del cliente interesado (opcional)">
+          </div>
+          <div class="form-group">
+            <label>Fecha de seguimiento</label>
+            <input id="mg-fecha-seguimiento" type="date">
+          </div>
+          <div class="form-group form-full">
+            <label>Notas / Información adicional</label>
+            <textarea id="mg-notas" placeholder="Observaciones internas, condiciones especiales, estado de negociación, datos adicionales del corredor..." style="min-height:90px"></textarea>
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:12px 0 8px;padding:6px 10px;background:var(--card2);border-radius:6px">⚡ Automatización de Seguimiento</div>
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px">
+            <input type="checkbox" id="mg-auto-sequence" checked style="width:16px;height:16px;accent-color:var(--accent)">
+            <span>Crear secuencia automática de tareas de seguimiento</span>
+          </label>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;padding-left:24px">Alta: D+1, D+2, D+4, D+7 · Media: D+1, D+3, D+7 · Baja: D+3, D+14</div>
+          <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="mg-seq-type" value="venta" checked style="accent-color:var(--accent)"> 🏠 Venta</label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="mg-seq-type" value="arriendo" style="accent-color:var(--accent)"> 🔑 Arriendo</label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="mg-seq-type" value="cobrok" style="accent-color:var(--accent)"> 🤝 Co-Broking</label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="mg-seq-type" value="inversion" style="accent-color:var(--accent)"> 📈 Inversión</label>
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:12px 0 8px;padding:6px 10px;background:var(--card2);border-radius:6px">📢 Acciones Rápidas</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px" id="mg-acciones-rapidas"></div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="closeModal('modalMlsGuardar')">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveMlsGuardada()">💾 Guardar en CRM</button>
+        </div>
+      </div>
+    </div>
+
+
+      <!-- ===== SEGUIMIENTO MLS GUARDADAS ===== -->
+      <div id="mls-tab-guardadas" class="mls-section" style="display:none">
+        <!-- KPI bar -->
+        <div class="kpi-grid" style="margin-bottom:16px" id="guardadas-kpi-row">
+          <div class="kpi-card"><div class="kpi-label">Guardadas</div><div class="kpi-value" id="gkpi-total" style="color:var(--accent)">0</div></div>
+          <div class="kpi-card"><div class="kpi-label">En Seguimiento</div><div class="kpi-value" id="gkpi-activas" style="color:var(--blue)">0</div></div>
+          <div class="kpi-card"><div class="kpi-label">Visitas Prog.</div><div class="kpi-value" id="gkpi-visitas" style="color:var(--purple)">0</div></div>
+          <div class="kpi-card"><div class="kpi-label">Cierres</div><div class="kpi-value" id="gkpi-cierres" style="color:var(--green)">0</div></div>
+        </div>
+        <!-- Filter bar -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+          <select id="gf-stage" onchange="renderMlsGuardadas()" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:12px">
+            <option value="">Todas las etapas</option>
+            <option value="guardado">💾 Guardado</option>
+            <option value="promovido">📢 Promovido</option>
+            <option value="contacto">📞 Contacto</option>
+            <option value="visita">🏠 Visita</option>
+            <option value="oferta">💰 Oferta</option>
+            <option value="cierre">🏆 Cierre</option>
+          </select>
+          <select id="gf-pri" onchange="renderMlsGuardadas()" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:12px">
+            <option value="">Todas las prioridades</option>
+            <option value="alta">🔴 Alta</option>
+            <option value="media">🟡 Media</option>
+            <option value="baja">🟢 Baja</option>
+          </select>
+          <input id="gf-q" placeholder="Buscar..." oninput="renderMlsGuardadas()" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:12px;width:160px">
+          <button class="btn btn-outline btn-sm" onclick="showPanel('tareas')">📋 Ver Tareas Auto</button>
+        </div>
+        <!-- Kanban board -->
+        <div id="mls-guardadas-board" style="display:flex;gap:14px;overflow-x:auto;padding-bottom:14px;min-height:300px"></div>
+      </div>
+
+        <!-- ========== RED INMOBILIARIA v2 ========== -->
     <div class="panel" id="panel-redInmo">
       <div class="kpi-grid" style="margin-bottom:18px">
         <div class="kpi-card"><div class="kpi-label">Aliados en Red</div><div class="kpi-value" style="color:var(--purple)" id="red-kpi-agentes">0</div><div class="kpi-delta up">Registrados</div></div>
@@ -1659,7 +1762,17 @@ CREATE POLICY "allow_all_clientes_activos" ON clientes_activos FOR ALL USING (tr
 CREATE POLICY "allow_all_contactos_crm" ON contactos_crm FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "allow_all_empresas_crm" ON empresas_crm FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "allow_all_notas_crm" ON notas_crm FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "allow_all_tareas_crm" ON tareas_crm FOR ALL USING (true) WITH CHECK (true);</textarea>
+CREATE POLICY "allow_all_tareas_crm" ON tareas_crm FOR ALL USING (true) WITH CHECK (true);
+
+-- MLS Seguimiento (ecosistema automatizado)
+CREATE TABLE IF NOT EXISTS mls_seguimiento (
+  id TEXT PRIMARY KEY,
+  mls_code TEXT,
+  payload JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE mls_seguimiento ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all_mls_seguimiento" ON mls_seguimiento FOR ALL USING (true) WITH CHECK (true);</textarea>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('setup-sql-text').value).then(()=>toast('✅ SQL copiado al portapapeles'))">📋 Copiar SQL</button>
         <a href="https://supabase.com/dashboard/project/dskslrlxldnxrglrochv/sql/new" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none">🔗 Abrir Supabase SQL Editor</a>
@@ -1768,6 +1881,27 @@ CREATE POLICY "allow_all_tareas_crm" ON tareas_crm FOR ALL USING (true) WITH CHE
       <div class="form-group form-full"><label>Nombre del Cliente *</label><input id="pv-cliente" placeholder="Nombre completo del cliente"></div>
       <div class="form-group"><label>Teléfono</label><input id="pv-tel" placeholder="+507 6000-0000"></div>
       <div class="form-group"><label>Email</label><input id="pv-email" type="email" placeholder="cliente@email.com"></div>
+      <div class="form-group"><label>Tipo de cliente</label>
+        <select id="pv-tipo-cliente" onchange="const s=document.getElementById('pv-empresa-section');if(s)s.style.display=this.value==='empresa'?'':'none'">
+          <option value="persona">Persona Natural</option>
+          <option value="empresa">Empresa / Jurídica</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Identificación (cédula / pasaporte)</label><input id="pv-cedula" placeholder="8-123-4567"></div>
+    </div>
+    <!-- Empresa section for post-venta -->
+    <div id="pv-empresa-section" style="display:none">
+      <div style="font-size:11px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:.8px;margin:10px 0 8px;padding:6px 10px;background:rgba(139,92,246,.07);border-radius:6px;border:1px solid rgba(139,92,246,.2)">🏢 Datos de la Empresa</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Nombre empresa</label><input id="pv-em-nombre" placeholder="Razón social completa"></div>
+        <div class="form-group"><label>RUC / NIT</label><input id="pv-em-ruc" placeholder="000-000-0"></div>
+        <div class="form-group"><label>Sector</label>
+          <select id="pv-em-sector"><option value="">-- Sector --</option><option>Inmobiliario</option><option>Construcción</option><option>Financiero</option><option>Tecnología</option><option>Salud</option><option>Retail</option><option>Hotelería</option><option>Otro</option></select>
+        </div>
+        <div class="form-group"><label>Rep. Legal</label><input id="pv-em-rep" placeholder="Nombre del representante legal"></div>
+        <div class="form-group"><label>Cargo</label><input id="pv-em-cargo" placeholder="CEO, Director, Gerente..."></div>
+        <div class="form-group"><label>Web empresa</label><input id="pv-em-web" placeholder="https://empresa.com"></div>
+      </div>
     </div>
     <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">🏠 Datos del Cierre</div>
     <div class="form-grid">
@@ -1885,6 +2019,24 @@ CREATE POLICY "allow_all_tareas_crm" ON tareas_crm FOR ALL USING (true) WITH CHE
     <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:var(--card2);border-radius:6px">📝 Descripción</div>
     <div class="form-grid">
       <div class="form-group form-full"><label>Descripción adicional</label><textarea id="p-desc" placeholder="Características especiales, vista, acabados, ubicación exacta..."></textarea></div>
+    </div>
+    <!-- MLS ACOBIR / Corredor (replicado del formulario MLS) -->
+    <div style="font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:rgba(59,130,246,.07);border-radius:6px;border:1px solid rgba(59,130,246,.2)">📋 Datos MLS ACOBIR / Corredor — Co-Broking</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Código MLS</label><input id="p-mls-code" placeholder="MLS-12345"></div>
+      <div class="form-group"><label>Comisión Co-Broking (%)</label><input id="p-comision" placeholder="3" type="number" step="0.5" min="0" max="10"></div>
+      <div class="form-group"><label>Agente / Corredor</label><input id="p-agente" placeholder="Nombre del corredor"></div>
+      <div class="form-group"><label>Licencia Corredor</label><input id="p-licencia-corredor" placeholder="PN-0000"></div>
+      <div class="form-group"><label>Agencia</label><input id="p-agencia" placeholder="Nombre de la agencia"></div>
+      <div class="form-group"><label>Teléfono Corredor</label><input id="p-tel-corredor" placeholder="+507 6000-0000"></div>
+      <div class="form-group"><label>Email Corredor</label><input id="p-email-corredor" type="email" placeholder="corredor@agencia.com"></div>
+      <div class="form-group"><label>Exclusividad</label>
+        <select id="p-exclusividad"><option value="">-- Seleccionar --</option><option>Exclusiva</option><option>No exclusiva</option><option>Compartida ACOBIR</option></select>
+      </div>
+      <div class="form-group"><label>Tipo MLS</label>
+        <select id="p-tipo-mls"><option value="">-- Tipo --</option><option>ACOBIR</option><option>ACOBIR + Exposure</option><option>Exposure Only</option><option>Wasi</option><option>Propia</option></select>
+      </div>
+      <div class="form-group"><label>Fecha vencimiento MLS</label><input id="p-fecha-venc-mls" type="date"></div>
     </div>
     <!-- Datos privados propietario -->
     <div style="font-size:11px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding:6px 10px;background:rgba(239,68,68,.07);border-radius:6px;border:1px solid rgba(239,68,68,.25)">🔒 Datos Privados del Propietario — Solo uso interno · No se comparte con clientes</div>
@@ -2848,6 +3000,7 @@ async function loadSupabaseData(){
     // Re-render all modules
     renderDashboard(); renderProps(); renderLeads(); renderCalendar(); updateBadges();
     renderClients(); renderContacts(); renderNotas(); renderTareas();
+  loadMlsGuardadas();
     if(document.getElementById('panel-redInmo').classList.contains('active')) renderRedInmo();
     document.getElementById('badge-leads').textContent=leads.filter(l=>l.status==='Nuevo').length;
     document.getElementById('badge-red').textContent=redContacts.length;
@@ -2979,6 +3132,7 @@ function showPanel(id){
     if(!mlsListados.length) loadMlsListados();
   }
   if(id==='redInmo') renderRedInmo();
+  if(id==='mls') { setTimeout(()=>{const gb=document.getElementById('badge-guardadas');if(gb)gb.textContent=mlsGuardadas.length;},100); }
   if(id==='empresas') renderEmpresas();
   if(id==='postVenta') renderPostVenta();
   if(id==='reportes') updateReportKPIs();
@@ -3068,11 +3222,12 @@ function renderProps(data){
     <td class="price">${p.op==='Venta'||p.op==='Pre-venta'?fmtPrice(p.precio):fmtPrice(p.precio,'mes')}</td>
     <td><span class="tag tag-${p.status.toLowerCase()}">${p.status}</span></td>
     <td><div class="action-btns">
-      <button class="btn btn-ghost btn-sm" title="Compartir WhatsApp" onclick="shareWA('${p.id}')">💬</button>
-      <button class="email-btn" title="Enviar por email" onclick="sharePropEmail('${p.id}')">📧</button>
-      <button class="btn btn-ghost btn-sm" title="Ver Ficha" onclick="verFicha('${p.id}')">📄</button>
-      <button class="btn btn-ghost btn-sm" title="Reporte al Propietario · WhatsApp" onclick="reportePropietarioWA('${p.id}')" style="color:var(--purple)">📊💬</button>
-      <button class="btn btn-ghost btn-sm" title="Reporte al Propietario · Email" onclick="reportePropietarioEmail('${p.id}')" style="color:var(--purple)">📊📧</button>
+      <button class="wa-btn" style="font-size:11px;padding:4px 8px" title="Compartir WhatsApp" onclick="shareWA('${p.id}')">💬 WA</button>
+      <button class="email-btn" style="font-size:11px;padding:4px 8px" title="Email jcastro" onclick="sharePropEmailJcastro('${p.id}')">📧 JC</button>
+      <button class="email-btn" style="font-size:11px;padding:4px 8px;background:var(--cyan)22;color:var(--cyan);border-color:var(--cyan)44" title="Email jelyan" onclick="sharePropEmailJelyan('${p.id}')">📧 JL</button>
+      <button class="btn btn-ghost btn-sm" title="Ver detalle" onclick="verFicha('${p.id}')">👁</button>
+      <button class="btn btn-ghost btn-sm" title="Exportar PDF" onclick="exportPropPDF('${p.id}')">📄</button>
+      <button class="btn btn-ghost btn-sm" title="Reporte propietario WA" onclick="reportePropietarioWA('${p.id}')" style="color:var(--purple)">📊</button>
       <button class="btn btn-ghost btn-sm" title="Archivos" onclick="openArchivosProp('${p.id}')">���${(p.archivos||[]).length?` ${p.archivos.length}`:''}</button>
       <button class="btn btn-ghost btn-sm" title="Editar" onclick="editProp('${p.id}')">✏️</button>
       <button class="btn btn-ghost btn-sm" title="Eliminar" onclick="deleteProp('${p.id}')">🗑️</button>
@@ -3227,9 +3382,11 @@ function renderPipeline(){
           <div class="pipeline-card-name">${l.nombre}</div>
           <div class="pipeline-card-meta">${l.interes} · ${l.fuente}</div>
           <div class="pipeline-card-val">${l.presupuesto}</div>
-          <div style="margin-top:6px;display:flex;gap:4px">
-            <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="waLead('${l.id}')">💬 WA</button>
-            <button class="email-btn" style="font-size:10px;padding:3px 7px" onclick="openEmailLead('${l.id}')">📧</button>
+          <div style="margin-top:6px;display:flex;gap:3px;flex-wrap:wrap">
+            <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="waLead('${l.id}')">💬</button>
+            <button class="email-btn" style="font-size:10px;padding:3px 7px" title="jcastro@jacrealtypa.com" onclick="emailLeadJcastro('${l.id}')">📧JC</button>
+            <button class="email-btn" style="font-size:10px;padding:3px 7px;background:var(--cyan)22;color:var(--cyan);border-color:var(--cyan)44" title="jelyanrealestate@gmail.com" onclick="emailLeadJelyan('${l.id}')">📧JL</button>
+            <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:10px" onclick="editLead('${l.id}')">✏️</button>
           </div>
         </div>`).join('')}
     </div>`;
@@ -3400,6 +3557,7 @@ function toggleAuto(btn,name){
 // ============================================================
 // MLS ACOBIR — listados importados (persistidos en Supabase tabla propiedades_red tipo='mls')
 let mlsListados = [];
+let mlsGuardadas = []; // Propiedades MLS en seguimiento activo
 
 function mlsTab(btn, id){
   document.querySelectorAll('.mls-section').forEach(s=>s.style.display='none');
@@ -3407,6 +3565,7 @@ function mlsTab(btn, id){
   const el=document.getElementById(id); if(el) el.style.display='';
   btn.classList.add('active');
   if(id==='mls-tab-listados') renderMLS();
+  if(id==='mls-tab-guardadas') renderMlsGuardadas();
 }
 function mlsOpenXposure(){
   window.open('https://panama.xposureapp.com/portal/panama/Dashboard','_blank');
@@ -3520,10 +3679,6 @@ function _mlsRenderPage(){
     const thumb=_fa[0]?`<img src="${_fa[0]}" referrerpolicy="no-referrer" style="width:48px;height:36px;object-fit:cover;border-radius:4px;margin-right:8px;vertical-align:middle;cursor:pointer" onclick="mlsAbrirDetalle(${idx})" onerror="this.style.display='none'">`:'' ;
     const corrLine=[m.agente,m.licencia_corredor,m.agencia].filter(Boolean).join(' · ');
     const corredor=corrLine?`<div style="font-size:10px;color:var(--muted);margin-top:2px">🔒 ${corrLine}</div>`:'';
-    const hasContact=m.tel_corredor||m.email_corredor||m.agente;
-    const contactoBtn=hasContact
-      ?`<button class="btn btn-outline btn-sm" style="white-space:nowrap" onclick="event.stopPropagation();mlsContactarAgente(${idx})">📞 Co-broking</button>`
-      :`<button class="btn btn-outline btn-sm" style="white-space:nowrap;opacity:.5" disabled>Sin contacto</button>`;
     return `<tr style="cursor:pointer" onclick="mlsAbrirDetalle(${idx})">
       <td style="font-family:monospace;font-size:10px;color:var(--text2);white-space:nowrap">${m.mls_code||'--'}</td>
       <td style="min-width:200px">
@@ -3537,7 +3692,16 @@ function _mlsRenderPage(){
       <td class="price" style="white-space:nowrap">${precioFmt}</td>
       <td style="font-size:11px;white-space:nowrap">${m.habitaciones?m.habitaciones+'🛏 ':''}${m.banos?m.banos+'🚿 ':''}${m.area_total?m.area_total+'m²':''}</td>
       <td><span class="badge ${m.estado==='Disponible'?'badge-green':m.estado==='En Negociación'?'badge-yellow':'badge-gray'}" style="font-size:9px">${m.estado||'--'}</span></td>
-      <td style="min-width:110px" onclick="event.stopPropagation()">${contactoBtn}</td>
+      <td style="min-width:180px" onclick="event.stopPropagation()">
+        <div style="display:flex;gap:3px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" title="Ver detalle" style="padding:3px 6px;font-size:11px" onclick="event.stopPropagation();mlsAbrirDetalle(${idx})">👁</button>
+          <button class="btn btn-outline btn-sm" title="WhatsApp corredor co-broking" style="padding:3px 6px;font-size:11px;color:var(--green)" onclick="event.stopPropagation();mlsContactarAgente(${idx})">💬</button>
+          <button class="btn btn-outline btn-sm" title="Email jcastro@jacrealtypa.com" style="padding:3px 6px;font-size:11px" onclick="event.stopPropagation();mlsEmailJcastro(${idx})">📧</button>
+          <button class="btn btn-outline btn-sm" title="Email jelyanrealestate@gmail.com" style="padding:3px 6px;font-size:11px" onclick="event.stopPropagation();mlsEmailJelyan(${idx})">📨</button>
+          <button class="btn btn-outline btn-sm" title="Exportar PDF ficha" style="padding:3px 6px;font-size:11px;color:var(--red)" onclick="event.stopPropagation();exportMlsPDF(${idx})">📄</button>
+          <button class="btn btn-primary btn-sm" title="Guardar en CRM" style="padding:3px 6px;font-size:11px" onclick="event.stopPropagation();guardarMlsProp(${idx})">💾</button>
+        </div>
+      </td>
     </tr>`;
   }).join('');
   const total=_mlsFiltered.length;
@@ -3588,10 +3752,13 @@ function mlsAbrirDetalle(idx){
   if(m.email_corredor) corrLines.push('<b>Email:</b> '+m.email_corredor);
   if(m.comision) corrLines.push('<b>Comisión co-broking:</b> '+m.comision);
   el('mls-det-corredor').innerHTML=corrLines.length?corrLines.join('<br>'):'<span style="color:var(--muted)">Sin datos del corredor</span>';
-  // Action buttons
+  // Action buttons — full set
   const acciones=[];
-  if(m.tel_corredor) acciones.push(`<button class="btn btn-primary btn-sm" onclick="mlsContactarAgente(${idx})">💬 WhatsApp Co-broking</button>`);
-  if(m.email_corredor) acciones.push(`<button class="btn btn-outline btn-sm" onclick="window.open('mailto:${m.email_corredor}?subject=Co-Broking+JAC+Realty','_blank')">📧 Email</button>`);
+  if(m.tel_corredor||m.agente) acciones.push(`<button class="btn btn-outline btn-sm" style="color:var(--green)" onclick="mlsContactarAgente(${idx})" title="WhatsApp co-broking al corredor">💬 WA Corredor</button>`);
+  acciones.push(`<button class="btn btn-outline btn-sm" onclick="mlsEmailJcastro(${idx})" title="Enviar por email jcastro@jacrealtypa.com">📧 jcastro</button>`);
+  acciones.push(`<button class="btn btn-outline btn-sm" onclick="mlsEmailJelyan(${idx})" title="Enviar por email jelyanrealestate@gmail.com">📨 jelyan</button>`);
+  acciones.push(`<button class="btn btn-outline btn-sm" style="color:var(--red)" onclick="exportMlsPDF(${idx})" title="Exportar ficha PDF">📄 PDF</button>`);
+  acciones.push(`<button class="btn btn-primary btn-sm" onclick="guardarMlsProp(${idx})" title="Guardar en CRM con notas">💾 Guardar en CRM</button>`);
   el('mls-det-acciones').innerHTML=acciones.join('');
   // Gallery
   el('mls-det-gallery').innerHTML=_fa.slice(1,5).map(src=>`<img src="${src}" referrerpolicy="no-referrer" style="width:64px;height:48px;object-fit:cover;border-radius:5px;cursor:pointer" onclick="document.getElementById('mls-det-img').src='${src}'" onerror="this.style.display='none'">`).join('');
@@ -3619,6 +3786,643 @@ function mlsContactarAgente(idx){
     toast('ℹ️ Sin datos de contacto para este corredor');
   }
 }
+// ---- MLS Email functions ----
+function _mlsBuildEmailBody(m){
+  const p=m.precio?'$'+Number(m.precio).toLocaleString('en-US'):'Consultar';
+  const area=m.area_total?m.area_total+'m²':'';
+  const hab=m.habitaciones?m.habitaciones+' hab':'';
+  const ban=m.banos?m.banos+' baños':'';
+  const features=[hab,ban,area].filter(Boolean).join(' · ');
+  const desc=m.descripcion?'\n\nDescripción:\n'+m.descripcion:'';
+  return `Propiedad: ${m.titulo||''}
+Código MLS: ${m.mls_code||'--'}
+Precio: ${p}
+Tipo: ${m.tipo_prop||m.tipo||''} · ${m.operacion||''}
+Zona: ${m.zona||''}
+${features}${desc}
+
+—
+Jely Castro · JAC Realty · Lic. PN-0931
+Tel: +507 6462-7763
+jcastro@jacrealtypa.com | jelyanrealestate@gmail.com
+www.jacrealtypa.com`;
+}
+function mlsEmailJcastro(idx){
+  const m=_mlsFiltered[idx]; if(!m) return;
+  const subj=encodeURIComponent(`Propiedad: ${m.titulo||''} ${m.mls_code?'· MLS '+m.mls_code:''}`);
+  const body=encodeURIComponent(_mlsBuildEmailBody(m));
+  window.open(`mailto:?from=jcastro@jacrealtypa.com&subject=${subj}&body=${body}`,'_blank');
+}
+function mlsEmailJelyan(idx){
+  const m=_mlsFiltered[idx]; if(!m) return;
+  const subj=encodeURIComponent(`Propiedad: ${m.titulo||''} ${m.mls_code?'· MLS '+m.mls_code:''}`);
+  const body=encodeURIComponent(_mlsBuildEmailBody(m));
+  window.open(`mailto:?from=jelyanrealestate@gmail.com&subject=${subj}&body=${body}`,'_blank');
+}
+
+// ---- MLS PDF Export ----
+function exportMlsPDF(idx){
+  const m=_mlsFiltered[idx]; if(!m) return;
+  if(!window.jspdf){toast('⏳ Cargando motor PDF...'); setTimeout(()=>exportMlsPDF(idx),800); return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210; const margin=16;
+  let y=margin;
+  // Header bar
+  doc.setFillColor(15,23,42); // dark navy
+  doc.rect(0,0,W,28,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('JAC REALTY',margin,12);
+  doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('Jely Castro · Lic. PN-0931',margin,18);
+  doc.text('+507 6462-7763 · jcastro@jacrealtypa.com · jelyanrealestate@gmail.com',margin,23);
+  doc.text('www.jacrealtypa.com',W-margin-30,23);
+  y=36;
+  // MLS Code badge
+  doc.setFillColor(59,130,246);
+  doc.roundedRect(margin,y,40,7,2,2,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
+  doc.text('MLS: '+(m.mls_code||'--'),margin+2,y+5);
+  // Operation badge
+  const opColor=m.operacion==='Venta'?[22,163,74]:m.operacion==='Alquiler'?[234,179,8]:[107,114,128];
+  doc.setFillColor(...opColor);
+  doc.roundedRect(margin+43,y,28,7,2,2,'F');
+  doc.text(m.operacion||'',margin+45,y+5);
+  // Status badge
+  const stColor=m.estado==='Disponible'?[22,163,74]:[234,179,8];
+  doc.setFillColor(...stColor);
+  doc.roundedRect(margin+74,y,28,7,2,2,'F');
+  doc.text(m.estado||'',margin+76,y+5);
+  y+=14;
+  // Title
+  doc.setTextColor(15,23,42); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  const titleLines=doc.splitTextToSize(m.titulo||'Sin título',W-margin*2);
+  doc.text(titleLines,margin,y);
+  y+=titleLines.length*7+4;
+  // Price
+  doc.setFontSize(22); doc.setFont('helvetica','bold'); doc.setTextColor(59,130,246);
+  doc.text(m.precio?'$'+Number(m.precio).toLocaleString('en-US'):'Precio a consultar',margin,y);
+  y+=10;
+  // Separator line
+  doc.setDrawColor(226,232,240); doc.setLineWidth(0.4);
+  doc.line(margin,y,W-margin,y); y+=6;
+  // Features grid
+  doc.setTextColor(55,65,81); doc.setFontSize(10); doc.setFont('helvetica','normal');
+  const feats=[];
+  if(m.tipo_prop||m.tipo) feats.push(['🏠 Tipo',m.tipo_prop||m.tipo]);
+  if(m.zona) feats.push(['📍 Zona',m.zona]);
+  if(m.habitaciones) feats.push(['🛏 Habitaciones',String(m.habitaciones)]);
+  if(m.banos) feats.push(['🚿 Baños',String(m.banos)]);
+  if(m.area_total) feats.push(['📐 Área Total',m.area_total+'m²']);
+  const col1=feats.filter((_,i)=>i%2===0);
+  const col2=feats.filter((_,i)=>i%2===1);
+  const colW=(W-margin*2)/2;
+  col1.forEach((f,i)=>{
+    doc.setFont('helvetica','bold'); doc.text(f[0]+': ',margin,y+i*6);
+    const lw=doc.getTextWidth(f[0]+': ');
+    doc.setFont('helvetica','normal'); doc.text(f[1],margin+lw,y+i*6);
+  });
+  col2.forEach((f,i)=>{
+    doc.setFont('helvetica','bold'); doc.text(f[0]+': ',margin+colW,y+i*6);
+    const lw=doc.getTextWidth(f[0]+': ');
+    doc.setFont('helvetica','normal'); doc.text(f[1],margin+colW+lw,y+i*6);
+  });
+  y+=Math.max(col1.length,col2.length)*6+6;
+  doc.setDrawColor(226,232,240); doc.line(margin,y,W-margin,y); y+=6;
+  // Description
+  if(m.descripcion){
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+    doc.text('DESCRIPCIÓN',margin,y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setTextColor(55,65,81); doc.setFontSize(9);
+    const descLines=doc.splitTextToSize(m.descripcion,W-margin*2);
+    const maxLines=Math.min(descLines.length,30);
+    doc.text(descLines.slice(0,maxLines),margin,y);
+    y+=maxLines*4.5+6;
+    doc.setDrawColor(226,232,240); doc.line(margin,y,W-margin,y); y+=6;
+  }
+  // Footer — contact info
+  const footerY=280;
+  doc.setFillColor(248,250,252);
+  doc.rect(0,footerY-4,W,14,'F');
+  doc.setDrawColor(226,232,240); doc.line(0,footerY-4,W,footerY-4);
+  doc.setTextColor(100,116,139); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('Jely Castro · JAC Realty · Lic. PN-0931 · +507 6462-7763',margin,footerY+1);
+  doc.text('jcastro@jacrealtypa.com · jelyanrealestate@gmail.com · www.jacrealtypa.com',margin,footerY+5.5);
+  doc.setFontSize(7); doc.setTextColor(148,163,184);
+  doc.text(`Ficha generada el ${new Date().toLocaleDateString('es-PA')} · Información sujeta a cambios sin previo aviso`,margin,footerY+9.5);
+  const fname=`JAC_Realty_${(m.mls_code||m.titulo||'propiedad').replace(/[^a-zA-Z0-9]/g,'-')}.pdf`;
+  doc.save(fname);
+  toast('📄 PDF descargado: '+fname);
+}
+
+// ---- MLS Guardar Modal ----
+function guardarMlsProp(idx){
+  const m=_mlsFiltered[idx]; if(!m) return;
+  const gEl=id=>document.getElementById(id);
+  gEl('mg-idx').value=idx;
+  const p=m.precio?'$'+Number(m.precio).toLocaleString('en-US'):'Consultar';
+  const feats=[m.habitaciones?m.habitaciones+'🛏':null,m.banos?m.banos+'🚿':null,m.area_total?m.area_total+'m²':null].filter(Boolean).join(' ');
+  gEl('mg-prop-resumen').innerHTML=`
+    <div style="font-weight:600;font-size:13px;color:var(--text);margin-bottom:4px">${m.titulo||'Sin título'}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+      ${m.mls_code?`<span class="badge badge-gray" style="font-size:9px">MLS: ${m.mls_code}</span>`:''}
+      ${m.operacion?`<span class="badge ${m.operacion==='Venta'?'badge-green':'badge-yellow'}" style="font-size:9px">${m.operacion}</span>`:''}
+      ${m.estado?`<span class="badge ${m.estado==='Disponible'?'badge-green':'badge-gray'}" style="font-size:9px">${m.estado}</span>`:''}
+    </div>
+    <div style="font-size:12px;color:var(--accent);font-weight:700">${p}</div>
+    <div style="font-size:11px;color:var(--text2)">${m.zona||''} ${feats?'· '+feats:''}</div>`;
+  // Quick action buttons in modal
+  gEl('mg-acciones-rapidas').innerHTML=`
+    <button class="btn btn-outline btn-sm" onclick="mlsContactarAgente(${idx})" style="color:var(--green)">💬 WA Corredor</button>
+    <button class="btn btn-outline btn-sm" onclick="mlsEmailJcastro(${idx})">📧 Email jcastro</button>
+    <button class="btn btn-outline btn-sm" onclick="mlsEmailJelyan(${idx})">📨 Email jelyan</button>
+    <button class="btn btn-outline btn-sm" style="color:var(--red)" onclick="exportMlsPDF(${idx})">📄 Exportar PDF</button>`;
+  // Default follow-up date: 3 days from now
+  const fd=new Date(); fd.setDate(fd.getDate()+3);
+  gEl('mg-fecha-seguimiento').value=fd.toISOString().split('T')[0];
+  openModal('modalMlsGuardar');
+}
+
+// ============================================================
+// MLS SEGUIMIENTO ECOSYSTEM — Automatización de seguimiento
+// ============================================================
+const MLS_STAGES = [
+  {id:'guardado',  label:'💾 Guardado',  color:'var(--muted)'},
+  {id:'promovido', label:'📢 Promovido', color:'var(--blue)'},
+  {id:'contacto',  label:'📞 Contacto',  color:'var(--cyan)'},
+  {id:'visita',    label:'🏠 Visita',    color:'var(--purple)'},
+  {id:'oferta',    label:'💰 Oferta',    color:'var(--accent)'},
+  {id:'cierre',    label:'🏆 Cierre',    color:'var(--green)'},
+];
+
+const AUTO_SEQ = {
+  venta: {
+    alta:  [{d:1,t:'Contactar corredor MLS',desc:'Confirmar disponibilidad, condiciones y documentos de la propiedad.',tipo:'Llamada'},
+            {d:2,t:'Enviar a clientes potenciales (WA)',desc:'Compartir ficha de la propiedad por WhatsApp a clientes que buscan este tipo.',tipo:'WhatsApp'},
+            {d:4,t:'Programar visita con cliente',desc:'Coordinar fecha/hora de visita física con cliente interesado.',tipo:'Visita'},
+            {d:7,t:'Seguimiento post-presentación',desc:'Confirmar nivel de interés. Si hay oferta, preparar documentación.',tipo:'Llamada'}],
+    media: [{d:1,t:'Verificar disponibilidad',desc:'Confirmar con corredor que la propiedad sigue disponible y al mismo precio.',tipo:'Llamada'},
+            {d:3,t:'Compartir con leads calificados',desc:'Enviar por WA o email a clientes que encajan con este tipo de propiedad.',tipo:'WhatsApp'},
+            {d:7,t:'Seguimiento semanal',desc:'Verificar si hay interés de algún cliente. Si no, marcar para revisión mensual.',tipo:'Email'}],
+    baja:  [{d:3,t:'Evaluar fit con cartera de clientes',desc:'Revisar si algún lead activo puede estar interesado en esta propiedad.',tipo:'Tarea'},
+            {d:14,t:'Seguimiento quincenal MLS',desc:'Verificar si hubo cambio de precio o estado. Re-evaluar interés.',tipo:'Tarea'}]
+  },
+  arriendo: {
+    alta:  [{d:1,t:'Contactar corredor (arriendo urgente)',desc:'Confirmar disponibilidad, términos de arriendo y condiciones del propietario.',tipo:'Llamada'},
+            {d:2,t:'Presentar a arrendatarios en búsqueda',desc:'Compartir con clientes que buscan arriendo en esta zona/tipo.',tipo:'WhatsApp'},
+            {d:3,t:'Coordinar visita',desc:'Agendar visita con arrendatario interesado.',tipo:'Visita'},
+            {d:5,t:'Seguimiento post-visita arriendo',desc:'Confirmar decisión del arrendatario. Preparar contrato si hay interés.',tipo:'Llamada'}],
+    media: [{d:1,t:'Verificar condiciones de arriendo',desc:'Confirmar precio, depósito, incluyentes y plazo mínimo.',tipo:'Llamada'},
+            {d:3,t:'Enviar a arrendatarios potenciales',desc:'Compartir con leads buscando arriendo compatible.',tipo:'WhatsApp'},
+            {d:7,t:'Revisión semanal de interés',desc:'Check de interés y estado de la propiedad en arriendo.',tipo:'Email'}],
+    baja:  [{d:5,t:'Revisar arriendo guardado',desc:'Verificar vigencia y compatibilidad con clientes arrendatarios.',tipo:'Tarea'},
+            {d:21,t:'Seguimiento mensual arriendo',desc:'Re-evaluar disponibilidad y precio de arriendo.',tipo:'Tarea'}]
+  },
+  cobrok: {
+    alta:  [{d:1,t:'Contactar corredor para co-broking',desc:'Llamar al corredor para confirmar disposición de co-broking y porcentaje.',tipo:'Llamada'},
+            {d:2,t:'Enviar solicitud formal de co-broking',desc:'Email formal con datos de tu agencia y propuesta de co-broking.',tipo:'Email'},
+            {d:3,t:'Buscar comprador en tu cartera',desc:'Revisar leads activos que encajen con esta propiedad para co-broking.',tipo:'Tarea'},
+            {d:7,t:'Seguimiento negociación co-broking',desc:'Confirmar estado del acuerdo y avance con el comprador.',tipo:'Llamada'}],
+    media: [{d:1,t:'Verificar condiciones co-broking',desc:'Confirmar % de comisión, exclusividad y condiciones del corredor.',tipo:'Llamada'},
+            {d:3,t:'Presentar a clientes calificados',desc:'Buscar un comprador en tu cartera para hacer el co-broking.',tipo:'Tarea'},
+            {d:10,t:'Revisión de avance co-broking',desc:'Verificar si hay un comprador interesado y el estado del acuerdo.',tipo:'Email'}],
+    baja:  [{d:5,t:'Evaluar co-broking guardado',desc:'Revisar si hay algún cliente activo que pueda tomar esta propiedad en co-broking.',tipo:'Tarea'},
+            {d:20,t:'Revisión mensual co-broking',desc:'Verificar vigencia de la propiedad y posibilidad de co-broking.',tipo:'Tarea'}]
+  },
+  inversion: {
+    alta:  [{d:1,t:'Análisis financiero rápido',desc:'Calcular ROI estimado, plusvalía de la zona, y potencial de renta.',tipo:'Tarea'},
+            {d:2,t:'Presentar como inversión',desc:'Enviar a inversores en tu cartera con análisis de retorno.',tipo:'WhatsApp'},
+            {d:4,t:'Organizar visita con inversor',desc:'Coordinar visita física o virtual para inversor interesado.',tipo:'Visita'},
+            {d:7,t:'Seguimiento decisión de inversión',desc:'Confirmar interés del inversor. Preparar documentación de compra.',tipo:'Llamada'}],
+    media: [{d:2,t:'Evaluar potencial de inversión',desc:'Analizar precio/m², potencial de renta y proyección de plusvalía.',tipo:'Tarea'},
+            {d:4,t:'Compartir con inversores calificados',desc:'Presentar la propiedad a inversores de tu cartera.',tipo:'WhatsApp'},
+            {d:10,t:'Seguimiento inversión',desc:'Verificar interés y estado de la propiedad como inversión.',tipo:'Email'}],
+    baja:  [{d:7,t:'Análisis de inversión guardada',desc:'Evaluar si encaja con perfil de inversor de tu cartera.',tipo:'Tarea'},
+            {d:30,t:'Revisión mensual inversión',desc:'Re-evaluar precio y condiciones para presentar a inversores.',tipo:'Tarea'}]
+  }
+};
+
+function createAutoFollowUpTasks(gEntry){
+  const prioridad = gEntry.prioridad||'media';
+  const seqType = gEntry.seqType||'venta';
+  const seqs = AUTO_SEQ[seqType] || AUTO_SEQ.venta;
+  const seq = seqs[prioridad] || seqs.media;
+  const today = new Date();
+  seq.forEach(item=>{
+    const d = new Date(today);
+    d.setDate(d.getDate() + item.d);
+    const fechaStr = d.toISOString().split('T')[0];
+    const task = {
+      id:'TSG'+Date.now()+Math.random().toString(36).substr(2,4),
+      titulo:`[MLS ${gEntry.mls_code||''}] ${item.t}`,
+      desc:`${item.desc}${gEntry.cliente?' · Cliente: '+gEntry.cliente:''}`,
+      fecha: fechaStr,
+      prioridad: prioridad==='alta'?'Alta':prioridad==='media'?'Media':'Baja',
+      status:'Pendiente',
+      tipo: item.tipo,
+      mls_code: gEntry.mls_code||'',
+      _autoSeq: true
+    };
+    tasks.push(task);
+    if(sb) sb.from('tareas_crm').upsert({id:task.id,payload:task}).then(({error})=>{if(error)console.warn('AutoTask SB:',error);});
+  });
+  document.getElementById('badge-tareas').textContent = tasks.filter(t=>t.status!=='Completada').length;
+  renderTareas();
+}
+
+function renderMlsGuardadas(){
+  const container = document.getElementById('mls-guardadas-board');
+  if(!container) return;
+  // Apply filters
+  const stF = (document.getElementById('gf-stage')||{}).value||'';
+  const priF = (document.getElementById('gf-pri')||{}).value||'';
+  const q = ((document.getElementById('gf-q')||{}).value||'').toLowerCase();
+  let list = mlsGuardadas.filter(g=>{
+    if(stF && g.stage!==stF) return false;
+    if(priF && g.prioridad!==priF) return false;
+    if(q && !(g.titulo||'').toLowerCase().includes(q) && !(g.mls_code||'').toLowerCase().includes(q) && !(g.zona||'').toLowerCase().includes(q) && !(g.cliente||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  // Update KPIs
+  const kpiTotal = document.getElementById('gkpi-total');
+  const kpiActivas = document.getElementById('gkpi-activas');
+  const kpiVisitas = document.getElementById('gkpi-visitas');
+  const kpiCierres = document.getElementById('gkpi-cierres');
+  if(kpiTotal) kpiTotal.textContent = mlsGuardadas.length;
+  if(kpiActivas) kpiActivas.textContent = mlsGuardadas.filter(g=>g.stage!=='guardado'&&g.stage!=='cierre').length;
+  if(kpiVisitas) kpiVisitas.textContent = mlsGuardadas.filter(g=>g.stage==='visita').length;
+  if(kpiCierres) kpiCierres.textContent = mlsGuardadas.filter(g=>g.stage==='cierre').length;
+  const badge = document.getElementById('badge-guardadas');
+  if(badge) badge.textContent = mlsGuardadas.length;
+
+  if(!list.length){
+    container.innerHTML = '<div style="text-align:center;padding:50px;color:var(--muted);width:100%">' +
+      '<div style="font-size:48px;margin-bottom:12px">📌</div>' +
+      '<div style="font-weight:600;margin-bottom:8px;font-size:15px">Sin propiedades en seguimiento</div>' +
+      '<div style="font-size:13px;max-width:300px;margin:0 auto">Usa el botón 💾 en la lista de listados MLS para guardar propiedades y crear secuencias de seguimiento automático</div>' +
+      '</div>';
+    return;
+  }
+
+  const stagesToShow = stF ? MLS_STAGES.filter(s=>s.id===stF) : MLS_STAGES;
+  container.innerHTML = stagesToShow.map(stage=>{
+    const stProps = list.filter(g=>g.stage===stage.id);
+    return '<div class="pipeline-col" style="min-width:190px;flex-shrink:0">' +
+      '<div class="pipeline-col-header">' +
+        '<span style="color:'+stage.color+'">'+stage.label+'</span>' +
+        '<span class="pipeline-count">'+stProps.length+'</span>' +
+      '</div>' +
+      stProps.map(g=>renderGuardadaCard(g)).join('') +
+    '</div>';
+  }).join('');
+}
+
+function renderGuardadaCard(g){
+  const stageIdx = MLS_STAGES.findIndex(s=>s.id===g.stage);
+  const nextStage = stageIdx<MLS_STAGES.length-1?MLS_STAGES[stageIdx+1]:null;
+  const foto = (g.fotos&&g.fotos[0])||'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&q=60';
+  const priColors = {alta:'var(--red)',media:'var(--accent)',baja:'var(--green)'};
+  const priColor = priColors[g.prioridad]||'var(--muted)';
+  const autoTaskCount = tasks.filter(t=>t.mls_code===g.mls_code&&t.status==='Pendiente').length;
+  const seqTypeLabel = {venta:'🏠',arriendo:'🔑',cobrok:'🤝',inversion:'📈'}[g.seqType||'venta']||'🏠';
+  
+  let card = '<div class="pipeline-card" style="cursor:default">';
+  card += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">';
+  card += '<span style="font-size:10px;font-family:monospace;color:var(--accent)">' + (g.mls_code||'') + '</span>';
+  card += '<span style="font-size:10px;color:'+priColor+';font-weight:700">' + (g.prioridad||'').toUpperCase() + '</span>';
+  card += '</div>';
+  // Mini image
+  card += '<div style="width:100%;aspect-ratio:16/7;border-radius:6px;overflow:hidden;margin-bottom:8px;background:var(--card2)">';
+  card += '<img src="'+foto+'" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">';
+  card += '</div>';
+  card += '<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.3">' + (g.titulo||'Sin título') + '</div>';
+  card += '<div style="font-size:11px;color:var(--muted)">' + seqTypeLabel + ' ' + (g.zona||'') + ' · ' + (g.tipo||'') + '</div>';
+  card += '<div style="font-size:13px;font-weight:700;color:var(--accent);margin:5px 0">$' + Number(g.precio||0).toLocaleString() + '</div>';
+  if(g.cliente) card += '<div style="font-size:11px;color:var(--cyan)">👤 ' + g.cliente + '</div>';
+  if(g.fecha_seguimiento) {
+    const today = new Date().toISOString().split('T')[0];
+    const overdue = g.fecha_seguimiento < today;
+    card += '<div style="font-size:11px;color:' + (overdue?'var(--red)':'var(--muted)') + ';margin-top:2px">📅 ' + g.fecha_seguimiento + (overdue?' ⚠️ Vencido':'') + '</div>';
+  }
+  if(autoTaskCount) card += '<div style="font-size:11px;color:var(--blue);margin-top:2px">📋 ' + autoTaskCount + ' tarea' + (autoTaskCount!==1?'s':'') + ' pendiente' + (autoTaskCount!==1?'s':'') + '</div>';
+  // Action buttons
+  card += '<div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap">';
+  // WA share
+  const waMsg = encodeURIComponent('🏠 *'+g.titulo+'*\n📍 '+g.zona+'\n💰 $'+Number(g.precio||0).toLocaleString()+'\n\n'+((g.descripcion||'').substring(0,200))+'\n\n_Jely Castro · JAC Realty · +507 6462-7763_\n_jcastro@jacrealtypa.com_');
+  card += '<a href="https://wa.me/?text='+waMsg+'" target="_blank" style="text-decoration:none"><button class="wa-btn" style="font-size:10px;padding:3px 7px" title="Compartir por WhatsApp">💬 WA</button></a>';
+  // Email
+  card += '<button class="email-btn" style="font-size:10px;padding:3px 7px" onclick="mlsEmailGuardada(''+g.id+'')" title="Enviar por email">📧</button>';
+  // PDF
+  card += '<button class="btn btn-outline" style="font-size:10px;padding:3px 7px" onclick="exportMlsGuardadaPDF(''+g.id+'')" title="Exportar PDF">📄</button>';
+  // Advance stage
+  if(nextStage) card += '<button class="btn" style="font-size:10px;padding:3px 7px;background:'+nextStage.color+';color:#fff;border:none;border-radius:6px;cursor:pointer" onclick="updateGuardadaStage(''+g.id+'',''+nextStage.id+'')" title="Avanzar a '+nextStage.label+'">'+nextStage.label.split(' ')[0]+' →</button>';
+  // Remove
+  card += '<button class="btn" style="font-size:10px;padding:3px 7px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer" onclick="removeGuardada(''+g.id+'')" title="Eliminar">✕</button>';
+  card += '</div>';
+  card += '</div>';
+  return card;
+}
+
+function updateGuardadaStage(id, newStage){
+  const g = mlsGuardadas.find(x=>x.id===id);
+  if(!g) return;
+  const oldStage = g.stage;
+  g.stage = newStage;
+  // Log activity
+  activities.unshift({tipo:'🔄 MLS',cliente:g.cliente||'—',desc:`${g.titulo||g.mls_code} → ${MLS_STAGES.find(s=>s.id===newStage)?.label||newStage}`,time:'Ahora'});
+  // Auto-actions for stage transitions
+  if(newStage==='visita'){
+    // Create visit reminder task
+    const visitDate = g.fecha_seguimiento || new Date(Date.now()+3*86400000).toISOString().split('T')[0];
+    const task = {
+      id:'TSG'+Date.now()+'v',
+      titulo:`[VISITA] ${g.titulo||g.mls_code}${g.cliente?' · '+g.cliente:''}`,
+      desc:`Visita programada para ${visitDate}. Preparar ficha PDF y WA de confirmación. Confirmar con corredor ${g.tel_corredor||'--'}.`,
+      fecha: visitDate,
+      prioridad:'Alta',
+      status:'Pendiente',
+      tipo:'Visita',
+      mls_code: g.mls_code||'',
+      _autoSeq:true
+    };
+    tasks.push(task);
+    if(sb) sb.from('tareas_crm').upsert({id:task.id,payload:task}).then(()=>{});
+    renderTareas();
+    toast('🏠 Tarea de visita creada para '+visitDate);
+  }
+  if(newStage==='oferta'){
+    const task = {
+      id:'TSG'+Date.now()+'o',
+      titulo:`[OFERTA] Preparar documentación — ${g.titulo||g.mls_code}`,
+      desc:`Recopilar documentación del cliente, promesa de compraventa, y coordinar con corredor ${g.agente||'--'} de ${g.agencia||'--'}. Tel: ${g.tel_corredor||'--'}`,
+      fecha: new Date(Date.now()+86400000).toISOString().split('T')[0],
+      prioridad:'Alta',
+      status:'Pendiente',
+      tipo:'Tarea',
+      mls_code: g.mls_code||'',
+      _autoSeq:true
+    };
+    tasks.push(task);
+    if(sb) sb.from('tareas_crm').upsert({id:task.id,payload:task}).then(()=>{});
+    renderTareas();
+    toast('💰 Tarea de oferta y documentación creada');
+  }
+  if(newStage==='cierre'){
+    // Trigger post-venta prep task
+    const task = {
+      id:'TSG'+Date.now()+'c',
+      titulo:`[CIERRE] Post-Venta — ${g.titulo||g.mls_code}`,
+      desc:`¡Propiedad cerrada! Preparar documentación final, registrar comisión, y abrir seguimiento post-venta para ${g.cliente||'el cliente'}. Recordar solicitar referidos.`,
+      fecha: new Date(Date.now()+86400000).toISOString().split('T')[0],
+      prioridad:'Alta',
+      status:'Pendiente',
+      tipo:'Tarea',
+      mls_code: g.mls_code||'',
+      _autoSeq:true
+    };
+    tasks.push(task);
+    if(sb) sb.from('tareas_crm').upsert({id:task.id,payload:task}).then(()=>{});
+    renderTareas();
+    toast('🏆 ¡Cierre registrado! Tarea de post-venta creada');
+    // Also create post-venta follow-up sequence
+    createPostVentaSequence(g);
+  }
+  // Persist
+  if(sb){
+    sb.from('mls_seguimiento').upsert({id:g.id,mls_code:g.mls_code,payload:g},{onConflict:'mls_code',ignoreDuplicates:false})
+      .then(({error})=>{if(error&&error.code!=='42P01')console.warn('MLS stage update SB:',error);});
+  }
+  renderMlsGuardadas();
+}
+
+function createPostVentaSequence(g){
+  const pv_tasks = [
+    {d:3, t:'Check de satisfacción (3 días)', desc:'Llamar al cliente para verificar satisfacción con la propiedad y el proceso.',tipo:'Llamada'},
+    {d:7, t:'Solicitar reseña y referidos', desc:'Pedir al cliente una reseña de Google y referencias a conocidos que busquen propiedad.',tipo:'WhatsApp'},
+    {d:30, t:'Seguimiento mensual post-venta', desc:'Check mensual con el cliente. Ofrecer servicios de administración o nuevas propiedades.',tipo:'Email'},
+    {d:90, t:'Reactivación 3 meses', desc:'Re-contactar al cliente. Puede estar listo para invertir o referir nuevos clientes.',tipo:'WhatsApp'},
+    {d:365, t:'Aniversario de compra', desc:'Felicitar al cliente por el aniversario de su compra. Excelente momento para pedir referidos.',tipo:'WhatsApp'}
+  ];
+  const today = new Date();
+  pv_tasks.forEach(item=>{
+    const d = new Date(today);
+    d.setDate(d.getDate()+item.d);
+    const task = {
+      id:'TPV'+Date.now()+Math.random().toString(36).substr(2,4),
+      titulo:'[POST-VENTA] '+item.t+' — '+(g.cliente||g.mls_code||''),
+      desc: item.desc + (g.mls_code?' | MLS: '+g.mls_code:''),
+      fecha: d.toISOString().split('T')[0],
+      prioridad: item.d<=7?'Alta':item.d<=30?'Media':'Baja',
+      status:'Pendiente',
+      tipo: item.tipo,
+      mls_code: g.mls_code||'',
+      _postVenta:true
+    };
+    tasks.push(task);
+    if(sb) sb.from('tareas_crm').upsert({id:task.id,payload:task}).then(()=>{});
+  });
+  document.getElementById('badge-tareas').textContent = tasks.filter(t=>t.status!=='Completada').length;
+  renderTareas();
+}
+
+function removeGuardada(id){
+  const g = mlsGuardadas.find(x=>x.id===id);
+  if(!g) return;
+  if(!confirm('¿Eliminar "'+g.titulo+'" del seguimiento? Las tareas auto-creadas permanecerán en Tareas.')) return;
+  mlsGuardadas = mlsGuardadas.filter(x=>x.id!==id);
+  if(sb){
+    sb.from('mls_seguimiento').delete().eq('id',id).then(()=>{});
+  }
+  renderMlsGuardadas();
+  toast('Propiedad eliminada del seguimiento');
+}
+
+function mlsEmailGuardada(id){
+  const g = mlsGuardadas.find(x=>x.id===id);
+  if(!g) return;
+  const subj = encodeURIComponent('Propiedad de su interés: '+g.titulo+' — JAC Realty');
+  const body = encodeURIComponent(
+    'Estimado/a'+(g.cliente?' '+g.cliente:'')+',\n\n' +
+    'Le comparto la siguiente propiedad que puede ser de su interés:\n\n' +
+    '🏠 '+g.titulo+'\n' +
+    '📍 '+g.zona+'\n' +
+    '💰 $'+Number(g.precio||0).toLocaleString()+'\n\n' +
+    (g.descripcion||'').substring(0,400)+'\n\n' +
+    'Para más información o coordinar una visita, estoy a su disposición.\n\n' +
+    'Cordialmente,\n' +
+    'Jely Castro · JAC Realty\n' +
+    'Lic. PN-0931\n' +
+    '+507 6462-7763\n' +
+    'jcastro@jacrealtypa.com | jelyanrealestate@gmail.com'
+  );
+  window.open('mailto:?subject='+subj+'&body='+body,'_blank');
+}
+
+function exportMlsGuardadaPDF(id){
+  const g = mlsGuardadas.find(x=>x.id===id);
+  if(!g) { toast('Propiedad no encontrada'); return; }
+  // Find in mlsFiltered if available
+  const m = mlsListados.find(x=>x.mls_code===g.mls_code) || g;
+  // Build fake idx for exportMlsPDF compatibility
+  const fakeIdx = _mlsFiltered.findIndex(x=>x.mls_code===g.mls_code);
+  if(fakeIdx>=0) exportMlsPDF(fakeIdx);
+  else {
+    // Build PDF directly from guardada data
+    if(!window.jspdf){toast('⏳ Cargando PDF...'); setTimeout(()=>exportMlsGuardadaPDF(id),800); return;}
+    const {jsPDF} = window.jspdf;
+    const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const W=210, margin=18;
+    doc.setFillColor(10,26,58);
+    doc.rect(0,0,W,32,'F');
+    doc.setTextColor(232,160,32);
+    doc.setFontSize(16);
+    doc.setFont('helvetica','bold');
+    doc.text('JAC REALTY',margin,14);
+    doc.setFontSize(8);
+    doc.setTextColor(200,200,200);
+    doc.text('Jely Castro · Lic. PN-0931 · +507 6462-7763',margin,21);
+    doc.text('jcastro@jacrealtypa.com · jelyanrealestate@gmail.com',margin,27);
+    let y=42;
+    doc.setTextColor(10,26,58);
+    doc.setFontSize(15);
+    doc.setFont('helvetica','bold');
+    const titleLines=doc.splitTextToSize(g.titulo||'Propiedad',W-2*margin);
+    doc.text(titleLines,margin,y); y+=titleLines.length*7+4;
+    doc.setFontSize(20);
+    doc.setTextColor(232,160,32);
+    doc.text('$'+Number(g.precio||0).toLocaleString('en-US'),margin,y); y+=10;
+    doc.setFontSize(10);
+    doc.setTextColor(80,80,80);
+    doc.text('📍 '+g.zona+' · '+(g.op||'')+'  |  MLS: '+(g.mls_code||''),margin,y); y+=8;
+    if(g.descripcion){
+      doc.setFontSize(9);
+      const descLines=doc.splitTextToSize(g.descripcion,W-2*margin);
+      const maxLines=Math.min(descLines.length,25);
+      doc.text(descLines.slice(0,maxLines),margin,y); y+=maxLines*4.5+6;
+    }
+    doc.setFillColor(10,26,58);
+    doc.rect(0,285,W,12,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(8);
+    doc.text('Jely Castro · JAC Realty · +507 6462-7763 · jcastro@jacrealtypa.com',W/2,291,{align:'center'});
+    doc.save('JAC_Realty_'+(g.mls_code||g.id)+'.pdf');
+    toast('📄 PDF descargado');
+  }
+}
+
+// Load mlsGuardadas from Supabase
+async function loadMlsGuardadas(){
+  if(!sb) return;
+  try {
+    const {data,error} = await sb.from('mls_seguimiento').select('*').order('created_at',{ascending:false}).limit(500);
+    if(error){
+      if(error.code==='42P01'){
+        // Table doesn't exist yet — create it
+        console.log('mls_seguimiento table not found, will be created on first save');
+      }
+      return;
+    }
+    if(data&&data.length){
+      mlsGuardadas = data.map(r=>r.payload||r).filter(Boolean);
+      const badge = document.getElementById('badge-guardadas');
+      if(badge) badge.textContent = mlsGuardadas.length;
+    }
+  } catch(e){ console.warn('loadMlsGuardadas:',e); }
+}
+
+
+async function saveMlsGuardada(){
+  const idx=parseInt(document.getElementById('mg-idx').value);
+  const m=_mlsFiltered[idx]; if(!m) return;
+  const gv=id=>{const el=document.getElementById(id);return el?el.value:''};
+  const notas=gv('mg-notas');
+  const tipo=gv('mg-tipo');
+  const prioridad=gv('mg-prioridad');
+  const cliente=gv('mg-cliente');
+  const fechaS=gv('mg-fecha-seguimiento');
+  // Save to CRM propiedades array (local + Supabase)
+  const p={
+    id:'MLS'+String(Date.now()).slice(-6),
+    titulo:m.titulo||'Sin título',
+    tipo:m.tipo_prop||m.tipo||'',
+    op:m.operacion||'',
+    zona:m.zona||'',
+    precio:m.precio||0,
+    area:m.area_total||0,
+    hab:m.habitaciones||0,
+    banos:m.banos||0,
+    status:'Disponible',
+    mls_code:m.mls_code||'',
+    agente:m.agente||'',
+    agencia:m.agencia||'',
+    licencia_corredor:m.licencia_corredor||'',
+    tel_corredor:m.tel_corredor||'',
+    email_corredor:m.email_corredor||'',
+    comision:m.comision||'',
+    descripcion:m.descripcion||'',
+    fotos:m.fotos?(Array.isArray(m.fotos)?m.fotos:(()=>{try{return JSON.parse(m.fotos);}catch(e){return[];}})()):[],
+    desc:notas||'',
+    nota_interna:`[MLS Import ${new Date().toLocaleDateString('es-PA')}] Tipo: ${tipo} · Prioridad: ${prioridad}${cliente?' · Cliente: '+cliente:''}${fechaS?' · Seguimiento: '+fechaS:''}${notas?'\n'+notas:''}`,
+    _mlsImport:true,
+    _mgTipo:tipo,_mgPrioridad:prioridad,_mgCliente:cliente,_mgFechaSeg:fechaS
+  };
+  if(!props.find(x=>x.mls_code&&x.mls_code===p.mls_code)){
+    props.push(p);
+  }
+  activities.unshift({tipo:'💾 Guardado',cliente:'CRM',desc:`MLS "${p.titulo}" guardada en CRM · ${tipo} · ${prioridad}`,time:'Ahora'});
+  // Persist to Supabase if available
+  if(sb){
+    const {error}=await sb.from('propiedades').upsert({
+      titulo:p.titulo, tipo:p.tipo, operacion:p.op, zona:p.zona,
+      precio:p.precio, area_total:p.area, habitaciones:p.hab,
+      banos:p.banos, estado:p.status, descripcion:m.descripcion||'',
+      mls_code:p.mls_code, agente:p.agente, agencia:p.agencia,
+      licencia_corredor:p.licencia_corredor, tel_corredor:p.tel_corredor,
+      email_corredor:p.email_corredor, comision:p.comision
+    },{onConflict:'mls_code',ignoreDuplicates:false});
+    if(error) console.warn('Supabase MLS save:',error);
+  }
+  // ─── Add to mlsGuardadas tracking ───
+  const autoSeq = document.getElementById('mg-auto-sequence') && document.getElementById('mg-auto-sequence').checked;
+  const seqType = document.querySelector('input[name="mg-seq-type"]:checked') ? document.querySelector('input[name="mg-seq-type"]:checked').value : 'venta';
+  const gEntry = {
+    id: 'SG'+Date.now(),
+    mls_code: m.mls_code||'',
+    titulo: m.titulo||p.titulo,
+    precio: m.precio||0,
+    zona: m.zona||'',
+    tipo: m.tipo_prop||m.tipo||'',
+    op: m.operacion||'',
+    stage: 'guardado',
+    prioridad: prioridad,
+    cliente: cliente,
+    fecha_guardado: new Date().toISOString().split('T')[0],
+    fecha_seguimiento: fechaS,
+    notas: notas,
+    seqType: seqType,
+    fotos: m.fotos?(Array.isArray(m.fotos)?m.fotos:(()=>{try{return JSON.parse(m.fotos);}catch(e){return[];}})()):[],
+    descripcion: m.descripcion||''
+  };
+  const existIdx = mlsGuardadas.findIndex(x=>x.mls_code&&x.mls_code===gEntry.mls_code);
+  if(existIdx>=0) mlsGuardadas[existIdx]={...mlsGuardadas[existIdx],...gEntry};
+  else mlsGuardadas.push(gEntry);
+  // Update badge
+  const badge=document.getElementById('badge-guardadas');
+  if(badge) badge.textContent=mlsGuardadas.length;
+  // Create auto follow-up tasks
+  if(autoSeq) createAutoFollowUpTasks(gEntry);
+  // Persist guardadas to Supabase
+  if(sb){
+    sb.from('mls_seguimiento').upsert({id:gEntry.id,mls_code:gEntry.mls_code,payload:gEntry},{onConflict:'mls_code',ignoreDuplicates:false})
+      .then(({error})=>{if(error&&error.code!=='42P01')console.warn('MLS seguimiento SB:',error);});
+  }
+  closeModal('modalMlsGuardar');
+  renderProps(); renderDashboard(); renderMlsGuardadas();
+  const taskCount = autoSeq ? ` · ${prioridad==='alta'?4:prioridad==='media'?3:2} tareas auto-creadas` : '';
+  toast(`✅ "${p.titulo}" guardada · Seguimiento: ${fechaS||'--'}${taskCount}`);
+}
+
 function mlsCopyEmbed(){
   const code=document.getElementById('mls-embed-code').textContent;
   navigator.clipboard.writeText(code.replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim()).then(()=>toast('📋 Código IDEX copiado'));
@@ -4196,6 +5000,16 @@ function saveProp(){
     amenidades,desc:gv('p-desc'),
     propietario:gv('p-propietario'),tel_propietario:gv('p-tel-propietario'),
     nota_interna:gv('p-nota-interna'),
+    mls_code:gv('p-mls-code'),
+    comision:gv('p-comision'),
+    agente:gv('p-agente'),
+    licencia_corredor:gv('p-licencia-corredor'),
+    agencia:gv('p-agencia'),
+    tel_corredor:gv('p-tel-corredor'),
+    email_corredor:gv('p-email-corredor'),
+    exclusividad:gv('p-exclusividad'),
+    tipo_mls:gv('p-tipo-mls'),
+    fecha_venc_mls:gv('p-fecha-venc-mls'),
     fotos:[..._fotosTemp],
     archivos:[]
   };
@@ -4243,6 +5057,11 @@ function editProp(id){
   s('p-estado-inmueble',p.estado_inmueble); s('p-status',p.status); s('p-negociable',p.negociable);
   s('p-desc',p.desc); s('p-propietario',p.propietario); s('p-tel-propietario',p.tel_propietario);
   s('p-nota-interna',p.nota_interna);
+  s('p-mls-code',p.mls_code); s('p-comision',p.comision);
+  s('p-agente',p.agente); s('p-licencia-corredor',p.licencia_corredor);
+  s('p-agencia',p.agencia); s('p-tel-corredor',p.tel_corredor);
+  s('p-email-corredor',p.email_corredor); s('p-exclusividad',p.exclusividad);
+  s('p-tipo-mls',p.tipo_mls); s('p-fecha-venc-mls',p.fecha_venc_mls);
   (p.amenidades||[]).forEach(a=>{const el=document.getElementById('am-'+a);if(el)el.checked=true;});
   _fotosTemp=[...(p.fotos||[])];
   renderFotosGrid();
@@ -4472,12 +5291,17 @@ function renderLeads(filter){
       <td><span style="background:${statusColor[l.status]||'var(--muted)'}22;color:${statusColor[l.status]||'var(--muted)'};padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600">${l.status||'Nuevo'}</span></td>
       <td style="font-size:12px;color:var(--muted)">${l.fecha||'—'}</td>
       <td>
-        ${l.tel||l.wa?`<button class="btn btn-sm" style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="WhatsApp" onclick="waLead('${l.id}')">💬</button>`:''}
-        ${l.email?`<button class="btn btn-sm" style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Email" onclick="openEmailLead('${l.id}')">📧</button>`:''}
-        <button class="btn btn-sm" style="background:var(--purple)22;color:var(--purple,#a855f7);border:1px solid var(--purple,#a855f7)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Historial" onclick="viewHistorial('lead','${l.id}')">${(l.historial||[]).length?`📋 ${l.historial.length}`:'📋'}</button>
-        <button class="btn btn-sm" style="background:var(--accent)22;color:var(--accent);border:1px solid var(--accent)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Archivos" onclick="openArchivos('lead','${l.id}')">📎 ${(l.archivos||[]).length||''}</button>
-        <button class="btn btn-sm btn-outline" title="Editar" onclick="editLead('${l.id}')">✏️</button>
-        <button class="btn btn-sm" style="background:#ef444422;color:var(--red);border:none;border-radius:6px;padding:4px 8px;cursor:pointer" title="Eliminar" onclick="deleteLead('${l.id}')">🗑</button>
+        <div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">
+        ${l.tel||l.wa?`<button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waLead('${l.id}')">💬</button>`:''}
+        ${l.email?`<button style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jcastro@jacrealtypa.com" onclick="emailLeadJcastro('${l.id}')">📧JC</button>`:''}
+        ${l.email?`<button style="background:var(--cyan)22;color:var(--cyan);border:1px solid var(--cyan)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jelyanrealestate@gmail.com" onclick="emailLeadJelyan('${l.id}')">📧JL</button>`:''}
+        <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Ver detalle" onclick="viewLeadDetail('${l.id}')">👁</button>
+        <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Exportar PDF" onclick="exportLeadPDF('${l.id}')">📄</button>
+        <button style="background:var(--purple)22;color:var(--purple,#a855f7);border:1px solid var(--purple,#a855f7)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Historial" onclick="viewHistorial('lead','${l.id}')">${(l.historial||[]).length?`📋${l.historial.length}`:'📋'}</button>
+        <button style="background:var(--accent)22;color:var(--accent);border:1px solid var(--accent)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Archivos" onclick="openArchivos('lead','${l.id}')">📎${(l.archivos||[]).length||''}</button>
+        <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Editar" onclick="editLead('${l.id}')">✏️</button>
+        <button style="background:#ef444422;color:var(--red);border:1px solid #ef444444;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Eliminar" onclick="deleteLead('${l.id}')">🗑</button>
+        </div>
       </td>
     </tr>`).join('');
 }
@@ -4507,12 +5331,17 @@ function renderContacts(filter){
       <td style="font-size:12px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.notas||'—'}</td>
       <td style="font-size:12px;color:var(--muted)">${c.fecha||'—'}</td>
       <td>
-        ${c.tel||c.wa?`<button class="btn btn-sm" style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="WhatsApp" onclick="waContact('${c.id}')">💬</button>`:''}
-        ${c.email?`<button class="btn btn-sm" style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Email" onclick="openEmailContact('${c.id}')">📧</button>`:''}
-        <button class="btn btn-sm" style="background:var(--purple)22;color:var(--purple,#a855f7);border:1px solid var(--purple,#a855f7)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Historial" onclick="viewHistorial('contact','${c.id}')">${(c.historial||[]).length?`📋 ${c.historial.length}`:'📋'}</button>
-        <button class="btn btn-sm" style="background:var(--accent)22;color:var(--accent);border:1px solid var(--accent)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Archivos" onclick="openArchivos('contact','${c.id}')">📎 ${(c.archivos||[]).length||''}</button>
-        <button class="btn btn-sm btn-outline" title="Editar" onclick="editContact('${c.id}')">✏️</button>
-        <button class="btn btn-sm" style="background:#ef444422;color:var(--red);border:none;border-radius:6px;padding:4px 8px;cursor:pointer" title="Eliminar" onclick="deleteContact('${c.id}')">🗑</button>
+        <div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">
+        ${c.tel||c.wa?`<button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waContact('${c.id}')">💬</button>`:''}
+        ${c.email?`<button style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jcastro" onclick="emailContactJcastro('${c.id}')">📧JC</button>`:''}
+        ${c.email?`<button style="background:var(--cyan)22;color:var(--cyan);border:1px solid var(--cyan)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jelyan" onclick="emailContactJelyan('${c.id}')">📧JL</button>`:''}
+        <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Ver detalle" onclick="viewContactDetail('${c.id}')">👁</button>
+        <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Exportar PDF" onclick="exportContactPDF('${c.id}')">📄</button>
+        <button style="background:var(--purple)22;color:var(--purple,#a855f7);border:1px solid var(--purple,#a855f7)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Historial" onclick="viewHistorial('contact','${c.id}')">${(c.historial||[]).length?`📋${c.historial.length}`:'📋'}</button>
+        <button style="background:var(--accent)22;color:var(--accent);border:1px solid var(--accent)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Archivos" onclick="openArchivos('contact','${c.id}')">📎${(c.archivos||[]).length||''}</button>
+        <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Editar" onclick="editContact('${c.id}')">✏️</button>
+        <button style="background:#ef444422;color:var(--red);border:1px solid #ef444444;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Eliminar" onclick="deleteContact('${c.id}')">🗑</button>
+        </div>
       </td>
     </tr>`).join('');
   document.getElementById('badge-contactos').textContent=contacts.length;
@@ -4654,12 +5483,17 @@ function renderClients(filter){
       <td style="font-size:12px;color:var(--muted)">${c.agente||'J. Castro'}</td>
       <td style="font-size:12px;color:var(--muted)">${c.fecha||'—'}</td>
       <td>
-        ${c.tel||c.wa?`<button class="btn btn-sm" style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="WhatsApp" onclick="waClient('${c.id}')">💬</button>`:''}
-        ${c.email?`<button class="btn btn-sm" style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Email" onclick="openEmailClient('${c.id}')">📧</button>`:''}
-        <button class="btn btn-sm" style="background:var(--purple)22;color:var(--purple,#a855f7);border:1px solid var(--purple,#a855f7)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Historial" onclick="viewHistorial('client','${c.id}')">${(c.historial||[]).length?`📋 ${c.historial.length}`:'📋'}</button>
-        <button class="btn btn-sm" style="background:var(--accent)22;color:var(--accent);border:1px solid var(--accent)44;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px" title="Archivos" onclick="openArchivos('client','${c.id}')">📎 ${(c.archivos||[]).length||''}</button>
-        <button class="btn btn-sm btn-outline" title="Editar" onclick="editClient('${c.id}')">✏️</button>
-        <button class="btn btn-sm" style="background:#ef444422;color:var(--red);border:none;border-radius:6px;padding:4px 8px;cursor:pointer" title="Eliminar" onclick="deleteClient('${c.id}')">🗑</button>
+        <div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">
+        ${c.tel||c.wa?`<button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waClient('${c.id}')">💬</button>`:''}
+        ${c.email?`<button style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jcastro" onclick="emailClientJcastro('${c.id}')">📧JC</button>`:''}
+        ${c.email?`<button style="background:var(--cyan)22;color:var(--cyan);border:1px solid var(--cyan)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jelyan" onclick="emailClientJelyan('${c.id}')">📧JL</button>`:''}
+        <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Ver detalle" onclick="viewClientDetail('${c.id}')">👁</button>
+        <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Exportar PDF" onclick="exportClientPDF('${c.id}')">📄</button>
+        <button style="background:var(--purple)22;color:var(--purple,#a855f7);border:1px solid var(--purple,#a855f7)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Historial" onclick="viewHistorial('client','${c.id}')">${(c.historial||[]).length?`📋${c.historial.length}`:'📋'}</button>
+        <button style="background:var(--accent)22;color:var(--accent);border:1px solid var(--accent)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Archivos" onclick="openArchivos('client','${c.id}')">📎${(c.archivos||[]).length||''}</button>
+        <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Editar" onclick="editClient('${c.id}')">✏️</button>
+        <button style="background:#ef444422;color:var(--red);border:1px solid #ef444444;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Eliminar" onclick="deleteClient('${c.id}')">🗑</button>
+        </div>
       </td>
     </tr>`).join('');
 }
@@ -6204,11 +7038,14 @@ function renderEmpresas(data){
     <td style="font-size:12px">${e.email||'–'}</td>
     <td><span class="tag" style="background:var(--card2);color:var(--muted)">${e.tipo||'–'}</span></td>
     <td><span class="tag" style="background:${empStatusColors[e.status]||'var(--muted)'}22;color:${empStatusColors[e.status]||'var(--muted)'}">${e.status||'–'}</span></td>
-    <td><div class="action-btns">
-      <button class="wa-btn" title="WhatsApp" onclick="waEmpresa('${e.id}')">💬</button>
-      <button class="email-btn" title="Email" onclick="emailEmpresa('${e.id}')">📧</button>
-      <button class="btn btn-ghost btn-sm" title="Editar" onclick="editEmpresa('${e.id}')">✏️</button>
-      <button class="btn btn-ghost btn-sm" title="Eliminar" onclick="deleteEmpresa('${e.id}')" style="color:var(--red)">🗑️</button>
+    <td><div class="action-btns" style="flex-wrap:wrap">
+      <button class="wa-btn" style="font-size:11px;padding:3px 7px" title="WhatsApp" onclick="waEmpresa('${e.id}')">💬</button>
+      <button class="email-btn" style="font-size:11px;padding:3px 7px" title="Email jcastro" onclick="emailEmpresaJcastro('${e.id}')">📧JC</button>
+      <button class="email-btn" style="font-size:11px;padding:3px 7px;background:var(--cyan)22;color:var(--cyan);border-color:var(--cyan)44" title="Email jelyan" onclick="emailEmpresaJelyan('${e.id}')">📧JL</button>
+      <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 7px" title="Ver detalle" onclick="viewEmpresaDetail('${e.id}')">👁</button>
+      <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 7px" title="Exportar PDF" onclick="exportEmpresaPDF('${e.id}')">📄</button>
+      <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 7px" title="Editar" onclick="editEmpresa('${e.id}')">✏️</button>
+      <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 7px;color:var(--red)" title="Eliminar" onclick="deleteEmpresa('${e.id}')">🗑️</button>
     </div></td>
   </tr>`).join(''):`<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">Sin empresas registradas. Haz clic en <strong>+ Nueva Empresa</strong> para agregar.</td></tr>`;
   document.getElementById('badge-empresas').textContent=arr.filter(e=>e.status==='Activo'||e.status==='VIP').length;
@@ -6736,6 +7573,273 @@ function confirmarImport(){
   document.getElementById('import-preview').innerHTML='';
   document.getElementById('import-confirm-btn').style.display='none';
 }
-</script>
+
+// ============================================================
+// DUAL EMAIL & EXPORT FUNCTIONS — All modules
+// ============================================================
+
+// ── PROPIEDADES ──
+function sharePropEmailJcastro(id){
+  const p=props.find(x=>x.id===id); if(!p)return;
+  const sub=encodeURIComponent(`${p.titulo} · ${p.zona} · JAC Realty`);
+  const body=encodeURIComponent(`🏠 ${p.titulo}\n📍 ${p.zona}\n💰 ${p.op==='Alquiler'?fmtPrice(p.precio,'mes'):fmtPrice(p.precio)}\n🛏 ${p.hab} hab · 🚿 ${p.banos} baños · 📐 ${p.area}m²\n\n${p.desc||''}\n\nJelyan Castro · JAC Realty Panamá · Lic. PN-0931\n📞 +507 64627763\n✉️ jcastro@jacrealtypa.com`);
+  window.open(`mailto:?from=jcastro@jacrealtypa.com&subject=${sub}&body=${body}`,'_blank');
+}
+function sharePropEmailJelyan(id){
+  const p=props.find(x=>x.id===id); if(!p)return;
+  const sub=encodeURIComponent(`${p.titulo} · ${p.zona} · JAC Realty`);
+  const body=encodeURIComponent(`🏠 ${p.titulo}\n📍 ${p.zona}\n💰 ${p.op==='Alquiler'?fmtPrice(p.precio,'mes'):fmtPrice(p.precio)}\n🛏 ${p.hab} hab · 🚿 ${p.banos} baños · 📐 ${p.area}m²\n\n${p.desc||''}\n\nJelyan Castro · JAC Realty Panamá · Lic. PN-0931\n📞 +507 64627763\n✉️ jelyanrealestate@gmail.com`);
+  window.open(`mailto:?from=jelyanrealestate@gmail.com&subject=${sub}&body=${body}`,'_blank');
+}
+function exportPropPDF(id){
+  const p=props.find(x=>x.id===id); if(!p)return;
+  if(!window.jspdf){toast('⏳ Cargando PDF...'); setTimeout(()=>exportPropPDF(id),800); return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,M=18;
+  doc.setFillColor(10,26,58); doc.rect(0,0,W,32,'F');
+  doc.setTextColor(232,160,32); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('JAC REALTY',M,14);
+  doc.setFontSize(8); doc.setTextColor(200,200,200);
+  doc.text('Jely Castro · Lic. PN-0931 · +507 6462-7763',M,21);
+  doc.text('jcastro@jacrealtypa.com · jelyanrealestate@gmail.com',M,27);
+  let y=42;
+  doc.setTextColor(10,26,58); doc.setFontSize(15); doc.setFont('helvetica','bold');
+  const tl=doc.splitTextToSize(p.titulo||'Propiedad',W-2*M);
+  doc.text(tl,M,y); y+=tl.length*7+4;
+  doc.setFontSize(20); doc.setTextColor(232,160,32);
+  doc.text('$'+Number(p.precio||0).toLocaleString('en-US'),M,y); y+=10;
+  doc.setFontSize(10); doc.setTextColor(80,80,80);
+  doc.text(`📍 ${p.zona||'—'} · ${p.op||''}  |  ${p.tipo||''}  |  ${p.hab||0} hab · ${p.banos||0} baños · ${p.area||0}m²`,M,y); y+=8;
+  if(p.desc){
+    const dl=doc.splitTextToSize(p.desc,W-2*M);
+    doc.setFontSize(9); doc.text(dl.slice(0,25),M,y); y+=Math.min(dl.length,25)*4.5+4;
+  }
+  doc.setFillColor(10,26,58); doc.rect(0,285,W,12,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8);
+  doc.text('Jely Castro · JAC Realty · +507 6462-7763 · jcastro@jacrealtypa.com',W/2,291,{align:'center'});
+  doc.save('JAC_Realty_Propiedad_'+p.id+'.pdf');
+  toast('📄 PDF descargado');
+}
+
+// ── LEADS ──
+function emailLeadJcastro(id){
+  const l=leads.find(x=>x.id===id); if(!l||!l.email)return;
+  const sub=encodeURIComponent('Propiedades disponibles para usted – JAC Realty');
+  const body=encodeURIComponent(`Estimado/a ${l.nombre},\n\nEspero que se encuentre bien. Soy Jelyan Castro de JAC Realty Panamá (Lic. PN-0931).\n\nTengo propiedades disponibles que coinciden con su búsqueda: ${l.interes||''}${l.zona?' en '+l.zona:''}.\n\nMe gustaría coordinar una reunión para mostrarle las opciones que mejor se adapten a sus necesidades.\n\nQuedo a su disposición.\n\nJelyan Castro\nJAC Realty PA · Lic. PN-0931\n📞 +507 64627763\n✉️ jcastro@jacrealtypa.com`);
+  window.open(`mailto:${l.email}?subject=${sub}&body=${body}`,'_blank');
+}
+function emailLeadJelyan(id){
+  const l=leads.find(x=>x.id===id); if(!l||!l.email)return;
+  const sub=encodeURIComponent('Propiedades disponibles para usted – JAC Realty');
+  const body=encodeURIComponent(`Estimado/a ${l.nombre},\n\nEspero que se encuentre bien. Soy Jelyan Castro de JAC Realty Panamá (Lic. PN-0931).\n\nTengo propiedades disponibles que coinciden con su búsqueda: ${l.interes||''}${l.zona?' en '+l.zona:''}.\n\nMe gustaría coordinar una reunión para mostrarle las opciones que mejor se adapten a sus necesidades.\n\nQuedo a su disposición.\n\nJelyan Castro\nJAC Realty PA · Lic. PN-0931\n📞 +507 64627763\n✉️ jelyanrealestate@gmail.com`);
+  window.open(`mailto:${l.email}?subject=${sub}&body=${body}`,'_blank');
+}
+function viewLeadDetail(id){
+  const l=leads.find(x=>x.id===id); if(!l)return;
+  const info=`👤 ${l.nombre}\n📞 ${l.tel||'—'} · 📧 ${l.email||'—'}\n🎯 Interés: ${l.interes||'—'} · ${l.tipo_prop||''}\n📍 Zona: ${l.zona||'—'}\n💰 Presupuesto: ${l.presupuesto||'—'}\n📊 Estado: ${l.status||'—'}\n📣 Fuente: ${l.fuente||'—'}\n📅 Fecha: ${l.fecha||'—'}\n📝 Notas: ${l.notas||'—'}`;
+  alert(info);
+}
+function exportLeadPDF(id){
+  const l=leads.find(x=>x.id===id); if(!l)return;
+  if(!window.jspdf){toast('⏳ Cargando PDF...'); setTimeout(()=>exportLeadPDF(id),800); return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,M=18;
+  doc.setFillColor(10,26,58); doc.rect(0,0,W,32,'F');
+  doc.setTextColor(232,160,32); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('JAC REALTY · LEAD',M,14);
+  doc.setFontSize(8); doc.setTextColor(200,200,200);
+  doc.text('Jely Castro · Lic. PN-0931 · +507 6462-7763 · jcastro@jacrealtypa.com',M,22);
+  doc.setFillColor(255,255,255); doc.rect(M,38,W-2*M,110,'F');
+  doc.setDrawColor(232,160,32); doc.rect(M,38,W-2*M,110,'S');
+  doc.setTextColor(10,26,58); doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text(l.nombre||'Lead',M+6,50);
+  const rows=[['Teléfono',l.tel||'—'],['Email',l.email||'—'],['Interés',l.interes||'—'],
+    ['Tipo prop.',l.tipo_prop||'—'],['Zona',l.zona||'—'],['Presupuesto',l.presupuesto||'—'],
+    ['Fuente',l.fuente||'—'],['Estado',l.status||'—'],['Fecha',l.fecha||'—']];
+  let y=60;
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  rows.forEach(([k,v])=>{
+    doc.setTextColor(100,100,100); doc.text(k+':',M+6,y);
+    doc.setTextColor(10,26,58); doc.text(String(v),M+45,y);
+    y+=8;
+  });
+  if(l.notas){
+    doc.setTextColor(10,26,58); doc.setFontSize(9);
+    const nl=doc.splitTextToSize('Notas: '+l.notas,W-2*M-12);
+    doc.text(nl.slice(0,5),M+6,y+4);
+  }
+  doc.setFillColor(10,26,58); doc.rect(0,285,W,12,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8);
+  doc.text('JAC Realty · +507 6462-7763 · jcastro@jacrealtypa.com · jelyanrealestate@gmail.com',W/2,291,{align:'center'});
+  doc.save('JAC_Lead_'+l.id+'.pdf');
+  toast('📄 PDF descargado');
+}
+
+// ── CONTACTOS ──
+function emailContactJcastro(id){
+  const c=contacts.find(x=>x.id===id); if(!c||!c.email)return;
+  const sub=encodeURIComponent('Oportunidades Inmobiliarias – JAC Realty');
+  const body=encodeURIComponent(`Estimado/a ${c.nombre},\n\nMe pongo en contacto desde JAC Realty Panamá (Lic. PN-0931) para compartir con usted las últimas propiedades disponibles en nuestro portafolio.\n\nQuedo a su disposición para cualquier consulta.\n\nJelyan Castro · JAC Realty PA\n📞 +507 64627763\n✉️ jcastro@jacrealtypa.com`);
+  window.open(`mailto:${c.email}?subject=${sub}&body=${body}`,'_blank');
+}
+function emailContactJelyan(id){
+  const c=contacts.find(x=>x.id===id); if(!c||!c.email)return;
+  const sub=encodeURIComponent('Oportunidades Inmobiliarias – JAC Realty');
+  const body=encodeURIComponent(`Estimado/a ${c.nombre},\n\nMe pongo en contacto desde JAC Realty Panamá (Lic. PN-0931) para compartir con usted las últimas propiedades disponibles en nuestro portafolio.\n\nQuedo a su disposición para cualquier consulta.\n\nJelyan Castro · JAC Realty PA\n📞 +507 64627763\n✉️ jelyanrealestate@gmail.com`);
+  window.open(`mailto:${c.email}?subject=${sub}&body=${body}`,'_blank');
+}
+function viewContactDetail(id){
+  const c=contacts.find(x=>x.id===id); if(!c)return;
+  editContact(id);
+}
+function exportContactPDF(id){
+  const c=contacts.find(x=>x.id===id); if(!c)return;
+  if(!window.jspdf){toast('⏳ Cargando PDF...'); setTimeout(()=>exportContactPDF(id),800); return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,M=18;
+  doc.setFillColor(10,26,58); doc.rect(0,0,W,32,'F');
+  doc.setTextColor(232,160,32); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('JAC REALTY · CONTACTO',M,14);
+  doc.setFontSize(8); doc.setTextColor(200,200,200);
+  doc.text('Jely Castro · Lic. PN-0931 · +507 6462-7763',M,22);
+  doc.setTextColor(10,26,58); doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text(c.nombre||'Contacto',M,46);
+  const rows=[['Teléfono',c.tel||'—'],['Email',c.email||'—'],['Empresa',c.empresa||'—'],['Cargo',c.cargo||'—'],['Categoría',c.categoria||'—'],['Notas',c.notas||'—']];
+  let y=56;
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  rows.forEach(([k,v])=>{
+    doc.setTextColor(100,100,100); doc.text(k+':',M,y);
+    doc.setTextColor(10,26,58); const vl=doc.splitTextToSize(String(v),W-2*M-40);
+    doc.text(vl.slice(0,2),M+40,y); y+=10;
+  });
+  doc.setFillColor(10,26,58); doc.rect(0,285,W,12,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8);
+  doc.text('JAC Realty · +507 6462-7763 · jcastro@jacrealtypa.com',W/2,291,{align:'center'});
+  doc.save('JAC_Contacto_'+c.id+'.pdf');
+  toast('📄 PDF descargado');
+}
+
+// ── CLIENTES ──
+function emailClientJcastro(id){
+  const c=clients.find(x=>x.id===id); if(!c||!c.email)return;
+  const sub=encodeURIComponent('Actualización de propiedades – JAC Realty');
+  const body=encodeURIComponent(`Estimado/a ${c.nombre},\n\nLe contacto desde JAC Realty Panamá para compartir las últimas actualizaciones sobre propiedades que se ajustan a su perfil de búsqueda.\n\nQuedo a su disposición.\n\nJelyan Castro · JAC Realty PA · Lic. PN-0931\n📞 +507 64627763\n✉️ jcastro@jacrealtypa.com`);
+  window.open(`mailto:${c.email}?subject=${sub}&body=${body}`,'_blank');
+}
+function emailClientJelyan(id){
+  const c=clients.find(x=>x.id===id); if(!c||!c.email)return;
+  const sub=encodeURIComponent('Actualización de propiedades – JAC Realty');
+  const body=encodeURIComponent(`Estimado/a ${c.nombre},\n\nLe contacto desde JAC Realty Panamá para compartir las últimas actualizaciones sobre propiedades que se ajustan a su perfil de búsqueda.\n\nQuedo a su disposición.\n\nJelyan Castro · JAC Realty PA · Lic. PN-0931\n📞 +507 64627763\n✉️ jelyanrealestate@gmail.com`);
+  window.open(`mailto:${c.email}?subject=${sub}&body=${body}`,'_blank');
+}
+function viewClientDetail(id){
+  const c=clients.find(x=>x.id===id); if(!c)return;
+  editClient(id);
+}
+function exportClientPDF(id){
+  const c=clients.find(x=>x.id===id); if(!c)return;
+  if(!window.jspdf){toast('⏳ Cargando PDF...'); setTimeout(()=>exportClientPDF(id),800); return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,M=18;
+  doc.setFillColor(10,26,58); doc.rect(0,0,W,32,'F');
+  doc.setTextColor(232,160,32); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('JAC REALTY · CLIENTE',M,14);
+  doc.setFontSize(8); doc.setTextColor(200,200,200);
+  doc.text('Jely Castro · Lic. PN-0931 · +507 6462-7763',M,22);
+  doc.setTextColor(10,26,58); doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text(c.nombre||'Cliente',M,46);
+  doc.setFontSize(11); doc.setTextColor(100,100,100);
+  doc.text(c.tipo||'—',M,54);
+  const rows=[['Teléfono',c.tel||'—'],['Email',c.email||'—'],['Estado',c.status||'—'],
+    ['Agente',c.agente||'J. Castro'],['Presupuesto','Hasta $'+Number(c.presupuesto_max||0).toLocaleString()],
+    ['Zona preferida',c.zona||'—'],['Tipo propiedad',c.tipo_prop||'—']];
+  let y=64;
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  rows.forEach(([k,v])=>{
+    doc.setTextColor(100,100,100); doc.text(k+':',M,y);
+    doc.setTextColor(10,26,58); doc.text(String(v),M+50,y);
+    y+=9;
+  });
+  doc.setFillColor(10,26,58); doc.rect(0,285,W,12,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8);
+  doc.text('JAC Realty · +507 6462-7763 · jcastro@jacrealtypa.com',W/2,291,{align:'center'});
+  doc.save('JAC_Cliente_'+c.id+'.pdf');
+  toast('📄 PDF descargado');
+}
+
+// ── EMPRESAS ──
+function emailEmpresaJcastro(id){
+  const e=empresas.find(x=>x.id===id); if(!e||!e.email)return;
+  const sub=encodeURIComponent('Oportunidades Inmobiliarias para '+e.nombre+' – JAC Realty');
+  const body=encodeURIComponent(`Estimado/a ${e.contacto||'equipo de '+e.nombre},\n\nMe dirijo a ustedes de parte de JAC Realty Panamá (Lic. PN-0931) para presentarles oportunidades inmobiliarias en Panamá que podrían ser de interés para ${e.nombre}.\n\nQuedo a su disposición.\n\nJelyan Castro · JAC Realty PA\n📞 +507 64627763\n✉️ jcastro@jacrealtypa.com`);
+  window.open(`mailto:${e.email}?subject=${sub}&body=${body}`,'_blank');
+}
+function emailEmpresaJelyan(id){
+  const e=empresas.find(x=>x.id===id); if(!e||!e.email)return;
+  const sub=encodeURIComponent('Oportunidades Inmobiliarias para '+e.nombre+' – JAC Realty');
+  const body=encodeURIComponent(`Estimado/a ${e.contacto||'equipo de '+e.nombre},\n\nMe dirijo a ustedes de parte de JAC Realty Panamá (Lic. PN-0931) para presentarles oportunidades inmobiliarias en Panamá que podrían ser de interés para ${e.nombre}.\n\nQuedo a su disposición.\n\nJelyan Castro · JAC Realty PA\n📞 +507 64627763\n✉️ jelyanrealestate@gmail.com`);
+  window.open(`mailto:${e.email}?subject=${sub}&body=${body}`,'_blank');
+}
+function viewEmpresaDetail(id){
+  const e=empresas.find(x=>x.id===id); if(!e)return;
+  editEmpresa(id);
+}
+function exportEmpresaPDF(id){
+  const e=empresas.find(x=>x.id===id); if(!e)return;
+  if(!window.jspdf){toast('⏳ Cargando PDF...'); setTimeout(()=>exportEmpresaPDF(id),800); return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,M=18;
+  doc.setFillColor(10,26,58); doc.rect(0,0,W,32,'F');
+  doc.setTextColor(232,160,32); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('JAC REALTY · EMPRESA',M,14);
+  doc.setFontSize(8); doc.setTextColor(200,200,200);
+  doc.text('Jely Castro · Lic. PN-0931 · +507 6462-7763',M,22);
+  doc.setTextColor(10,26,58); doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text(e.nombre||'Empresa',M,46);
+  if(e.comercial){doc.setFontSize(10);doc.setTextColor(100,100,100);doc.text(e.comercial,M,54);}
+  const rows=[['Sector',e.sector||'—'],['Tipo',e.tipo||'—'],['Contacto',e.contacto||'—'],['Cargo',e.cargo||'—'],
+    ['Teléfono',e.tel||'—'],['Email',e.email||'—'],['RUC',e.ruc||'—'],['Estado',e.status||'—'],
+    ['Interés',e.interes||'—'],['Presupuesto',e.presupuesto||'—']];
+  let y=64;
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  rows.forEach(([k,v])=>{
+    doc.setTextColor(100,100,100); doc.text(k+':',M,y);
+    doc.setTextColor(10,26,58); doc.text(String(v),M+40,y);
+    y+=9;
+  });
+  doc.setFillColor(10,26,58); doc.rect(0,285,W,12,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8);
+  doc.text('JAC Realty · +507 6462-7763 · jcastro@jacrealtypa.com',W/2,291,{align:'center'});
+  doc.save('JAC_Empresa_'+e.id+'.pdf');
+  toast('📄 PDF descargado');
+}
+
+// ── POST-VENTA email dual & PDF ──
+function emailPVJcastro(id){
+  const pv=postVentas.find(x=>x.id===id); if(!pv||!pv.email)return;
+  const sub=encodeURIComponent('Seguimiento post-venta · '+pv.propiedad+' – JAC Realty');
+  const body=encodeURIComponent(`Estimado/a ${pv.cliente},\n\nEspero que todo vaya excelente con su propiedad. Soy Jelyan Castro de JAC Realty.\n\nMe pongo en contacto para hacer seguimiento a su proceso de cierre/entrega y verificar que todo esté en orden.\n\nQuedo a su disposición.\n\nJelyan Castro · JAC Realty PA · Lic. PN-0931\n📞 +507 64627763\n✉️ jcastro@jacrealtypa.com`);
+  window.open(`mailto:${pv.email}?subject=${sub}&body=${body}`,'_blank');
+}
+function emailPVJelyan(id){
+  const pv=postVentas.find(x=>x.id===id); if(!pv||!pv.email)return;
+  const sub=encodeURIComponent('Seguimiento post-venta · '+pv.propiedad+' – JAC Realty');
+  const body=encodeURIComponent(`Estimado/a ${pv.cliente},\n\nEspero que todo vaya excelente con su propiedad. Soy Jelyan Castro de JAC Realty.\n\nMe pongo en contacto para hacer seguimiento a su proceso de cierre/entrega y verificar que todo esté en orden.\n\nQuedo a su disposición.\n\nJelyan Castro · JAC Realty PA · Lic. PN-0931\n📞 +507 64627763\n✉️ jelyanrealestate@gmail.com`);
+  window.open(`mailto:${pv.email}?subject=${sub}&body=${body}`,'_blank');
+}
+
+// ── PIPELINE: email dual from pipeline cards ──
+function emailPipelineJcastro(leadId){
+  emailLeadJcastro(leadId);
+}
+function emailPipelineJelyan(leadId){
+  emailLeadJelyan(leadId);
+}
+\n</script>
 </body>
 </html>
