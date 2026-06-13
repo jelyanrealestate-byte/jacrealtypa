@@ -4282,13 +4282,13 @@ function renderGuardadaCard(g){
   const waMsg = encodeURIComponent('🏠 *'+g.titulo+'*\n📍 '+g.zona+'\n💰 $'+Number(g.precio||0).toLocaleString()+'\n\n'+((g.descripcion||'').substring(0,200))+'\n\n_Jely Castro · JAC Realty · +507 6462-7763_\n_jcastro@jacrealtypa.com_');
   card += '<a href="https://wa.me/?text='+waMsg+'" target="_blank" style="text-decoration:none"><button class="wa-btn" style="font-size:10px;padding:3px 7px" title="Compartir por WhatsApp">💬 WA</button></a>';
   // Email
-  card += '<button class="email-btn" style="font-size:10px;padding:3px 7px" onclick="mlsEmailGuardada(''+g.id+'')" title="Enviar por email">📧</button>';
+  card += '<button class="email-btn" style="font-size:10px;padding:3px 7px" onclick="mlsEmailGuardada(\''+g.id+'\')" title="Enviar por email">📧</button>';
   // PDF
-  card += '<button class="btn btn-outline" style="font-size:10px;padding:3px 7px" onclick="exportMlsGuardadaPDF(''+g.id+'')" title="Exportar PDF">📄</button>';
+  card += '<button class="btn btn-outline" style="font-size:10px;padding:3px 7px" onclick="exportMlsGuardadaPDF(\''+g.id+'\')" title="Exportar PDF">📄</button>';
   // Advance stage
-  if(nextStage) card += '<button class="btn" style="font-size:10px;padding:3px 7px;background:'+nextStage.color+';color:#fff;border:none;border-radius:6px;cursor:pointer" onclick="updateGuardadaStage(''+g.id+'',''+nextStage.id+'')" title="Avanzar a '+nextStage.label+'">'+nextStage.label.split(' ')[0]+' →</button>';
+  if(nextStage) card += '<button class="btn" style="font-size:10px;padding:3px 7px;background:'+nextStage.color+';color:#fff;border:none;border-radius:6px;cursor:pointer" onclick="updateGuardadaStage(\''+g.id+'\',\''+nextStage.id+'\')" title="Avanzar a '+nextStage.label+'">'+nextStage.label.split(' ')[0]+' →</button>';
   // Remove
-  card += '<button class="btn" style="font-size:10px;padding:3px 7px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer" onclick="removeGuardada(''+g.id+'')" title="Eliminar">✕</button>';
+  card += '<button class="btn" style="font-size:10px;padding:3px 7px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer" onclick="removeGuardada(\''+g.id+'\')" title="Eliminar">✕</button>';
   card += '</div>';
   card += '</div>';
   return card;
@@ -8128,7 +8128,7 @@ function emailPipelineJcastro(leadId){
 function emailPipelineJelyan(leadId){
   emailLeadJelyan(leadId);
 }
-\n
+
 // ════════════════════════════════════════════════════════════════
 // MÓDULO AGENTES — CRUD completo con permisos estilo Wasi
 // ════════════════════════════════════════════════════════════════
