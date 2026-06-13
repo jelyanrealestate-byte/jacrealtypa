@@ -505,7 +505,7 @@ const _JAC_WA='50764627763';
 let _webProps=[];
 let _currentList=[];
 let _mlsOffset=0;
-let _mlsPageSize=100;
+let _mlsPageSize=20;
 let _mlsHasMore=false;
 let _mlsLoadingMore=false;
 
@@ -561,7 +561,7 @@ function webRenderProps(list){
     const isMLS=p._src==='mls';
     const waMsg=encodeURIComponent(`Hola JAC Realty 🏠 Me interesa la propiedad:\n*${p.titulo||'Propiedad en '+p.zona}*\n📍 ${p.zona||'Panamá'} · ${p.tipo||''}\n💰 ${precio}\n\n¿Pueden darme más información?`);
     return `<div onclick="openWebPropModal(_currentList[${i}])" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .25s,border-color .25s" onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='rgba(196,30,58,.4)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(255,255,255,.07)'">
-      <div style="height:210px;background:url('${img}') center/cover no-repeat;position:relative">
+      <div style="height:210px;position:relative;overflow:hidden;background:#1a1a1a"><img src="${img}" loading="lazy" alt="${p.titulo||''}" onerror="this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=700&q=80'" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s">
         <div style="position:absolute;top:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap">
           ${opLabel?`<span style="background:#C41E3A;color:#fff;font-size:9px;font-weight:800;padding:4px 11px;border-radius:3px;letter-spacing:1.5px">${opLabel}</span>`:''}
           ${p.tipo?`<span style="background:rgba(0,0,0,.72);color:#fff;font-size:9px;padding:4px 10px;border-radius:3px;letter-spacing:.5px">${p.tipo}</span>`:''}
@@ -619,7 +619,7 @@ function updateLoadMoreBtn(){
   if(_mlsHasMore){
     lm.style.display='block';
     const loaded=_webProps.filter(p=>p._src==='mls').length;
-    if(info) info.textContent=`${loaded} de 1305 propiedades MLS cargadas`;
+    if(info) info.textContent=`Mostrando ${loaded} de 1305 propiedades MLS`;
     if(btn) btn.textContent='Cargar más propiedades ↓';
     btn.disabled=false;
   } else {
