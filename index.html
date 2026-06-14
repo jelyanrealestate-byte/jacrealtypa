@@ -979,18 +979,17 @@ document.addEventListener('DOMContentLoaded',()=>loadWebProps());
 
       <!-- ACOBIR -->
       <div class="assoc-item">
-        <img src="https://acobir.com/wp-content/uploads/2020/10/LogoACOBIR-01.png"
-             alt="ACOBIR"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-             style="height:52px">
-        <!-- Fallback SVG si la imagen no carga -->
-        <div style="display:none;height:52px;align-items:center;justify-content:center">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 52" height="40">
-            <rect x="1" y="1" width="178" height="50" rx="3" fill="none" stroke="#9B8E85" stroke-width="1.2"/>
-            <text x="90" y="30" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="18" font-weight="600" fill="#1a3a5c" text-anchor="middle" letter-spacing="5">ACOBIR</text>
-            <text x="90" y="44" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="7" font-weight="400" fill="#9B8E85" text-anchor="middle" letter-spacing="2.5">PANAMÁ</text>
-          </svg>
-        </div>
+        <!-- SVG inline fiel al logo oficial ACOBIR (casa azul + techo dorado) -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 308 80" height="52" role="img" aria-label="ACOBIR">
+          <!-- Techo dorado -->
+          <polyline points="2,48 40,12 76,34" fill="none" stroke="#D4A020" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Cuerpo azul de la casa (forma A) -->
+          <rect x="22" y="30" width="54" height="50" rx="2" fill="#3D5496"/>
+          <!-- Arco blanco interior (negativo de la A) -->
+          <path d="M33,80 L33,54 Q50,38 67,54 L67,80 Z" fill="white"/>
+          <!-- Texto COBIR -->
+          <text x="86" y="73" font-family="'Arial Black',Arial,Helvetica,sans-serif" font-size="58" font-weight="900" fill="#3D5496">COBIR</text>
+        </svg>
         <span class="assoc-item-name">ACOBIR</span>
       </div>
 
@@ -998,9 +997,18 @@ document.addEventListener('DOMContentLoaded',()=>loadWebProps());
 
       <!-- MLS Panamá -->
       <div class="assoc-item">
-        <img src="https://www.mlsacobir.com/wp-content/uploads/2020/08/logo-mls-acobir-panama-footer-150x75-1.png"
+        <img src="https://www.acobir.com/site/assets/files/2020/09/07/3832/53002091-0-logomls.png"
              alt="MLS Panamá · ACOBIR"
-             style="height:52px">
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+             style="height:52px;max-width:150px;object-fit:contain">
+        <!-- Fallback SVG MLS -->
+        <div style="display:none;height:52px;align-items:center;justify-content:center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 52" height="48">
+            <rect x="0" y="0" width="156" height="52" rx="5" fill="#1a3a5c"/>
+            <text x="78" y="22" font-family="'Helvetica Neue',Arial,sans-serif" font-size="8.5" font-weight="700" fill="rgba(255,255,255,.8)" text-anchor="middle" letter-spacing="2.5">MLS PANAMÁ</text>
+            <text x="78" y="42" font-family="'Arial Black',Arial,sans-serif" font-size="16" font-weight="900" fill="#D4A020" text-anchor="middle" letter-spacing="3">ACOBIR</text>
+          </svg>
+        </div>
         <span class="assoc-item-name">MLS Panamá</span>
       </div>
 
