@@ -1469,7 +1469,15 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
         </div>
         <div id="mls-det-desc-wrap" style="margin-top:12px;display:none">
           <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;padding:6px 10px;background:var(--card2);border-radius:6px">📝 Descripción</div>
-          <div id="mls-det-desc" style="font-size:12px;color:var(--text2);line-height:1.7;max-height:130px;overflow-y:auto;padding:8px 4px"></div>
+          <div id="mls-det-desc" style="font-size:12px;color:var(--text2);line-height:1.7;max-height:150px;overflow-y:auto;padding:8px 4px"></div>
+        </div>
+        <div id="mls-det-ubicacion-wrap" style="margin-top:10px;display:none">
+          <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;padding:6px 10px;background:var(--card2);border-radius:6px">📍 Ubicación detallada</div>
+          <div id="mls-det-ubicacion" style="font-size:12px;color:var(--text2);line-height:1.8;padding:4px 8px;display:grid;grid-template-columns:1fr 1fr;gap:4px"></div>
+        </div>
+        <div id="mls-det-amenidades-wrap" style="margin-top:10px;display:none">
+          <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;padding:6px 10px;background:var(--card2);border-radius:6px">🏡 Características y amenidades</div>
+          <div id="mls-det-amenidades" style="font-size:12px;color:var(--text2);line-height:1.8;padding:4px 8px"></div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-outline" onclick="closeModal('modalMlsDetalle')">Cerrar</button>
@@ -3775,7 +3783,7 @@ async function loadMlsListados(){
   let all=[]; let from=0; const batch=1000;
   while(true){
     const {data,error}=await sb.from('propiedades_red')
-      .select('id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos,mls_code,descripcion,agente,agencia,licencia_corredor,tel_corredor,email_corredor,comision,created_at')
+      .select('id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos,mls_code,descripcion,agente,agencia,licencia_corredor,tel_corredor,tel_corredor_wa,email_corredor,comision,provincia,distrito,barrio,corregimiento,edificio,ano_construccion,area_lote,zonificacion,caracteristicas_externas,amenidades_prop,caracteristicas_internas,area_exterior,url_mls,created_at')
       .order('created_at',{ascending:false})
       .range(from,from+batch-1);
     if(error||!data||!data.length) break;
@@ -3922,13 +3930,15 @@ function mlsAbrirDetalle(idx){
   if(m.agente) corrLines.push('<b>Corredor:</b> '+m.agente);
   if(m.licencia_corredor) corrLines.push('<b>Licencia:</b> '+m.licencia_corredor);
   if(m.agencia) corrLines.push('<b>Agencia:</b> '+m.agencia);
-  if(m.tel_corredor) corrLines.push('<b>Tel:</b> '+m.tel_corredor);
+  if(m.tel_corredor_wa) corrLines.push('<b>WhatsApp:</b> '+m.tel_corredor_wa);
+  else if(m.tel_corredor) corrLines.push('<b>Tel:</b> '+m.tel_corredor);
   if(m.email_corredor) corrLines.push('<b>Email:</b> '+m.email_corredor);
   if(m.comision) corrLines.push('<b>Comisión co-broking:</b> '+m.comision);
   el('mls-det-corredor').innerHTML=corrLines.length?corrLines.join('<br>'):'<span style="color:var(--muted)">Sin datos del corredor</span>';
   // Action buttons — full set
   const acciones=[];
-  if(m.tel_corredor||m.agente) acciones.push(`<button class="btn btn-outline btn-sm" style="color:var(--green)" onclick="mlsContactarAgente(${idx})" title="WhatsApp co-broking al corredor">💬 WA Corredor</button>`);
+  if(m.tel_corredor_wa||m.tel_corredor||m.agente) acciones.push(`<button class="btn btn-outline btn-sm" style="color:var(--green)" onclick="mlsContactarAgente(${idx})" title="WhatsApp co-broking al corredor">💬 WA Corredor</button>`);
+  if(m.url_mls) acciones.push(`<a href="${m.url_mls}" target="_blank" rel="noopener" style="text-decoration:none"><button class="btn btn-outline btn-sm" title="Ver ficha completa en MLS ACOBIR">🔗 Ver MLS</button></a>`);
   acciones.push(`<button class="btn btn-outline btn-sm" onclick="mlsEmailJcastro(${idx})" title="Enviar por email jcastro@jacrealtypa.com">📧 jcastro</button>`);
   acciones.push(`<button class="btn btn-outline btn-sm" onclick="mlsEmailJelyan(${idx})" title="Enviar por email jelyanrealestate@gmail.com">📨 jelyan</button>`);
   acciones.push(`<button class="btn btn-outline btn-sm" style="color:var(--red)" onclick="exportMlsPDF(${idx})" title="Exportar ficha PDF">📄 PDF</button>`);
@@ -3943,12 +3953,32 @@ function mlsAbrirDetalle(idx){
   } else {
     el('mls-det-desc-wrap').style.display='none';
   }
+  // Location details
+  const ubParts=[];
+  if(m.provincia) ubParts.push(`<div><span style="color:var(--muted);font-size:10px">PROVINCIA</span><br><b>${m.provincia}</b></div>`);
+  if(m.distrito) ubParts.push(`<div><span style="color:var(--muted);font-size:10px">DISTRITO</span><br><b>${m.distrito}</b></div>`);
+  if(m.corregimiento) ubParts.push(`<div><span style="color:var(--muted);font-size:10px">CORREGIMIENTO</span><br><b>${m.corregimiento}</b></div>`);
+  if(m.barrio) ubParts.push(`<div><span style="color:var(--muted);font-size:10px">BARRIO</span><br><b>${m.barrio}</b></div>`);
+  if(ubParts.length){ el('mls-det-ubicacion-wrap').style.display=''; el('mls-det-ubicacion').innerHTML=ubParts.join(''); }
+  else el('mls-det-ubicacion-wrap').style.display='none';
+  // Amenities & building details
+  const amLines=[];
+  if(m.edificio) amLines.push(`<div style="margin-bottom:3px"><b>Edificio:</b> ${m.edificio}</div>`);
+  if(m.ano_construccion) amLines.push(`<div style="margin-bottom:3px"><b>Año de construcción:</b> ${m.ano_construccion}</div>`);
+  if(m.area_lote) amLines.push(`<div style="margin-bottom:3px"><b>Área de lote:</b> ${m.area_lote}</div>`);
+  if(m.area_exterior) amLines.push(`<div style="margin-bottom:3px"><b>Área exterior:</b> ${m.area_exterior}</div>`);
+  if(m.zonificacion) amLines.push(`<div style="margin-bottom:3px"><b>Zonificación:</b> ${m.zonificacion}</div>`);
+  if(m.caracteristicas_externas) amLines.push(`<div style="margin-bottom:3px"><b>Características exteriores:</b> ${m.caracteristicas_externas}</div>`);
+  if(m.caracteristicas_internas) amLines.push(`<div style="margin-bottom:3px"><b>Características internas:</b> ${m.caracteristicas_internas}</div>`);
+  if(m.amenidades_prop) amLines.push(`<div style="margin-bottom:3px"><b>Amenidades:</b> ${m.amenidades_prop}</div>`);
+  if(amLines.length){ el('mls-det-amenidades-wrap').style.display=''; el('mls-det-amenidades').innerHTML=amLines.join(''); }
+  else el('mls-det-amenidades-wrap').style.display='none';
   openModal('modalMlsDetalle');
 }
 function mlsContactarAgente(idx){
   const m=_mlsFiltered[idx]; if(!m) return;
   const n=m.agente||'Corredor';
-  const t=m.tel_corredor||'';
+  const t=m.tel_corredor_wa||m.tel_corredor||'';
   const e=m.email_corredor||'';
   const a=m.agencia||'';
   if(t){
