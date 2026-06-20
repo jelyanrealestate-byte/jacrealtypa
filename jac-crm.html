@@ -7865,13 +7865,22 @@ function verFicha(id){
 }
 function renderFichaModal(p, conContacto){
   if(!p) return;
-  const fotosHtml = p.fotos&&p.fotos.length ?
-    `<div class="ficha-gallery">
-      <div class="main-foto" style="background-image:url(${p.fotos[0]});background-size:cover;background-position:center;border-radius:8px 0 0 8px"></div>
-      ${p.fotos[1]?`<div style="background-image:url(${p.fotos[1]});background-size:cover;background-position:center"></div>`:'<div class="no-foto" style="font-size:30px">🏠</div>'}
-      ${p.fotos[2]?`<div style="background-image:url(${p.fotos[2]});background-size:cover;background-position:center"></div>`:'<div class="no-foto" style="font-size:30px">📷</div>'}
+  const fotos=p.fotos&&p.fotos.length?p.fotos:[];
+  const fotosHtml = fotos.length ?
+    `<div style="position:relative;background:#111;margin-bottom:16px" id="ficha-sl-wrap">
+      <div style="position:relative;height:300px;overflow:hidden" id="ficha-sl-stage">
+        ${fotos.map((f,i)=>`<img src="${f}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:${i===0?1:0};transition:opacity .4s" class="ficha-sl-img" onerror="this.style.display='none'">`).join('')}
+      </div>
+      ${fotos.length>1?`
+        <button onclick="fichaSlide(-1)" style="position:absolute;left:8px;top:150px;transform:translateY(-50%);background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:34px;height:34px;font-size:20px;line-height:1;cursor:pointer;z-index:5">&#8249;</button>
+        <button onclick="fichaSlide(1)" style="position:absolute;right:8px;top:150px;transform:translateY(-50%);background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:34px;height:34px;font-size:20px;line-height:1;cursor:pointer;z-index:5">&#8250;</button>
+        <div style="position:absolute;top:10px;right:12px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;padding:3px 10px;border-radius:12px;z-index:5" id="ficha-sl-count">1 / ${fotos.length}</div>
+        <div style="display:flex;gap:5px;padding:6px 10px;overflow-x:auto;background:rgba(0,0,0,.78);scrollbar-width:thin">
+          ${fotos.map((f,i)=>`<img src="${f}" onclick="fichaGoSlide(${i})" class="ficha-sl-thumb" style="height:54px;min-width:82px;width:82px;object-fit:cover;border-radius:5px;cursor:pointer;opacity:${i===0?1:.5};border:2px solid ${i===0?'#C41E3A':'transparent'};flex-shrink:0;transition:.2s" onerror="this.parentElement.removeChild(this)">`).join('')}
+        </div>
+      `:''}
     </div>` :
-    `<div style="height:200px;display:flex;align-items:center;justify-content:center;font-size:60px;background:var(--card2);border-radius:8px">${propEmoji[p.tipo]||'🏠'}</div>`;
+    `<div style="height:200px;display:flex;align-items:center;justify-content:center;font-size:60px;background:var(--card2);border-radius:8px;margin-bottom:16px">${propEmoji[p.tipo]||'🏠'}</div>`;
 
   const amenidadesList=(p.amenidades||[]).map(a=>`<span style="background:var(--card2);padding:2px 8px;border-radius:12px;font-size:11px;margin:2px">✓ ${a}</span>`).join('');
 
@@ -7934,6 +7943,32 @@ function fichaToggleContacto(){
   const id=document.getElementById('ficha-modal-prop-id').value;
   const p=props.find(x=>x.id===id);
   if(p) renderFichaModal(p, document.getElementById('ficha-con-contacto').checked);
+}
+function fichaSlide(dir){
+  const wrap=document.getElementById('ficha-sl-wrap');
+  if(!wrap)return;
+  const imgs=wrap.querySelectorAll('.ficha-sl-img');
+  const thumbs=wrap.querySelectorAll('.ficha-sl-thumb');
+  const counter=document.getElementById('ficha-sl-count');
+  if(!imgs.length)return;
+  let cur=[...imgs].findIndex(img=>parseFloat(img.style.opacity||0)>=0.9);
+  if(cur<0)cur=0;
+  imgs[cur].style.opacity='0';
+  if(thumbs[cur]){thumbs[cur].style.opacity='.5';thumbs[cur].style.borderColor='transparent';}
+  cur=(cur+dir+imgs.length)%imgs.length;
+  imgs[cur].style.opacity='1';
+  if(thumbs[cur]){thumbs[cur].style.opacity='1';thumbs[cur].style.borderColor='#C41E3A';thumbs[cur].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});}
+  if(counter)counter.textContent=(cur+1)+' / '+imgs.length;
+}
+function fichaGoSlide(idx){
+  const wrap=document.getElementById('ficha-sl-wrap');
+  if(!wrap)return;
+  const imgs=wrap.querySelectorAll('.ficha-sl-img');
+  const thumbs=wrap.querySelectorAll('.ficha-sl-thumb');
+  const counter=document.getElementById('ficha-sl-count');
+  imgs.forEach((img,i)=>{img.style.opacity=i===idx?'1':'0';});
+  thumbs.forEach((t,i)=>{t.style.opacity=i===idx?'1':'.5';t.style.borderColor=i===idx?'#C41E3A':'transparent';});
+  if(counter)counter.textContent=(idx+1)+' / '+imgs.length;
 }
 function compartirFichaWA(){
   const id=document.getElementById('ficha-modal-prop-id').value;
@@ -8545,130 +8580,176 @@ function sharePropEmailJelyan(id){
 }
 async function exportPropPDF(id){
   const p=props.find(x=>x.id===id); if(!p)return;
-  if(!window.jspdf){toast('⏳ Cargando motor PDF...'); setTimeout(()=>exportPropPDF(id),800); return;}
+  if(!window.jspdf){toast('Cargando motor PDF...'); setTimeout(()=>exportPropPDF(id),800); return;}
+  toast('Generando PDF con todas las fotos...');
   const {jsPDF}=window.jspdf;
+
+  // jsPDF solo soporta latin-1 con helvetica — eliminar tildes/emojis
+  const safe=s=>(s||'').toString()
+    .replace(/[áàâä]/g,'a').replace(/[ÁÀÂÄ]/g,'A')
+    .replace(/[éèêë]/g,'e').replace(/[ÉÈÊË]/g,'E')
+    .replace(/[íìîï]/g,'i').replace(/[ÍÌÎÏ]/g,'I')
+    .replace(/[óòôö]/g,'o').replace(/[ÓÒÔÖ]/g,'O')
+    .replace(/[úùûü]/g,'u').replace(/[ÚÙÛÜ]/g,'U')
+    .replace(/[ñ]/g,'n').replace(/[Ñ]/g,'N')
+    .replace(/[^\x09\x0A\x0D\x20-\x7E]/g,'').trim();
+
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=210; const M=16;
-  // ── Header rojo JAC ──
-  doc.setFillColor(196,30,58); doc.rect(0,0,W,30,'F');
-  doc.setFillColor(139,0,32); doc.rect(0,24,W,6,'F');
-  doc.setTextColor(255,255,255); doc.setFontSize(20); doc.setFont('helvetica','bold');
-  doc.text('JAC',M,17);
-  doc.setFontSize(7); doc.setTextColor(255,200,200);
-  doc.text('REALTY',M+17,17);
-  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(255,230,230);
-  doc.text('by Jely An Castro · Lic. PN-0931',M,22);
-  doc.setTextColor(255,255,255); doc.setFontSize(7);
-  doc.text('+507 6462-7763 · jcastro@jacrealtypa.com · www.jacrealtypa.com',W-M,22,{align:'right'});
-  let y=36;
+  const W=210, M=14, FOOTER_Y=283;
+  let y=0;
+
+  const addHeader=()=>{
+    doc.setFillColor(196,30,58); doc.rect(0,0,W,28,'F');
+    doc.setFillColor(139,0,32); doc.rect(0,22,W,6,'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(20); doc.setFont('helvetica','bold');
+    doc.text('JAC REALTY',M,15);
+    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(255,220,220);
+    doc.text('by Jely An Castro  Lic. PN-0931',M,21);
+    doc.setTextColor(255,255,255); doc.setFontSize(7);
+    doc.text('+507 6462-7763  jcastro@jacrealtypa.com  www.jacrealtypa.com',W-M,21,{align:'right'});
+    y=33;
+  };
+  const addFooter=()=>{
+    doc.setFillColor(196,30,58); doc.rect(0,FOOTER_Y,W,14,'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+    doc.text('Jely An Castro  JAC Realty Panama  Lic. PN-0931',M,FOOTER_Y+7);
+    doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(255,200,200);
+    doc.text('+507 6462-7763  jcastro@jacrealtypa.com  www.jacrealtypa.com',W-M,FOOTER_Y+7,{align:'right'});
+    doc.setTextColor(255,170,170); doc.setFontSize(6);
+    doc.text('Generado: '+new Date().toLocaleDateString('es-PA')+'  Informacion sujeta a cambios',W/2,FOOTER_Y+12,{align:'center'});
+  };
+  const checkPage=(need=20)=>{
+    if(y+need>FOOTER_Y-4){addFooter();doc.addPage();addHeader();}
+  };
+
+  addHeader();
+
   // ── Badges ──
   const opColor=p.op==='Venta'?[22,163,74]:p.op==='Alquiler'?[234,179,8]:[107,114,128];
-  doc.setFillColor(...opColor); doc.roundedRect(M,y,28,7,2,2,'F');
+  doc.setFillColor(...opColor); doc.roundedRect(M,y,26,7,2,2,'F');
   doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
-  doc.text(p.op||'',M+2,y+5);
-  doc.setFillColor(100,100,100); doc.roundedRect(M+31,y,38,7,2,2,'F');
-  doc.text(p.tipo||'',M+33,y+5);
-  const stColor=p.status==='Disponible'||!p.status?[22,163,74]:[234,179,8];
-  doc.setFillColor(...stColor); doc.roundedRect(M+72,y,32,7,2,2,'F');
-  doc.text(p.status||'Disponible',M+74,y+5);
-  if(p.id){doc.setFillColor(59,130,246); doc.roundedRect(M+107,y,36,7,2,2,'F'); doc.text('ID: '+p.id,M+109,y+5);}
-  y+=14;
-  // ── Título ──
-  doc.setTextColor(15,23,42); doc.setFontSize(16); doc.setFont('helvetica','bold');
-  const titleLines=doc.splitTextToSize(p.titulo||'Propiedad',W-M*2);
-  doc.text(titleLines,M,y); y+=titleLines.length*7+3;
+  doc.text(safe(p.op),M+2,y+5);
+  doc.setFillColor(80,80,80); doc.roundedRect(M+29,y,36,7,2,2,'F');
+  doc.text(safe(p.tipo),M+31,y+5);
+  const stC=(!p.status||p.status==='Disponible')?[22,163,74]:[234,179,8];
+  doc.setFillColor(...stC); doc.roundedRect(M+68,y,34,7,2,2,'F');
+  doc.text(safe(p.status||'Disponible'),M+70,y+5);
+  if(p.codigo||p.id){doc.setFillColor(59,130,246);doc.roundedRect(M+105,y,42,7,2,2,'F');doc.text('Ref: '+safe(p.codigo||p.id),M+107,y+5);}
+  y+=13;
+
+  // ── Titulo ──
+  doc.setTextColor(15,23,42); doc.setFontSize(15); doc.setFont('helvetica','bold');
+  const tLines=doc.splitTextToSize(safe(p.titulo||'Propiedad'),W-M*2);
+  doc.text(tLines,M,y); y+=tLines.length*6.5+3;
+
   // ── Precio ──
-  doc.setFontSize(22); doc.setFont('helvetica','bold'); doc.setTextColor(196,30,58);
-  const precioTxt=p.precio?'$'+Number(p.precio).toLocaleString('en-US')+(p.op==='Alquiler'?' /mes':''):'Precio a consultar';
-  doc.text(precioTxt,M,y); y+=10;
-  // ── Fotos (máx 2) ──
+  doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.setTextColor(196,30,58);
+  const prTxt=p.precio?'$'+Number(p.precio).toLocaleString('en-US')+(p.op==='Alquiler'?' /mes':''):'Precio a consultar';
+  doc.text(prTxt,M,y); y+=9;
+
+  // ── Ubicacion ──
+  const locParts=[p.corregimiento,p.distrito,p.provincia].filter(Boolean);
+  const locStr=locParts.length?locParts.map(safe).join(', '):(safe(p.zona)||'Panama');
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(80,90,100);
+  doc.text('Ubicacion: '+locStr,M,y); y+=8;
+
+  // ── Especificaciones ──
+  doc.setDrawColor(220,225,235); doc.setLineWidth(0.3); doc.line(M,y,W-M,y); y+=5;
+  const specs=[];
+  if(p.tipo) specs.push(['Tipo',safe(p.tipo)]);
+  if(p.hab>0) specs.push(['Habitaciones',String(p.hab)]);
+  if(p.banos>0) specs.push(['Banos',String(p.banos)]);
+  if(p.area>0) specs.push(['Area total',p.area+' m2']);
+  if(p.area_construida>0) specs.push(['Area const.',p.area_construida+' m2']);
+  if(p.estac>0) specs.push(['Parqueos',String(p.estac)]);
+  if(p.piso) specs.push(['Piso',safe(String(p.piso))]);
+  if(p.amueblado) specs.push(['Amueblado','Si']);
+  if(p.op==='Alquiler'&&p.precio_alquiler) specs.push(['Renta','$'+Number(p.precio_alquiler).toLocaleString('en-US')+'/mes']);
+  if(specs.length){
+    const SC=3, SW=(W-2*M-(SC-1)*3)/SC, SH=9;
+    doc.setFontSize(8);
+    specs.forEach((s,i)=>{
+      const c=i%SC, r=Math.floor(i/SC);
+      const sx=M+c*(SW+3), sy=y+r*SH;
+      doc.setFillColor(244,246,250); doc.roundedRect(sx,sy-3.5,SW,SH-1,1,1,'F');
+      doc.setFont('helvetica','bold'); doc.setTextColor(120,130,145); doc.setFontSize(7);
+      doc.text(s[0].toUpperCase(),sx+2,sy);
+      doc.setFont('helvetica','bold'); doc.setTextColor(20,20,20); doc.setFontSize(8.5);
+      doc.text(s[1],sx+2,sy+4.5);
+    });
+    y+=Math.ceil(specs.length/SC)*SH+5;
+  }
+
+  // ── Descripcion ──
+  if(p.desc){
+    checkPage(28);
+    doc.setDrawColor(220,225,235); doc.line(M,y,W-M,y); y+=5;
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+    doc.text('DESCRIPCION',M,y); y+=4;
+    doc.setFont('helvetica','normal'); doc.setTextColor(50,60,70); doc.setFontSize(8.5);
+    const dLines=doc.splitTextToSize(safe(p.desc),W-M*2);
+    for(let li=0;li<dLines.length;li++){
+      checkPage(6);
+      doc.text(dLines[li],M,y); y+=4.5;
+    }
+    y+=4;
+  }
+
+  // ── Fotos — TODAS en grid 3 columnas ──
+  let fotosArr=[];
   try{
-    let fotosArr=[];
     if(Array.isArray(p.fotos)) fotosArr=p.fotos;
     else if(typeof p.fotos==='string'&&p.fotos.startsWith('[')) fotosArr=JSON.parse(p.fotos);
     else if(typeof p.fotos==='string'&&p.fotos.length>5) fotosArr=[p.fotos];
-    const fUrls=fotosArr.filter(Boolean).slice(0,2);
-    if(fUrls.length>0){
-      const imgW=fUrls.length>1?(W-2*M-4)/2:(W-2*M);
-      const imgH=Math.round(imgW*0.62);
-      for(let fi=0;fi<fUrls.length;fi++){
-        const b64=await _imgBase64(fUrls[fi]);
-        if(b64){ const fx=M+fi*(imgW+4); doc.addImage(b64,'JPEG',fx,y,imgW,imgH,'prop'+fi,'FAST'); }
-      }
-      y+=imgH+5;
-    }
   }catch(e){}
-  // ── Separador ──
-  doc.setDrawColor(226,232,240); doc.setLineWidth(0.4); doc.line(M,y,W-M,y); y+=6;
-  // ── Ficha de especificaciones ──
-  const feats=[];
-  if(p.tipo) feats.push(['Tipo',p.tipo]);
-  if(p.zona) feats.push(['Zona',p.zona]);
-  if(p.hab) feats.push(['Habitaciones',String(p.hab)]);
-  if(p.banos) feats.push(['Baños',String(p.banos)]);
-  if(p.area) feats.push(['Area',p.area+'m²']);
-  if(p.area_lote) feats.push(['Lote',p.area_lote+'m²']);
-  if(p.parking) feats.push(['Parqueo',String(p.parking)]);
-  if(p.piso) feats.push(['Piso',String(p.piso)]);
-  if(p.anio) feats.push(['Año',String(p.anio)]);
-  if(p.mantenimiento) feats.push(['Mantenimiento','$'+Number(p.mantenimiento).toLocaleString('en-US')]);
-  const half=Math.ceil(feats.length/2);
-  const col1=feats.slice(0,half); const col2=feats.slice(half);
-  const colW=(W-M*2)/2;
-  doc.setFontSize(9);
-  col1.forEach((f,i)=>{
-    doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139); doc.text(f[0].toUpperCase()+': ',M,y+i*6);
-    const lw=doc.getTextWidth(f[0].toUpperCase()+': ');
-    doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30); doc.text(f[1],M+lw,y+i*6);
-  });
-  col2.forEach((f,i)=>{
-    doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139); doc.text(f[0].toUpperCase()+': ',M+colW,y+i*6);
-    const lw=doc.getTextWidth(f[0].toUpperCase()+': ');
-    doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30); doc.text(f[1],M+colW+lw,y+i*6);
-  });
-  y+=Math.max(col1.length,col2.length)*6+6;
-  // ── Ubicación ──
-  if(p.zona||p.dir){
-    doc.setDrawColor(226,232,240); doc.line(M,y,W-M,y); y+=5;
+  fotosArr=fotosArr.filter(Boolean);
+
+  if(fotosArr.length){
+    checkPage(50);
+    doc.setDrawColor(220,225,235); doc.line(M,y,W-M,y); y+=5;
     doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
-    doc.text('UBICACION',M,y); y+=4;
-    doc.setFont('helvetica','normal'); doc.setTextColor(55,65,81); doc.setFontSize(9);
-    doc.text([p.dir||'',p.zona||''].filter(Boolean).join(' · '),M,y); y+=7;
+    doc.text('FOTOS - '+fotosArr.length+' imagen'+(fotosArr.length===1?'':'es'),M,y); y+=6;
+
+    const COLS=3;
+    const IW=(W-2*M-(COLS-1)*3)/COLS;
+    const IH=Math.round(IW*0.68);
+
+    for(let fi=0;fi<fotosArr.length;fi++){
+      const col=fi%COLS;
+      // Si es inicio de fila, verificar si cabe
+      if(col===0 && y+IH+5>FOOTER_Y-4){
+        addFooter(); doc.addPage(); addHeader(); y+=2;
+      }
+      const fx=M+col*(IW+3);
+      try{
+        const b64=await _imgBase64(fotosArr[fi]);
+        if(b64) doc.addImage(b64,'JPEG',fx,y,IW,IH,'pf'+fi,'FAST');
+        else{ doc.setFillColor(228,232,238); doc.rect(fx,y,IW,IH,'F'); doc.setTextColor(160,165,175); doc.setFontSize(7); doc.text('Foto '+(fi+1),fx+IW/2,y+IH/2,{align:'center'}); }
+      }catch(e){ doc.setFillColor(228,232,238); doc.rect(fx,y,IW,IH,'F'); }
+      // Avanzar Y al final de cada fila completa o última foto
+      if(col===COLS-1||fi===fotosArr.length-1) y+=IH+4;
+    }
+    y+=3;
   }
-  // ── Descripción ──
-  if(p.desc){
-    doc.setDrawColor(226,232,240); doc.line(M,y,W-M,y); y+=5;
-    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
-    doc.text('DESCRIPCION',M,y); y+=4;
-    doc.setFont('helvetica','normal'); doc.setTextColor(55,65,81); doc.setFontSize(9);
-    const descLines=doc.splitTextToSize(p.desc,W-M*2);
-    const maxL=Math.min(descLines.length,28);
-    doc.text(descLines.slice(0,maxL),M,y); y+=maxL*4.5+5;
-  }
-  // ── Extras ──
-  if(p.extras&&p.extras.length){
-    const exArr=Array.isArray(p.extras)?p.extras:(typeof p.extras==='string'?p.extras.split(','):[]);
-    if(exArr.length){
-      doc.setDrawColor(226,232,240); doc.line(M,y,W-M,y); y+=5;
+
+  // ── Amenidades ──
+  if(p.amenidades&&p.amenidades.length){
+    const amArr=Array.isArray(p.amenidades)?p.amenidades:String(p.amenidades).split(',');
+    if(amArr.length){
+      checkPage(18);
+      doc.setDrawColor(220,225,235); doc.line(M,y,W-M,y); y+=5;
       doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
-      doc.text('EXTRAS / AMENIDADES',M,y); y+=4;
-      doc.setFont('helvetica','normal'); doc.setTextColor(55,65,81); doc.setFontSize(8.5);
-      doc.text(exArr.map(x=>String(x).trim()).join('  ·  '),M,y); y+=7;
+      doc.text('AMENIDADES',M,y); y+=4;
+      doc.setFont('helvetica','normal'); doc.setTextColor(50,60,70); doc.setFontSize(8.5);
+      const amLine=doc.splitTextToSize(amArr.map(a=>safe(String(a).trim())).join('  |  '),W-M*2);
+      doc.text(amLine,M,y); y+=amLine.length*4.5+4;
     }
   }
-  // ── Footer rojo ──
-  const footerY=282;
-  doc.setFillColor(196,30,58); doc.rect(0,footerY,W,15,'F');
-  doc.setFillColor(139,0,32); doc.rect(0,footerY+10,W,5,'F');
-  doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
-  doc.text('Jely An Castro · JAC Realty Panama · Lic. PN-0931',M,footerY+6);
-  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(255,220,220);
-  doc.text('+507 6462-7763 · jcastro@jacrealtypa.com · www.jacrealtypa.com',W-M,footerY+6,{align:'right'});
-  doc.setTextColor(255,180,180); doc.setFontSize(6.5);
-  doc.text('Ficha generada el '+new Date().toLocaleDateString('es-PA')+' · Informacion sujeta a cambios sin previo aviso',W/2,footerY+12,{align:'center'});
-  const fname='JAC_Realty_'+(p.titulo||p.id||'propiedad').replace(/[^a-zA-Z0-9]/g,'-')+'.pdf';
+
+  addFooter();
+  const fname='JAC_Realty_'+safe(p.titulo||p.id||'propiedad').replace(/\s+/g,'-').replace(/[^a-zA-Z0-9-]/g,'').slice(0,50)+'.pdf';
   doc.save(fname);
-  toast('📄 PDF descargado: '+fname);
+  toast('PDF descargado: '+fname);
 }
 
 // ── LEADS ──
