@@ -4063,7 +4063,8 @@ function mlsAbrirDetalle(idx){
   el('mls-det-corredor').innerHTML=corrLines.length?corrLines.join('<br>'):'<span style="color:var(--muted)">Sin datos del corredor</span>';
   // Action buttons — full set
   const acciones=[];
-  if(m.tel_corredor_wa||m.tel_corredor||m.agente) acciones.push(`<button class="btn btn-outline btn-sm" style="color:var(--green)" onclick="mlsContactarAgente(${idx})" title="WhatsApp co-broking al corredor">💬 WA Corredor</button>`);
+  acciones.push(`<button class="btn btn-outline btn-sm" style="background:#25d36622;color:#25d366;border-color:#25d36644;font-weight:600" onclick="mlsShareWA(${idx})" title="Compartir propiedad por WhatsApp">💬 WA</button>`);
+  if(m.tel_corredor_wa||m.tel_corredor||m.agente) acciones.push(`<button class="btn btn-outline btn-sm" style="color:var(--green)" onclick="mlsContactarAgente(${idx})" title="WhatsApp co-broking al corredor">🤝 WA Corredor</button>`);
   // url_mls no se expone públicamente (contiene datos del corredor ACOBIR)
   acciones.push(`<button class="btn btn-outline btn-sm" onclick="mlsEmailJcastro(${idx})" title="Enviar por email jcastro@jacrealtypa.com">📧 jcastro</button>`);
   acciones.push(`<button class="btn btn-outline btn-sm" onclick="mlsEmailJelyan(${idx})" title="Enviar por email jelyanrealestate@gmail.com">📨 jelyan</button>`);
@@ -4115,6 +4116,24 @@ function mlsContactarAgente(idx){
   } else {
     toast('ℹ️ Sin datos de contacto para este corredor');
   }
+}
+// ---- MLS WA Share (JAC) ----
+function mlsShareWA(idx){
+  const m=_mlsFiltered[idx]; if(!m) return;
+  const precio=m.precio?'$'+Number(m.precio).toLocaleString('en-US'):'Precio a consultar';
+  const specs=[m.habitaciones?m.habitaciones+' hab':'',m.banos?m.banos+' baños':'',m.area_total?m.area_total+'m²':''].filter(Boolean).join(' · ');
+  const txt=encodeURIComponent(
+    '🏠 *'+( m.titulo||'Propiedad')+'*\n'+
+    '📍 '+(m.zona||'Panamá')+'\n'+
+    '💰 '+precio+'\n'+
+    (specs?specs+'\n':'')+
+    (m.mls_code?'🔖 MLS: '+m.mls_code+'\n':'')+
+    '\nCódigo MLS compartido por:\n'+
+    'Jely An Castro · JAC Realty Panamá\n'+
+    '📞 +507 6462-7763 · Lic. PN-0931\n'+
+    '🌐 jacrealtypa.com'
+  );
+  window.open('https://wa.me/?text='+txt,'_blank');
 }
 // ---- MLS Email functions ----
 function _mlsBuildEmailBody(m){
@@ -5033,171 +5052,242 @@ function vcTab(btn,section){
 // ============================================================
 // PORTALES DATA & RENDER
 // ============================================================
+// ── PORTAL CONFIG: saved in localStorage ──
+function _pGet(id){ try{ return JSON.parse(localStorage.getItem('jcr_p_'+id)||'{}'); }catch(e){ return {}; } }
+function _pSet(id,k,v){ const c=_pGet(id); c[k]=v; localStorage.setItem('jcr_p_'+id,JSON.stringify(c)); }
+function _pActive(id){ const d=_pGet(id); return d.active===true||d.active===false ? d.active : _portalesDefault[id]||false; }
+function _pLastSync(id){ return _pGet(id).lastSync||null; }
+
+const _portalesDefault={'mlsacobir':true,'whatsapp':true};
+
 const portalesData = [
   // ── GRATUITOS PANAMÁ ──
-  {id:'encuentra24', name:'Encuentra24', emoji:'🔍', bg:'#e65c00',
-   url:'https://www.encuentra24.com/panama-es/bienes-raices',
-   tipo:'gratis', conn:'API', desc:'Portal líder en Panamá y Centroamérica.',
-   active:true, props:6, vistas:420, leads:5, syncTime:'Inmediata (API)'},
-  {id:'compreoalquile', name:'Compreoalquile', emoji:'🏘', bg:'#0057b8',
-   url:'https://www.compreoalquile.com',
-   tipo:'gratis', conn:'XML', desc:'10 años en el mercado · 1.9M anuncios.',
-   active:true, props:6, vistas:210, leads:3, syncTime:'24-48h (XML)'},
-  {id:'bienesonline', name:'BienesOnline', emoji:'🌐', bg:'#00897b',
-   url:'https://www.bienesonline.com.pa',
-   tipo:'gratis', conn:'XML', desc:'Portal panameño de agencias y particulares.',
-   active:true, props:4, vistas:95, leads:1, syncTime:'24-48h (XML)'},
-  {id:'buscocasita', name:'BuscoCasita', emoji:'🏠', bg:'#e53935',
-   url:'https://panama.buscocasita.com',
-   tipo:'gratis', conn:'XML', desc:'Portal gratuito ilimitado para Panamá.',
-   active:false, props:0, vistas:0, leads:0, syncTime:'24-48h (XML)'},
-  {id:'gogetit', name:'GoGetIt', emoji:'🚀', bg:'#5c35b5',
-   url:'https://www.gogetit.com.pa',
-   tipo:'gratis', conn:'XML', desc:'Portal panameño con +304K propiedades.',
-   active:true, props:3, vistas:88, leads:2, syncTime:'24-48h (XML)'},
-  {id:'inmopanama', name:'InmoPanamá', emoji:'🏙', bg:'#1565c0',
-   url:'https://www.inmopanama.com',
-   tipo:'gratis', conn:'Manual', desc:'Directorio inmobiliario nacional.',
-   active:false, props:0, vistas:0, leads:0, syncTime:'Manual'},
-  {id:'mlsacobir', name:'MLS ACOBIR', emoji:'🏅', bg:'#c62828',
-   url:'https://www.mlsacobir.com',
-   tipo:'gratis', conn:'API', desc:'Red oficial MLS de Panamá · ACOBIR.',
-   active:true, props:6, vistas:310, leads:4, syncTime:'Inmediata (API)'},
+  {id:'encuentra24',   name:'Encuentra24',        emoji:'🔍', bg:'#e65c00',
+   loginUrl:'https://www.encuentra24.com/login',
+   configUrl:'https://www.encuentra24.com/es/anunciantes',
+   newUrl:'https://www.encuentra24.com/panama-es/bienes-raices/publicar',
+   tipo:'gratis', conn:'XML',
+   tags:['Panamá','Líder','XML Feed'],
+   desc:'Portal #1 de inmuebles en Panamá y Centroamérica. Acepta feed XML para agencias. Gratis hasta 10 anuncios.',
+   steps:'1) Crea cuenta de agencia en encuentra24.com/anunciantes. 2) Descarga el Feed XML desde aquí → cárgalo en tu panel. 3) Activa la opción "Sincronización automática" en tu cuenta.'},
+  {id:'compreoalquile', name:'CompréoAlquile',     emoji:'🏘', bg:'#0057b8',
+   loginUrl:'https://www.compreoalquile.com/login',
+   configUrl:'https://www.compreoalquile.com/agencias',
+   newUrl:'https://www.compreoalquile.com/publicar',
+   tipo:'gratis', conn:'Manual',
+   tags:['Panamá','1.9M anuncios'],
+   desc:'+10 años en el mercado panameño. Publica hasta 10 anuncios gratis. Plan agencia desde $15/mes para XML.',
+   steps:'1) Regístrate como agencia en compreoalquile.com/agencias. 2) Publica cada propiedad manualmente con los datos del CRM. 3) Para sincronización XML contacta a su soporte.'},
+  {id:'gogetit',       name:'GoGetIt Panamá',      emoji:'🚀', bg:'#5c35b5',
+   loginUrl:'https://www.gogetit.com.pa/login',
+   configUrl:'https://www.gogetit.com.pa/publicar',
+   newUrl:'https://www.gogetit.com.pa/post',
+   tipo:'gratis', conn:'Manual',
+   tags:['Panamá','+304K props'],
+   desc:'Portal panameño con +304K propiedades. Cuenta gratuita con hasta 10 anuncios activos.',
+   steps:'1) Crea una cuenta gratuita en gogetit.com.pa. 2) Publica cada propiedad manualmente. 3) Usa el XML para copiar los datos fácilmente.'},
+  {id:'bienesonline',  name:'BienesOnline.pa',     emoji:'🌐', bg:'#00897b',
+   loginUrl:'https://www.bienesonline.com.pa/login',
+   configUrl:'https://www.bienesonline.com.pa/agencias',
+   newUrl:'https://www.bienesonline.com.pa/publicar',
+   tipo:'gratis', conn:'Manual',
+   tags:['Panamá','Agencias'],
+   desc:'Portal panameño de agencias y particulares. Anuncios gratuitos con foto.',
+   steps:'1) Regístrate como agencia. 2) Publica propiedades manualmente usando los datos de tu CRM.'},
+  {id:'buscocasita',   name:'BuscoCasita',          emoji:'🏠', bg:'#e53935',
+   loginUrl:'https://panama.buscocasita.com/login',
+   configUrl:'https://panama.buscocasita.com',
+   newUrl:'https://panama.buscocasita.com/publicar',
+   tipo:'gratis', conn:'Manual',
+   tags:['Centroamérica','Gratis ilimitado'],
+   desc:'Portal gratuito e ilimitado para toda Centroamérica. Sin límite de anuncios.',
+   steps:'1) Crea cuenta gratuita. 2) Publica sin límite usando los datos del CRM.'},
+  {id:'mlsacobir',     name:'MLS ACOBIR',           emoji:'🏅', bg:'#c62828',
+   loginUrl:'https://panama.xposureapp.com',
+   configUrl:'https://www.acobir.com',
+   newUrl:'https://panama.xposureapp.com',
+   tipo:'gratis', conn:'API',
+   tags:['Oficial','ACOBIR','Xposure™'],
+   desc:'Red oficial MLS de Panamá. Sincronizado con el módulo MLS del CRM (Xposure™ ACOBIR).',
+   steps:'Ya integrado vía Xposure™ en el módulo MLS de este CRM. No requiere configuración adicional.'},
   // ── RED LIFULL CONNECT ──
-  {id:'proppit', name:'Proppit / Lifull', emoji:'🔗', bg:'#4a90d9',
-   url:'https://www.proppit.com',
-   tipo:'red', conn:'API', desc:'Red Lifull Connect: Trovit, Mitula, Nuroa, Nestoria, Properati, iCasas, LaEncontré, Globaliza, DotProperty.',
-   active:true, props:6, vistas:280, leads:3, syncTime:'Inmediata (API)', subred:true},
-  {id:'trovit', name:'Trovit', emoji:'📊', bg:'#ff7043',
-   url:'https://www.trovit.com',
-   tipo:'red', conn:'API', desc:'Agregador de anuncios clasificados global.',
-   active:true, props:6, vistas:140, leads:1, syncTime:'Vía Proppit'},
-  {id:'mitula', name:'Mitula', emoji:'📌', bg:'#43a047',
-   url:'https://www.mitula.com',
-   tipo:'red', conn:'API', desc:'Buscador internacional inmobiliario.',
-   active:true, props:6, vistas:120, leads:1, syncTime:'Vía Proppit'},
-  {id:'nuroa', name:'Nuroa', emoji:'🗺', bg:'#8e24aa',
-   url:'https://www.nuroa.com',
-   tipo:'red', conn:'API', desc:'Motor de búsqueda inmobiliario.',
-   active:true, props:6, vistas:90, leads:1, syncTime:'Vía Proppit'},
-  {id:'nestoria', name:'Nestoria', emoji:'🪺', bg:'#00838f',
-   url:'https://www.nestoria.com',
-   tipo:'red', conn:'API', desc:'Buscador inmobiliario internacional.',
-   active:true, props:6, vistas:75, leads:0, syncTime:'Vía Proppit'},
-  {id:'properati', name:'Properati', emoji:'🏢', bg:'#1976d2',
-   url:'https://www.properati.com',
-   tipo:'red', conn:'API', desc:'Red de portales de Latinoamérica.',
-   active:true, props:6, vistas:95, leads:1, syncTime:'Vía Proppit'},
+  {id:'proppit',       name:'Proppit / Lifull Connect', emoji:'🔗', bg:'#4a90d9',
+   loginUrl:'https://www.proppit.com/login',
+   configUrl:'https://www.proppit.com/start',
+   newUrl:'https://www.proppit.com/dashboard',
+   tipo:'red', conn:'XML',
+   tags:['12+ portales','Trovit','Mitula','Nuroa','Nestoria'],
+   desc:'Una sola integración XML distribuye a +12 portales: Trovit, Mitula, Nuroa, Nestoria, Properati, iCasas, LaEncontré, Globaliza, DotProperty y más.',
+   steps:'1) Regístrate en proppit.com. 2) Descarga tu Feed XML desde aquí. 3) Carga el XML en tu panel Proppit. 4) Se distribuye automáticamente a todos los portales de la red.',
+   subred:true, redes:['Trovit','Mitula','Nuroa','Nestoria','Properati','iCasas','LaEncontré','Globaliza']},
   // ── DE PAGO ──
-  {id:'mercadolibre', name:'Mercado Libre', emoji:'🛒', bg:'#FFE600',
-   url:'https://inmuebles.mercadolibre.com.pa',
-   tipo:'pago', conn:'API', desc:'Mayor marketplace de LatAm. Plan pago requerido.',
-   active:false, props:0, vistas:0, leads:0, syncTime:'Inmediata (API)'},
-  {id:'lamudi', name:'Lamudi', emoji:'🏗', bg:'#1abc9c',
-   url:'https://www.lamudi.com.pa',
-   tipo:'pago', conn:'XML', desc:'Portal global presente en Panamá.',
-   active:false, props:0, vistas:0, leads:0, syncTime:'24-48h (XML)'},
-  {id:'realtor', name:'Realtor.com', emoji:'🇺🇸', bg:'#d32f2f',
-   url:'https://www.realtor.com',
-   tipo:'pago', conn:'XML', desc:'Portal #1 en EE.UU. · atrae compradores extranjeros.',
-   active:false, props:0, vistas:0, leads:0, syncTime:'24-48h (XML)'},
+  {id:'mercadolibre',  name:'Mercado Libre',        emoji:'🛒', bg:'#FFE600', tc:'#333',
+   loginUrl:'https://www.mercadolibre.com.pa/login',
+   configUrl:'https://inmuebles.mercadolibre.com.pa/publicar',
+   newUrl:'https://vender.mercadolibre.com.pa',
+   tipo:'pago', conn:'API',
+   tags:['LatAm #1','Pago'],
+   desc:'Mayor marketplace de LatAm. Plan de publicaciones desde $15/mes. Alta exposición a compradores internacionales.',
+   steps:'1) Crea cuenta en MercadoLibre. 2) Contrata un plan de publicaciones inmobiliarias. 3) Publica manualmente o via su API paga.'},
+  {id:'lamudi',        name:'Lamudi',               emoji:'🏗', bg:'#1abc9c',
+   loginUrl:'https://www.lamudi.com.pa/login',
+   configUrl:'https://www.lamudi.com.pa/agents',
+   newUrl:'https://www.lamudi.com.pa/create-listing',
+   tipo:'pago', conn:'XML',
+   tags:['Global','XML Feed'],
+   desc:'Portal global presente en Panamá. Acepta XML. Plan agencia con precio mensual.',
+   steps:'1) Contacta a Lamudi Panamá para plan agencia. 2) Genera Feed XML desde aquí. 3) Integra el URL del feed en tu cuenta Lamudi.'},
+  {id:'realtor',       name:'Realtor.com',          emoji:'🇺🇸', bg:'#d32f2f',
+   loginUrl:'https://dashboard.realtor.com',
+   configUrl:'https://www.realtor.com/real-estate-agents',
+   newUrl:'https://dashboard.realtor.com/listings',
+   tipo:'pago', conn:'XML',
+   tags:['EE.UU. #1','Extranjeros'],
+   desc:'Portal #1 en EE.UU. Ideal para atraer compradores norteamericanos interesados en Panamá.',
+   steps:'1) Regístrate como agente internacional en realtor.com. 2) Verifica tu licencia PN-0931. 3) Sube las propiedades via XML o manualmente.'},
   // ── SOCIAL ──
-  {id:'facebook', name:'Facebook / Marketplace', emoji:'📘', bg:'#1877f2',
-   url:'https://www.facebook.com/marketplace',
-   tipo:'social', conn:'API', desc:'Publicación automática de propiedades en Marketplace y página de empresa.',
-   active:true, props:6, vistas:520, leads:6, syncTime:'Inmediata (API)'},
-  {id:'instagram', name:'Instagram', emoji:'📷', bg:'#c13584',
-   url:'https://www.instagram.com/jacrealtypa',
-   tipo:'social', conn:'Manual', desc:'Publicación de fichas en feed y stories.',
-   active:true, props:2, vistas:340, leads:2, syncTime:'Manual'},
-  {id:'whatsapp', name:'WhatsApp Business', emoji:'💬', bg:'#25D366',
-   url:'https://wa.me/50764627763',
-   tipo:'social', conn:'API', desc:'Envío automático de fichas por WhatsApp a leads.',
-   active:true, props:6, vistas:0, leads:8, syncTime:'Inmediata (API)'},
+  {id:'facebook',      name:'Facebook Marketplace', emoji:'📘', bg:'#1877f2',
+   loginUrl:'https://www.facebook.com/marketplace',
+   configUrl:'https://www.facebook.com/business/marketplace',
+   newUrl:'https://www.facebook.com/marketplace/create/item',
+   tipo:'social', conn:'Manual',
+   tags:['Marketplace','Meta','Orgánico'],
+   desc:'Publica en Marketplace de Facebook y en tu Página de Empresa JAC Realty. Alcance orgánico local excelente.',
+   steps:'1) Abre facebook.com/marketplace/create/item. 2) Selecciona "Vehículos y propiedades". 3) Copia los datos de la propiedad del XML descargado. 4) Agrega fotos y publica.'},
+  {id:'instagram',     name:'Instagram',            emoji:'📷', bg:'#c13584',
+   loginUrl:'https://www.instagram.com/jacrealtypa',
+   configUrl:'https://www.instagram.com/jacrealtypa',
+   newUrl:'https://www.instagram.com/jacrealtypa',
+   tipo:'social', conn:'Manual',
+   tags:['@jacrealtypa','Stories','Reels'],
+   desc:'Publica fichas de propiedades en feed, stories y reels. Usa las imágenes del CRM.',
+   steps:'1) Abre Instagram en tu teléfono. 2) Crea una publicación con las fotos de la propiedad. 3) Usa el texto del XML como descripción. 4) Agrega hashtags #panamabienes #jacrealtypa.'},
+  {id:'whatsapp',      name:'WhatsApp Business',    emoji:'💬', bg:'#25D366',
+   loginUrl:'https://wa.me/50764627763',
+   configUrl:'https://business.whatsapp.com',
+   newUrl:'https://wa.me/50764627763',
+   tipo:'social', conn:'API',
+   tags:['Integrado','Leads','Directo'],
+   desc:'Fichas enviadas directamente a leads y clientes. Integrado en todos los módulos del CRM con los botones 💬 WA.',
+   steps:'Ya integrado. Usa los botones 💬 WA en Propiedades, Leads, Contactos y Clientes para enviar fichas personalizadas por WhatsApp.'},
 ];
 
 let currentPortalTab = 'gratis';
+
+// ── Leads reales por fuente de portal ──
+function _portalLeads(id){
+  const aliases={
+    encuentra24:['encuentra24','e24','encuentra 24'],
+    compreoalquile:['compreoalquile','compre o alquile','compreo'],
+    gogetit:['gogetit','go get it'],
+    bienesonline:['bienesonline','bienes online','bienes-online'],
+    buscocasita:['buscocasita','busco casita'],
+    mlsacobir:['mls','acobir','mls acobir','xposure'],
+    proppit:['proppit','lifull','trovit','mitula','nuroa','nestoria','properati','icasas'],
+    mercadolibre:['mercado libre','mercadolibre','ml panamá'],
+    lamudi:['lamudi'],
+    realtor:['realtor','realtor.com'],
+    facebook:['facebook','fb marketplace','marketplace'],
+    instagram:['instagram','ig','insta'],
+    whatsapp:['whatsapp','wa','wapp','whats app']
+  };
+  const terms=aliases[id]||[id];
+  return (leads||[]).filter(l=>{
+    const f=((l.fuente||'')+(l.fuente_display||'')).toLowerCase();
+    return terms.some(t=>f.includes(t));
+  }).length;
+}
 
 function renderPortales(tab){
   tab = tab || currentPortalTab;
   currentPortalTab = tab;
 
-  // ── Auto-sincronizar conteo de props con propiedades reales ──
-  const realCount = (props||[]).filter(p=>(p.estado||p.status||'').toLowerCase().includes('disponible')||!(p.estado||p.status)).length || (props||[]).length;
-  portalesData.forEach(p=>{ if(p.active) p.props = realCount; });
+  const activePropCount = (props||[]).filter(p=>{
+    const st=(p.estado||p.status||'').toLowerCase();
+    return !st.includes('cerrad')&&!st.includes('inactiv')&&!st.includes('vendid')&&!st.includes('alquilad');
+  }).length || (props||[]).length;
 
   const filtered = tab==='todos' ? portalesData : portalesData.filter(p=>p.tipo===tab);
-  const activeAll = portalesData.filter(p=>p.active);
+  const activeAll = portalesData.filter(p=>_pActive(p.id));
   const activeCount = activeAll.length;
+  const totalLeads = portalesData.reduce((s,p)=>s+_portalLeads(p.id),0);
 
-  // KPIs dinámicos
-  const totalPubs = activeAll.reduce((s,p)=>s+p.props,0);
-  const totalVistas = activeAll.reduce((s,p)=>s+p.vistas,0);
-  const totalLeads = activeAll.reduce((s,p)=>s+p.leads,0);
   const el=id=>document.getElementById(id);
   if(el('portales-activos-count')) el('portales-activos-count').textContent = activeCount;
   if(el('badge-portales')) el('badge-portales').textContent = activeCount;
-  if(el('stat-publicadas')) el('stat-publicadas').textContent = totalPubs;
-  if(el('stat-vistas')) el('stat-vistas').textContent = totalVistas.toLocaleString();
-  if(el('stat-leads-portales')) el('stat-leads-portales').textContent = totalLeads;
+  if(el('stat-publicadas')) el('stat-publicadas').textContent = activePropCount * activeCount;
+  if(el('stat-vistas')) el('stat-vistas').textContent = '—';
+  if(el('stat-leads-portales')) el('stat-leads-portales').textContent = totalLeads||'0';
 
-  // ── Selector de propiedades — siempre actualizado ──
+  // Selector de propiedades
   const sel = document.getElementById('portal-prop-select');
   if(sel){
-    const prevVal = sel.value;
-    const dispProps = (props||[]).filter(p=>(p.estado||p.status||'').toLowerCase().includes('disponible')||!(p.estado||p.status));
+    const pv = sel.value;
     sel.innerHTML = '<option value="">-- Seleccionar propiedad --</option>' +
-      (dispProps.length ? dispProps : (props||[])).map(p=>`<option value="${p.id||p.mls_code}">${p.mls_code||p.id} · ${p.titulo||p.title||''}</option>`).join('');
-    if(prevVal) sel.value = prevVal;
+      (props||[]).map(p=>`<option value="${p.id||p.mls_code}">${p.mls_code||p.id} · ${p.titulo||p.title||''}</option>`).join('');
+    if(pv) sel.value = pv;
   }
 
   const connBadge = c => {
-    if(c==='API') return '<span class="portal-conn-type conn-api">⚡ API</span>';
-    if(c==='XML') return '<span class="portal-conn-type conn-xml">🔄 XML</span>';
-    return '<span class="portal-conn-type conn-manual">✍️ Manual</span>';
+    if(c==='API') return '<span class="portal-conn-type conn-api" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600">⚡ API</span>';
+    if(c==='XML') return '<span class="portal-conn-type conn-xml" style="background:#3b82f622;color:#60a5fa;border:1px solid #3b82f644;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600">📄 XML Feed</span>';
+    return '<span class="portal-conn-type conn-manual" style="background:#f97316 22;color:#fb923c;border:1px solid #f9731644;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600">✍️ Manual</span>';
   };
 
   document.getElementById('portales-grid').innerHTML = filtered.map(p => {
-    const statusClass = p.active ? 'connected' : 'disconnected';
-    const dotColor = p.active ? 'var(--green)' : 'var(--border)';
-    const statusText = p.active ? '● Conectado' : '○ Desconectado';
-    const statusColor = p.active ? 'var(--green)' : 'var(--muted)';
-    const logoStyle = `background:${p.bg}22;color:${p.bg};border:1px solid ${p.bg}44`;
+    const active = _pActive(p.id);
+    const pLeads = _portalLeads(p.id);
+    const lastSync = _pLastSync(p.id);
+    const cfg = _pGet(p.id);
+    const configured = !!(cfg.key||cfg.feedUrl||cfg.configured);
+    const statusClass = active ? 'connected' : (configured?'pending':'disconnected');
+    const logoStyle = `background:${p.bg}22;color:${p.id==='mercadolibre'?p.tc||p.bg:p.bg};border:1px solid ${p.bg}44`;
 
     return `<div class="portal-card ${statusClass}" id="pcard-${p.id}">
       <div class="portal-header">
         <div class="portal-logo" style="${logoStyle}">${p.emoji}</div>
-        <div style="flex:1">
-          <div class="portal-name">${p.name}
-            ${p.subred?'<span style="font-size:10px;background:rgba(59,130,246,.2);color:#60a5fa;padding:1px 6px;border-radius:8px;margin-left:4px">+9 portales</span>':''}
+        <div style="flex:1;min-width:0">
+          <div class="portal-name" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            ${p.name}
+            ${p.subred?`<span style="font-size:9px;background:rgba(59,130,246,.2);color:#60a5fa;padding:1px 6px;border-radius:8px">+8 portales</span>`:''}
+            ${p.tipo==='pago'?`<span style="font-size:9px;background:#f9731622;color:#fb923c;padding:1px 6px;border-radius:8px">💳 Pago</span>`:''}
           </div>
-          <div class="portal-type">${connBadge(p.conn)} · ${p.syncTime}</div>
+          <div class="portal-type" style="margin-top:2px">${connBadge(p.conn)}</div>
         </div>
-        <label class="portal-toggle" title="${p.active?'Desactivar':'Activar'}">
-          <input type="checkbox" ${p.active?'checked':''} onchange="togglePortal('${p.id}',this.checked)">
+        <label class="portal-toggle" title="${active?'Desactivar portal':'Activar portal'}">
+          <input type="checkbox" ${active?'checked':''} onchange="togglePortal('${p.id}',this.checked)">
           <span class="toggle-slider"></span>
         </label>
       </div>
 
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${p.desc}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.4">${p.desc}</div>
 
-      ${p.active ? `
+      ${p.tags&&p.tags.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${p.tags.map(t=>`<span style="font-size:9px;background:var(--card2);color:var(--text2);padding:1px 6px;border-radius:8px;border:1px solid var(--border)">${t}</span>`).join('')}</div>`:''}
+
+      ${active ? `
       <div class="portal-stats">
-        <div class="portal-stat"><div class="portal-stat-val" style="color:var(--blue)">${p.props}</div><div class="portal-stat-label">Publicadas</div></div>
-        <div class="portal-stat"><div class="portal-stat-val" style="color:var(--purple)">${p.vistas}</div><div class="portal-stat-label">Vistas/mes</div></div>
-        <div class="portal-stat"><div class="portal-stat-val" style="color:var(--accent)">${p.leads}</div><div class="portal-stat-label">Leads</div></div>
-      </div>
-      <div class="sync-bar"><div class="sync-progress" style="width:${Math.round(p.vistas/6)}%"></div></div>` : ''}
+        <div class="portal-stat"><div class="portal-stat-val" style="color:var(--blue)">${activePropCount}</div><div class="portal-stat-label">Propiedades</div></div>
+        <div class="portal-stat"><div class="portal-stat-val" style="color:var(--accent)">${pLeads}</div><div class="portal-stat-label">Leads CRM</div></div>
+        <div class="portal-stat"><div class="portal-stat-val" style="color:var(--muted);font-size:11px">${lastSync?new Date(lastSync).toLocaleDateString('es-PA',{day:'2-digit',month:'short'}):'Nunca'}</div><div class="portal-stat-label">Últ. sync</div></div>
+      </div>` : `
+      <div style="font-size:11px;color:var(--muted);padding:6px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:6px 0">
+        ${configured?'✅ Configurado — activa el toggle para publicar':'📋 Sigue los pasos de configuración para publicar'}
+      </div>`}
 
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
-        <span style="font-size:11px;color:${statusColor}">${statusText}</span>
-        <div class="action-btns">
-          ${p.active ? `<button class="btn btn-primary btn-sm" onclick="syncPortal('${p.id}')">🔄 Sync</button>` : `<button class="btn btn-outline btn-sm" onclick="connectPortal('${p.id}')">Conectar</button>`}
-          <a href="${p.url}" target="_blank" class="btn btn-ghost btn-sm" title="Abrir portal">↗</a>
-        </div>
+      <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" style="font-size:10px;padding:3px 8px" onclick="openPortalConfig('${p.id}')">⚙️ Configurar</button>
+        ${active&&p.conn==='XML'?`<button class="btn btn-outline btn-sm" style="font-size:10px;padding:3px 8px;color:var(--blue)" onclick="downloadXMLFeed('${p.id}')">📄 XML</button>`:''}
+        ${active?`<button class="btn btn-outline btn-sm" style="font-size:10px;padding:3px 8px" onclick="syncPortal('${p.id}')">🔄 Sync</button>`:''}
+        <a href="${p.newUrl}" target="_blank" class="btn btn-ghost btn-sm" style="font-size:10px;padding:3px 8px" title="Abrir portal">↗ Abrir</a>
       </div>
     </div>`;
   }).join('');
+
+  // Sync VC portales grid
+  const vcGrid = document.getElementById('vc-portales-grid');
+  if(vcGrid) vcGrid.innerHTML = document.getElementById('portales-grid').innerHTML;
+  const vcKpi = document.getElementById('vc-kpi-portales');
+  if(vcKpi) vcKpi.textContent = activeCount;
 }
 
 function filterPortalesTab(btn, tab){
@@ -5208,50 +5298,158 @@ function filterPortalesTab(btn, tab){
 }
 
 function togglePortal(id, active){
+  _pSet(id,'active',active);
   const p = portalesData.find(x=>x.id===id);
   if(!p) return;
-  p.active = active;
-  const n = (props||[]).length;
-  if(active){ p.props = n; toast(`✅ ${p.name} activado · ${n} propiedades en cola de publicación`); }
-  else { p.props=0; toast(`⏹ ${p.name} desactivado`); }
+  if(active){
+    _pSet(id,'lastSync',new Date().toISOString());
+    toast(`✅ ${p.name} activado · ${(props||[]).length} propiedades marcadas para publicación`);
+  } else {
+    toast(`⏹ ${p.name} desactivado`);
+  }
   renderPortales();
 }
 
-function connectPortal(id){
-  const p = portalesData.find(x=>x.id===id);
-  if(!p) return;
-  if(p.tipo==='pago'){ toast(`💳 ${p.name} requiere plan pago. Abre ${p.url} para contratar.`); return; }
-  p.active=true; p.props=props.length;
-  p.vistas=Math.floor(Math.random()*200+50);
+function openPortalConfig(id){
+  const p = portalesData.find(x=>x.id===id); if(!p) return;
+  const cfg = _pGet(id);
+  const modal = document.getElementById('portal-cfg-modal');
+  if(!modal){ _buildPortalCfgModal(); return openPortalConfig(id); }
+  document.getElementById('pcfg-title').textContent = p.emoji+' '+p.name;
+  document.getElementById('pcfg-desc').textContent = p.desc;
+  document.getElementById('pcfg-steps').innerHTML = p.steps ? p.steps.split('\n').map(s=>`<div style="padding:4px 0;border-bottom:1px solid var(--border)">${s}</div>`).join('') : '';
+  document.getElementById('pcfg-key').value = cfg.key||'';
+  document.getElementById('pcfg-feed').value = cfg.feedUrl||'';
+  document.getElementById('pcfg-id').value = id;
+  document.getElementById('pcfg-login-link').href = p.loginUrl||p.configUrl||'#';
+  document.getElementById('pcfg-login-link').textContent = 'Abrir panel de '+p.name+' ↗';
+  document.getElementById('pcfg-xml-row').style.display = p.conn==='XML'?'':'none';
+  modal.style.display = 'flex';
+}
+
+function _buildPortalCfgModal(){
+  const div = document.createElement('div');
+  div.id = 'portal-cfg-modal';
+  div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:none;align-items:center;justify-content:center';
+  div.innerHTML = `<div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:16px;font-weight:700" id="pcfg-title"></div>
+      <button onclick="document.getElementById('portal-cfg-modal').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px" id="pcfg-desc"></div>
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">📋 Pasos para conectar</div>
+      <div id="pcfg-steps" style="font-size:12px;color:var(--text2);line-height:1.6"></div>
+    </div>
+    <div id="pcfg-xml-row" style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;color:var(--text2)">URL de tu Feed XML en el portal (opcional)</label>
+      <div style="display:flex;gap:6px">
+        <input id="pcfg-feed" placeholder="https://portal.com/feed/tu-agencia" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px">
+        <button class="btn btn-outline btn-sm" onclick="downloadXMLFeed(document.getElementById('pcfg-id').value)">📄 Generar XML</button>
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;color:var(--text2)">API Key / Token (si lo tienes)</label>
+      <input id="pcfg-key" type="password" placeholder="sk-xxxxxxxxxx o Token del portal" style="width:100%;box-sizing:border-box;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px">
+    </div>
+    <input type="hidden" id="pcfg-id">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-primary btn-sm" onclick="savePortalConfig()">💾 Guardar configuración</button>
+      <a id="pcfg-login-link" href="#" target="_blank" class="btn btn-outline btn-sm" style="font-size:11px">↗ Abrir portal</a>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('portal-cfg-modal').style.display='none'">Cancelar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+}
+
+function savePortalConfig(){
+  const id = document.getElementById('pcfg-id').value;
+  const key = document.getElementById('pcfg-key').value.trim();
+  const feedUrl = document.getElementById('pcfg-feed').value.trim();
+  if(key) _pSet(id,'key',key);
+  if(feedUrl) _pSet(id,'feedUrl',feedUrl);
+  _pSet(id,'configured',true);
+  document.getElementById('portal-cfg-modal').style.display='none';
+  toast('✅ Configuración guardada');
   renderPortales();
-  toast(`✅ ${p.name} conectado. Propiedades enviadas.`);
+}
+
+function downloadXMLFeed(portalId){
+  const activeProp = (props||[]).filter(p=>{
+    const st=(p.estado||p.status||'').toLowerCase();
+    return !st.includes('cerrad')&&!st.includes('inactiv')&&!st.includes('vendid')&&!st.includes('alquilad');
+  });
+  if(!activeProp.length){ toast('⚠️ Sin propiedades disponibles'); return; }
+  const now = new Date().toISOString();
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<listing-feed agent="JAC Realty Panamá" license="PN-0931" generated="${now}" portal="${portalId||'general'}">\n`+
+    activeProp.map(p=>{
+      const fotos = (()=>{try{return Array.isArray(p.fotos)?p.fotos:JSON.parse(p.fotos||'[]');}catch(e){return[];}})();
+      const precio = parseFloat((p.precio||'0').toString().replace(/[^0-9.]/g,''))||0;
+      return `  <property>
+    <id>${p.id||p.mls_code||''}</id>
+    <reference>${p.mls_code||p.id||''}</reference>
+    <operation>${(p.op||p.operacion||'').toLowerCase()}</operation>
+    <type>${(p.tipo||p.tipo_prop||'').toLowerCase()}</type>
+    <status>${(p.status||p.estado||'available').toLowerCase()}</status>
+    <title><![CDATA[${p.titulo||p.title||''}]]></title>
+    <description><![CDATA[${p.desc||p.descripcion||''}]]></description>
+    <price currency="USD">${precio}</price>
+    <area unit="m2">${p.area||p.area_total||0}</area>
+    <bedrooms>${p.hab||p.habitaciones||0}</bedrooms>
+    <bathrooms>${p.banos||0}</bathrooms>
+    <parking>${p.estac||0}</parking>
+    <location>
+      <country>Panama</country>
+      <province>Panamá</province>
+      <zone><![CDATA[${p.zona||''}]]></zone>
+    </location>
+    <photos>${fotos.map((f,i)=>`\n      <photo order="${i+1}"><![CDATA[${f}]]></photo>`).join('')}\n    </photos>
+    <contact>
+      <name>Jely An Castro</name>
+      <phone>+50764627763</phone>
+      <email>jcastro@jacrealtypa.com</email>
+      <website>https://jacrealtypa.com</website>
+      <license>PN-0931</license>
+    </contact>
+  </property>`;
+    }).join('\n')+'\n</listing-feed>';
+
+  const blob = new Blob([xml], {type:'application/xml;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'jac-realty-feed'+(portalId?'-'+portalId:'')+'.xml';
+  a.click(); URL.revokeObjectURL(url);
+  toast(`📄 XML generado · ${activeProp.length} propiedades · Sube este archivo al portal`);
 }
 
 function syncPortal(id){
-  const p = portalesData.find(x=>x.id===id);
-  if(!p) return;
-  p.props = props.length;
-  const card = document.getElementById('pcard-'+id);
-  if(card){ const bar=card.querySelector('.sync-progress'); if(bar){bar.style.width='0%'; setTimeout(()=>bar.style.width=Math.round(p.vistas/6)+'%',100);} }
-  toast(`🔄 ${p.name} sincronizado · ${p.props} propiedades actualizadas`);
+  const p = portalesData.find(x=>x.id===id); if(!p) return;
+  _pSet(id,'lastSync',new Date().toISOString());
+  renderPortales();
+  toast(`🔄 ${p.name} sincronizado · ${(props||[]).length} propiedades actualizadas`);
 }
 
 function syncAll(){
-  const n=(props||[]).length;
-  portalesData.filter(p=>p.active).forEach(p=>{ p.props=n; });
+  const now = new Date().toISOString();
+  portalesData.filter(p=>_pActive(p.id)).forEach(p=>_pSet(p.id,'lastSync',now));
   renderPortales();
-  const active=portalesData.filter(p=>p.active).length;
-  toast(`🔄 ${active} portales sincronizados · ${n} propiedades actualizadas en cada portal`);
+  const active=portalesData.filter(p=>_pActive(p.id)).length;
+  toast(`🔄 ${active} portales sincronizados · ${(props||[]).length} propiedades actualizadas`);
 }
 
 function publishAll(){
-  const active = portalesData.filter(p=>p.active);
+  const active = portalesData.filter(p=>_pActive(p.id));
   const n=(props||[]).length;
-  active.forEach(p=>{ p.props=n; });
+  if(!n){ toast('⚠️ Sin propiedades. Agrega propiedades en el módulo Propiedades.'); return; }
+  if(!active.length){ toast('⚠️ Sin portales activos. Activa al menos un portal.'); return; }
+  const now = new Date().toISOString();
+  active.forEach(p=>_pSet(p.id,'lastSync',now));
   renderPortales();
-  if(!n){ toast('⚠️ Sin propiedades disponibles. Agrega propiedades en el módulo Propiedades.'); return; }
-  toast(`🚀 Publicando ${n} propiedades en ${active.length} portales activos...`);
-  setTimeout(()=>toast(`✅ ${n} propiedades × ${active.length} portales = ${n*active.length} publicaciones activas`),2200);
+  toast(`🚀 ${n} propiedades marcadas en ${active.length} portales activos`);
+  setTimeout(()=>{
+    const xmlNeeded = active.filter(p=>p.conn==='XML');
+    if(xmlNeeded.length) toast(`📄 ${xmlNeeded.length} portales usan XML — descarga y sube el feed`);
+  },2000);
 }
 
 function publishSelected(){
@@ -5259,11 +5457,11 @@ function publishSelected(){
   const propId = sel.value;
   if(!propId){ toast('⚠️ Selecciona una propiedad primero'); return; }
   const prop = (props||[]).find(p=>p.id===propId||p.mls_code===propId);
-  const active = portalesData.filter(p=>p.active);
+  const active = portalesData.filter(p=>_pActive(p.id));
   if(!active.length){ toast('⚠️ Sin portales activos. Activa al menos un portal.'); return; }
   const titulo = prop?(prop.titulo||prop.title||propId):propId;
-  toast(`🚀 Publicando "${titulo}" en ${active.length} portales...`);
-  setTimeout(()=>toast(`✅ "${titulo}" publicada en ${active.length} portales activos`),1800);
+  toast(`🚀 "${titulo}" marcada para publicar en ${active.length} portales`);
+  setTimeout(()=>toast(`📄 Descarga el Feed XML e impórtalo en los portales XML para completar la publicación`),2000);
 }
 
 // ============================================================
