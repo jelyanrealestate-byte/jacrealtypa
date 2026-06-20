@@ -597,7 +597,7 @@ async function loadWebProps(){
     ]);
     const [propias,mls]=await Promise.all([r1.json(),r2.json()]);
     const propias2=(Array.isArray(propias)?propias:[]).map(p=>({...p,tipo:p.tipo,zona:p.corregimiento||p.distrito||'Panamá',_src:'propia'}));
-    const mls2=(Array.isArray(mls)?mls:[]).map(p=>({...p,tipo:p.tipo_prop||p.tipo,zona:p.zona||'Panamá',_src:'mls'}));
+    const mls2=(Array.isArray(mls)?mls:[]).map(p=>({...p,tipo:p.tipo_prop||p.tipo,zona:p.corregimiento||p.distrito||p.zona||'Panamá',_src:'mls'}));
     _webProps=[...propias2,...mls2];
     _mlsOffset=mls2.length;
     _mlsHasMore=mls2.length===_mlsPageSize;
@@ -820,12 +820,12 @@ async function loadMoreMLS(){
   if(btn){ btn.textContent='Cargando...'; btn.disabled=true; }
   try {
     const resp=await fetch(
-      `${_SB_URL}/rest/v1/propiedades_red?select=id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos,mls_code,descripcion,agente,agencia,licencia_corredor,tel_corredor,email_corredor,comision&estado=eq.Disponible&order=created_at.desc&limit=${_mlsPageSize}&offset=${_mlsOffset}`,
+      `${_SB_URL}/rest/v1/propiedades_red?select=id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos,mls_code,descripcion,provincia,distrito,barrio,corregimiento,edificio,ano_construccion,area_lote,caracteristicas_externas,caracteristicas_internas,amenidades_prop,area_exterior,url_mls&estado=eq.Disponible&order=created_at.desc&limit=${_mlsPageSize}&offset=${_mlsOffset}`,
       {headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}}
     );
     const newMls=await resp.json();
     if(Array.isArray(newMls)&&newMls.length){
-      const newMls2=newMls.map(p=>({...p,tipo:p.tipo_prop||p.tipo,zona:p.zona||'Panamá',_src:'mls'}));
+      const newMls2=newMls.map(p=>({...p,tipo:p.tipo_prop||p.tipo,zona:p.corregimiento||p.distrito||p.zona||'Panamá',_src:'mls'}));
       _webProps=[..._webProps,...newMls2];
       _mlsOffset+=newMls.length;
       _mlsHasMore=newMls.length===_mlsPageSize;
