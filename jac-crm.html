@@ -3938,7 +3938,7 @@ function mlsAbrirDetalle(idx){
   // Action buttons — full set
   const acciones=[];
   if(m.tel_corredor_wa||m.tel_corredor||m.agente) acciones.push(`<button class="btn btn-outline btn-sm" style="color:var(--green)" onclick="mlsContactarAgente(${idx})" title="WhatsApp co-broking al corredor">💬 WA Corredor</button>`);
-  if(m.url_mls) acciones.push(`<a href="${m.url_mls}" target="_blank" rel="noopener" style="text-decoration:none"><button class="btn btn-outline btn-sm" title="Ver ficha completa en MLS ACOBIR">🔗 Ver MLS</button></a>`);
+  // url_mls no se expone públicamente (contiene datos del corredor ACOBIR)
   acciones.push(`<button class="btn btn-outline btn-sm" onclick="mlsEmailJcastro(${idx})" title="Enviar por email jcastro@jacrealtypa.com">📧 jcastro</button>`);
   acciones.push(`<button class="btn btn-outline btn-sm" onclick="mlsEmailJelyan(${idx})" title="Enviar por email jelyanrealestate@gmail.com">📨 jelyan</button>`);
   acciones.push(`<button class="btn btn-outline btn-sm" style="color:var(--red)" onclick="exportMlsPDF(${idx})" title="Exportar ficha PDF">📄 PDF</button>`);
@@ -4994,18 +4994,35 @@ let currentPortalTab = 'gratis';
 
 function renderPortales(tab){
   tab = tab || currentPortalTab;
-  const filtered = tab==='todos' ? portalesData : portalesData.filter(p=>p.tipo===tab);
-  const activeCount = portalesData.filter(p=>p.active).length;
-  document.getElementById('portales-activos-count').textContent = activeCount;
-  document.getElementById('badge-portales').textContent = activeCount;
-  const totalPubs = portalesData.filter(p=>p.active).reduce((s,p)=>s+p.props,0);
-  document.getElementById('stat-publicadas').textContent = totalPubs;
+  currentPortalTab = tab;
 
-  // Fill property selector
+  // ── Auto-sincronizar conteo de props con propiedades reales ──
+  const realCount = (props||[]).filter(p=>(p.estado||p.status||'').toLowerCase().includes('disponible')||!(p.estado||p.status)).length || (props||[]).length;
+  portalesData.forEach(p=>{ if(p.active) p.props = realCount; });
+
+  const filtered = tab==='todos' ? portalesData : portalesData.filter(p=>p.tipo===tab);
+  const activeAll = portalesData.filter(p=>p.active);
+  const activeCount = activeAll.length;
+
+  // KPIs dinámicos
+  const totalPubs = activeAll.reduce((s,p)=>s+p.props,0);
+  const totalVistas = activeAll.reduce((s,p)=>s+p.vistas,0);
+  const totalLeads = activeAll.reduce((s,p)=>s+p.leads,0);
+  const el=id=>document.getElementById(id);
+  if(el('portales-activos-count')) el('portales-activos-count').textContent = activeCount;
+  if(el('badge-portales')) el('badge-portales').textContent = activeCount;
+  if(el('stat-publicadas')) el('stat-publicadas').textContent = totalPubs;
+  if(el('stat-vistas')) el('stat-vistas').textContent = totalVistas.toLocaleString();
+  if(el('stat-leads-portales')) el('stat-leads-portales').textContent = totalLeads;
+
+  // ── Selector de propiedades — siempre actualizado ──
   const sel = document.getElementById('portal-prop-select');
-  if(sel && sel.options.length <= 1){
+  if(sel){
+    const prevVal = sel.value;
+    const dispProps = (props||[]).filter(p=>(p.estado||p.status||'').toLowerCase().includes('disponible')||!(p.estado||p.status));
     sel.innerHTML = '<option value="">-- Seleccionar propiedad --</option>' +
-      props.map(p=>`<option value="${p.id}">${p.id} · ${p.titulo}</option>`).join('');
+      (dispProps.length ? dispProps : (props||[])).map(p=>`<option value="${p.id||p.mls_code}">${p.mls_code||p.id} · ${p.titulo||p.title||''}</option>`).join('');
+    if(prevVal) sel.value = prevVal;
   }
 
   const connBadge = c => {
@@ -5059,7 +5076,7 @@ function renderPortales(tab){
 
 function filterPortalesTab(btn, tab){
   document.querySelectorAll('#portales-tabs .tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
+  if(btn) btn.classList.add('active');
   currentPortalTab = tab;
   renderPortales(tab);
 }
@@ -5068,8 +5085,9 @@ function togglePortal(id, active){
   const p = portalesData.find(x=>x.id===id);
   if(!p) return;
   p.active = active;
-  if(active){ p.props = props.length; toast(`✅ ${p.name} activado · Publicando ${props.length} propiedades...`); }
-  else { p.props=0; p.vistas=0; p.leads=0; toast(`⏹ ${p.name} desactivado`); }
+  const n = (props||[]).length;
+  if(active){ p.props = n; toast(`✅ ${p.name} activado · ${n} propiedades en cola de publicación`); }
+  else { p.props=0; toast(`⏹ ${p.name} desactivado`); }
   renderPortales();
 }
 
@@ -5093,27 +5111,33 @@ function syncPortal(id){
 }
 
 function syncAll(){
-  portalesData.filter(p=>p.active).forEach(p=>{ p.props=props.length; });
+  const n=(props||[]).length;
+  portalesData.filter(p=>p.active).forEach(p=>{ p.props=n; });
   renderPortales();
-  toast(`🔄 Todos los portales sincronizados · ${props.length} propiedades × ${portalesData.filter(p=>p.active).length} portales`);
+  const active=portalesData.filter(p=>p.active).length;
+  toast(`🔄 ${active} portales sincronizados · ${n} propiedades actualizadas en cada portal`);
 }
 
 function publishAll(){
   const active = portalesData.filter(p=>p.active);
-  active.forEach(p=>{ p.props=props.length; });
+  const n=(props||[]).length;
+  active.forEach(p=>{ p.props=n; });
   renderPortales();
-  toast(`🚀 Publicando ${props.length} propiedades en ${active.length} portales...`);
-  setTimeout(()=>toast(`✅ Listo · ${props.length*active.length} publicaciones activas en todos los portales`),2000);
+  if(!n){ toast('⚠️ Sin propiedades disponibles. Agrega propiedades en el módulo Propiedades.'); return; }
+  toast(`🚀 Publicando ${n} propiedades en ${active.length} portales activos...`);
+  setTimeout(()=>toast(`✅ ${n} propiedades × ${active.length} portales = ${n*active.length} publicaciones activas`),2200);
 }
 
 function publishSelected(){
   const sel = document.getElementById('portal-prop-select');
   const propId = sel.value;
-  if(!propId){ toast('Selecciona una propiedad primero'); return; }
-  const prop = props.find(p=>p.id===propId);
+  if(!propId){ toast('⚠️ Selecciona una propiedad primero'); return; }
+  const prop = (props||[]).find(p=>p.id===propId||p.mls_code===propId);
   const active = portalesData.filter(p=>p.active);
-  toast(`🚀 Publicando "${prop.titulo}" en ${active.length} portales...`);
-  setTimeout(()=>toast(`✅ "${prop.titulo}" publicada en ${active.length} portales`),1800);
+  if(!active.length){ toast('⚠️ Sin portales activos. Activa al menos un portal.'); return; }
+  const titulo = prop?(prop.titulo||prop.title||propId):propId;
+  toast(`🚀 Publicando "${titulo}" en ${active.length} portales...`);
+  setTimeout(()=>toast(`✅ "${titulo}" publicada en ${active.length} portales activos`),1800);
 }
 
 // ============================================================
