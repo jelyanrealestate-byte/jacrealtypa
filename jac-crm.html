@@ -235,6 +235,24 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .prop-card:hover{border-color:var(--accent);transform:translateY(-2px)}
 .prop-img{height:160px;background:linear-gradient(135deg,#1e2535,#252d3f);display:flex;align-items:center;justify-content:center;font-size:36px;position:relative}
 .prop-img-badge{position:absolute;top:8px;left:8px}
+/* ── Mensajero ── */
+.msg-conv-item{display:flex;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:.15s;position:relative}
+.msg-conv-item:hover{background:var(--bg)}
+.msg-conv-item.active{background:var(--accent)22;border-left:3px solid var(--accent)}
+.msg-conv-item.unread{background:rgba(196,30,58,.07)}
+.msg-conv-av{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#111;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.msg-conv-av.broadcast{background:var(--blue);color:#fff}
+.msg-conv-info{flex:1;min-width:0}
+.msg-conv-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg-conv-preview{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.msg-conv-time{font-size:10px;color:var(--muted);white-space:nowrap;margin-left:6px}
+.msg-unread-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);position:absolute;top:12px;right:10px}
+.msg-bubble{max-width:72%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.45;position:relative;word-break:break-word}
+.msg-bubble.mine{background:var(--accent);color:#fff;border-radius:12px 12px 3px 12px;align-self:flex-end}
+.msg-bubble.theirs{background:var(--card2);color:var(--text);border-radius:12px 12px 12px 3px;align-self:flex-start}
+.msg-bubble.broadcast{background:rgba(59,130,246,.18);color:var(--text);border-radius:12px 12px 12px 3px;align-self:flex-start;border:1px solid rgba(59,130,246,.3)}
+.msg-bubble-meta{font-size:10px;opacity:.7;margin-top:3px;display:block}
+.msg-row{display:flex;flex-direction:column}
 /* ── Prop card photo slider ── */
 .prop-slider{position:relative;height:160px;overflow:hidden;background:#1e2535;border-radius:0}
 .prop-slider .s-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s}
@@ -785,6 +803,10 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
     <div class="nav-item" onclick="showPanel('actividad')">
       <span class="icon">⚡</span> Actividad
     </div>
+    <div class="nav-item" onclick="showPanel('mensajero')">
+      <span class="icon">💬</span> Mensajero
+      <span class="nav-badge" id="badge-mensajero" style="background:var(--accent);color:#111;display:none">0</span>
+    </div>
     <div class="nav-item" onclick="showPanel('notas')">
       <span class="icon">📝</span> Notas
       <span class="nav-badge" id="badge-notas" style="background:var(--blue)">0</span>
@@ -1102,23 +1124,77 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 
     <!-- ========== ACTIVIDAD ========== -->
     <div class="panel" id="panel-actividad">
-      <div style="display:grid;grid-template-columns:1fr 300px;gap:16px">
+      <div style="display:grid;grid-template-columns:1fr 280px;gap:16px">
         <div>
-          <div class="sec-header"><span class="sec-title">Registro de Actividades</span>
-            <button class="btn btn-primary btn-sm" onclick="openModal('modalActividad')">+ Registrar</button>
+          <div class="sec-header" style="flex-wrap:wrap;gap:8px">
+            <span class="sec-title">Registro de Actividades</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+              <select id="act-filter-tipo" onchange="renderActivity()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--text);font-size:12px;outline:none">
+                <option value="">Todos los tipos</option>
+                <option value="Llamada">📞 Llamada</option>
+                <option value="Email">📧 Email</option>
+                <option value="WhatsApp">💬 WhatsApp</option>
+                <option value="Visita">🏠 Visita</option>
+                <option value="Reunión">🤝 Reunión</option>
+                <option value="Nota">📝 Nota</option>
+              </select>
+              <select id="act-filter-period" onchange="renderActivity()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--text);font-size:12px;outline:none">
+                <option value="all">Todo</option>
+                <option value="today">Hoy</option>
+                <option value="week">Esta semana</option>
+                <option value="month" selected>Este mes</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="(function(){const fd=document.getElementById('a-fecha');const fh=document.getElementById('a-hora');if(fd)fd.value=new Date().toISOString().slice(0,10);if(fh)fh.value=new Date().toTimeString().slice(0,5);openModal('modalActividad');})()">+ Registrar</button>
+            </div>
           </div>
           <div class="table-wrap" style="padding:8px 14px">
-            <div class="activity-list" id="activity-log"></div>
+            <div class="activity-list" id="activity-log"><div style="text-align:center;padding:30px;color:var(--muted)">Cargando actividades...</div></div>
           </div>
         </div>
         <div>
-          <div class="sec-title" style="margin-bottom:10px">Resumen</div>
+          <div class="sec-title" style="margin-bottom:10px">Resumen del mes</div>
           <div class="table-wrap" style="padding:12px 14px">
-            <div class="metric-row"><span>Llamadas este mes</span><span class="metric-val" style="color:var(--blue)">12</span></div>
-            <div class="metric-row"><span>Emails enviados</span><span class="metric-val" style="color:var(--cyan)">28</span></div>
-            <div class="metric-row"><span>Visitas realizadas</span><span class="metric-val" style="color:var(--purple)">7</span></div>
-            <div class="metric-row"><span>WhatsApp enviados</span><span class="metric-val" style="color:#4ade80">41</span></div>
-            <div class="metric-row"><span>Reuniones</span><span class="metric-val" style="color:var(--accent)">5</span></div>
+            <div class="metric-row"><span>📞 Llamadas</span><span class="metric-val" style="color:var(--blue)" id="act-stat-llamada">0</span></div>
+            <div class="metric-row"><span>📧 Emails</span><span class="metric-val" style="color:var(--cyan)" id="act-stat-email">0</span></div>
+            <div class="metric-row"><span>🏠 Visitas</span><span class="metric-val" style="color:var(--purple)" id="act-stat-visita">0</span></div>
+            <div class="metric-row"><span>💬 WhatsApp</span><span class="metric-val" style="color:#4ade80" id="act-stat-whatsapp">0</span></div>
+            <div class="metric-row"><span>🤝 Reuniones</span><span class="metric-val" style="color:var(--accent)" id="act-stat-reunion">0</span></div>
+            <div class="metric-row" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px"><span><strong>Total</strong></span><span class="metric-val" id="act-stat-total">0</span></div>
+          </div>
+          <div class="sec-title" style="margin:14px 0 10px">Actividad reciente</div>
+          <div id="act-recents" style="font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MENSAJERO ========== -->
+    <div class="panel" id="panel-mensajero">
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:0;height:calc(100vh - 130px);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+        <!-- Lista de conversaciones -->
+        <div style="border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--card2)">
+          <div style="padding:12px;border-bottom:1px solid var(--border)">
+            <div style="font-weight:600;font-size:13px;margin-bottom:8px">💬 Mensajero Interno</div>
+            <div style="display:flex;gap:6px">
+              <input id="msg-search" type="text" placeholder="Buscar..." oninput="filterMsgConvs()" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);font-size:12px;outline:none">
+              <button class="btn btn-primary btn-sm" onclick="openNuevoMensaje()" title="Nuevo mensaje">✏️</button>
+            </div>
+          </div>
+          <div id="msg-convs-list" style="flex:1;overflow-y:auto"></div>
+        </div>
+        <!-- Hilo de mensajes -->
+        <div style="display:flex;flex-direction:column;background:var(--bg)">
+          <div id="msg-thread-header" style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;gap:12px;min-height:52px">
+            <span id="msg-thread-title" style="font-weight:600;font-size:13px;color:var(--muted)">Selecciona una conversación</span>
+          </div>
+          <div id="msg-thread-body" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div style="text-align:center;color:var(--muted);font-size:13px;margin-top:60px">💬 Selecciona una conversación para ver los mensajes</div>
+          </div>
+          <div id="msg-compose" style="padding:12px 16px;border-top:1px solid var(--border);background:var(--card2);display:none">
+            <div style="display:flex;gap:8px;align-items:flex-end">
+              <textarea id="msg-input" rows="2" placeholder="Escribe un mensaje..." onkeydown="msgKeyDown(event)" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;resize:none;outline:none;line-height:1.4"></textarea>
+              <button class="btn btn-primary" onclick="sendMensaje()" style="padding:8px 14px">➤</button>
+            </div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px">Enter = enviar · Shift+Enter = nueva línea</div>
           </div>
         </div>
       </div>
@@ -1914,7 +1990,42 @@ INSERT INTO agentes_crm (nombre,apellido,email,username,password_hash,licencia,t
 VALUES ('Jely','Castro','jcastro@jacrealtypa.com','jcastro',
   '5e154b017f873b16a14903cf04b6293a0e725dfbd8c147ef87c2bc39227d3c76',
   'PN-0931','50764627763','50764627763','admin',true)
-ON CONFLICT (email) DO NOTHING;</textarea>
+ON CONFLICT (email) DO NOTHING;
+
+-- ══════════════════════════════════════════════
+-- TABLA ACTIVIDADES — Registro de gestiones
+-- ══════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS actividades_crm (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tipo TEXT NOT NULL,
+  cliente_nombre TEXT,
+  descripcion TEXT,
+  resultado TEXT,
+  fecha DATE DEFAULT CURRENT_DATE,
+  hora TIME DEFAULT CURRENT_TIME,
+  agente_id UUID REFERENCES agentes_crm(id) ON DELETE SET NULL,
+  agente_nombre TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE actividades_crm ENABLE ROW LEVEL SECURITY;
+CREATE POLICY allow_all_actividades_crm ON actividades_crm FOR ALL USING (true) WITH CHECK (true);
+
+-- ══════════════════════════════════════════════
+-- TABLA MENSAJERO — Mensajes internos entre agentes
+-- ══════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS mensajes_internos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  de_agente_id UUID NOT NULL,
+  de_agente_nombre TEXT,
+  para_agente_id UUID,      -- NULL = broadcast a todos
+  para_agente_nombre TEXT,
+  asunto TEXT,
+  mensaje TEXT NOT NULL,
+  leido BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE mensajes_internos ENABLE ROW LEVEL SECURITY;
+CREATE POLICY allow_all_mensajes_internos ON mensajes_internos FOR ALL USING (true) WITH CHECK (true);</textarea>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('setup-sql-text').value).then(()=>toast('✅ SQL copiado al portapapeles'))">📋 Copiar SQL</button>
         <a href="https://supabase.com/dashboard/project/dskslrlxldnxrglrochv/sql/new" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none">🔗 Abrir Supabase SQL Editor</a>
@@ -2604,21 +2715,65 @@ ON CONFLICT (email) DO NOTHING;</textarea>
 
 <!-- Modal Actividad -->
 <div class="modal-bg" id="modalActividad">
-  <div class="modal">
+  <div class="modal" style="max-width:560px">
     <div class="modal-header">
       <span class="modal-title">⚡ Registrar Actividad</span>
       <button class="modal-close" onclick="closeModal('modalActividad')">✕</button>
     </div>
     <div class="form-grid">
-      <div class="form-group"><label>Tipo</label>
-        <select id="a-tipo"><option>📞 Llamada</option><option>📧 Email</option><option>💬 WhatsApp</option><option>🏠 Visita</option><option>🤝 Reunión</option><option>📝 Nota</option></select>
+      <div class="form-group"><label>Tipo *</label>
+        <select id="a-tipo" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);width:100%">
+          <option value="Llamada">📞 Llamada</option>
+          <option value="Email">📧 Email</option>
+          <option value="WhatsApp">💬 WhatsApp</option>
+          <option value="Visita">🏠 Visita</option>
+          <option value="Reunión">🤝 Reunión</option>
+          <option value="Nota">📝 Nota</option>
+        </select>
       </div>
-      <div class="form-group"><label>Cliente</label><input id="a-cliente" placeholder="Nombre del cliente"></div>
-      <div class="form-group form-full"><label>Descripción</label><textarea id="a-desc" placeholder="¿Qué ocurrió?"></textarea></div>
+      <div class="form-group"><label>Cliente / Prospecto *</label><input id="a-cliente" placeholder="Nombre del cliente o lead"></div>
+      <div class="form-group"><label>Fecha</label><input id="a-fecha" type="date"></div>
+      <div class="form-group"><label>Hora</label><input id="a-hora" type="time"></div>
+      <div class="form-group form-full"><label>Descripción *</label><textarea id="a-desc" rows="3" placeholder="¿Qué ocurrió? Detalla el resultado de la gestión..."></textarea></div>
+      <div class="form-group form-full"><label>Resultado</label>
+        <select id="a-resultado" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);width:100%">
+          <option value="">— Sin resultado específico —</option>
+          <option value="Interesado">✅ Interesado — avanza</option>
+          <option value="Pendiente seguimiento">⏳ Pendiente de seguimiento</option>
+          <option value="Cita agendada">📅 Cita agendada</option>
+          <option value="Oferta enviada">📋 Oferta enviada</option>
+          <option value="No interesado">❌ No interesado</option>
+          <option value="No contesta">📵 No contesta / No responde</option>
+          <option value="Cierre">🏆 Cierre / Venta</option>
+        </select>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalActividad')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveActividad()">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nuevo Mensaje -->
+<div class="modal-bg" id="modalNuevoMensaje">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <span class="modal-title">✏️ Nuevo Mensaje</span>
+      <button class="modal-close" onclick="closeModal('modalNuevoMensaje')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Para *</label>
+        <select id="nm-para" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);width:100%">
+          <option value="all">📢 Todos los agentes (broadcast)</option>
+        </select>
+      </div>
+      <div class="form-group form-full"><label>Asunto</label><input id="nm-asunto" placeholder="Asunto del mensaje (opcional)"></div>
+      <div class="form-group form-full"><label>Mensaje *</label><textarea id="nm-mensaje" rows="4" placeholder="Escribe tu mensaje..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalNuevoMensaje')">Cancelar</button>
+      <button class="btn btn-primary" onclick="sendNuevoMensaje()">Enviar ➤</button>
     </div>
   </div>
 </div>
@@ -2975,6 +3130,13 @@ ON CONFLICT (email) DO NOTHING;</textarea>
 
 <!-- ========== AGENTES ========== -->
 <div class="panel" id="panel-agentes">
+  <!-- Stats bar -->
+  <div id="agentes-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+    <div class="kpi-card"><div class="kpi-val" id="ag-stat-total">—</div><div class="kpi-label">Total agentes</div></div>
+    <div class="kpi-card"><div class="kpi-val" style="color:var(--green)" id="ag-stat-activos">—</div><div class="kpi-label">Activos</div></div>
+    <div class="kpi-card"><div class="kpi-val" style="color:var(--accent)" id="ag-stat-admins">—</div><div class="kpi-label">Admins/Supervisores</div></div>
+    <div class="kpi-card"><div class="kpi-val" style="color:var(--blue)" id="ag-stat-agentes">—</div><div class="kpi-label">Agentes/Asistentes</div></div>
+  </div>
   <div class="search-bar" style="gap:10px;flex-wrap:wrap">
     <input type="text" id="agente-search" placeholder="🔍 Buscar agente..." oninput="renderAgentes()" style="flex:1;min-width:180px">
     <select id="agente-filter-rol" onchange="renderAgentes()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none">
@@ -2989,7 +3151,8 @@ ON CONFLICT (email) DO NOTHING;</textarea>
       <option value="activo">Activos</option>
       <option value="inactivo">Inactivos</option>
     </select>
-    <button class="btn btn-primary" onclick="openModalAgente(null)">+ Nuevo Agente</button>
+    <button class="btn btn-outline btn-sm" onclick="openMiPerfil()" title="Editar mi perfil">👤 Mi Perfil</button>
+    <button class="btn btn-primary" onclick="openModalAgente(null)" id="btn-nuevo-agente">+ Nuevo Agente</button>
   </div>
   <div class="agentes-grid" id="agentes-grid"></div>
 </div>
@@ -3333,7 +3496,7 @@ function showPanel(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  const labels={dashboard:'Dashboard',propiedades:'Propiedades',contactos:'Contactos',leads:'Leads',clientes:'Clientes',empresas:'Empresas',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria',postVenta:'Post-Venta',matching:'🎯 Matching Inteligente',agentes:'👥 Equipo de Agentes',configuracion:'⚙️ Configuración'};
+  const labels={dashboard:'Dashboard',propiedades:'Propiedades',contactos:'Contactos',leads:'Leads',clientes:'Clientes',empresas:'Empresas',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',mensajero:'💬 Mensajero Interno',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria',postVenta:'Post-Venta',matching:'🎯 Matching Inteligente',agentes:'👥 Equipo de Agentes',configuracion:'⚙️ Configuración'};
   if(id==='matching') populateMatchingSelect();
   document.getElementById('topbar-title').textContent=labels[id]||id;
   // Mark active nav item (works both from onclick and programmatic calls)
@@ -3351,7 +3514,14 @@ function showPanel(id){
   if(id==='clientes') renderClients();
   if(id==='pipeline') renderPipeline();
   if(id==='agenda') renderCalendar();
-  if(id==='actividad') renderActivity();
+  if(id==='actividad'){
+    // Pre-fill today's date/time when opening panel
+    const fd=document.getElementById('a-fecha');const fh=document.getElementById('a-hora');
+    if(fd&&!fd.value)fd.value=new Date().toISOString().slice(0,10);
+    if(fh&&!fh.value)fh.value=new Date().toTimeString().slice(0,5);
+    loadActividades().then(()=>renderActivity());
+  }
+  if(id==='mensajero') renderMensajero();
   if(id==='notas') renderNotas();
   if(id==='tareas') renderTareas();
   if(id==='portales'){
@@ -3732,17 +3902,74 @@ function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalend
 // ACTIVITY
 // ============================================================
 function renderActivity(){
-  const iconColors={'📞':'var(--blue)','📧':'var(--cyan)','💬':'#4ade80','🏠':'var(--purple)','🤝':'var(--accent)','📝':'var(--muted)'};
-  document.getElementById('activity-log').innerHTML=activities.map(a=>{
-    const icon=a.tipo.split(' ')[0];
-    const color=iconColors[icon]||'var(--muted)';
-    return `<div class="activity-item">
-      <div class="activity-icon" style="background:${color}22;color:${color}">${icon}</div>
-      <div class="activity-body">
-        <div class="activity-text"><strong>${a.cliente}</strong> — ${a.desc}</div>
-        <div class="activity-time">${a.tipo} · ${a.time}</div>
-      </div>
-    </div>`;}).join('');
+  const iconColors={
+    '📞':'var(--blue)','📧':'var(--cyan)','💬':'#4ade80',
+    '🏠':'var(--purple)','🤝':'var(--accent)','📝':'var(--muted)',
+    '⚡':'var(--accent)','✅':'var(--green)','🎯':'var(--accent)',
+    '💾':'var(--blue)','📊':'var(--cyan)','🏢':'var(--purple)','🤝':'var(--green)'
+  };
+  const logEl=document.getElementById('activity-log');
+  if(!logEl) return;
+  const filterTipo=(document.getElementById('act-filter-tipo')?.value||'').toLowerCase();
+  const filterPeriod=document.getElementById('act-filter-period')?.value||'all';
+  const now=new Date();
+  let list=activities.filter(a=>{
+    if(filterTipo){
+      const tipoLow=a.tipo.toLowerCase();
+      if(!tipoLow.includes(filterTipo)) return false;
+    }
+    if(filterPeriod!=='all'&&a.created_at){
+      const d=new Date(a.created_at);
+      if(filterPeriod==='today'){
+        if(d.toDateString()!==now.toDateString()) return false;
+      } else if(filterPeriod==='week'){
+        const wStart=new Date(now); wStart.setDate(now.getDate()-now.getDay());
+        if(d<wStart) return false;
+      } else if(filterPeriod==='month'){
+        if(d.getMonth()!==now.getMonth()||d.getFullYear()!==now.getFullYear()) return false;
+      }
+    }
+    return true;
+  });
+  if(!list.length){
+    logEl.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">No hay actividades registradas aún.<br><small>Haz clic en "+ Registrar" para agregar la primera.</small></div>';
+  } else {
+    logEl.innerHTML=list.map(a=>{
+      const parts=a.tipo.split(' ');
+      const icon=parts.length>1?parts[1]:parts[0];
+      const color=iconColors[icon]||'var(--muted)';
+      const resHtml=a.resultado?'<span style="display:inline-block;margin-top:3px;font-size:10px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:1px 7px">'+a.resultado+'</span>':'';
+      return '<div class="activity-item">'+
+        '<div class="activity-icon" style="background:'+color+'22;color:'+color+'">'+icon+'</div>'+
+        '<div class="activity-body">'+
+          '<div class="activity-text"><strong>'+a.cliente+'</strong> — '+a.desc+'</div>'+
+          '<div class="activity-time">'+a.tipo.replace(/⚡\s*/,'')+''+' · '+a.time+'</div>'+
+          resHtml+
+        '</div></div>';
+    }).join('');
+  }
+  // Update sidebar stats (this month always)
+  const thisMonth=activities.filter(a=>{
+    if(!a.created_at) return true; // in-memory ones count
+    const d=new Date(a.created_at);
+    return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+  });
+  const count=(tipo)=>thisMonth.filter(a=>a.tipo.toLowerCase().includes(tipo.toLowerCase())).length;
+  ['llamada','email','visita','whatsapp','reuni'].forEach(t=>{
+    const key={'llamada':'llamada','email':'email','visita':'visita','whatsapp':'whatsapp','reuni':'reunion'}[t];
+    const el=document.getElementById('act-stat-'+key);
+    if(el) el.textContent=count(t);
+  });
+  const totalEl=document.getElementById('act-stat-total');
+  if(totalEl) totalEl.textContent=thisMonth.length;
+  // Recent 3 in sidebar
+  const recEl=document.getElementById('act-recents');
+  if(recEl){
+    recEl.innerHTML=activities.slice(0,3).map(a=>'<div style="padding:6px 8px;background:var(--card2);border-radius:6px;border-left:3px solid var(--accent)">'+
+      '<div style="font-weight:600;font-size:11px">'+a.cliente+'</div>'+
+      '<div style="color:var(--muted);font-size:10px">'+a.tipo.replace(/⚡\s*/,'')+'</div>'+
+    '</div>').join('');
+  }
 }
 
 // ============================================================
@@ -6436,18 +6663,57 @@ function saveCita(){
   toast('✅ Cita agendada');
 }
 
-function saveActividad(){
+async function saveActividad(){
   const cliente=document.getElementById('a-cliente').value.trim();
-  if(!cliente){alert('Ingresa el nombre del cliente');return;}
-  activities.unshift({
-    tipo:document.getElementById('a-tipo').value,
-    cliente,
-    desc:document.getElementById('a-desc').value,
-    time:'Ahora'
-  });
+  const desc=document.getElementById('a-desc').value.trim();
+  if(!cliente){toast('⚠️ Ingresa el nombre del cliente');return;}
+  if(!desc){toast('⚠️ Ingresa una descripción');return;}
+  const tipo=document.getElementById('a-tipo').value;
+  const fecha=document.getElementById('a-fecha').value||new Date().toISOString().slice(0,10);
+  const hora=document.getElementById('a-hora').value||new Date().toTimeString().slice(0,5);
+  const resultado=document.getElementById('a-resultado').value;
+  const agenteName=(window._crm_agent?.nombre||'')+(window._crm_agent?.apellido?' '+window._crm_agent.apellido:'');
+  const record={
+    tipo,cliente_nombre:cliente,descripcion:desc,
+    resultado:resultado||null,
+    fecha,hora,
+    agente_id:window._crm_agent?.id||null,
+    agente_nombre:agenteName||null,
+    created_at:new Date().toISOString()
+  };
+  // Push to in-memory array immediately
+  activities.unshift({tipo:'⚡ '+tipo,cliente,desc,time:'Ahora',fecha,resultado});
+  // Persist to Supabase
+  if(sb){
+    const {error}=await sb.from('actividades_crm').insert([record]);
+    if(error&&error.code==='42P01'){
+      // Table doesn't exist yet — show hint
+      toast('⚠️ Tabla actividades_crm no existe. Ejecuta el SQL en DB Setup.');
+    } else if(error){ toast('⚠️ Error Supabase: '+error.message); }
+    else { toast('✅ Actividad registrada'); }
+  } else { toast('✅ Actividad guardada (offline)'); }
+  // Clear form
+  ['a-cliente','a-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('a-resultado').value='';
   closeModal('modalActividad');
-  renderActivity();renderDashboard();
-  toast('✅ Actividad registrada');
+  renderActivity(); renderDashboard();
+}
+
+async function loadActividades(){
+  if(!sb) return;
+  const from=new Date(); from.setDate(from.getDate()-90); // last 90 days
+  const {data,error}=await sb.from('actividades_crm')
+    .select('*').order('created_at',{ascending:false}).limit(300);
+  if(error){ if(error.code!=='42P01') console.warn('actividades_crm:',error.message); return; }
+  if(data) activities=data.map(r=>({
+    tipo:'⚡ '+(r.tipo||'Actividad'),
+    cliente:r.cliente_nombre||'—',
+    desc:r.descripcion||'',
+    time:r.fecha?new Date(r.created_at).toLocaleDateString('es-PA',{day:'2-digit',month:'short'}):'Ahora',
+    fecha:r.fecha||'',
+    resultado:r.resultado||'',
+    created_at:r.created_at
+  }));
 }
 
 // ============================================================
@@ -9225,6 +9491,14 @@ async function renderAgentes(){
   }
   _agentes_cache=agents;
   document.getElementById('badge-agentes').textContent=agents.filter(a=>a.activo).length;
+  // Stats bar
+  const sTot=document.getElementById('ag-stat-total'); if(sTot) sTot.textContent=agents.length;
+  const sAct=document.getElementById('ag-stat-activos'); if(sAct) sAct.textContent=agents.filter(a=>a.activo).length;
+  const sAdm=document.getElementById('ag-stat-admins'); if(sAdm) sAdm.textContent=agents.filter(a=>a.rol==='admin'||a.rol==='supervisor').length;
+  const sAg=document.getElementById('ag-stat-agentes'); if(sAg) sAg.textContent=agents.filter(a=>a.rol==='agente'||a.rol==='asistente').length;
+  // Only admin can create new agents
+  const btnNew=document.getElementById('btn-nuevo-agente');
+  if(btnNew) btnNew.style.display=(window._crm_agent?.rol==='admin')?'':'none';
   // Filter
   let list=agents.filter(a=>{
     if(filterRol&&a.rol!==filterRol) return false;
@@ -9565,6 +9839,242 @@ async function syncE24Props(){
     if(btn){btn.disabled=false;btn.textContent='🔄 Sync E24';}
   }
 }
+// ============================================================
+// MENSAJERO INTERNO
+// ============================================================
+let _msg_convs = [];          // [{peerId, peerName, peerInitials, lastMsg, lastTime, unread}]
+let _msg_active_peer = null;  // 'all' | agente_id
+let _msg_active_peer_name = '';
+let _msg_poll_timer = null;
+let _msg_all_msgs = [];       // all messages fetched
+
+async function renderMensajero(){
+  await loadMensajero();
+}
+
+async function loadMensajero(){
+  if(!sb){ 
+    document.getElementById('msg-convs-list').innerHTML='<div style="text-align:center;padding:20px;font-size:12px;color:var(--muted)">Mensajero requiere conexión a Supabase</div>';
+    return;
+  }
+  const myId=window._crm_agent?.id||null;
+  if(!myId){ document.getElementById('msg-convs-list').innerHTML='<div style="padding:20px;font-size:12px;color:var(--muted)">Inicia sesión para usar el Mensajero</div>'; return; }
+
+  // Load messages for/from me
+  const {data,error}=await sb.from('mensajes_internos')
+    .select('*')
+    .or('de_agente_id.eq.'+myId+',para_agente_id.eq.'+myId+',para_agente_id.is.null')
+    .order('created_at',{ascending:false})
+    .limit(500);
+  if(error){ 
+    if(error.code==='42P01'){ document.getElementById('msg-convs-list').innerHTML='<div style="padding:14px;font-size:12px;color:var(--muted)">⚠️ Tabla mensajes_internos no existe.<br>Ejecuta el SQL en <strong>DB Setup</strong>.</div>'; return; }
+    console.warn('mensajes_internos:', error.message); return;
+  }
+  _msg_all_msgs = data||[];
+
+  // Build conversation list
+  const convMap = {};
+  _msg_all_msgs.forEach(m=>{
+    const isMine = m.de_agente_id===myId;
+    const isBroadcast = !m.para_agente_id;
+    let peerId, peerName;
+    if(isBroadcast){ peerId='all'; peerName='📢 Todos'; }
+    else if(isMine){ peerId=m.para_agente_id; peerName=m.para_agente_nombre||'Agente'; }
+    else { peerId=m.de_agente_id; peerName=m.de_agente_nombre||'Agente'; }
+
+    if(!convMap[peerId]||new Date(m.created_at)>new Date(convMap[peerId].lastTime)){
+      convMap[peerId]={peerId,peerName,lastMsg:m.mensaje,lastTime:m.created_at,unread:0};
+    }
+    if(!isMine && !m.leido){ if(!convMap[peerId]) convMap[peerId].unread=0; convMap[peerId].unread=(convMap[peerId].unread||0)+1; }
+  });
+  _msg_convs = Object.values(convMap).sort((a,b)=>new Date(b.lastTime)-new Date(a.lastTime));
+
+  // Unread badge
+  const totalUnread = _msg_all_msgs.filter(m=>m.de_agente_id!==myId&&!m.leido).length;
+  const badge=document.getElementById('badge-mensajero');
+  if(badge){ badge.textContent=totalUnread; badge.style.display=totalUnread>0?'':'none'; }
+
+  renderMsgConvs();
+  if(_msg_active_peer) renderMsgThread(_msg_active_peer, _msg_active_peer_name);
+
+  // Poll every 20s
+  clearTimeout(_msg_poll_timer);
+  _msg_poll_timer = setTimeout(()=>{
+    if(document.getElementById('panel-mensajero')?.classList.contains('active')) loadMensajero();
+  }, 20000);
+}
+
+function filterMsgConvs(){
+  renderMsgConvs();
+}
+
+function renderMsgConvs(){
+  const search=(document.getElementById('msg-search')?.value||'').toLowerCase();
+  const el=document.getElementById('msg-convs-list');
+  if(!el) return;
+  let list=_msg_convs.filter(c=>!search||c.peerName.toLowerCase().includes(search)||c.lastMsg.toLowerCase().includes(search));
+  if(!list.length){ el.innerHTML='<div style="text-align:center;padding:30px;font-size:12px;color:var(--muted)">Sin conversaciones aún.<br>Haz clic en ✏️ para enviar un mensaje.</div>'; return; }
+  el.innerHTML=list.map(c=>{
+    const initials=c.peerName==='📢 Todos'?'📢':c.peerName.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+    const isActive=_msg_active_peer===c.peerId;
+    const isBcast=c.peerId==='all';
+    const timeStr=c.lastTime?new Date(c.lastTime).toLocaleDateString('es-PA',{day:'2-digit',month:'short'})+' '+new Date(c.lastTime).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'}):'';
+    return '<div class="msg-conv-item'+(isActive?' active':'')+(c.unread?' unread':'')+'" onclick="openMsgThread(''+c.peerId+'',''+c.peerName.replace(/'/g,'&apos;')+'')" >'+
+      '<div class="msg-conv-av'+(isBcast?' broadcast':'')+'">'+initials+'</div>'+
+      '<div class="msg-conv-info">'+
+        '<div class="msg-conv-name">'+c.peerName+'</div>'+
+        '<div class="msg-conv-preview">'+(c.lastMsg||'').slice(0,50)+'</div>'+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">'+
+        '<span class="msg-conv-time">'+timeStr+'</span>'+
+        (c.unread?'<span style="background:var(--accent);color:#fff;border-radius:10px;font-size:9px;padding:1px 5px">'+c.unread+'</span>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+async function openMsgThread(peerId, peerName){
+  _msg_active_peer=peerId;
+  _msg_active_peer_name=peerName;
+  renderMsgConvs();
+  renderMsgThread(peerId, peerName);
+  // Mark as read
+  const myId=window._crm_agent?.id;
+  if(sb&&myId){
+    const filter = peerId==='all'
+      ? sb.from('mensajes_internos').update({leido:true}).is('para_agente_id',null).eq('leido',false).neq('de_agente_id',myId)
+      : sb.from('mensajes_internos').update({leido:true}).eq('de_agente_id',peerId).eq('para_agente_id',myId).eq('leido',false);
+    await filter;
+    // Update local cache
+    _msg_all_msgs.forEach(m=>{
+      if(peerId==='all'&&!m.para_agente_id&&m.de_agente_id!==myId) m.leido=true;
+      else if(m.de_agente_id===peerId&&m.para_agente_id===myId) m.leido=true;
+    });
+    const newUnread=_msg_all_msgs.filter(m=>m.de_agente_id!==myId&&!m.leido).length;
+    const badge=document.getElementById('badge-mensajero');
+    if(badge){ badge.textContent=newUnread; badge.style.display=newUnread>0?'':'none'; }
+  }
+}
+
+function renderMsgThread(peerId, peerName){
+  const myId=window._crm_agent?.id;
+  const headerEl=document.getElementById('msg-thread-header');
+  const bodyEl=document.getElementById('msg-thread-body');
+  const composeEl=document.getElementById('msg-compose');
+  if(!headerEl||!bodyEl) return;
+
+  const isBcast=peerId==='all';
+  const initials=peerName==='📢 Todos'?'📢':peerName.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+  headerEl.innerHTML='<div style="width:36px;height:36px;border-radius:50%;background:'+(isBcast?'var(--blue)':'var(--accent)')+';color:'+(isBcast?'#fff':'#111')+';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">'+initials+'</div>'+
+    '<div><div style="font-weight:600;font-size:13px">'+peerName+'</div><div style="font-size:11px;color:var(--muted)">'+(isBcast?'Mensaje grupal · todos los agentes':'Conversación directa')+'</div></div>';
+
+  // Filter messages for this thread
+  let msgs=_msg_all_msgs.filter(m=>{
+    if(isBcast) return !m.para_agente_id;
+    return (m.de_agente_id===myId&&m.para_agente_id===peerId)||(m.de_agente_id===peerId&&m.para_agente_id===myId);
+  }).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+
+  if(!msgs.length){
+    bodyEl.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;margin-top:60px">No hay mensajes en esta conversación aún.</div>';
+  } else {
+    bodyEl.innerHTML=msgs.map(m=>{
+      const isMine=m.de_agente_id===myId;
+      const cls=isMine?'mine':(isBcast?'broadcast':'theirs');
+      const timeStr=new Date(m.created_at).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'});
+      const dateStr=new Date(m.created_at).toLocaleDateString('es-PA',{weekday:'short',day:'2-digit',month:'short'});
+      return '<div class="msg-row">'+
+        '<div class="msg-bubble '+cls+'">'+
+          (m.asunto?'<div style="font-weight:600;margin-bottom:3px;font-size:12px">'+m.asunto+'</div>':'')+
+          m.mensaje.replace(/\n/g,'<br>')+
+          '<span class="msg-bubble-meta">'+(isMine?'Tú':m.de_agente_nombre||'Agente')+' · '+dateStr+' '+timeStr+(isMine&&m.leido?' ✓✓':'')+' </span>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+    setTimeout(()=>{bodyEl.scrollTop=bodyEl.scrollHeight;},50);
+  }
+  if(composeEl){ composeEl.style.display='block'; document.getElementById('msg-input')?.focus(); }
+}
+
+async function sendMensaje(){
+  const myId=window._crm_agent?.id;
+  const myName=(window._crm_agent?.nombre||'')+(window._crm_agent?.apellido?' '+window._crm_agent.apellido:'');
+  const texto=(document.getElementById('msg-input')?.value||'').trim();
+  if(!texto) return;
+  if(!myId||!sb){ toast('❌ Sin sesión/conexión'); return; }
+  const isBcast=_msg_active_peer==='all';
+  const record={
+    de_agente_id:myId, de_agente_nombre:myName,
+    para_agente_id:isBcast?null:_msg_active_peer,
+    para_agente_nombre:isBcast?null:_msg_active_peer_name,
+    mensaje:texto, leido:false,
+    created_at:new Date().toISOString()
+  };
+  const {error}=await sb.from('mensajes_internos').insert([record]);
+  if(error){ toast('❌ Error: '+error.message); return; }
+  document.getElementById('msg-input').value='';
+  await loadMensajero();
+}
+
+function msgKeyDown(e){
+  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMensaje(); }
+}
+
+async function openNuevoMensaje(){
+  // Populate agent selector
+  const sel=document.getElementById('nm-para');
+  if(!sel) return;
+  sel.innerHTML='<option value="all">📢 Todos los agentes (broadcast)</option>';
+  if(sb){
+    const {data}=await sb.from('agentes_crm').select('id,nombre,apellido').eq('activo',true).order('nombre');
+    if(data){
+      const myId=window._crm_agent?.id;
+      data.filter(a=>a.id!==myId).forEach(a=>{
+        const opt=document.createElement('option');
+        opt.value=a.id; opt.textContent=(a.nombre||'')+(a.apellido?' '+a.apellido:'');
+        sel.appendChild(opt);
+      });
+    }
+  }
+  document.getElementById('nm-mensaje').value='';
+  document.getElementById('nm-asunto').value='';
+  openModal('modalNuevoMensaje');
+}
+
+async function sendNuevoMensaje(){
+  const myId=window._crm_agent?.id;
+  const myName=(window._crm_agent?.nombre||'')+(window._crm_agent?.apellido?' '+window._crm_agent.apellido:'');
+  const paraId=document.getElementById('nm-para').value;
+  const paraName=document.getElementById('nm-para').selectedOptions[0]?.textContent||'';
+  const asunto=document.getElementById('nm-asunto').value.trim();
+  const mensaje=document.getElementById('nm-mensaje').value.trim();
+  if(!mensaje){ toast('⚠️ Escribe un mensaje'); return; }
+  if(!myId||!sb){ toast('❌ Sin sesión/conexión'); return; }
+  const isBcast=paraId==='all';
+  const record={
+    de_agente_id:myId, de_agente_nombre:myName,
+    para_agente_id:isBcast?null:paraId,
+    para_agente_nombre:isBcast?null:paraName,
+    asunto:asunto||null, mensaje, leido:false,
+    created_at:new Date().toISOString()
+  };
+  const {error}=await sb.from('mensajes_internos').insert([record]);
+  if(error){ toast('❌ '+error.message); return; }
+  closeModal('modalNuevoMensaje');
+  toast('✅ Mensaje enviado');
+  _msg_active_peer=isBcast?'all':paraId;
+  _msg_active_peer_name=isBcast?'📢 Todos':paraName;
+  await loadMensajero();
+}
+
+// ============================================================
+// AGENTES — Mi Perfil + Stats
+// ============================================================
+function openMiPerfil(){
+  const me=window._crm_agent;
+  if(!me){ toast('No hay sesión activa'); return; }
+  openModalAgente(me.id);
+}
+
 </script>
 </body>
 </html>
