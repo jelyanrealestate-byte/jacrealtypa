@@ -5703,7 +5703,7 @@ function renderLeads(filter){
       <td style="font-size:12px;color:var(--muted)">${l.fecha||'—'}</td>
       <td>
         <div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">
-        `<button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waLead('${l.id}')">💬</button>`
+        <button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waLead('${l.id}')">💬</button>
         ${l.email?`<button style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jcastro@jacrealtypa.com" onclick="emailLeadJcastro('${l.id}')">📧JC</button>`:''}
         ${l.email?`<button style="background:var(--cyan)22;color:var(--cyan);border:1px solid var(--cyan)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jelyanrealestate@gmail.com" onclick="emailLeadJelyan('${l.id}')">📧JL</button>`:''}
         <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Ver detalle" onclick="viewLeadDetail('${l.id}')">👁</button>
@@ -5743,7 +5743,7 @@ function renderContacts(filter){
       <td style="font-size:12px;color:var(--muted)">${c.fecha||'—'}</td>
       <td>
         <div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">
-        `<button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waContact('${c.id}')">💬</button>`
+        <button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waContact('${c.id}')">💬</button>
         ${c.email?`<button style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jcastro" onclick="emailContactJcastro('${c.id}')">📧JC</button>`:''}
         ${c.email?`<button style="background:var(--cyan)22;color:var(--cyan);border:1px solid var(--cyan)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jelyan" onclick="emailContactJelyan('${c.id}')">📧JL</button>`:''}
         <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Ver detalle" onclick="viewContactDetail('${c.id}')">👁</button>
@@ -5895,7 +5895,7 @@ function renderClients(filter){
       <td style="font-size:12px;color:var(--muted)">${c.fecha||'—'}</td>
       <td>
         <div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">
-        `<button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waClient('${c.id}')">💬</button>`
+        <button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waClient('${c.id}')">💬</button>
         ${c.email?`<button style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jcastro" onclick="emailClientJcastro('${c.id}')">📧JC</button>`:''}
         ${c.email?`<button style="background:var(--cyan)22;color:var(--cyan);border:1px solid var(--cyan)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jelyan" onclick="emailClientJelyan('${c.id}')">📧JL</button>`:''}
         <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Ver detalle" onclick="viewClientDetail('${c.id}')">👁</button>
