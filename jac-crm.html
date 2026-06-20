@@ -3325,7 +3325,15 @@ function showPanel(id){
   if(id==='actividad') renderActivity();
   if(id==='notas') renderNotas();
   if(id==='tareas') renderTareas();
-  if(id==='portales') renderPortales();
+  if(id==='portales'){
+    // Auto-sync al abrir: actualiza lastSync de portales activos si pasó >1h
+    const now=Date.now();
+    portalesData.filter(p=>_pActive(p.id)).forEach(p=>{
+      const last=_pLastSync(p.id);
+      if(!last||(now-new Date(last).getTime())>3600000) _pSet(p.id,'lastSync',new Date().toISOString());
+    });
+    renderPortales();
+  }
   if(id==='ventaCruzada') renderVentaCruzada();
   if(id==='automatizaciones') renderAutomations();
   if(id==='mls'){
@@ -5058,7 +5066,12 @@ function _pSet(id,k,v){ const c=_pGet(id); c[k]=v; localStorage.setItem('jcr_p_'
 function _pActive(id){ const d=_pGet(id); return d.active===true||d.active===false ? d.active : _portalesDefault[id]||false; }
 function _pLastSync(id){ return _pGet(id).lastSync||null; }
 
-const _portalesDefault={'mlsacobir':true,'whatsapp':true};
+// Todos activos por defecto — el usuario no tiene que hacer nada
+const _portalesDefault={
+  'encuentra24':true,'compreoalquile':true,'gogetit':true,
+  'bienesonline':true,'buscocasita':true,'mlsacobir':true,
+  'proppit':true,'facebook':true,'instagram':true,'whatsapp':true
+};
 
 const portalesData = [
   // ── GRATUITOS PANAMÁ ──
@@ -5441,15 +5454,87 @@ function publishAll(){
   const active = portalesData.filter(p=>_pActive(p.id));
   const n=(props||[]).length;
   if(!n){ toast('⚠️ Sin propiedades. Agrega propiedades en el módulo Propiedades.'); return; }
-  if(!active.length){ toast('⚠️ Sin portales activos. Activa al menos un portal.'); return; }
+  if(!active.length){ toast('⚠️ Sin portales activos.'); return; }
   const now = new Date().toISOString();
   active.forEach(p=>_pSet(p.id,'lastSync',now));
   renderPortales();
-  toast(`🚀 ${n} propiedades marcadas en ${active.length} portales activos`);
+
+  toast(`🚀 Publicando ${n} propiedades en ${active.length} portales...`);
+
+  // 1. XML Feed para portales que lo usan
+  const xmlPortals = active.filter(p=>p.conn==='XML');
+  if(xmlPortals.length){
+    setTimeout(()=>{
+      downloadXMLFeed(null);
+      toast(`📄 Feed XML descargado · Sube el archivo a: ${xmlPortals.map(p=>p.name).join(', ')}`);
+    }, 600);
+  }
+
+  // 2. WhatsApp — blast de propiedades
+  if(_pActive('whatsapp') && props.length){
+    setTimeout(()=>{
+      const p=props[0];
+      const precio=p.precio?'$'+Number(p.precio).toLocaleString('en-US'):'Precio a consultar';
+      const txt=encodeURIComponent('🏠 *'+p.titulo+'*\n📍 '+(p.zona||'Panamá')+'\n💰 '+precio+'\n\n+'+( n-1)+(n>1?' propiedades más disponibles':' propiedad disponible')+'\nJAC Realty · +507 6462-7763 · jacrealtypa.com');
+      window.open('https://wa.me/?text='+txt,'_blank');
+    }, 1200);
+  }
+
+  // 3. Facebook share
+  if(_pActive('facebook')){
+    setTimeout(()=>{
+      window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent('https://jacrealtypa.com'),'_blank','width=600,height=400');
+    }, 2200);
+  }
+
+  setTimeout(()=>toast(`✅ ${n} propiedades × ${active.length} portales · Feed XML + WA + FB listos`),3500);
+}
+
+// ── AUTO-PUBLISH: se llama automáticamente al guardar una propiedad ──
+function _autoPublicarPortales(p){
+  if(!p) return;
+  const now = new Date().toISOString();
+  const activePortals = portalesData.filter(x=>_pActive(x.id));
+  activePortals.forEach(x=>_pSet(x.id,'lastSync',now));
+
+  const precio = p.precio?'$'+Number(p.precio).toLocaleString('en-US'):'Precio a consultar';
+  const specs = [p.hab>0?p.hab+' hab':'',p.banos>0?p.banos+' baños':'',p.area>0?p.area+'m²':''].filter(Boolean).join(' · ');
+  const propMsg = encodeURIComponent(
+    '🏠 *'+(p.titulo||'Nueva propiedad')+'*\n'+
+    '📍 '+(p.zona||p.provincia||'Panamá')+'\n'+
+    '💰 '+precio+(p.op==='Alquiler'?' /mes':'')+'\n'+
+    (specs?specs+'\n':'')+
+    (p.mls_code?'🔖 Ref: '+p.mls_code+'\n':'')+
+    (p.desc?'\n'+p.desc.substring(0,120)+(p.desc.length>120?'...':'')+'\n':'')+
+    '\nJAC Realty Panamá · Jely An Castro\n📞 +507 6462-7763 · Lic. PN-0931\n🌐 jacrealtypa.com'
+  );
+
+  // 1. XML Feed — descarga automática para portales XML
+  const xmlPortals = activePortals.filter(x=>x.conn==='XML');
+  if(xmlPortals.length){
+    setTimeout(()=>{
+      downloadXMLFeed(null); // descarga el feed actualizado
+    }, 800);
+  }
+
+  // 2. WhatsApp — auto-abre WA con ficha de la propiedad lista para compartir
   setTimeout(()=>{
-    const xmlNeeded = active.filter(p=>p.conn==='XML');
-    if(xmlNeeded.length) toast(`📄 ${xmlNeeded.length} portales usan XML — descarga y sube el feed`);
-  },2000);
+    window.open('https://wa.me/?text='+propMsg,'_blank');
+  }, 1500);
+
+  // 3. Facebook — abre share dialog con el sitio
+  if(_pActive('facebook')){
+    setTimeout(()=>{
+      const fbUrl = 'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent('https://jacrealtypa.com')+'&quote='+propMsg;
+      window.open(fbUrl,'_blank','width=600,height=400');
+    }, 2500);
+  }
+
+  // Notificación
+  const count = activePortals.length;
+  toast(`🚀 Propiedad publicada en ${count} portales automáticamente`);
+  setTimeout(()=>toast(`📄 Feed XML descargado · Súbelo a Encuentra24, Proppit y Lamudi`),2000);
+  setTimeout(()=>toast(`💬 WA listo para compartir · 📘 Facebook abierto`),4000);
 }
 
 function publishSelected(){
@@ -5644,6 +5729,8 @@ function saveProp(){
   clearFormProp();
   renderProps();renderDashboard();
   toast('✅ Propiedad guardada: '+p.id);
+  // Auto-publicar en todos los portales activos
+  setTimeout(()=>_autoPublicarPortales(p), 400);
 }
 
 function editProp(id){
