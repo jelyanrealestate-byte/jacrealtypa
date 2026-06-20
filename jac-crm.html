@@ -1479,6 +1479,35 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
           <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;padding:6px 10px;background:var(--card2);border-radius:6px">🏡 Características y amenidades</div>
           <div id="mls-det-amenidades" style="font-size:12px;color:var(--text2);line-height:1.8;padding:4px 8px"></div>
         </div>
+        <!-- ROI Calculator — CRM interno únicamente -->
+        <div id="mls-det-roi-wrap" style="margin-top:12px;background:linear-gradient(135deg,rgba(232,160,32,.08),rgba(232,160,32,.03));border-radius:10px;padding:14px;border:1.5px solid rgba(232,160,32,.25)">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            📊 CALCULADORA ROI — Inversión Inmobiliaria
+            <span style="background:var(--accent);color:#111;font-size:8px;padding:2px 7px;border-radius:10px;letter-spacing:.5px;font-weight:800">CRM</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <div>
+              <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Renta mensual estimada ($)</label>
+              <input type="number" id="roi-renta" placeholder="ej: 1,500" min="0" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);font-size:12px;box-sizing:border-box" oninput="calcROI()">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Gastos anuales ($) <span style="color:var(--accent)">(vacío=25%)</span></label>
+              <input type="number" id="roi-gastos" placeholder="auto 25% renta" min="0" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);font-size:12px;box-sizing:border-box" oninput="calcROI()">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">% Enganche / entrada</label>
+              <input type="number" id="roi-enganche" value="20" min="0" max="100" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);font-size:12px;box-sizing:border-box" oninput="calcROI()">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Tasa hipotecaria anual (%)</label>
+              <input type="number" id="roi-tasa" value="6.5" step="0.1" min="0" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);font-size:12px;box-sizing:border-box" oninput="calcROI()">
+            </div>
+          </div>
+          <div id="roi-resultados" style="display:none"></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:6px;text-align:center">
+            🔒 Esta calculadora es interna del CRM — no visible al cliente
+          </div>
+        </div>
         <div class="modal-footer">
           <button class="btn btn-outline" onclick="closeModal('modalMlsDetalle')">Cerrar</button>
         </div>
@@ -3903,6 +3932,97 @@ function _mlsPageNav(dir){
   const p=document.getElementById('panel-mls');
   if(p) p.scrollIntoView({behavior:'smooth',block:'start'});
 }
+
+// ─────────────────────────────────────────────────────────
+//  ROI Calculator — CRM interno
+// ─────────────────────────────────────────────────────────
+window._roiPrecio = 0;
+window.calcROI = function(){
+  const precio = window._roiPrecio || 0;
+  if(!precio){ document.getElementById('roi-resultados').style.display='none'; return; }
+  const rentaMens = parseFloat(document.getElementById('roi-renta').value) || 0;
+  if(!rentaMens){ document.getElementById('roi-resultados').style.display='none'; return; }
+  const gastosInput = document.getElementById('roi-gastos').value;
+  const enganchePct = parseFloat(document.getElementById('roi-enganche').value) || 20;
+  const tasaAnual   = parseFloat(document.getElementById('roi-tasa').value) || 6.5;
+
+  const rentaAnual  = rentaMens * 12;
+  const gastos      = gastosInput !== '' ? parseFloat(gastosInput) || 0 : rentaAnual * 0.25;
+  const noi         = rentaAnual - gastos;           // Net Operating Income
+  const capRate     = precio > 0 ? (noi / precio * 100) : 0;
+
+  // Hipoteca
+  const enganche    = precio * enganchePct / 100;
+  const prestamo    = precio - enganche;
+  const r           = tasaAnual / 100 / 12;
+  const n           = 360; // 30 años
+  const cuotaMens   = r > 0 ? prestamo * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1) : prestamo/n;
+  const cuotaAnual  = cuotaMens * 12;
+  const flujoAnual  = noi - cuotaAnual;
+
+  // Cash on Cash ROI = flujo neto / enganche
+  const cashOnCash  = enganche > 0 ? (flujoAnual / enganche * 100) : 0;
+
+  // ROI simple (sin financiamiento) = NOI / Precio
+  const roiSimple   = precio > 0 ? (noi / precio * 100) : 0;
+
+  // Período de recuperación
+  const payback     = noi > 0 ? (precio / noi).toFixed(1) : '∞';
+
+  const fmtUSD = v => (v < 0 ? '-$' : '$') + Math.abs(Math.round(v)).toLocaleString('en-US');
+  const fmtPct = v => (v >= 0 ? '' : '-') + Math.abs(v).toFixed(2) + '%';
+  const scoreColor = v => v >= 8 ? '#27ae60' : v >= 5 ? '#f39c12' : '#e74c3c';
+  const scoreLabel = v => v >= 8 ? '🟢 Excelente' : v >= 5 ? '🟡 Bueno' : v >= 3 ? '🟠 Bajo' : '🔴 Revisar';
+
+  const html = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+      <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border)">
+        <div style="font-size:20px;font-weight:800;color:${scoreColor(capRate)}">${fmtPct(capRate)}</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Cap Rate</div>
+        <div style="font-size:8px;margin-top:2px">${scoreLabel(capRate)}</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border)">
+        <div style="font-size:20px;font-weight:800;color:${scoreColor(cashOnCash)}">${fmtPct(cashOnCash)}</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Cash on Cash</div>
+        <div style="font-size:8px;margin-top:2px">${scoreLabel(cashOnCash)}</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border)">
+        <div style="font-size:20px;font-weight:800;color:var(--text)">${payback}</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Años recuperación</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text2);background:var(--bg);border-radius:8px;padding:10px;border:1px solid var(--border)">
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 12px;align-items:center">
+        <span style="color:var(--muted)">Precio de compra</span>
+        <span style="text-align:right;font-weight:700">${fmtUSD(precio)}</span>
+        <span style="color:var(--muted)">Enganche (${enganchePct}%)</span>
+        <span style="text-align:right">${fmtUSD(enganche)}</span>
+        <span style="color:var(--muted)">Préstamo</span>
+        <span style="text-align:right">${fmtUSD(prestamo)}</span>
+        <span style="color:var(--muted)">Cuota hipotecaria/mes</span>
+        <span style="text-align:right">${fmtUSD(cuotaMens)}</span>
+        <span style="height:1px;background:var(--border);grid-column:1/-1;margin:2px 0"></span>
+        <span style="color:var(--muted)">Renta bruta anual</span>
+        <span style="text-align:right;color:#27ae60">${fmtUSD(rentaAnual)}</span>
+        <span style="color:var(--muted)">Gastos anuales</span>
+        <span style="text-align:right;color:#e74c3c">-${fmtUSD(gastos)}</span>
+        <span style="color:var(--muted)">NOI (Ingreso neto op.)</span>
+        <span style="text-align:right;font-weight:700;color:#27ae60">${fmtUSD(noi)}</span>
+        <span style="color:var(--muted)">Cuota hipotecaria anual</span>
+        <span style="text-align:right;color:#e74c3c">-${fmtUSD(cuotaAnual)}</span>
+        <span style="height:1px;background:var(--border);grid-column:1/-1;margin:2px 0"></span>
+        <span style="font-weight:700">Flujo neto anual</span>
+        <span style="text-align:right;font-weight:800;font-size:13px;color:${flujoAnual>=0?'#27ae60':'#e74c3c'}">${fmtUSD(flujoAnual)}</span>
+        <span style="font-weight:700">ROI simple (sin finan.)</span>
+        <span style="text-align:right;font-weight:700;color:${scoreColor(roiSimple)}">${fmtPct(roiSimple)}</span>
+      </div>
+    </div>
+  `;
+  const res = document.getElementById('roi-resultados');
+  res.style.display = '';
+  res.innerHTML = html;
+};
+
 function mlsAbrirDetalle(idx){
   const m=_mlsFiltered[idx]; if(!m) return;
   const _f=m.fotos;const _fa=Array.isArray(_f)?_f:(()=>{try{return JSON.parse(_f||'[]');}catch(e){return[];}})();
@@ -3918,6 +4038,12 @@ function mlsAbrirDetalle(idx){
     m.estado?`<span class="badge ${m.estado==='Disponible'?'badge-green':m.estado==='En Negociación'?'badge-yellow':'badge-gray'}">${m.estado}</span>`:''
   ].join('');
   el('mls-det-precio').textContent=m.precio?'$'+Number(m.precio).toLocaleString('en-US'):'Precio a consultar';
+  // Fijar precio para el ROI calculator
+  window._roiPrecio = parseFloat(m.precio) || 0;
+  // Reset ROI inputs
+  ['roi-renta','roi-gastos'].forEach(id=>{const el2=document.getElementById(id);if(el2)el2.value='';});
+  const roi_res=document.getElementById('roi-resultados');
+  if(roi_res) roi_res.style.display='none';
   el('mls-det-detalles').innerHTML=[
     m.habitaciones?`<div>🛏 <b>${m.habitaciones}</b> habitaciones</div>`:'',
     m.banos?`<div>🚿 <b>${m.banos}</b> baños</div>`:'',
@@ -6895,59 +7021,76 @@ function deleteRedProp(titleOrId){
     err.classList.remove('show');
     btn.disabled=true;btn.textContent='Verificando…';
     form.style.opacity='.5';loading.style.display='block';
+
+    // ── Helpers ──
+    const _showErr=msg=>{err.textContent=msg;err.classList.add('show');document.getElementById('login-pass').value='';document.getElementById('login-pass').focus();};
+    const _loginOk=agent=>{
+      if(typeof agent.permisos==='string'){try{agent.permisos=JSON.parse(agent.permisos);}catch(e){agent.permisos=PERM_ADMIN;}}
+      if(!agent.permisos||!Object.keys(agent.permisos).length) agent.permisos=PERM_ADMIN;
+      window._crm_agent=agent;
+      sessionStorage.setItem('_jcr_agent',JSON.stringify(agent));
+      document.getElementById('login-screen').classList.add('hidden');
+      applyPermissions(agent);
+      err.classList.remove('show');
+    };
+    const _isAdmin=u2=>_la.includes(u2)||u2.includes('jcastro')||u2===atob('amNhc3Rybw==')+'@'+atob('amFjcmVhbHR5cGE=')+'.com';
+    const legAgent={nombre:'J.',apellido:'Castro',email:'jcastro@jacrealtypa.com',username:'jcastro',rol:'admin',licencia:'PN-0931',permisos:PERM_ADMIN};
+
     try{
-      const hash=await sha256hex(p);
-      // Try Supabase agentes_crm
-      let agent=null;
+      const hash = await sha256hex(p);
+
+      // ── 1. Intentar Supabase ──
+      let sbAgent = null;
       if(sb){
-        const isEmail=u.includes('@');
-        let q=sb.from('agentes_crm').select('*').eq(isEmail?'email':'username',u).eq('password_hash',hash).eq('activo',true);
-        const {data,error}=await q.limit(1);
-        if(!error&&data&&data.length>0) agent=data[0];
+        try{
+          const isEmail = u.includes('@');
+          const {data,error} = await sb.from('agentes_crm').select('*')
+            .eq(isEmail?'email':'username', u).limit(1);
+          if(!error && data && data.length > 0){
+            const row = data[0];
+            // Aceptar hash SHA-256 O contraseña plain (compatibilidad con tabla vieja)
+            const pwMatch = (row.password_hash===hash) || (row.password_hash===p);
+            if(pwMatch){
+              if(row.activo===false){
+                _showErr('❌ Cuenta inactiva. Contacta al administrador.'); return;
+              }
+              sbAgent = row;
+              // Actualizar last_login en background
+              sb.from('agentes_crm').update({last_login:new Date().toISOString()}).eq('id',row.id).then(()=>{});
+            }
+            // Si el hash no coincide en Supabase, continuamos al legacy (no bloqueamos)
+          }
+        }catch(sbErr){ console.warn('Supabase login warn:',sbErr); /* sigue a legacy */ }
       }
-      if(agent){
-        // Parse permisos if string
-        if(typeof agent.permisos==='string'){try{agent.permisos=JSON.parse(agent.permisos);}catch(e){agent.permisos=PERM_ADMIN;}}
-        if(!agent.permisos||!Object.keys(agent.permisos).length) agent.permisos=PERM_ADMIN;
-        window._crm_agent=agent;
-        sessionStorage.setItem('_jcr_agent',JSON.stringify(agent));
-        // Update last_login
-        if(sb) sb.from('agentes_crm').update({last_login:new Date().toISOString()}).eq('id',agent.id).then(()=>{});
-        document.getElementById('login-screen').classList.add('hidden');
-        applyPermissions(agent);
-        err.classList.remove('show');
-      } else {
-        // Legacy fallback
-        const legacyOk=(u===_la[0]||u===atob('amNhc3Rybw==')+'@'+atob('amFjcmVhbHR5cGE=')+'.com')&&(await sha256hex(_lp))===hash;
-        if(legacyOk||p===_lp&&(_la.includes(u)||u.includes('jcastro'))){
-          const legAgent={nombre:'J.',apellido:'Castro',email:'jcastro@jacrealtypa.com',username:'jcastro',rol:'admin',licencia:'PN-0931',permisos:PERM_ADMIN};
-          window._crm_agent=legAgent;
-          sessionStorage.setItem('_jcr_agent',JSON.stringify(legAgent));
-          document.getElementById('login-screen').classList.add('hidden');
-          applyPermissions(legAgent);
-        } else {
-          err.textContent='❌ Email, usuario o contraseña incorrectos';
-          err.classList.add('show');
-          document.getElementById('login-pass').value='';
-          document.getElementById('login-pass').focus();
-        }
+
+      if(sbAgent){
+        _loginOk(sbAgent); return;
       }
-    } catch(ex){
-      console.warn('Login error:',ex);
-      // Ultra-fallback: check legacy synchronously
-      if(u===_la[0]&&p===_lp){
-        const legAgent={nombre:'J.',apellido:'Castro',email:'jcastro@jacrealtypa.com',username:'jcastro',rol:'admin',licencia:'PN-0931',permisos:PERM_ADMIN};
-        window._crm_agent=legAgent;
-        sessionStorage.setItem('_jcr_agent',JSON.stringify(legAgent));
-        document.getElementById('login-screen').classList.add('hidden');
-        applyPermissions(legAgent);
-      } else {
-        err.textContent='❌ Error de conexión — intenta de nuevo';
-        err.classList.add('show');
+
+      // ── 2. Legacy admin hardcoded (siempre disponible como respaldo) ──
+      if(_isAdmin(u) && p===_lp){
+        _loginOk(legAgent); return;
       }
+
+      // ── 3. SHA-256 doble verificación legacy ──
+      const legHash = await sha256hex(_lp);
+      if(_isAdmin(u) && hash===legHash){
+        _loginOk(legAgent); return;
+      }
+
+      // ── Sin match: error ──
+      _showErr('❌ Usuario o contraseña incorrectos');
+
+    }catch(ex){
+      console.warn('doLogin exception:',ex);
+      // Ultra-fallback sincrónico — siempre funciona aunque crypto falle
+      if(_isAdmin(u) && p===_lp){
+        _loginOk(legAgent); return;
+      }
+      _showErr('❌ Error de conexión. Verifica tu internet e intenta de nuevo.');
     } finally{
-      btn.disabled=false;btn.textContent='Entrar al CRM →';
-      form.style.opacity='1';loading.style.display='none';
+      btn.disabled=false; btn.textContent='Entrar al CRM →';
+      form.style.opacity='1'; loading.style.display='none';
     }
   };
 
