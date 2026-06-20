@@ -846,6 +846,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       </div>
       <button class="btn btn-outline btn-sm topbar-secondary" title="Configurar Supabase DB" onclick="openModal('modalSetupDB')">🗄️ DB Setup</button>
       <button class="btn btn-outline btn-sm topbar-secondary" onclick="openModal('modalImportExcel')">📊 Importar</button>
+      <button class="btn btn-outline btn-sm topbar-secondary" onclick="syncE24Props()" id="btn-sync-e24" title="Sincronizar propiedades desde Encuentra24">🔄 Sync E24</button>
       <button class="btn btn-outline btn-sm" onclick="openModal('modalProp')">+ Propiedad</button>
       <button class="btn btn-primary btn-sm" onclick="openModal('modalLead')">+ Lead</button>
     </div>
@@ -3171,9 +3172,16 @@ async function loadSupabaseData(){
     if(propsRes.data && propsRes.data.length){
       props = propsRes.data.map(p=>({
         id: p.id, titulo:p.titulo||'', tipo:p.tipo||'Apartamento',
-        op:p.operacion||'Venta', zona:p.zona||'', precio:p.precio||0,
+        op:p.operacion||'Venta',
+        zona:p.direccion||p.zona||(p.distrito&&p.corregimiento?`${p.distrito} · ${p.corregimiento}`:(p.distrito||p.corregimiento||'')),
+        precio:p.precio||0,
         area:p.area_total||0, hab:p.habitaciones||0, banos:p.banos||0,
         estac:p.parqueos||0, status:p.estado||'Disponible', desc:p.descripcion||'',
+        fotos:(()=>{try{return Array.isArray(p.fotos)?p.fotos:JSON.parse(p.fotos||'[]');}catch(e){return[];}})(),
+        provincia:p.provincia||'', distrito:p.distrito||'', corregimiento:p.corregimiento||'',
+        propietario:p.propietario_nombre||'', tel_propietario:p.propietario_telefono||'',
+        nota_interna:p.notas||'', comision:p.comision||'',
+        amueblado:p.amueblado||false,
         _sbId:p.id
       }));
     }
@@ -3463,7 +3471,7 @@ function renderProps(data){
       </div>
       <div class="prop-body">
         <div class="prop-title">${p.titulo}</div>
-        <div class="prop-loc">📍 ${p.zona}</div>
+        <div class="prop-loc">📍 ${p.zona||p.distrito||'—'}${p.codigo&&p.codigo.startsWith('E24-')?' <span style="font-size:9px;background:#e8500022;color:#e85000;border-radius:8px;padding:1px 5px;font-weight:600">E24</span>':''}</div>
         <div class="prop-specs">
           ${p.hab>0?`<span>🛏 ${p.hab}</span>`:''}
           ${p.banos>0?`<span>🚿 ${p.banos}</span>`:''}
@@ -4787,14 +4795,15 @@ async function saveMlsGuardada(){
   activities.unshift({tipo:'💾 Guardado',cliente:'CRM',desc:`MLS "${p.titulo}" guardada en CRM · ${tipo} · ${prioridad}`,time:'Ahora'});
   // Persist to Supabase if available
   if(sb){
-    const {error}=await sb.from('propiedades').upsert({
-      titulo:p.titulo, tipo:p.tipo, operacion:p.op, zona:p.zona,
+    const {error}=await sb.from('propiedades').insert({
+      titulo:p.titulo, tipo:p.tipo, operacion:p.op,
+      direccion:p.zona||(m.zona||''), provincia:p.provincia||'', distrito:p.distrito||'',
       precio:p.precio, area_total:p.area, habitaciones:p.hab,
       banos:p.banos, estado:p.status, descripcion:m.descripcion||'',
-      mls_code:p.mls_code, agente:p.agente, agencia:p.agencia,
-      licencia_corredor:p.licencia_corredor, tel_corredor:p.tel_corredor,
-      email_corredor:p.email_corredor, comision:p.comision
-    },{onConflict:'mls_code',ignoreDuplicates:false});
+      fotos:JSON.stringify(m.fotos||(Array.isArray(m.fotos)?m.fotos:[])),
+      comision:p.comision||'',
+      notas:'Fuente: MLS ACOBIR · '+( m.mls_code||'')
+    });
     if(error) console.warn('Supabase MLS save:',error);
   }
   // ─── Add to mlsGuardadas tracking ───
@@ -5709,7 +5718,24 @@ function saveProp(){
   };
   if(editId){
     const idx=props.findIndex(x=>x.id===editId);
-    if(idx>-1){props[idx]={...props[idx],...p,id:editId};toast('✏️ Propiedad actualizada');}
+    if(idx>-1){
+      const sbId=props[idx]._sbId;
+      props[idx]={...props[idx],...p,id:editId};
+      toast('✏️ Propiedad actualizada');
+      // Persist edit to Supabase
+      if(sb&&sbId){
+        sb.from('propiedades').update({
+          titulo:p.titulo, tipo:p.tipo, operacion:p.op,
+          direccion:p.zona, provincia:p.provincia||'', distrito:p.distrito||'', corregimiento:p.corregimiento||'',
+          precio:p.precio, area_total:p.area, habitaciones:p.hab,
+          banos:p.banos, parqueos:p.estac, estado:p.status, descripcion:p.desc,
+          fotos:JSON.stringify(p.fotos||[]),
+          propietario_nombre:p.propietario||'', propietario_telefono:p.tel_propietario||'',
+          comision:p.comision||'', amueblado:!!(p.amenidades&&p.amenidades.includes('amoblado')),
+          notas:p.nota_interna||''
+        }).eq('id',sbId).then(({error})=>{if(error)console.warn('Prop update SB:',error);});
+      }
+    }
     closeModal('modalProp');clearFormProp();renderProps();renderDashboard();return;
   }
   props.push(p);
@@ -5717,9 +5743,14 @@ function saveProp(){
   // Persist to Supabase
   if(sb){
     sb.from('propiedades').insert({
-      titulo:p.titulo, tipo:p.tipo, operacion:p.op, zona:p.zona,
+      titulo:p.titulo, tipo:p.tipo, operacion:p.op,
+      direccion:p.zona, provincia:p.provincia||'', distrito:p.distrito||'', corregimiento:p.corregimiento||'',
       precio:p.precio, area_total:p.area, habitaciones:p.hab,
-      banos:p.banos, parqueos:p.estac, estado:p.status, descripcion:p.desc
+      banos:p.banos, parqueos:p.estac, estado:p.status, descripcion:p.desc,
+      fotos:JSON.stringify(p.fotos||[]),
+      propietario_nombre:p.propietario||'', propietario_telefono:p.tel_propietario||'',
+      comision:p.comision||'', amueblado:!!(p.amenidades&&p.amenidades.includes('amoblado')),
+      notas:p.nota_interna||''
     }).then(({error,data})=>{
       if(error) console.warn('Supabase prop save error:',error);
       else if(data && data[0]) p._sbId=data[0].id;
@@ -9275,6 +9306,121 @@ async function saveNewPassword(){
   toast('🔑 Contraseña actualizada');
 }
 
+
+// ============================================================
+// SYNC ENCUENTRA24 — auto-import new listings from E24 profile
+// ============================================================
+async function syncE24Props(){
+  const btn=document.getElementById('btn-sync-e24');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Syncing...';}
+  try{
+    // Fetch public profile via CORS proxy
+    const profileUrl='https://www.encuentra24.com/panama-es/user/profile/jelyanrealestate';
+    const proxy='https://api.allorigins.win/get?url='+encodeURIComponent(profileUrl)+'&_='+Date.now();
+    const r=await fetch(proxy,{cache:'no-store'});
+    if(!r.ok) throw new Error('Proxy error '+r.status);
+    const data=await r.json();
+    const pageHtml=data.contents||'';
+
+    // Extract property IDs from the page
+    const re=/encuentra24\.com\/panama[^"]*\/(\d{6,})/g;
+    const ids=new Set();
+    let m;
+    while((m=re.exec(pageHtml))!==null) ids.add(m[1]);
+
+    if(!ids.size){toast('⚠️ No se encontraron propiedades en el perfil E24.');if(btn){btn.disabled=false;btn.textContent='🔄 Sync E24';}return;}
+
+    // Check which IDs are already saved (by codigo E24-{id})
+    let existingCodes=[];
+    if(sb){
+      const {data:existing}=await sb.from('propiedades').select('codigo').ilike('codigo','E24-%');
+      existingCodes=(existing||[]).map(p=>(p.codigo||'').replace('E24-',''));
+    } else {
+      existingCodes=props.filter(p=>p.codigo&&p.codigo.startsWith('E24-')).map(p=>p.codigo.replace('E24-',''));
+    }
+    const newIds=[...ids].filter(id=>!existingCodes.includes(id));
+
+    if(!newIds.length){
+      toast('✅ Propiedades E24 ya sincronizadas ('+ids.size+' activas)');
+      if(btn){btn.disabled=false;btn.textContent='🔄 Sync E24';}return;
+    }
+
+    toast('⏳ Importando '+newIds.length+' propiedad(es) nueva(s)...');
+
+    // Fetch each new property page and extract data
+    function extractHab(d){const m=d.match(/(\d+)\s*(?:habitaci|recámara|cuarto)/i);return m?parseInt(m[1]):0;}
+    function extractBan(d){const m=d.match(/(\d+)\s*baño/i);return m?parseInt(m[1]):0;}
+    function extractArea(d){const m=d.match(/(\d[\d,.]*)\s*m[²2]/i);return m?parseFloat(m[1].replace(',','.')):0;}
+
+    let imported=0;
+    for(const e24id of newIds){
+      try{
+        // Find the URL from the profile HTML
+        const urlMatch=pageHtml.match(new RegExp('(https://www\.encuentra24\.com/panama[^"]*'+e24id+')'));
+        const propUrl=urlMatch?urlMatch[1]:'https://www.encuentra24.com/panama-es/bienes-raices/'+e24id;
+        const pr=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent(propUrl));
+        const pd=await pr.json();
+        const ph=pd.contents||'';
+        const parser=new DOMParser();
+        const doc=parser.parseFromString(ph,'text/html');
+
+        // Extract from JSON-LD
+        const jsonLd=doc.querySelector('script[type="application/ld+json"]');
+        let ld=null;
+        if(jsonLd)try{ld=JSON.parse(jsonLd.textContent);}catch(e){}
+        const priceNum=ld?.offers?.price||0;
+        const rawDesc=ld?.description||'';
+        const cleanDesc=rawDesc.replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'').trim();
+        const addr=ld?.offers?.availableAtOrFrom?.address||{};
+        const title=doc.querySelector('h1')?.textContent?.trim()||ld?.name||'Propiedad E24-'+e24id;
+        const ogImg=doc.querySelector('meta[property="og:image"]')?.content||'';
+        const opMatch=propUrl.includes('alquiler')?'Alquiler':'Venta';
+        const tipoMatch=propUrl.includes('apartamento')?'Apartamento':'Casa';
+        const ub=(addr.streetAddress||'').toLowerCase();
+        let provincia='Panamá Oeste',distrito='',corregimiento='',direccion=addr.streetAddress||'';
+        if(ub.includes('chorrera')||ub.includes('caimito')){distrito='La Chorrera';corregimiento='Puerto Caimito';}
+        else{distrito='Arraiján';corregimiento='Vacamonte';}
+
+        const newProp={
+          codigo:'E24-'+e24id,titulo:title,tipo:tipoMatch,operacion:opMatch,
+          precio:priceNum||0,moneda:'USD',
+          area_total:extractArea(cleanDesc),habitaciones:extractHab(cleanDesc)||0,
+          banos:extractBan(cleanDesc)||0,parqueos:1,
+          amueblado:/amoblad|semi.?amoblad/i.test(cleanDesc),
+          descripcion:cleanDesc.substring(0,1500),
+          direccion,provincia,distrito,corregimiento,estado:'Disponible',
+          fotos:JSON.stringify(ogImg?[ogImg]:[]),
+          notas:'Fuente: Encuentra24 · '+propUrl
+        };
+
+        if(sb){
+          const{error}=await sb.from('propiedades').insert(newProp);
+          if(!error){
+            // Add to local array
+            props.unshift({
+              id:newProp.codigo,titulo:newProp.titulo,tipo:newProp.tipo,op:newProp.operacion,
+              zona:newProp.direccion,precio:newProp.precio,area:newProp.area_total,
+              hab:newProp.habitaciones,banos:newProp.banos,estac:1,
+              status:'Disponible',desc:newProp.descripcion,
+              fotos:newProp.fotos?JSON.parse(newProp.fotos):[],
+              provincia,distrito,corregimiento,_sbId:null
+            });
+            imported++;
+          }
+        }
+        await new Promise(res=>setTimeout(res,300)); // small delay between requests
+      }catch(err){console.warn('E24 import error for '+e24id,err);}
+    }
+
+    if(imported>0){renderProps();renderDashboard();}
+    toast(imported>0?'✅ '+imported+' propiedad(es) importada(s) desde Encuentra24':'⚠️ No se pudieron importar las propiedades');
+  }catch(e){
+    console.warn('syncE24Props error:',e);
+    toast('❌ Error al conectar con Encuentra24. Verifica tu conexión.');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='🔄 Sync E24';}
+  }
+}
 </script>
 </body>
 </html>
