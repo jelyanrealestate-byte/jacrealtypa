@@ -592,7 +592,7 @@ async function loadWebProps(){
     const [r1,r2]=await Promise.all([
       fetch(`${_SB_URL}/rest/v1/propiedades?select=id,titulo,tipo,operacion,corregimiento,distrito,precio,area_total,habitaciones,banos,estado,fotos,descripcion,notas&estado=eq.Disponible&order=created_at.desc&limit=100`,
         {headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}}),
-      fetch(`${_SB_URL}/rest/v1/propiedades_red?select=id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos,mls_code,descripcion,agente,agencia,licencia_corredor,tel_corredor,tel_corredor_wa,email_corredor,comision,provincia,distrito,barrio,corregimiento,edificio,ano_construccion,area_lote,zonificacion,caracteristicas_externas,amenidades_prop,caracteristicas_internas,area_exterior,url_mls&estado=eq.Disponible&order=created_at.desc&limit=${_mlsPageSize}&offset=0`,
+      fetch(`${_SB_URL}/rest/v1/propiedades_red?select=id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos,mls_code,descripcion,provincia,distrito,barrio,corregimiento,edificio,ano_construccion,area_lote,zonificacion,caracteristicas_externas,amenidades_prop,caracteristicas_internas,area_exterior&estado=eq.Disponible&order=created_at.desc&limit=${_mlsPageSize}&offset=0`,
         {headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}})
     ]);
     const [propias,mls]=await Promise.all([r1.json(),r2.json()]);
@@ -820,7 +820,7 @@ async function loadMoreMLS(){
   if(btn){ btn.textContent='Cargando...'; btn.disabled=true; }
   try {
     const resp=await fetch(
-      `${_SB_URL}/rest/v1/propiedades_red?select=id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos,mls_code,descripcion,provincia,distrito,barrio,corregimiento,edificio,ano_construccion,area_lote,caracteristicas_externas,caracteristicas_internas,amenidades_prop,area_exterior,url_mls&estado=eq.Disponible&order=created_at.desc&limit=${_mlsPageSize}&offset=${_mlsOffset}`,
+      `${_SB_URL}/rest/v1/propiedades_red?select=id,titulo,tipo_prop,tipo,operacion,zona,precio,area_total,habitaciones,banos,estado,fotos,mls_code,descripcion,provincia,distrito,barrio,corregimiento,edificio,ano_construccion,area_lote,caracteristicas_externas,caracteristicas_internas,amenidades_prop,area_exterior&estado=eq.Disponible&order=created_at.desc&limit=${_mlsPageSize}&offset=${_mlsOffset}`,
       {headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}}
     );
     const newMls=await resp.json();
@@ -909,7 +909,6 @@ function openWebPropModal(p){
         <a href="#contacto" onclick="closePropModal()" style="flex:1;min-width:180px;display:flex;align-items:center;justify-content:center;gap:6px;background:#C41E3A;color:#fff;padding:13px 16px;border-radius:4px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-decoration:none;transition:background .25s" onmouseover="this.style.background='#a01830'" onmouseout="this.style.background='#C41E3A'">
           Solicitar Información →
         </a>
-        /* url_mls no expuesta al público — datos del corredor rival */
       </div>
     </div>
   `;
