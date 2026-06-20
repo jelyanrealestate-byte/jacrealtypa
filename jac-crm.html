@@ -233,8 +233,25 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .prop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .prop-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:.15s}
 .prop-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-.prop-img{height:130px;background:linear-gradient(135deg,#1e2535,#252d3f);display:flex;align-items:center;justify-content:center;font-size:36px;position:relative}
+.prop-img{height:160px;background:linear-gradient(135deg,#1e2535,#252d3f);display:flex;align-items:center;justify-content:center;font-size:36px;position:relative}
 .prop-img-badge{position:absolute;top:8px;left:8px}
+/* ── Prop card photo slider ── */
+.prop-slider{position:relative;height:160px;overflow:hidden;background:#1e2535;border-radius:0}
+.prop-slider .s-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s}
+.prop-slider .s-img.active{opacity:1}
+.s-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:26px;height:26px;font-size:17px;line-height:26px;text-align:center;cursor:pointer;z-index:6;padding:0;transition:.15s}
+.s-btn:hover{background:rgba(0,0,0,.85)}
+.s-prev{left:6px}.s-next{right:6px}
+.s-dots{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:6}
+.s-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.45);transition:.2s;cursor:pointer}
+.s-dot.active{background:#fff;transform:scale(1.25)}
+/* ── Prop card action row ── */
+.prop-actions{display:flex;gap:4px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.pa-btn{flex:1;padding:5px 2px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--card2);color:var(--text);cursor:pointer;transition:.15s;text-align:center;white-space:nowrap}
+.pa-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pa-btn.pa-wa{color:#25d366;border-color:#25d36644;background:#25d36611;font-weight:600}
+.pa-btn.pa-wa:hover{background:#25d366;color:#fff;border-color:#25d366}
+.pa-btn.pa-del:hover{background:var(--red,#ef4444);border-color:var(--red,#ef4444);color:#fff}
 .prop-body{padding:12px}
 .prop-title{font-weight:600;font-size:13px;margin-bottom:4px}
 .prop-loc{font-size:11px;color:var(--muted);margin-bottom:8px}
@@ -3462,16 +3479,26 @@ function renderProps(data){
   </tr>`).join('');
   // Grid view
   const grid=document.getElementById('props-grid-container');
-  grid.innerHTML=arr.map(p=>`
-    <div class="prop-card">
-      <div class="prop-img" style="${p.fotos&&p.fotos.length?`background-image:url(${p.fotos[0]});background-size:cover;background-position:center;font-size:0`:``}">
-        ${p.fotos&&p.fotos.length?'':propEmoji[p.tipo]||'🏠'}
-        <div class="prop-img-badge"><span class="tag tag-${p.op.toLowerCase().replace('-','')}">${p.op}</span></div>
-        ${p.fotos&&p.fotos.length>1?`<div style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px">📷 ${p.fotos.length}</div>`:''}
-      </div>
+  grid.innerHTML=arr.map(p=>{
+    const fotos=p.fotos&&p.fotos.length?p.fotos:[];
+    const hasFotos=fotos.length>0;
+    const e24Badge=p.codigo&&p.codigo.startsWith('E24-')?' <span style="font-size:9px;background:#e8500022;color:#e85000;border-radius:8px;padding:1px 5px;font-weight:600">E24</span>':'';
+    // Build photo area: slider if has photos, placeholder emoji otherwise
+    let imgHtml;
+    if(hasFotos){
+      const imgs=fotos.map((f,i)=>`<img class="s-img${i===0?' active':''}" src="${f}" alt="" loading="lazy" onerror="this.style.display='none'">`).join('');
+      const nav=fotos.length>1
+        ?`<button class="s-btn s-prev" onclick="event.stopPropagation();slidePhoto('${p.id}',-1)">&#8249;</button><button class="s-btn s-next" onclick="event.stopPropagation();slidePhoto('${p.id}',1)">&#8250;</button><div class="s-dots">${fotos.map((_,i)=>`<span class="s-dot${i===0?' active':''}" onclick="event.stopPropagation();goPhoto('${p.id}',${i})"></span>`).join('')}</div>`
+        :'';
+      imgHtml=`<div class="prop-slider" id="pslider-${p.id}">${imgs}${nav}<div class="prop-img-badge"><span class="tag tag-${p.op.toLowerCase().replace('-','')}">${p.op}</span></div></div>`;
+    } else {
+      imgHtml=`<div class="prop-img"><span>${propEmoji[p.tipo]||'🏠'}</span><div class="prop-img-badge"><span class="tag tag-${p.op.toLowerCase().replace('-','')}">${p.op}</span></div></div>`;
+    }
+    return `<div class="prop-card" onclick="verFicha('${p.id}')">
+      ${imgHtml}
       <div class="prop-body">
         <div class="prop-title">${p.titulo}</div>
-        <div class="prop-loc">📍 ${p.zona||p.distrito||'—'}${p.codigo&&p.codigo.startsWith('E24-')?' <span style="font-size:9px;background:#e8500022;color:#e85000;border-radius:8px;padding:1px 5px;font-weight:600">E24</span>':''}</div>
+        <div class="prop-loc">📍 ${p.zona||p.distrito||'—'}${e24Badge}</div>
         <div class="prop-specs">
           ${p.hab>0?`<span>🛏 ${p.hab}</span>`:''}
           ${p.banos>0?`<span>🚿 ${p.banos}</span>`:''}
@@ -3479,8 +3506,15 @@ function renderProps(data){
           ${p.estac>0?`<span>🚗 ${p.estac}</span>`:''}
         </div>
         <div class="prop-price">${p.op==='Venta'||p.op==='Pre-venta'?fmtPrice(p.precio):fmtPrice(p.precio,'mes')}</div>
+        <div class="prop-actions" onclick="event.stopPropagation()">
+          <button class="pa-btn pa-wa" onclick="shareWA('${p.id}')" title="Compartir por WhatsApp">💬 WA</button>
+          <button class="pa-btn" onclick="verFicha('${p.id}')" title="Ver ficha completa">👁</button>
+          <button class="pa-btn" onclick="editProp('${p.id}')" title="Editar propiedad">✏️</button>
+          <button class="pa-btn pa-del" onclick="deleteProp('${p.id}')" title="Eliminar">🗑️</button>
+        </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 function filterProps(q){
   renderProps(props.filter(p=>p.titulo.toLowerCase().includes(q.toLowerCase())||p.zona.toLowerCase().includes(q.toLowerCase())));
@@ -3495,6 +3529,29 @@ function deleteProp(id){
   renderProps();toast('Propiedad eliminada');
   if(sb&&p&&p._sbId) sb.from('propiedades').delete().eq('id',p._sbId).then(({error})=>{if(error)console.warn('Prop delete SB:',error);});
 }
+// ── Photo slider helpers ──────────────────────────────────────
+function slidePhoto(id, dir){
+  const sl=document.getElementById('pslider-'+id);
+  if(!sl)return;
+  const imgs=sl.querySelectorAll('.s-img');
+  const dots=sl.querySelectorAll('.s-dot');
+  if(imgs.length<=1)return;
+  let cur=[...imgs].findIndex(i=>i.classList.contains('active'));
+  imgs[cur].classList.remove('active');
+  if(dots[cur])dots[cur].classList.remove('active');
+  cur=(cur+dir+imgs.length)%imgs.length;
+  imgs[cur].classList.add('active');
+  if(dots[cur])dots[cur].classList.add('active');
+}
+function goPhoto(id, idx){
+  const sl=document.getElementById('pslider-'+id);
+  if(!sl)return;
+  const imgs=sl.querySelectorAll('.s-img');
+  const dots=sl.querySelectorAll('.s-dot');
+  imgs.forEach((i,n)=>i.classList.toggle('active',n===idx));
+  dots.forEach((d,n)=>d.classList.toggle('active',n===idx));
+}
+// ─────────────────────────────────────────────────────────────
 function shareWA(id){
   const p=props.find(x=>x.id===id);
   if(!p)return;
