@@ -342,7 +342,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
    LOGIN SCREEN
    ============================================================ */
 #login-screen{
-  position:fixed;inset:0;background:linear-gradient(135deg,#07090f 0%,#0f1117 55%,#161b27 100%);
+  position:fixed;inset:0;background:linear-gradient(135deg,#0A0005 0%,#1A0008 55%,#2C000D 100%);
   z-index:99999;display:flex;align-items:center;justify-content:center;
 }
 #login-screen.hidden{display:none}
@@ -355,11 +355,11 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 .login-logo-badge{
   display:inline-flex;align-items:center;justify-content:center;
   width:70px;height:70px;border-radius:18px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  font-size:26px;font-weight:900;color:#000;margin-bottom:10px;
-  box-shadow:0 8px 24px rgba(232,160,32,.35);letter-spacing:1px;
+  background:linear-gradient(135deg,#C41E3A,#8B0020);
+  font-size:26px;font-weight:900;color:#fff;margin-bottom:10px;
+  box-shadow:0 8px 24px rgba(196,30,58,.4);letter-spacing:1px;
 }
-.login-brand{font-size:22px;font-weight:800;color:var(--accent);letter-spacing:3px}
+.login-brand{font-size:22px;font-weight:800;color:#ffffff;letter-spacing:3px;text-shadow:0 1px 3px rgba(0,0,0,.5)}
 .login-tagline{font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:.8px}
 .login-title{font-size:14px;font-weight:600;margin-bottom:18px;text-align:center;color:var(--muted)}
 .login-form .form-group{margin-bottom:13px}
@@ -369,22 +369,22 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
   border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;
   outline:none;font-family:inherit;transition:.15s;
 }
-.login-form .form-group input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,160,32,.12)}
+.login-form .form-group input:focus{border-color:#C41E3A;box-shadow:0 0 0 3px rgba(196,30,58,.18)}
 .login-error{color:var(--red);font-size:12px;text-align:center;margin-bottom:10px;display:none;font-weight:500}
 .login-error.show{display:block}
 .btn-login{
-  width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  width:100%;padding:12px;background:linear-gradient(135deg,#C41E3A,#8B0020);
   color:#000;border:none;border-radius:10px;font-size:14px;font-weight:700;
   cursor:pointer;transition:.2s;letter-spacing:.5px;margin-top:4px;
 }
-.btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(232,160,32,.35)}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(196,30,58,.45)}
 .btn-login:active{transform:translateY(0)}
 .login-footer-bar{
   margin-top:24px;padding-top:16px;border-top:1px solid var(--border);
   text-align:center;
 }
 .login-sig{font-size:11px;color:var(--muted);line-height:1.8}
-.login-sig strong{color:var(--accent);font-weight:700}
+.login-sig strong{color:#C41E3A;font-weight:700}
 
 /* ============================================================
    HAMBURGER / SIDEBAR OVERLAY (MOBILE)
@@ -670,7 +670,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 .perm-check-item:hover{border-color:var(--accent)}
 .perm-check-item input{accent-color:var(--accent);cursor:pointer}
 /* Login agent badge */
-#login-agent-badge{display:none;position:absolute;top:10px;right:10px;background:rgba(232,160,32,.15);border:1px solid rgba(232,160,32,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--accent)}
+#login-agent-badge{display:none;position:absolute;top:10px;right:10px;background:rgba(196,30,58,.15);border:1px solid rgba(196,30,58,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#C41E3A}
 .agent-topbar-badge{display:flex;align-items:center;gap:8px;padding:5px 12px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:20px;font-size:12px;cursor:default}
 .agent-topbar-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#c47a10);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#111}
 </style>
@@ -688,10 +688,10 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 74" width="190" style="display:block;margin:0 auto 12px">
         <line x1="0" y1="10" x2="220" y2="10" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
         <text x="110" y="56" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="46" font-weight="300" fill="#FFFFFF" text-anchor="middle" letter-spacing="9">JAC</text>
-        <text x="110" y="67" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="9.5" font-weight="700" fill="#e8a020" text-anchor="middle" letter-spacing="10">REALTY</text>
+        <text x="110" y="67" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="9.5" font-weight="700" fill="#C41E3A" text-anchor="middle" letter-spacing="10">REALTY</text>
         <line x1="0" y1="74" x2="220" y2="74" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
       </svg>
-      <div class="login-tagline">Portal Agentes · Licencia PN-0931 · Panamá</div>
+      <div class="login-tagline">JAC Realty by Jely An Castro · Lic. PN-0931 · Panamá</div>
     </div>
     <p class="login-title">Acceso al Sistema CRM</p>
     <div id="login-loading" style="display:none;text-align:center;padding:18px 0;color:var(--muted);font-size:13px">⏳ Verificando acceso…</div>
@@ -709,9 +709,9 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
     </div>
     <div class="login-footer-bar">
       <div class="login-sig">
-        <strong>J. Castro</strong><br>
+        <strong>JAC Realty by Jely An Castro</strong><br>
         Agente Inmobiliaria · Lic. PN-0931<br>
-        JAC Realty PA · jacrealtypa.com
+        📞 +507 6462-7763 · jacrealtypa.com
       </div>
     </div>
   </div>
@@ -727,7 +727,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 50" height="40" style="display:block">
         <line x1="0" y1="7" x2="150" y2="7" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
         <text x="75" y="37" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="27" font-weight="300" fill="#FFFFFF" text-anchor="middle" letter-spacing="5">JAC</text>
-        <text x="75" y="46" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="7" font-weight="700" fill="#e8a020" text-anchor="middle" letter-spacing="6">REALTY</text>
+        <text x="75" y="46" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="7" font-weight="700" fill="#C41E3A" text-anchor="middle" letter-spacing="6">REALTY</text>
         <line x1="0" y1="50" x2="150" y2="50" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
       </svg>
       <button id="sidebar-close" onclick="toggleSidebar()" title="Cerrar menú">✕</button>
@@ -4025,7 +4025,27 @@ function mlsEmailJelyan(idx){
 }
 
 // ---- MLS PDF Export ----
-function exportMlsPDF(idx){
+// ── Foto a base64 vía canvas (cross-origin) ──
+async function _imgBase64(url){
+  return new Promise(res=>{
+    if(!url) return res(null);
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){
+      try{
+        const c=document.createElement('canvas');
+        c.width=Math.min(img.naturalWidth,800);
+        c.height=Math.round(c.width*(img.naturalHeight/img.naturalWidth));
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        res(c.toDataURL('image/jpeg',0.72));
+      }catch(e){res(null);}
+    };
+    img.onerror=()=>res(null);
+    img.src=url+'?t='+Date.now();
+  });
+}
+
+async function exportMlsPDF(idx){
   const m=_mlsFiltered[idx]; if(!m) return;
   if(!window.jspdf){toast('⏳ Cargando motor PDF...'); setTimeout(()=>exportMlsPDF(idx),800); return;}
   const {jsPDF}=window.jspdf;
@@ -4033,15 +4053,24 @@ function exportMlsPDF(idx){
   const W=210; const margin=16;
   let y=margin;
   // Header bar
-  doc.setFillColor(15,23,42); // dark navy
-  doc.rect(0,0,W,28,'F');
+  // Header bar - JAC Realty red
+  doc.setFillColor(196,30,58);
+  doc.rect(0,0,W,30,'F');
+  doc.setFillColor(139,0,32);
+  doc.rect(0,24,W,6,'F');
+  // Logo text
   doc.setTextColor(255,255,255);
-  doc.setFontSize(16); doc.setFont('helvetica','bold');
-  doc.text('JAC REALTY',margin,12);
+  doc.setFontSize(20); doc.setFont('helvetica','bold');
+  doc.text('JAC',margin,17);
+  doc.setFontSize(7); doc.setFont('helvetica','bold');
+  doc.setTextColor(255,200,200);
+  doc.text('REALTY',margin+17,17);
   doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.text('Jely Castro · Lic. PN-0931',margin,18);
-  doc.text('+507 6462-7763 · jcastro@jacrealtypa.com · jelyanrealestate@gmail.com',margin,23);
-  doc.text('www.jacrealtypa.com',W-margin-30,23);
+  doc.setTextColor(255,230,230);
+  doc.text('by Jely An Castro · Lic. PN-0931',margin,22);
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(7);
+  doc.text('+507 6462-7763 · jcastro@jacrealtypa.com · www.jacrealtypa.com',W-margin,22,{align:'right'});
   y=36;
   // MLS Code badge
   doc.setFillColor(59,130,246);
@@ -4065,9 +4094,30 @@ function exportMlsPDF(idx){
   doc.text(titleLines,margin,y);
   y+=titleLines.length*7+4;
   // Price
-  doc.setFontSize(22); doc.setFont('helvetica','bold'); doc.setTextColor(59,130,246);
+  doc.setFontSize(22); doc.setFont('helvetica','bold'); doc.setTextColor(196,30,58);
   doc.text(m.precio?'$'+Number(m.precio).toLocaleString('en-US'):'Precio a consultar',margin,y);
   y+=10;
+  // Photos — load first 2
+  try{
+    const rawFotos=m.fotos;
+    let fotosArr=[];
+    if(Array.isArray(rawFotos)) fotosArr=rawFotos;
+    else if(typeof rawFotos==='string'&&rawFotos.startsWith('[')) fotosArr=JSON.parse(rawFotos);
+    else if(typeof rawFotos==='string'&&rawFotos.length>5) fotosArr=[rawFotos];
+    const fUrls=fotosArr.filter(Boolean).slice(0,2);
+    if(fUrls.length>0){
+      const imgW=fUrls.length>1?(W-2*margin-4)/2:(W-2*margin);
+      const imgH=Math.round(imgW*0.62);
+      for(let fi=0;fi<fUrls.length;fi++){
+        const b64=await _imgBase64(fUrls[fi]);
+        if(b64){
+          const fx=margin+fi*(imgW+4);
+          doc.addImage(b64,'JPEG',fx,y,imgW,imgH,'img'+fi,'FAST');
+        }
+      }
+      y+=imgH+4;
+    }
+  }catch(e){}
   // Separator line
   doc.setDrawColor(226,232,240); doc.setLineWidth(0.4);
   doc.line(margin,y,W-margin,y); y+=6;
@@ -4075,10 +4125,17 @@ function exportMlsPDF(idx){
   doc.setTextColor(55,65,81); doc.setFontSize(10); doc.setFont('helvetica','normal');
   const feats=[];
   if(m.tipo_prop||m.tipo) feats.push(['🏠 Tipo',m.tipo_prop||m.tipo]);
-  if(m.zona) feats.push(['📍 Zona',m.zona]);
+  if(m.operacion) feats.push(['🔑 Operación',m.operacion]);
+  if(m.zona||m.corregimiento) feats.push(['📍 Zona',m.corregimiento||m.zona]);
+  if(m.distrito) feats.push(['🗺 Distrito',m.distrito]);
+  if(m.provincia) feats.push(['🌎 Provincia',m.provincia]);
+  if(m.edificio) feats.push(['🏢 Edificio',m.edificio]);
   if(m.habitaciones) feats.push(['🛏 Habitaciones',String(m.habitaciones)]);
   if(m.banos) feats.push(['🚿 Baños',String(m.banos)]);
-  if(m.area_total) feats.push(['📐 Área Total',m.area_total+'m²']);
+  if(m.area_total) feats.push(['📐 Área',m.area_total+'m²']);
+  if(m.area_lote) feats.push(['🌿 Lote',m.area_lote+'m²']);
+  if(m.ano_construccion) feats.push(['🏗 Año',String(m.ano_construccion)]);
+  if(m.zonificacion) feats.push(['📋 Zonif.',m.zonificacion]);
   const col1=feats.filter((_,i)=>i%2===0);
   const col2=feats.filter((_,i)=>i%2===1);
   const colW=(W-margin*2)/2;
@@ -4111,7 +4168,7 @@ function exportMlsPDF(idx){
   doc.rect(0,footerY-4,W,14,'F');
   doc.setDrawColor(226,232,240); doc.line(0,footerY-4,W,footerY-4);
   doc.setTextColor(100,116,139); doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.text('Jely Castro · JAC Realty · Lic. PN-0931 · +507 6462-7763',margin,footerY+1);
+  doc.text('JAC Realty by Jely An Castro · Lic. PN-0931 · +507 6462-7763',margin,footerY+1);
   doc.text('jcastro@jacrealtypa.com · jelyanrealestate@gmail.com · www.jacrealtypa.com',margin,footerY+5.5);
   doc.setFontSize(7); doc.setTextColor(148,163,184);
   doc.text(`Ficha generada el ${new Date().toLocaleDateString('es-PA')} · Información sujeta a cambios sin previo aviso`,margin,footerY+9.5);
@@ -5496,7 +5553,7 @@ function renderLeads(filter){
       <td style="font-size:12px;color:var(--muted)">${l.fecha||'—'}</td>
       <td>
         <div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">
-        ${l.tel||l.wa?`<button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waLead('${l.id}')">💬</button>`:''}
+        `<button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waLead('${l.id}')">💬</button>`
         ${l.email?`<button style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jcastro@jacrealtypa.com" onclick="emailLeadJcastro('${l.id}')">📧JC</button>`:''}
         ${l.email?`<button style="background:var(--cyan)22;color:var(--cyan);border:1px solid var(--cyan)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jelyanrealestate@gmail.com" onclick="emailLeadJelyan('${l.id}')">📧JL</button>`:''}
         <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Ver detalle" onclick="viewLeadDetail('${l.id}')">👁</button>
@@ -5536,7 +5593,7 @@ function renderContacts(filter){
       <td style="font-size:12px;color:var(--muted)">${c.fecha||'—'}</td>
       <td>
         <div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">
-        ${c.tel||c.wa?`<button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waContact('${c.id}')">💬</button>`:''}
+        `<button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waContact('${c.id}')">💬</button>`
         ${c.email?`<button style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jcastro" onclick="emailContactJcastro('${c.id}')">📧JC</button>`:''}
         ${c.email?`<button style="background:var(--cyan)22;color:var(--cyan);border:1px solid var(--cyan)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jelyan" onclick="emailContactJelyan('${c.id}')">📧JL</button>`:''}
         <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Ver detalle" onclick="viewContactDetail('${c.id}')">👁</button>
@@ -5688,7 +5745,7 @@ function renderClients(filter){
       <td style="font-size:12px;color:var(--muted)">${c.fecha||'—'}</td>
       <td>
         <div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">
-        ${c.tel||c.wa?`<button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waClient('${c.id}')">💬</button>`:''}
+        `<button style="background:#25d36622;color:#25d366;border:1px solid #25d36644;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="WhatsApp" onclick="waClient('${c.id}')">💬</button>`
         ${c.email?`<button style="background:var(--blue)22;color:var(--blue);border:1px solid var(--blue)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jcastro" onclick="emailClientJcastro('${c.id}')">📧JC</button>`:''}
         ${c.email?`<button style="background:var(--cyan)22;color:var(--cyan);border:1px solid var(--cyan)44;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Email jelyan" onclick="emailClientJelyan('${c.id}')">📧JL</button>`:''}
         <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px" title="Ver detalle" onclick="viewClientDetail('${c.id}')">👁</button>
@@ -6019,27 +6076,33 @@ function addHistorialNota(){
 function waLead(id){
   const l=leads.find(x=>x.id===id);
   if(!l)return;
-  const txt=encodeURIComponent(`Hola ${l.nombre.split(' ')[0]}, soy Jelyan de JAC Realty. Tenemos propiedades disponibles que se ajustan a su búsqueda de ${(l.interes||'').toLowerCase()} en ${l.zona||'su zona de interés'}. ¿Podríamos coordinar una cita? 🏡`);
-  window.open('https://wa.me/'+((l.wa||l.tel||'').replace(/\D/g,''))+`?text=${txt}`);
+  const num=(l.wa||l.tel||'').replace(/\D/g,'');
+  const txt=encodeURIComponent(`Hola ${l.nombre.split(' ')[0]}, soy Jely An Castro de JAC Realty (Lic. PN-0931). Tenemos propiedades disponibles que se ajustan a su búsqueda${l.interes?' de '+(l.interes||'').toLowerCase():''}${l.zona?' en '+l.zona:''}. ¿Podríamos coordinar una cita? 🏡\n\n📞 +507 6462-7763 · jacrealtypa.com`);
+  if(!num){toast('⚠️ Agrega número de teléfono o WhatsApp a este lead primero');return;}
+  window.open('https://wa.me/'+num+`?text=${txt}`);
   logHistory('lead',id,'💬','WhatsApp enviado',`Mensaje de presentación enviado vía WhatsApp.`,txt.substring(0,200));
   toast('💬 WhatsApp abierto · Evento registrado en historial');
 }
 function waContact(id){
   const c=contacts.find(x=>x.id===id);
   if(!c)return;
-  const txt=encodeURIComponent(`Hola ${c.nombre.split(' ')[0]}, soy Jelyan de JAC Realty. Me pongo en contacto para coordinar. 🏡`);
-  window.open('https://wa.me/'+((c.wa||c.tel||'').replace(/\D/g,''))+`?text=${txt}`);
+  const num=(c.wa||c.tel||'').replace(/\D/g,'');
+  const txt=encodeURIComponent(`Hola ${c.nombre.split(' ')[0]}, soy Jely An Castro de JAC Realty (Lic. PN-0931). Me pongo en contacto para coordinar. 🏡\n\nJAC Realty · +507 6462-7763 · jacrealtypa.com`);
+  if(!num){toast('⚠️ Agrega número de teléfono o WhatsApp a este contacto primero');return;}
+  window.open('https://wa.me/'+num+`?text=${txt}`);
   logHistory('contact',id,'💬','WhatsApp enviado','Mensaje enviado vía WhatsApp.',txt.substring(0,200));
   toast('💬 WhatsApp abierto · Evento registrado en historial');
 }
 function waClient(id){
   const c=clients.find(x=>x.id===id);
   if(!c)return;
+  const num=(c.wa||c.tel||'').replace(/\D/g,'');
   const base = c.tipo==='Comprador'||c.tipo==='Arrendatario'
-    ? `Hola ${c.nombre.split(' ')[0]}, soy Jelyan de JAC Realty. Tengo novedades sobre propiedades que pueden interesarle. ¿Tiene un momento? 🏡`
-    : `Hola ${c.nombre.split(' ')[0]}, soy Jelyan de JAC Realty. Le escribo con novedades sobre su propiedad. ¿Tiene un momento? 🏠`;
+    ? `Hola ${c.nombre.split(' ')[0]}, soy Jely An Castro de JAC Realty (Lic. PN-0931). Tengo novedades sobre propiedades que pueden interesarle. ¿Tiene un momento? 🏡\n\n📞 +507 6462-7763 · jacrealtypa.com`
+    : `Hola ${c.nombre.split(' ')[0]}, soy Jely An Castro de JAC Realty (Lic. PN-0931). Le escribo con novedades sobre su propiedad. ¿Tiene un momento? 🏠\n\n📞 +507 6462-7763 · jacrealtypa.com`;
   const txt=encodeURIComponent(base);
-  window.open('https://wa.me/'+((c.wa||c.tel||'').replace(/\D/g,''))+`?text=${txt}`);
+  if(!num){toast('⚠️ Agrega número de teléfono o WhatsApp a este cliente primero');return;}
+  window.open('https://wa.me/'+num+`?text=${txt}`);
   logHistory('client',id,'💬','WhatsApp enviado','Mensaje enviado vía WhatsApp.',base);
   toast('💬 WhatsApp abierto · Evento registrado en historial');
 }
@@ -7968,33 +8031,71 @@ function exportLeadPDF(id){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   const W=210,M=18;
-  doc.setFillColor(10,26,58); doc.rect(0,0,W,32,'F');
-  doc.setTextColor(232,160,32); doc.setFontSize(16); doc.setFont('helvetica','bold');
-  doc.text('JAC REALTY · LEAD',M,14);
-  doc.setFontSize(8); doc.setTextColor(200,200,200);
-  doc.text('Jely Castro · Lic. PN-0931 · +507 6462-7763 · jcastro@jacrealtypa.com',M,22);
-  doc.setFillColor(255,255,255); doc.rect(M,38,W-2*M,110,'F');
-  doc.setDrawColor(232,160,32); doc.rect(M,38,W-2*M,110,'S');
-  doc.setTextColor(10,26,58); doc.setFontSize(14); doc.setFont('helvetica','bold');
-  doc.text(l.nombre||'Lead',M+6,50);
-  const rows=[['Teléfono',l.tel||'—'],['Email',l.email||'—'],['Interés',l.interes||'—'],
-    ['Tipo prop.',l.tipo_prop||'—'],['Zona',l.zona||'—'],['Presupuesto',l.presupuesto||'—'],
-    ['Fuente',l.fuente||'—'],['Estado',l.status||'—'],['Fecha',l.fecha||'—']];
-  let y=60;
+  // Header rojo JAC Realty
+  doc.setFillColor(196,30,58); doc.rect(0,0,W,30,'F');
+  doc.setFillColor(139,0,32); doc.rect(0,24,W,6,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(20); doc.setFont('helvetica','bold');
+  doc.text('JAC',M,17);
+  doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(255,200,200);
+  doc.text('REALTY',M+17,17);
+  doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+  doc.text('FICHA DE LEAD',W-M,17,{align:'right'});
+  doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(255,230,230);
+  doc.text('by Jely An Castro · Lic. PN-0931 · +507 6462-7763 · jacrealtypa.com',M,22);
+  // Card
+  let y=36;
+  doc.setFillColor(248,250,252); doc.rect(M,y,W-2*M,8,'F');
+  doc.setTextColor(196,30,58); doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text(l.nombre||'Lead',M+4,y+6);
+  y+=12;
+  const statusColor={'Nuevo':[59,130,246],'Contactado':[6,182,212],'Visita programada':[168,85,247],
+    'En negociación':[232,160,32],'Oferta presentada':[234,179,8],'Cerrado ✅':[22,163,74],'Perdido ❌':[239,68,68]};
+  const sc=statusColor[l.status]||[100,100,100];
+  doc.setFillColor(...sc); doc.roundedRect(M,y,55,6,2,2,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
+  doc.text(l.status||'Nuevo',M+3,y+4.5);
+  y+=10;
+  // Divider
+  doc.setDrawColor(226,232,240); doc.setLineWidth(0.3); doc.line(M,y,W-M,y); y+=5;
+  // Data rows
+  const rows=[
+    ['Teléfono',l.tel||'—'],['WhatsApp',l.wa||l.tel||'—'],['Email',l.email||'—'],
+    ['Interés',l.interes||'—'],['Tipo propiedad',l.tipo_prop||'—'],['Zona',l.zona||'—'],
+    ['Presupuesto',l.presupuesto||'—'],['Fuente',l.fuente_display||l.fuente||'—'],
+    ['Fecha',l.fecha||'—'],['Empresa',l.empresa||'—']
+  ];
   doc.setFontSize(9); doc.setFont('helvetica','normal');
-  rows.forEach(([k,v])=>{
-    doc.setTextColor(100,100,100); doc.text(k+':',M+6,y);
-    doc.setTextColor(10,26,58); doc.text(String(v),M+45,y);
-    y+=8;
+  const col=Math.ceil(rows.length/2);
+  const colW=(W-2*M)/2-4;
+  rows.forEach(([k,v],i)=>{
+    const cx=i<col?M:M+colW+8;
+    const cy=y+(i%col)*8;
+    doc.setTextColor(130,130,130); doc.setFont('helvetica','bold'); doc.text(k+': ',cx,cy);
+    const kw=doc.getTextWidth(k+': ');
+    doc.setTextColor(30,30,30); doc.setFont('helvetica','normal');
+    doc.text(doc.splitTextToSize(String(v),colW-kw)[0],cx+kw,cy);
   });
+  y+=col*8+6;
+  doc.setDrawColor(226,232,240); doc.line(M,y,W-M,y); y+=5;
+  // Notas
   if(l.notas){
-    doc.setTextColor(10,26,58); doc.setFontSize(9);
-    const nl=doc.splitTextToSize('Notas: '+l.notas,W-2*M-12);
-    doc.text(nl.slice(0,5),M+6,y+4);
+    doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+    doc.text('NOTAS',M,y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setTextColor(55,65,81);
+    const nl=doc.splitTextToSize(l.notas,W-2*M);
+    doc.text(nl.slice(0,8),M,y); y+=nl.slice(0,8).length*4.5+4;
   }
-  doc.setFillColor(10,26,58); doc.rect(0,285,W,12,'F');
-  doc.setTextColor(255,255,255); doc.setFontSize(8);
-  doc.text('JAC Realty · +507 6462-7763 · jcastro@jacrealtypa.com · jelyanrealestate@gmail.com',W/2,291,{align:'center'});
+  // Historial count
+  if(l.historial&&l.historial.length){
+    doc.setFontSize(8); doc.setTextColor(100,116,139);
+    doc.text(`Historial: ${l.historial.length} evento(s) registrado(s)`,M,y); y+=6;
+  }
+  // Footer
+  doc.setFillColor(196,30,58); doc.rect(0,284,W,13,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
+  doc.text('JAC Realty by Jely An Castro · Lic. PN-0931',W/2,290,{align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+  doc.text('+507 6462-7763 · jcastro@jacrealtypa.com · www.jacrealtypa.com',W/2,295,{align:'center'});
   doc.save('JAC_Lead_'+l.id+'.pdf');
   toast('📄 PDF descargado');
 }
@@ -8022,24 +8123,58 @@ function exportContactPDF(id){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   const W=210,M=18;
-  doc.setFillColor(10,26,58); doc.rect(0,0,W,32,'F');
-  doc.setTextColor(232,160,32); doc.setFontSize(16); doc.setFont('helvetica','bold');
-  doc.text('JAC REALTY · CONTACTO',M,14);
-  doc.setFontSize(8); doc.setTextColor(200,200,200);
-  doc.text('Jely Castro · Lic. PN-0931 · +507 6462-7763',M,22);
-  doc.setTextColor(10,26,58); doc.setFontSize(14); doc.setFont('helvetica','bold');
-  doc.text(c.nombre||'Contacto',M,46);
-  const rows=[['Teléfono',c.tel||'—'],['Email',c.email||'—'],['Empresa',c.empresa||'—'],['Cargo',c.cargo||'—'],['Categoría',c.categoria||'—'],['Notas',c.notas||'—']];
-  let y=56;
-  doc.setFontSize(10); doc.setFont('helvetica','normal');
-  rows.forEach(([k,v])=>{
-    doc.setTextColor(100,100,100); doc.text(k+':',M,y);
-    doc.setTextColor(10,26,58); const vl=doc.splitTextToSize(String(v),W-2*M-40);
-    doc.text(vl.slice(0,2),M+40,y); y+=10;
+  // Header rojo
+  doc.setFillColor(196,30,58); doc.rect(0,0,W,30,'F');
+  doc.setFillColor(139,0,32); doc.rect(0,24,W,6,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(20); doc.setFont('helvetica','bold');
+  doc.text('JAC',M,17);
+  doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(255,200,200);
+  doc.text('REALTY',M+17,17);
+  doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+  doc.text('FICHA DE CONTACTO',W-M,17,{align:'right'});
+  doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(255,230,230);
+  doc.text('by Jely An Castro · Lic. PN-0931 · +507 6462-7763 · jacrealtypa.com',M,22);
+  let y=36;
+  doc.setFillColor(248,250,252); doc.rect(M,y,W-2*M,8,'F');
+  doc.setTextColor(196,30,58); doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text(c.nombre||'Contacto',M+4,y+6);
+  y+=12;
+  // Categoría badge
+  doc.setFillColor(30,30,60); doc.roundedRect(M,y,45,6,2,2,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
+  doc.text(c.categoria||'Contacto',M+3,y+4.5);
+  y+=10;
+  doc.setDrawColor(226,232,240); doc.setLineWidth(0.3); doc.line(M,y,W-M,y); y+=5;
+  const rows=[
+    ['Teléfono',c.tel||'—'],['WhatsApp',c.wa||c.tel||'—'],['Email',c.email||'—'],
+    ['Empresa',c.empresa||'—'],['Cargo',c.cargo||'—'],['Instagram','@'+(c.instagram||'—')],
+    ['Cédula',c.cedula||'—'],['Nacimiento',c.nacimiento||'—'],['LinkedIn',c.linkedin||'—']
+  ];
+  doc.setFontSize(9);
+  const col=Math.ceil(rows.length/2);
+  const colW=(W-2*M)/2-4;
+  rows.forEach(([k,v],i)=>{
+    const cx=i<col?M:M+colW+8;
+    const cy=y+(i%col)*8;
+    doc.setTextColor(130,130,130); doc.setFont('helvetica','bold'); doc.text(k+': ',cx,cy);
+    const kw=doc.getTextWidth(k+': ');
+    doc.setTextColor(30,30,30); doc.setFont('helvetica','normal');
+    doc.text(doc.splitTextToSize(String(v),colW-kw)[0],cx+kw,cy);
   });
-  doc.setFillColor(10,26,58); doc.rect(0,285,W,12,'F');
-  doc.setTextColor(255,255,255); doc.setFontSize(8);
-  doc.text('JAC Realty · +507 6462-7763 · jcastro@jacrealtypa.com',W/2,291,{align:'center'});
+  y+=col*8+6;
+  doc.setDrawColor(226,232,240); doc.line(M,y,W-M,y); y+=5;
+  if(c.notas){
+    doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+    doc.text('NOTAS',M,y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setTextColor(55,65,81);
+    const nl=doc.splitTextToSize(c.notas,W-2*M);
+    doc.text(nl.slice(0,8),M,y);
+  }
+  doc.setFillColor(196,30,58); doc.rect(0,284,W,13,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
+  doc.text('JAC Realty by Jely An Castro · Lic. PN-0931',W/2,290,{align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+  doc.text('+507 6462-7763 · jcastro@jacrealtypa.com · www.jacrealtypa.com',W/2,295,{align:'center'});
   doc.save('JAC_Contacto_'+c.id+'.pdf');
   toast('📄 PDF descargado');
 }
@@ -8067,28 +8202,70 @@ function exportClientPDF(id){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   const W=210,M=18;
-  doc.setFillColor(10,26,58); doc.rect(0,0,W,32,'F');
-  doc.setTextColor(232,160,32); doc.setFontSize(16); doc.setFont('helvetica','bold');
-  doc.text('JAC REALTY · CLIENTE',M,14);
-  doc.setFontSize(8); doc.setTextColor(200,200,200);
-  doc.text('Jely Castro · Lic. PN-0931 · +507 6462-7763',M,22);
-  doc.setTextColor(10,26,58); doc.setFontSize(14); doc.setFont('helvetica','bold');
-  doc.text(c.nombre||'Cliente',M,46);
-  doc.setFontSize(11); doc.setTextColor(100,100,100);
-  doc.text(c.tipo||'—',M,54);
-  const rows=[['Teléfono',c.tel||'—'],['Email',c.email||'—'],['Estado',c.status||'—'],
-    ['Agente',c.agente||'J. Castro'],['Presupuesto','Hasta $'+Number(c.presupuesto_max||0).toLocaleString()],
-    ['Zona preferida',c.zona||'—'],['Tipo propiedad',c.tipo_prop||'—']];
-  let y=64;
-  doc.setFontSize(10); doc.setFont('helvetica','normal');
-  rows.forEach(([k,v])=>{
-    doc.setTextColor(100,100,100); doc.text(k+':',M,y);
-    doc.setTextColor(10,26,58); doc.text(String(v),M+50,y);
-    y+=9;
+  // Header rojo
+  doc.setFillColor(196,30,58); doc.rect(0,0,W,30,'F');
+  doc.setFillColor(139,0,32); doc.rect(0,24,W,6,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(20); doc.setFont('helvetica','bold');
+  doc.text('JAC',M,17);
+  doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(255,200,200);
+  doc.text('REALTY',M+17,17);
+  doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+  doc.text('FICHA DE CLIENTE',W-M,17,{align:'right'});
+  doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(255,230,230);
+  doc.text('by Jely An Castro · Lic. PN-0931 · +507 6462-7763 · jacrealtypa.com',M,22);
+  let y=36;
+  doc.setFillColor(248,250,252); doc.rect(M,y,W-2*M,8,'F');
+  doc.setTextColor(196,30,58); doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text(c.nombre||'Cliente',M+4,y+6);
+  y+=12;
+  const tipoColors={'Comprador':[59,130,246],'Arrendatario':[168,85,247],'Vendedor/Propietario':[196,30,58],'Arrendador/Propietario':[22,163,74]};
+  const tc=tipoColors[c.tipo]||[100,100,100];
+  doc.setFillColor(...tc); doc.roundedRect(M,y,60,6,2,2,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
+  doc.text(c.tipo||'Cliente',M+3,y+4.5);
+  // Status
+  doc.setFillColor(30,80,30); doc.roundedRect(M+65,y,40,6,2,2,'F');
+  doc.text(c.status||'Activo',M+68,y+4.5);
+  y+=12;
+  doc.setDrawColor(226,232,240); doc.setLineWidth(0.3); doc.line(M,y,W-M,y); y+=5;
+  const isBuyer=c.tipo==='Comprador'||c.tipo==='Arrendatario';
+  const rows=isBuyer?[
+    ['Teléfono',c.tel||'—'],['WhatsApp',c.wa||c.tel||'—'],['Email',c.email||'—'],
+    ['Presupuesto máx.','$'+Number(c.presupuesto_max||0).toLocaleString()],
+    ['Zona preferida',c.zona||'—'],['Tipo propiedad',c.tipo_prop||'—'],
+    ['Habitaciones',c.habitaciones||'—'],['Baños',c.banos||'—'],
+    ['Agente',c.agente||'Jely An Castro'],['Empresa',c.empresa||'—']
+  ]:[
+    ['Teléfono',c.tel||'—'],['WhatsApp',c.wa||c.tel||'—'],['Email',c.email||'—'],
+    ['Propiedad',c.prop_direccion||'—'],['Precio propiedad','$'+Number(c.prop_precio||0).toLocaleString()],
+    ['Zona',c.zona||'—'],['Tipo propiedad',c.tipo_prop||'—'],
+    ['Comisión',c.comision||'—'],['Agente',c.agente||'Jely An Castro'],['Empresa',c.empresa||'—']
+  ];
+  doc.setFontSize(9);
+  const col=Math.ceil(rows.length/2);
+  const colW=(W-2*M)/2-4;
+  rows.forEach(([k,v],i)=>{
+    const cx=i<col?M:M+colW+8;
+    const cy=y+(i%col)*8;
+    doc.setTextColor(130,130,130); doc.setFont('helvetica','bold'); doc.text(k+': ',cx,cy);
+    const kw=doc.getTextWidth(k+': ');
+    doc.setTextColor(30,30,30); doc.setFont('helvetica','normal');
+    doc.text(doc.splitTextToSize(String(v),colW-kw)[0],cx+kw,cy);
   });
-  doc.setFillColor(10,26,58); doc.rect(0,285,W,12,'F');
-  doc.setTextColor(255,255,255); doc.setFontSize(8);
-  doc.text('JAC Realty · +507 6462-7763 · jcastro@jacrealtypa.com',W/2,291,{align:'center'});
+  y+=col*8+6;
+  if(c.notas){
+    doc.setDrawColor(226,232,240); doc.line(M,y,W-M,y); y+=5;
+    doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+    doc.text('NOTAS',M,y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setTextColor(55,65,81);
+    const nl=doc.splitTextToSize(c.notas,W-2*M);
+    doc.text(nl.slice(0,6),M,y);
+  }
+  doc.setFillColor(196,30,58); doc.rect(0,284,W,13,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
+  doc.text('JAC Realty by Jely An Castro · Lic. PN-0931',W/2,290,{align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+  doc.text('+507 6462-7763 · jcastro@jacrealtypa.com · www.jacrealtypa.com',W/2,295,{align:'center'});
   doc.save('JAC_Cliente_'+c.id+'.pdf');
   toast('📄 PDF descargado');
 }
