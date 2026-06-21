@@ -729,7 +729,7 @@ function webRenderProps(list){
   countEl.textContent=`${list.length} propiedad${list.length!==1?'es':''} disponible${list.length!==1?'s':''}`;
   _currentList=list;
   grid.innerHTML=list.map((p,i)=>{
-    const _f=p.fotos;const _fa=Array.isArray(_f)?_f:(()=>{try{return JSON.parse(_f||'[]');}catch(e){return[];}})();const img=(_fa[0]&&!_fa[0].startsWith('['))?_fa[0]:'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=700&q=80';
+    const _f=p.fotos;const _fa=Array.isArray(_f)?_f:(()=>{try{return JSON.parse(_f||'[]');}catch(e){return[];}})();const _toUrl=x=>x?(typeof x==='string'?x:x.contentUrl||x.url||null):null;const img=_toUrl(_fa[0])||'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=700&q=80';
     const precio=p.precio?'$'+Number(p.precio).toLocaleString('en-US'):'Consultar';
     const opLabel=(p.operacion||'').toUpperCase();
     const isMLS=p._src==='mls';
@@ -846,6 +846,8 @@ function openWebPropModal(p){
   if(typeof fotos==='string'){try{fotos=JSON.parse(fotos);}catch(e){fotos=fotos?[fotos]:[];}}
   if(!Array.isArray(fotos))fotos=fotos?[fotos]:[];
   const fallback='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=900&q=80';
+  const _toUrl=x=>x?(typeof x==='string'?x:x.contentUrl||x.url||null):null;
+  fotos=fotos.map(_toUrl).filter(Boolean);
   const img=fotos[0]||fallback;
   const precio=p.precio?'$'+Number(p.precio).toLocaleString('en-US'):'Consultar';
   const tipo=p.tipo||p.tipo_prop||'';
