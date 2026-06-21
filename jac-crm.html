@@ -9921,7 +9921,7 @@ function renderMsgConvs(){
     const isActive=_msg_active_peer===c.peerId;
     const isBcast=c.peerId==='all';
     const timeStr=c.lastTime?new Date(c.lastTime).toLocaleDateString('es-PA',{day:'2-digit',month:'short'})+' '+new Date(c.lastTime).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'}):'';
-    return '<div class="msg-conv-item'+(isActive?' active':'')+(c.unread?' unread':'')+'" onclick="openMsgThread(''+c.peerId+'',''+c.peerName.replace(/'/g,'&apos;')+'')" >'+
+    return '<div class="msg-conv-item'+(isActive?' active':'')+(c.unread?' unread':'')+'" onclick="openMsgThread(\''+c.peerId+'\',\''+c.peerName.replace(/'/g,'&#39;')+'\')" >'+
       '<div class="msg-conv-av'+(isBcast?' broadcast':'')+'">'+initials+'</div>'+
       '<div class="msg-conv-info">'+
         '<div class="msg-conv-name">'+c.peerName+'</div>'+
