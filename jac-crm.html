@@ -253,6 +253,38 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .msg-bubble.broadcast{background:rgba(59,130,246,.18);color:var(--text);border-radius:12px 12px 12px 3px;align-self:flex-start;border:1px solid rgba(59,130,246,.3)}
 .msg-bubble-meta{font-size:10px;opacity:.7;margin-top:3px;display:block}
 .msg-row{display:flex;flex-direction:column}
+/* ── Diligencias ── */
+.dtab{background:transparent;border:none;border-bottom:3px solid transparent;padding:8px 18px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:.15s;margin-bottom:-2px}
+.dtab:hover{color:var(--text)}
+.dtab-active{color:var(--text);border-bottom-color:var(--accent)}
+.dil-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;transition:.15s;position:relative}
+.dil-card:hover{box-shadow:0 2px 10px rgba(0,0,0,.18);border-color:var(--accent)44}
+.dil-card.urgente{border-left:4px solid #ef4444}
+.dil-card.alta{border-left:4px solid #f97316}
+.dil-card.normal{border-left:4px solid var(--accent)}
+.dil-card.baja{border-left:4px solid #22c55e}
+.dil-estado{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.dil-estado.pendiente{background:rgba(232,160,32,.18);color:var(--accent2)}
+.dil-estado.en_camino{background:rgba(59,130,246,.18);color:#60a5fa}
+.dil-estado.completada{background:rgba(34,197,94,.18);color:#4ade80}
+.dil-estado.cancelada{background:rgba(120,120,120,.18);color:var(--muted)}
+.dil-urgencia{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600}
+.dil-urgencia.urgente{background:rgba(239,68,68,.15);color:#f87171}
+.dil-urgencia.alta{background:rgba(249,115,22,.15);color:#fb923c}
+.dil-urgencia.normal{background:rgba(232,160,32,.12);color:var(--accent2)}
+.dil-urgencia.baja{background:rgba(34,197,94,.12);color:#4ade80}
+.dil-tipo-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600;background:var(--card2);color:var(--text)}
+.dil-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.dil-actions button{font-size:11px;padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--card2);color:var(--text);cursor:pointer;transition:.15s;font-weight:500}
+.dil-actions button:hover{background:var(--bg)}
+.dil-actions .btn-wa{background:#25d36611;color:#25d366;border-color:#25d36633;font-weight:700}
+.dil-actions .btn-wa:hover{background:#25d366;color:#fff;border-color:#25d366}
+.dil-actions .btn-camino{background:rgba(59,130,246,.1);color:#60a5fa;border-color:rgba(59,130,246,.3)}
+.dil-actions .btn-camino:hover{background:#3b82f6;color:#fff}
+.dil-actions .btn-completar{background:rgba(34,197,94,.1);color:#4ade80;border-color:rgba(34,197,94,.3)}
+.dil-actions .btn-completar:hover{background:#22c55e;color:#fff}
+.dil-actions .btn-cancelar{color:var(--muted);border-color:var(--border)}
+.dil-actions .btn-cancelar:hover{background:#ef4444;color:#fff;border-color:#ef4444}
 /* ── Prop card photo slider ── */
 .prop-slider{position:relative;height:160px;overflow:hidden;background:#1e2535;border-radius:0}
 .prop-slider .s-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s}
@@ -804,7 +836,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <span class="icon">⚡</span> Actividad
     </div>
     <div class="nav-item" onclick="showPanel('mensajero')">
-      <span class="icon">💬</span> Mensajero
+      <span class="icon">🏍️</span> Mensajero
       <span class="nav-badge" id="badge-mensajero" style="background:var(--accent);color:#111;display:none">0</span>
     </div>
     <div class="nav-item" onclick="showPanel('notas')">
@@ -1169,32 +1201,94 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 
     <!-- ========== MENSAJERO ========== -->
     <div class="panel" id="panel-mensajero">
-      <div style="display:grid;grid-template-columns:280px 1fr;gap:0;height:calc(100vh - 130px);border:1px solid var(--border);border-radius:12px;overflow:hidden">
-        <!-- Lista de conversaciones -->
-        <div style="border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--card2)">
-          <div style="padding:12px;border-bottom:1px solid var(--border)">
-            <div style="font-weight:600;font-size:13px;margin-bottom:8px">💬 Mensajero Interno</div>
-            <div style="display:flex;gap:6px">
-              <input id="msg-search" type="text" placeholder="Buscar..." oninput="filterMsgConvs()" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);font-size:12px;outline:none">
-              <button class="btn btn-primary btn-sm" onclick="openNuevoMensaje()" title="Nuevo mensaje">✏️</button>
-            </div>
+      <!-- Tabs -->
+      <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px">
+        <button id="dtab-btn-diligencias" class="dtab dtab-active" onclick="switchDTab('diligencias')">🏍️ Diligencias Francisco</button>
+        <button id="dtab-btn-chat" class="dtab" onclick="switchDTab('chat')">💬 Chat Equipo</button>
+      </div>
+
+      <!-- ── DILIGENCIAS TAB ── -->
+      <div id="dtab-content-diligencias">
+        <!-- Stats -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">
+          <div class="kpi-card" style="padding:14px 12px">
+            <div class="kpi-label">⏳ Pendientes</div>
+            <div class="kpi-value" id="dil-stat-pendientes" style="font-size:30px;color:var(--accent)">0</div>
           </div>
-          <div id="msg-convs-list" style="flex:1;overflow-y:auto"></div>
+          <div class="kpi-card" style="padding:14px 12px">
+            <div class="kpi-label">🏍️ En Camino</div>
+            <div class="kpi-value" id="dil-stat-camino" style="font-size:30px;color:var(--blue)">0</div>
+          </div>
+          <div class="kpi-card" style="padding:14px 12px">
+            <div class="kpi-label">✅ Hoy Completadas</div>
+            <div class="kpi-value" id="dil-stat-hoy" style="font-size:30px;color:var(--green)">0</div>
+          </div>
+          <div class="kpi-card" style="padding:14px 12px">
+            <div class="kpi-label">📊 Total Mes</div>
+            <div class="kpi-value" id="dil-stat-mes" style="font-size:30px;color:var(--cyan)">0</div>
+          </div>
         </div>
-        <!-- Hilo de mensajes -->
-        <div style="display:flex;flex-direction:column;background:var(--bg)">
-          <div id="msg-thread-header" style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;gap:12px;min-height:52px">
-            <span id="msg-thread-title" style="font-weight:600;font-size:13px;color:var(--muted)">Selecciona una conversación</span>
+        <!-- Francisco info bar -->
+        <div style="background:linear-gradient(135deg,rgba(37,211,102,.1),rgba(37,211,102,.04));border:1px solid rgba(37,211,102,.3);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap">
+          <div style="width:42px;height:42px;border-radius:50%;background:#25d36622;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🏍️</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:700;font-size:13px">Francisco Florez — Mensajero</div>
+            <div style="font-size:11px;color:var(--muted)">📱 6671-4215 &nbsp;·&nbsp; Disponible para diligencias</div>
           </div>
-          <div id="msg-thread-body" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px">
-            <div style="text-align:center;color:var(--muted);font-size:13px;margin-top:60px">💬 Selecciona una conversación para ver los mensajes</div>
-          </div>
-          <div id="msg-compose" style="padding:12px 16px;border-top:1px solid var(--border);background:var(--card2);display:none">
-            <div style="display:flex;gap:8px;align-items:flex-end">
-              <textarea id="msg-input" rows="2" placeholder="Escribe un mensaje..." onkeydown="msgKeyDown(event)" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;resize:none;outline:none;line-height:1.4"></textarea>
-              <button class="btn btn-primary" onclick="sendMensaje()" style="padding:8px 14px">➤</button>
+          <button class="btn btn-sm" onclick="enviarWAFrancisco()" style="background:#25d366;color:#fff;border:none;font-weight:600;flex-shrink:0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Contactar Francisco
+          </button>
+        </div>
+        <!-- Toolbar -->
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-primary btn-sm" onclick="openNuevaDiligencia()">+ Nueva Diligencia</button>
+          <select id="dil-filter-estado" onchange="renderDiligencias()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;outline:none">
+            <option value="">Todos los estados</option>
+            <option value="pendiente">⏳ Pendientes</option>
+            <option value="en_camino">🏍️ En Camino</option>
+            <option value="completada">✅ Completadas</option>
+            <option value="cancelada">❌ Canceladas</option>
+          </select>
+          <select id="dil-filter-urgencia" onchange="renderDiligencias()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;outline:none">
+            <option value="">Toda urgencia</option>
+            <option value="urgente">🔴 Urgente</option>
+            <option value="alta">🟠 Alta</option>
+            <option value="normal">🟡 Normal</option>
+            <option value="baja">🟢 Baja</option>
+          </select>
+          <button class="btn btn-sm" onclick="loadDiligencias()" style="margin-left:auto" title="Actualizar">🔄</button>
+        </div>
+        <div id="dil-list"></div>
+      </div>
+
+      <!-- ── CHAT EQUIPO TAB ── -->
+      <div id="dtab-content-chat" style="display:none">
+        <div style="display:grid;grid-template-columns:280px 1fr;gap:0;height:calc(100vh - 250px);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+          <div style="border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--card2)">
+            <div style="padding:12px;border-bottom:1px solid var(--border)">
+              <div style="font-weight:600;font-size:13px;margin-bottom:8px">💬 Mensajero Interno</div>
+              <div style="display:flex;gap:6px">
+                <input id="msg-search" type="text" placeholder="Buscar..." oninput="filterMsgConvs()" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);font-size:12px;outline:none">
+                <button class="btn btn-primary btn-sm" onclick="openNuevoMensaje()" title="Nuevo mensaje">✏️</button>
+              </div>
             </div>
-            <div style="font-size:10px;color:var(--muted);margin-top:4px">Enter = enviar · Shift+Enter = nueva línea</div>
+            <div id="msg-convs-list" style="flex:1;overflow-y:auto"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;background:var(--bg)">
+            <div id="msg-thread-header" style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;gap:12px;min-height:52px">
+              <span id="msg-thread-title" style="font-weight:600;font-size:13px;color:var(--muted)">Selecciona una conversación</span>
+            </div>
+            <div id="msg-thread-body" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px">
+              <div style="text-align:center;color:var(--muted);font-size:13px;margin-top:60px">💬 Selecciona una conversación para ver los mensajes</div>
+            </div>
+            <div id="msg-compose" style="padding:12px 16px;border-top:1px solid var(--border);background:var(--card2);display:none">
+              <div style="display:flex;gap:8px;align-items:flex-end">
+                <textarea id="msg-input" rows="2" placeholder="Escribe un mensaje..." onkeydown="msgKeyDown(event)" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;resize:none;outline:none;line-height:1.4"></textarea>
+                <button class="btn btn-primary" onclick="sendMensaje()" style="padding:8px 14px">➤</button>
+              </div>
+              <div style="font-size:10px;color:var(--muted);margin-top:4px">Enter = enviar · Shift+Enter = nueva línea</div>
+            </div>
           </div>
         </div>
       </div>
@@ -2798,6 +2892,77 @@ CREATE POLICY allow_all_mensajes_internos ON mensajes_internos FOR ALL USING (tr
   </div>
 </div>
 
+<!-- Modal Nueva Diligencia -->
+<div class="modal-bg" id="modalNuevaDiligencia">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header">
+      <span class="modal-title">🏍️ Nueva Diligencia</span>
+      <button class="modal-close" onclick="closeModal('modalNuevaDiligencia')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Tipo *</label>
+        <select id="dil-tipo" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);width:100%">
+          <option value="entrega">📦 Entrega</option>
+          <option value="recoleccion">📤 Recolección</option>
+          <option value="visita">🏠 Visita</option>
+          <option value="firma">✍️ Firma</option>
+          <option value="tramite">📋 Trámite</option>
+          <option value="gestion">⚙️ Gestión</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Urgencia</label>
+        <select id="dil-urgencia" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);width:100%">
+          <option value="normal">🟡 Normal</option>
+          <option value="baja">🟢 Baja</option>
+          <option value="alta">🟠 Alta</option>
+          <option value="urgente">🔴 Urgente</option>
+        </select>
+      </div>
+      <div class="form-group form-full"><label>Descripción * — ¿Qué debe hacer Francisco?</label>
+        <textarea id="dil-descripcion" rows="3" placeholder="Ej: Llevar contrato firmado a la oficina del señor Pérez en Costa del Este..."></textarea>
+      </div>
+      <div class="form-group form-full"><label>📍 Dirección de destino</label>
+        <input id="dil-direccion" placeholder="Ej: Calle 50, Edificio X, Piso 3, Oficina 301">
+      </div>
+      <div class="form-group form-full"><label>🗺️ Referencia / punto de encuentro</label>
+        <input id="dil-referencia" placeholder="Ej: Frente al banco, preguntar por Juana en recepción">
+      </div>
+      <div class="form-group"><label>🏠 Propiedad asociada (opcional)</label>
+        <input id="dil-propiedad-titulo" placeholder="Título o código de la propiedad">
+      </div>
+      <div class="form-group"><label>📞 Nombre del contacto</label>
+        <input id="dil-contacto-nombre" placeholder="A quién visitar o entregar">
+      </div>
+      <div class="form-group"><label>📱 Tel del contacto</label>
+        <input id="dil-contacto-tel" placeholder="+507 6XXX-XXXX">
+      </div>
+      <div class="form-group form-full"><label>📝 Notas / instrucciones especiales</label>
+        <textarea id="dil-notas" rows="2" placeholder="Instrucciones adicionales para Francisco..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalNuevaDiligencia')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveDiligencia(false)">💾 Guardar</button>
+      <button class="btn" onclick="saveDiligencia(true)" style="background:#25d366;color:#fff;border:none;font-weight:600">💾 Guardar + Notificar WA 🏍️</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ver/Editar Diligencia -->
+<div class="modal-bg" id="modalVerDiligencia">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <span class="modal-title" id="vd-title">📋 Diligencia</span>
+      <button class="modal-close" onclick="closeModal('modalVerDiligencia')">✕</button>
+    </div>
+    <div id="vd-body" style="padding:4px 0 8px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalVerDiligencia')">Cerrar</button>
+      <button class="btn" id="vd-btn-wa" onclick="enviarWADiligenciaById()" style="background:#25d366;color:#fff;border:none;font-weight:600">📱 WA Francisco</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal Historial Universal (expandible, sin límite) -->
 <div class="modal-bg" id="modalHistorial" style="z-index:1100">
   <div class="modal" style="width:820px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column">
@@ -3516,7 +3681,7 @@ function showPanel(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  const labels={dashboard:'Dashboard',propiedades:'Propiedades',contactos:'Contactos',leads:'Leads',clientes:'Clientes',empresas:'Empresas',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',mensajero:'💬 Mensajero Interno',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria',postVenta:'Post-Venta',matching:'🎯 Matching Inteligente',agentes:'👥 Equipo de Agentes',configuracion:'⚙️ Configuración'};
+  const labels={dashboard:'Dashboard',propiedades:'Propiedades',contactos:'Contactos',leads:'Leads',clientes:'Clientes',empresas:'Empresas',pipeline:'Pipeline',agenda:'Agenda',actividad:'Actividad',mensajero:'🏍️ Mensajero',notas:'Notas',tareas:'Tareas',reportes:'Reportes',portales:'Portales Inmobiliarios',ventaCruzada:'Venta Cruzada · Portales Aliados',automatizaciones:'Automatizaciones',mls:'Red MLS',redInmo:'Red Inmobiliaria',postVenta:'Post-Venta',matching:'🎯 Matching Inteligente',agentes:'👥 Equipo de Agentes',configuracion:'⚙️ Configuración'};
   if(id==='matching') populateMatchingSelect();
   document.getElementById('topbar-title').textContent=labels[id]||id;
   // Mark active nav item (works both from onclick and programmatic calls)
@@ -9941,17 +10106,276 @@ async function syncE24Props(){
   }
 }
 // ============================================================
-// MENSAJERO INTERNO
+// MENSAJERO — DILIGENCIAS (Francisco Florez) + CHAT EQUIPO
 // ============================================================
-let _msg_convs = [];          // [{peerId, peerName, peerInitials, lastMsg, lastTime, unread}]
-let _msg_active_peer = null;  // 'all' | agente_id
-let _msg_active_peer_name = '';
-let _msg_poll_timer = null;
-let _msg_all_msgs = [];       // all messages fetched
+
+// ── Tab switcher ──────────────────────────────────────────
+let _dTab = 'diligencias';
+function switchDTab(tab){
+  _dTab = tab;
+  document.getElementById('dtab-btn-diligencias').className='dtab'+(tab==='diligencias'?' dtab-active':'');
+  document.getElementById('dtab-btn-chat').className='dtab'+(tab==='chat'?' dtab-active':'');
+  document.getElementById('dtab-content-diligencias').style.display=tab==='diligencias'?'':'none';
+  document.getElementById('dtab-content-chat').style.display=tab==='chat'?'':'none';
+  if(tab==='chat') loadMensajero();
+  if(tab==='diligencias') loadDiligencias();
+}
 
 async function renderMensajero(){
-  await loadMensajero();
+  if(_dTab==='diligencias') await loadDiligencias();
+  else await loadMensajero();
 }
+
+// ── DILIGENCIAS ───────────────────────────────────────────
+let _dil_data = [];
+let _dil_active_id = null;
+
+const _DIL_TIPO_LABELS = {entrega:'📦 Entrega',recoleccion:'📤 Recolección',visita:'🏠 Visita',firma:'✍️ Firma',tramite:'📋 Trámite',gestion:'⚙️ Gestión'};
+const _DIL_URGENCIA_LABELS = {urgente:'🔴 Urgente',alta:'🟠 Alta',normal:'🟡 Normal',baja:'🟢 Baja'};
+const _DIL_ESTADO_LABELS = {pendiente:'⏳ Pendiente',en_camino:'🏍️ En Camino',completada:'✅ Completada',cancelada:'❌ Cancelada'};
+
+async function loadDiligencias(){
+  const el=document.getElementById('dil-list');
+  if(!sb){ if(el) el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px;text-align:center">⚠️ Requiere conexión a Supabase</div>'; return; }
+  if(el) el.innerHTML='<div style="padding:16px;color:var(--muted);font-size:12px;text-align:center">Cargando diligencias...</div>';
+  const {data,error}=await sb.from('diligencias')
+    .select('*')
+    .order('created_at',{ascending:false})
+    .limit(200);
+  if(error){
+    if(error.code==='42P01'){ if(el) el.innerHTML='<div style="padding:14px;font-size:12px;color:var(--muted)">⚠️ Tabla <b>diligencias</b> no existe.<br>Ejecuta el SQL en <b>DB Setup</b>.</div>'; return; }
+    if(el) el.innerHTML='<div style="padding:14px;font-size:12px;color:var(--muted)">❌ Error: '+error.message+'</div>'; return;
+  }
+  _dil_data = data||[];
+  updateDilStats();
+  renderDiligencias();
+  updateDilBadge();
+}
+
+function updateDilStats(){
+  const today=new Date().toISOString().slice(0,10);
+  const firstOfMonth=new Date().toISOString().slice(0,7)+'-01';
+  document.getElementById('dil-stat-pendientes').textContent=_dil_data.filter(d=>d.estado==='pendiente').length;
+  document.getElementById('dil-stat-camino').textContent=_dil_data.filter(d=>d.estado==='en_camino').length;
+  document.getElementById('dil-stat-hoy').textContent=_dil_data.filter(d=>d.estado==='completada'&&d.fecha_completado&&d.fecha_completado.slice(0,10)===today).length;
+  document.getElementById('dil-stat-mes').textContent=_dil_data.filter(d=>d.created_at&&d.created_at>=firstOfMonth).length;
+}
+
+function updateDilBadge(){
+  const n=_dil_data.filter(d=>d.estado==='pendiente'||d.estado==='en_camino').length;
+  const badge=document.getElementById('badge-mensajero');
+  if(badge){ badge.textContent=n; badge.style.display=n>0?'':'none'; }
+}
+
+function renderDiligencias(){
+  const el=document.getElementById('dil-list');
+  if(!el) return;
+  const filtroEstado=(document.getElementById('dil-filter-estado')?.value)||'';
+  const filtroUrg=(document.getElementById('dil-filter-urgencia')?.value)||'';
+  let list=_dil_data;
+  if(filtroEstado) list=list.filter(d=>d.estado===filtroEstado);
+  if(filtroUrg) list=list.filter(d=>d.urgencia===filtroUrg);
+  if(!list.length){ el.innerHTML='<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">No hay diligencias'+(filtroEstado||filtroUrg?' con estos filtros':'')+'.</div>'; return; }
+  el.innerHTML=list.map(d=>renderDiligenciaCard(d)).join('');
+}
+
+function renderDiligenciaCard(d){
+  const fecha=d.fecha_solicitud?new Date(d.fecha_solicitud).toLocaleDateString('es-PA',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+  const tipoLabel=_DIL_TIPO_LABELS[d.tipo]||d.tipo;
+  const urgLabel=_DIL_URGENCIA_LABELS[d.urgencia]||d.urgencia;
+  const estLabel=_DIL_ESTADO_LABELS[d.estado]||d.estado;
+  const solicitado=d.solicitado_por?'<span style="font-size:11px;color:var(--muted)">Solicitado por: '+d.solicitado_por+'</span>':''
+  let acciones='';
+  if(d.estado==='pendiente') acciones+=`<button class="btn-camino" onclick="setDilEstado('${d.id}','en_camino')">🏍️ En Camino</button><button class="btn-completar" onclick="setDilEstado('${d.id}','completada')">✅ Completar</button>`;
+  if(d.estado==='en_camino') acciones+=`<button class="btn-completar" onclick="setDilEstado('${d.id}','completada')">✅ Completar</button>`;
+  if(d.estado!=='cancelada'&&d.estado!=='completada') acciones+=`<button class="btn-cancelar" onclick="setDilEstado('${d.id}','cancelada')">❌ Cancelar</button>`;
+  return `<div class="dil-card ${d.urgencia}" id="dil-card-${d.id}">
+    <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+          <span class="dil-tipo-badge">${tipoLabel}</span>
+          <span class="dil-estado ${d.estado}">${estLabel}</span>
+          <span class="dil-urgencia ${d.urgencia}">${urgLabel}</span>
+          <span style="font-size:11px;color:var(--muted);margin-left:auto">${fecha}</span>
+        </div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">${d.descripcion||''}</div>
+        ${d.direccion?`<div style="font-size:12px;color:var(--muted)">📍 ${d.direccion}</div>`:''}
+        ${d.referencia?`<div style="font-size:11px;color:var(--muted);margin-top:2px">🗺️ ${d.referencia}</div>`:''}
+        ${d.contacto_nombre||d.contacto_tel?`<div style="font-size:11px;color:var(--muted);margin-top:3px">👤 ${d.contacto_nombre||''} ${d.contacto_tel?'· 📱 '+d.contacto_tel:''}</div>`:''}
+        ${d.propiedad_titulo?`<div style="font-size:11px;color:var(--muted);margin-top:2px">🏠 ${d.propiedad_titulo}</div>`:''}
+        ${solicitado}
+        ${d.notas?`<div style="font-size:11px;color:var(--muted);margin-top:4px;background:var(--card2);border-radius:6px;padding:5px 8px">📝 ${d.notas}</div>`:''}
+      </div>
+    </div>
+    <div class="dil-actions">
+      <button class="btn-wa" onclick="enviarWADiligencia('${d.id}')">📱 WA Francisco</button>
+      ${acciones}
+      <button onclick="verDiligencia('${d.id}')" style="margin-left:auto">👁️ Ver</button>
+    </div>
+  </div>`;
+}
+
+async function setDilEstado(id, estado){
+  if(!sb){ toast('❌ Sin conexión'); return; }
+  const update={estado, updated_at:new Date().toISOString()};
+  if(estado==='completada') update.fecha_completado=new Date().toISOString();
+  if(estado==='en_camino'&&!_dil_data.find(d=>d.id===id)?.fecha_asignacion) update.fecha_asignacion=new Date().toISOString();
+  const {error}=await sb.from('diligencias').update(update).eq('id',id);
+  if(error){ toast('❌ '+error.message); return; }
+  const idx=_dil_data.findIndex(d=>d.id===id);
+  if(idx>=0) Object.assign(_dil_data[idx],update);
+  updateDilStats(); renderDiligencias(); updateDilBadge();
+  const label=_DIL_ESTADO_LABELS[estado]||estado;
+  toast('✅ Diligencia: '+label);
+  // Auto-notify WA if estado changes to en_camino or completada
+  if(estado==='en_camino'||estado==='completada'){
+    const d=_dil_data.find(x=>x.id===id);
+    if(d) setTimeout(()=>_confirmarWAEstado(d, estado),300);
+  }
+}
+
+function _confirmarWAEstado(d, estado){
+  const quien=window._crm_agent?(window._crm_agent.nombre||'Equipo'):'Equipo';
+  const label=_DIL_ESTADO_LABELS[estado]||estado;
+  const txt=encodeURIComponent(
+    `🏍️ *JAC REALTY — Actualización Diligencia*\n\n`+
+    `Estado: ${label}\n`+
+    `Tipo: ${_DIL_TIPO_LABELS[d.tipo]||d.tipo}\n`+
+    `Descripción: ${d.descripcion}\n`+
+    (d.direccion?`Dirección: ${d.direccion}\n`:'')+
+    (d.contacto_nombre?`Contacto: ${d.contacto_nombre}${d.contacto_tel?' ('+d.contacto_tel+')':''}\n`:'')+
+    `\nActualizado por: ${quien}`
+  );
+  const _fw='50766714215';
+  window.open(`https://wa.me/${_fw}?text=${txt}`,'_blank');
+}
+
+function openNuevaDiligencia(){
+  document.getElementById('dil-tipo').value='entrega';
+  document.getElementById('dil-urgencia').value='normal';
+  document.getElementById('dil-descripcion').value='';
+  document.getElementById('dil-direccion').value='';
+  document.getElementById('dil-referencia').value='';
+  document.getElementById('dil-propiedad-titulo').value='';
+  document.getElementById('dil-contacto-nombre').value='';
+  document.getElementById('dil-contacto-tel').value='';
+  document.getElementById('dil-notas').value='';
+  openModal('modalNuevaDiligencia');
+}
+
+async function saveDiligencia(sendWA=false){
+  const desc=(document.getElementById('dil-descripcion')?.value||'').trim();
+  if(!desc){ toast('⚠️ Agrega una descripción'); return; }
+  if(!sb){ toast('❌ Sin conexión a Supabase'); return; }
+  const quien=window._crm_agent?(window._crm_agent.nombre||'')+(window._crm_agent.apellido?' '+window._crm_agent.apellido:''):'';
+  const record={
+    tipo:document.getElementById('dil-tipo').value,
+    descripcion:desc,
+    direccion:document.getElementById('dil-direccion').value.trim(),
+    referencia:document.getElementById('dil-referencia').value.trim(),
+    propiedad_titulo:document.getElementById('dil-propiedad-titulo').value.trim(),
+    contacto_nombre:document.getElementById('dil-contacto-nombre').value.trim(),
+    contacto_tel:document.getElementById('dil-contacto-tel').value.trim(),
+    urgencia:document.getElementById('dil-urgencia').value,
+    notas:document.getElementById('dil-notas').value.trim(),
+    estado:'pendiente',
+    asignado_nombre:'Francisco Florez',
+    asignado_wa:'50766714215',
+    solicitado_por:quien,
+    wa_enviado:sendWA,
+    fecha_solicitud:new Date().toISOString()
+  };
+  const {data,error}=await sb.from('diligencias').insert([record]).select();
+  if(error){ toast('❌ '+error.message); return; }
+  closeModal('modalNuevaDiligencia');
+  toast('✅ Diligencia creada');
+  if(sendWA&&data&&data[0]) enviarWADiligencia(data[0].id,data[0]);
+  await loadDiligencias();
+}
+
+function enviarWAFrancisco(){
+  const _fw='50766714215';
+  window.open('https://wa.me/'+_fw,'_blank');
+}
+
+function enviarWADiligencia(id, dObj){
+  const d=dObj||_dil_data.find(x=>x.id===id);
+  if(!d){ toast('❌ Diligencia no encontrada'); return; }
+  const txt=buildWATextDiligencia(d);
+  const _fw='50766714215';
+  window.open(`https://wa.me/${_fw}?text=${encodeURIComponent(txt)}`,'_blank');
+  // Mark as wa_enviado
+  if(sb) sb.from('diligencias').update({wa_enviado:true,updated_at:new Date().toISOString()}).eq('id',id).then(()=>{
+    const idx=_dil_data.findIndex(x=>x.id===id);
+    if(idx>=0) _dil_data[idx].wa_enviado=true;
+  });
+}
+
+function buildWATextDiligencia(d){
+  const tipoLabel=_DIL_TIPO_LABELS[d.tipo]||d.tipo;
+  const urgLabel=_DIL_URGENCIA_LABELS[d.urgencia]||d.urgencia;
+  const quien=window._crm_agent?(window._crm_agent.nombre||'')+(window._crm_agent.apellido?' '+window._crm_agent.apellido:''):'Jely An';
+  const fecha=new Date().toLocaleString('es-PA',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+  let txt=`🏍️ *DILIGENCIA — JAC REALTY*\n\n`;
+  txt+=`📋 *Tipo:* ${tipoLabel}\n`;
+  txt+=`⚡ *Urgencia:* ${urgLabel}\n\n`;
+  txt+=`📝 *Descripción:*\n${d.descripcion}\n\n`;
+  if(d.direccion) txt+=`📍 *Dirección:*\n${d.direccion}\n\n`;
+  if(d.referencia) txt+=`🗺️ *Referencia:* ${d.referencia}\n\n`;
+  if(d.contacto_nombre||d.contacto_tel) txt+=`👤 *Contacto:* ${d.contacto_nombre||''}${d.contacto_tel?' — 📱 '+d.contacto_tel:''}\n\n`;
+  if(d.propiedad_titulo) txt+=`🏠 *Propiedad:* ${d.propiedad_titulo}\n\n`;
+  if(d.notas) txt+=`📝 *Notas:* ${d.notas}\n\n`;
+  txt+=`_Solicitud: ${fecha} · Solicitado por: ${d.solicitado_por||quien}_`;
+  return txt;
+}
+
+function verDiligencia(id){
+  const d=_dil_data.find(x=>x.id===id);
+  if(!d) return;
+  _dil_active_id=id;
+  const tipoLabel=_DIL_TIPO_LABELS[d.tipo]||d.tipo;
+  const urgLabel=_DIL_URGENCIA_LABELS[d.urgencia]||d.urgencia;
+  const estLabel=_DIL_ESTADO_LABELS[d.estado]||d.estado;
+  const fecha=d.fecha_solicitud?new Date(d.fecha_solicitud).toLocaleString('es-PA',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+  const fechaComp=d.fecha_completado?new Date(d.fecha_completado).toLocaleString('es-PA',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+  document.getElementById('vd-title').textContent=tipoLabel+' — '+estLabel;
+  document.getElementById('vd-body').innerHTML=`
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <span class="dil-estado ${d.estado}">${estLabel}</span>
+      <span class="dil-urgencia ${d.urgencia}">${urgLabel}</span>
+      ${d.wa_enviado?'<span style="font-size:10px;color:#25d366;background:#25d36618;padding:3px 9px;border-radius:8px;font-weight:600">WA ✓ Enviado</span>':''}
+    </div>
+    <div style="font-size:14px;font-weight:700;margin-bottom:10px">${d.descripcion}</div>
+    <div style="display:grid;gap:8px;font-size:12px">
+      ${d.direccion?`<div><span style="color:var(--muted)">📍 Dirección:</span> ${d.direccion}</div>`:''}
+      ${d.referencia?`<div><span style="color:var(--muted)">🗺️ Referencia:</span> ${d.referencia}</div>`:''}
+      ${d.contacto_nombre?`<div><span style="color:var(--muted)">👤 Contacto:</span> ${d.contacto_nombre}${d.contacto_tel?' · 📱 '+d.contacto_tel:''}</div>`:''}
+      ${d.propiedad_titulo?`<div><span style="color:var(--muted)">🏠 Propiedad:</span> ${d.propiedad_titulo}</div>`:''}
+      ${d.solicitado_por?`<div><span style="color:var(--muted)">👤 Solicitado por:</span> ${d.solicitado_por}</div>`:''}
+      ${fecha?`<div><span style="color:var(--muted)">📅 Solicitada:</span> ${fecha}</div>`:''}
+      ${fechaComp?`<div><span style="color:var(--green)">✅ Completada:</span> ${fechaComp}</div>`:''}
+      ${d.notas?`<div style="margin-top:6px"><span style="color:var(--muted)">📝 Notas:</span><br><div style="background:var(--card2);border-radius:7px;padding:8px 10px;margin-top:4px">${d.notas}</div></div>`:''}
+    </div>
+    ${d.estado!=='completada'&&d.estado!=='cancelada'?`
+    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+      ${d.estado==='pendiente'?`<button class="btn btn-sm" onclick="setDilEstado('${d.id}','en_camino');closeModal('modalVerDiligencia')" style="background:#3b82f6;color:#fff;border:none">🏍️ Marcar En Camino</button>`:''}
+      <button class="btn btn-sm" onclick="setDilEstado('${d.id}','completada');closeModal('modalVerDiligencia')" style="background:#22c55e;color:#fff;border:none">✅ Completar</button>
+      <button class="btn btn-sm" onclick="setDilEstado('${d.id}','cancelada');closeModal('modalVerDiligencia')" style="background:var(--card2);color:var(--muted)">❌ Cancelar</button>
+    </div>`:''}
+  `;
+  openModal('modalVerDiligencia');
+}
+
+function enviarWADiligenciaById(){
+  if(_dil_active_id) enviarWADiligencia(_dil_active_id);
+}
+
+// ── CHAT EQUIPO (Mensajero Interno) ───────────────────────
+let _msg_convs = [];
+let _msg_active_peer = null;
+let _msg_active_peer_name = '';
+let _msg_poll_timer = null;
+let _msg_all_msgs = [];
 
 async function loadMensajero(){
   if(!sb){ 
@@ -10001,7 +10425,7 @@ async function loadMensajero(){
   // Poll every 20s
   clearTimeout(_msg_poll_timer);
   _msg_poll_timer = setTimeout(()=>{
-    if(document.getElementById('panel-mensajero')?.classList.contains('active')) loadMensajero();
+    if(document.getElementById('panel-mensajero')?.classList.contains('active')){ if(_dTab==='chat') loadMensajero(); else loadDiligencias(); }
   }, 20000);
 }
 
