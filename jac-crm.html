@@ -2028,7 +2028,27 @@ ALTER TABLE mensajes_internos ENABLE ROW LEVEL SECURITY;
 CREATE POLICY allow_all_mensajes_internos ON mensajes_internos FOR ALL USING (true) WITH CHECK (true);</textarea>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('setup-sql-text').value).then(()=>toast('✅ SQL copiado al portapapeles'))">📋 Copiar SQL</button>
-        <a href="https://supabase.com/dashboard/project/dskslrlxldnxrglrochv/sql/new" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none">🔗 Abrir Supabase SQL Editor</a>
+        <a href="https://supabase.com/dashboard/project/dskslrlxldnxrglrochv/sql/new" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none">🔗 Abrir SQL Editor</a>
+      </div>
+
+      <!-- AUTO-SETUP: ejecutar SQL directamente con Personal Access Token -->
+      <div style="margin-top:18px;border-top:1px solid var(--border);padding-top:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <span style="font-size:13px;font-weight:600;color:var(--text)">⚡ Crear tablas automáticamente</span>
+          <span style="font-size:11px;color:var(--muted)">(recomendado)</span>
+        </div>
+        <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:var(--muted);line-height:1.7">
+          Necesitas un <strong style="color:var(--accent)">Personal Access Token</strong> de Supabase:<br>
+          1. Ve a <a href="https://supabase.com/dashboard/account/tokens" target="_blank" style="color:var(--accent)">supabase.com/dashboard/account/tokens</a><br>
+          2. Crea un token nuevo (nombre: <em>JAC CRM Setup</em>)<br>
+          3. Pégalo aquí y haz clic en "Crear Tablas"<br>
+          <span style="color:#ef4444;font-size:10px">⚠️ El token se borrará de la memoria inmediatamente después de ejecutar</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+          <input type="password" id="setup-pat-input" placeholder="sbp_xxxxxxxxxxxxxxxxxxxxxxxx" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:12px;font-family:monospace;outline:none">
+          <button class="btn btn-primary btn-sm" onclick="runAutoSetup()" style="white-space:nowrap">🚀 Crear Tablas</button>
+        </div>
+        <div id="setup-progress" style="display:none;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;font-family:monospace;line-height:1.8;max-height:160px;overflow-y:auto"></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -6697,6 +6717,85 @@ async function saveActividad(){
   document.getElementById('a-resultado').value='';
   closeModal('modalActividad');
   renderActivity(); renderDashboard();
+}
+
+// ============================================================
+// AUTO-SETUP: Crear tablas Supabase con Personal Access Token
+// ============================================================
+async function runAutoSetup(){
+  const patInput = document.getElementById('setup-pat-input');
+  const pat = patInput.value.trim();
+  if(!pat){ toast('⚠️ Ingresa el Personal Access Token'); return; }
+
+  const progress = document.getElementById('setup-progress');
+  progress.style.display = 'block';
+  progress.innerHTML = '🔄 Iniciando creación de tablas...\n';
+
+  const PROJECT_REF = 'dskslrlxldnxrglrochv';
+  const API = `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`;
+
+  const log = (msg, ok=true) => {
+    progress.innerHTML += (ok ? '✅ ' : '❌ ') + msg + '\n';
+    progress.scrollTop = progress.scrollHeight;
+  };
+
+  // SQL statements to execute in order
+  const statements = [
+    // Basic tables (already exist, safe to skip)
+    [`CREATE TABLE IF NOT EXISTS clientes_activos (id TEXT PRIMARY KEY, payload JSONB DEFAULT '{}', created_at TIMESTAMPTZ DEFAULT NOW())`, 'clientes_activos'],
+    [`CREATE TABLE IF NOT EXISTS contactos_crm (id TEXT PRIMARY KEY, payload JSONB DEFAULT '{}', created_at TIMESTAMPTZ DEFAULT NOW())`, 'contactos_crm'],
+    [`CREATE TABLE IF NOT EXISTS empresas_crm (id TEXT PRIMARY KEY, payload JSONB DEFAULT '{}', created_at TIMESTAMPTZ DEFAULT NOW())`, 'empresas_crm'],
+    [`CREATE TABLE IF NOT EXISTS notas_crm (id TEXT PRIMARY KEY, payload JSONB DEFAULT '{}', created_at TIMESTAMPTZ DEFAULT NOW())`, 'notas_crm'],
+    [`CREATE TABLE IF NOT EXISTS tareas_crm (id TEXT PRIMARY KEY, payload JSONB DEFAULT '{}', created_at TIMESTAMPTZ DEFAULT NOW())`, 'tareas_crm'],
+    // MLS seguimiento
+    [`CREATE TABLE IF NOT EXISTS mls_seguimiento (id TEXT PRIMARY KEY, mls_code TEXT, payload JSONB, created_at TIMESTAMPTZ DEFAULT NOW())`, 'mls_seguimiento'],
+    [`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='mls_seguimiento' AND policyname='allow_all_mls_seguimiento') THEN ALTER TABLE mls_seguimiento ENABLE ROW LEVEL SECURITY; CREATE POLICY "allow_all_mls_seguimiento" ON mls_seguimiento FOR ALL USING (true) WITH CHECK (true); END IF; END $$`, 'RLS mls_seguimiento'],
+    // Agentes CRM
+    [`CREATE TABLE IF NOT EXISTS agentes_crm (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), nombre TEXT NOT NULL, apellido TEXT DEFAULT '', email TEXT UNIQUE NOT NULL, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, licencia TEXT DEFAULT '', telefono TEXT DEFAULT '', whatsapp TEXT DEFAULT '', foto_url TEXT DEFAULT '', rol TEXT DEFAULT 'agente' CHECK (rol IN ('admin','supervisor','agente','asistente')), permisos JSONB DEFAULT '{}'::jsonb, activo BOOLEAN DEFAULT true, notas_internas TEXT DEFAULT '', created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW(), last_login TIMESTAMPTZ)`, 'agentes_crm'],
+    [`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='agentes_crm' AND policyname='allow_all_agentes_crm') THEN ALTER TABLE agentes_crm ENABLE ROW LEVEL SECURITY; CREATE POLICY "allow_all_agentes_crm" ON agentes_crm FOR ALL USING (true) WITH CHECK (true); END IF; END $$`, 'RLS agentes_crm'],
+    [`INSERT INTO agentes_crm (nombre,apellido,email,username,password_hash,licencia,telefono,whatsapp,rol,activo) VALUES ('Jely','Castro','jcastro@jacrealtypa.com','jcastro','5e154b017f873b16a14903cf04b6293a0e725dfbd8c147ef87c2bc39227d3c76','PN-0931','50764627763','50764627763','admin',true) ON CONFLICT (email) DO NOTHING`, 'Agente admin Jely Castro'],
+    // Actividades CRM
+    [`CREATE TABLE IF NOT EXISTS actividades_crm (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tipo TEXT NOT NULL, cliente_nombre TEXT, descripcion TEXT, resultado TEXT, fecha DATE DEFAULT CURRENT_DATE, hora TIME DEFAULT CURRENT_TIME, agente_id UUID REFERENCES agentes_crm(id) ON DELETE SET NULL, agente_nombre TEXT, created_at TIMESTAMPTZ DEFAULT NOW())`, 'actividades_crm'],
+    [`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='actividades_crm' AND policyname='allow_all_actividades_crm') THEN ALTER TABLE actividades_crm ENABLE ROW LEVEL SECURITY; CREATE POLICY "allow_all_actividades_crm" ON actividades_crm FOR ALL USING (true) WITH CHECK (true); END IF; END $$`, 'RLS actividades_crm'],
+    // Mensajes internos
+    [`CREATE TABLE IF NOT EXISTS mensajes_internos (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), de_agente_id UUID NOT NULL, de_agente_nombre TEXT, para_agente_id UUID, para_agente_nombre TEXT, asunto TEXT, mensaje TEXT NOT NULL, leido BOOLEAN DEFAULT false, created_at TIMESTAMPTZ DEFAULT NOW())`, 'mensajes_internos'],
+    [`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='mensajes_internos' AND policyname='allow_all_mensajes_internos') THEN ALTER TABLE mensajes_internos ENABLE ROW LEVEL SECURITY; CREATE POLICY "allow_all_mensajes_internos" ON mensajes_internos FOR ALL USING (true) WITH CHECK (true); END IF; END $$`, 'RLS mensajes_internos'],
+  ];
+
+  let allOk = true;
+  for(const [sql, label] of statements){
+    try {
+      const r = await fetch(API, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${pat}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query: sql })
+      });
+      if(r.ok || r.status === 200){
+        log(label);
+      } else {
+        const body = await r.text();
+        log(`${label}: HTTP ${r.status} — ${body.substring(0,80)}`, false);
+        allOk = false;
+      }
+    } catch(e){
+      log(`${label}: ${e.message}`, false);
+      allOk = false;
+    }
+  }
+
+  // Clear PAT immediately
+  patInput.value = '';
+
+  if(allOk){
+    progress.innerHTML += '\n🎉 ¡Todas las tablas creadas! Recargando CRM...\n';
+    setTimeout(()=>{ closeModal('modalSetupDB'); location.reload(); }, 2000);
+  } else {
+    progress.innerHTML += '\n⚠️ Algunos errores — verifica el token y reintenta.';
+    toast('⚠️ Algunos errores en el setup. Revisa el log.');
+  }
 }
 
 async function loadActividades(){
