@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>JAC Realty CRM · Portal Agentes</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -161,6 +164,38 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .upcoming{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
 .upcoming-title{font-size:13px;font-weight:600;margin-bottom:10px}
 .event-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+/* ── NUEVA AGENDA (estilo JAC Seguros) ── */
+.jac-atab{padding:10px 18px;background:none;border:none;border-bottom:3px solid transparent;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:.15s;margin-bottom:-2px;white-space:nowrap}
+.jac-atab:hover{color:var(--text)}
+.jac-atab.jac-atab-active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
+.jac-mini-cal{width:100%}
+.jac-mini-cal-title{font-size:10px;font-weight:700;color:#3a5a8a;text-align:center;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.jac-mini-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0}
+.jac-mini-cal-dh{font-size:8px;font-weight:600;color:#8899bb;text-align:center;padding:2px 0}
+.jac-mini-cal-day{font-size:10px;text-align:center;padding:3px 1px;border-radius:4px;cursor:pointer;color:#3a4a6a;line-height:1.6}
+.jac-mini-cal-day:hover{background:#f0e8d0}
+.jac-mini-cal-day.jac-mc-today{background:#2563eb;color:#fff;font-weight:700;border-radius:50%}
+.jac-mini-cal-day.jac-mc-has-ev{font-weight:700;color:#1a2a4a;text-decoration:underline;text-underline-offset:2px}
+.jac-mini-cal-day.jac-mc-other{color:#bbc8d8;cursor:default}
+.jac-sidebar-card{background:#fff;border-radius:8px;padding:8px 10px;border-left:3px solid #e8a020;box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:6px}
+.jac-sidebar-card.jac-sc-cita{border-left-color:#f97316}
+.jac-sidebar-card.jac-sc-tarea{border-left-color:#818cf8}
+.jac-sidebar-card.jac-sc-mls{border-left-color:#22c55e}
+.jac-sidebar-card-label{font-size:8px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#8899bb;margin-bottom:2px}
+.jac-sidebar-card-title{font-size:11px;font-weight:600;color:#1a2a4a;line-height:1.3}
+.jac-cal-day{min-height:86px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:7px 6px;cursor:pointer;transition:background .1s}
+.jac-cal-day:hover{background:rgba(232,160,32,.04)}
+.jac-cal-day.jac-other{opacity:.3;pointer-events:none}
+.jac-cal-day.jac-selected{background:rgba(37,99,235,.06)}
+.jac-day-num{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--text);border-radius:6px;margin-bottom:4px}
+.jac-cal-day.jac-today .jac-day-num{background:#2563eb;color:#fff;font-weight:700}
+.jac-cal-day.jac-selected:not(.jac-today) .jac-day-num{color:#2563eb;font-weight:700}
+.jac-cal-dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:2px}
+.jac-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.jac-evento-card{border-radius:8px;border:1px solid var(--border);padding:10px 14px;display:flex;align-items:flex-start;gap:10px;background:var(--card);margin-bottom:8px}
+.jac-evento-card.jac-ec-cita{border-left:3px solid #f97316}
+.jac-evento-card.jac-ec-tarea{border-left:3px solid #818cf8}
+.jac-evento-card.jac-ec-mls{border-left:3px solid #22c55e}
 .event-item:last-child{border-bottom:none}
 .event-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
 .event-desc{font-size:12px}
@@ -253,6 +288,18 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .msg-bubble.broadcast{background:rgba(59,130,246,.18);color:var(--text);border-radius:12px 12px 12px 3px;align-self:flex-start;border:1px solid rgba(59,130,246,.3)}
 .msg-bubble-meta{font-size:10px;opacity:.7;margin-top:3px;display:block}
 .msg-row{display:flex;flex-direction:column}
+/* ── Sync Status Bar ── */
+#sync-bar{position:fixed;bottom:0;left:0;right:0;height:24px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:11px;font-weight:600;z-index:9999;transition:all .3s;pointer-events:none;letter-spacing:.3px}
+#sync-bar.sb-ok{background:rgba(34,197,94,.12);color:#4ade80;border-top:1px solid rgba(34,197,94,.2)}
+#sync-bar.sb-syncing{background:rgba(59,130,246,.12);color:#60a5fa;border-top:1px solid rgba(59,130,246,.2)}
+#sync-bar.sb-offline{background:rgba(239,68,68,.12);color:#f87171;border-top:1px solid rgba(239,68,68,.2);pointer-events:auto;cursor:pointer}
+#sync-bar.sb-queue{background:rgba(232,160,32,.12);color:var(--accent2);border-top:1px solid rgba(232,160,32,.2)}
+#sync-bar.sb-hidden{opacity:0;height:0;border:none}
+.sync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sb-ok .sync-dot{background:#22c55e;box-shadow:0 0 6px #22c55e}
+.sb-syncing .sync-dot{background:#3b82f6;animation:pulse 1s infinite}
+.sb-offline .sync-dot{background:#ef4444}
+.sb-queue .sync-dot{background:var(--accent2)}
 /* ── Diligencias ── */
 .dtab{background:transparent;border:none;border-bottom:3px solid transparent;padding:8px 18px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:.15s;margin-bottom:-2px}
 .dtab:hover{color:var(--text)}
@@ -788,6 +835,12 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
   </div>
 </div>
 
+<!-- SYNC STATUS BAR -->
+<div id="sync-bar" class="sb-hidden">
+  <span class="sync-dot"></span>
+  <span id="sync-bar-msg">Conectando a Supabase…</span>
+</div>
+
 <!-- SIDEBAR OVERLAY (mobile) -->
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
@@ -934,22 +987,22 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
         <div class="kpi-card">
           <div class="kpi-label">Propiedades Activas</div>
           <div class="kpi-value" style="color:var(--blue)" id="kpi-props">0</div>
-          <div class="kpi-delta up">↑ 2 este mes</div>
+          <div class="kpi-delta" id="kpi-props-delta">—</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Leads Activos</div>
           <div class="kpi-value" style="color:var(--accent)" id="kpi-leads">0</div>
-          <div class="kpi-delta up">↑ 5 esta semana</div>
+          <div class="kpi-delta" id="kpi-leads-delta">—</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Citas este Mes</div>
           <div class="kpi-value" style="color:var(--purple)" id="kpi-citas">0</div>
-          <div class="kpi-delta up">↑ 3 vs mes anterior</div>
+          <div class="kpi-delta" id="kpi-citas-delta">—</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Tasa de Cierre</div>
-          <div class="kpi-value" style="color:var(--green)">24%</div>
-          <div class="kpi-delta up">↑ 4% vs trimestre</div>
+          <div class="kpi-value" style="color:var(--green)" id="kpi-tasa-cierre">—</div>
+          <div class="kpi-delta" id="kpi-tasa-cierre-delta" style="color:var(--text2)">Sin datos suficientes</div>
         </div>
         <div class="kpi-card" style="cursor:pointer" onclick="showPanel('contactos')">
           <div class="kpi-label">Empresas</div>
@@ -1128,27 +1181,112 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
     </div>
 
     <!-- ========== AGENDA ========== -->
-    <div class="panel" id="panel-agenda">
-      <div class="cal-grid">
-        <div class="cal-main">
-          <div class="cal-header">
-            <button class="btn btn-ghost" onclick="calPrev()">‹</button>
-            <span class="cal-month" id="cal-month-label"></span>
-            <button class="btn btn-ghost" onclick="calNext()">›</button>
+    <div class="panel" id="panel-agenda" style="padding:0;overflow:hidden;border-radius:12px;border:1px solid var(--border)">
+      <div style="display:flex;height:calc(100vh - 140px);min-height:560px">
+
+        <!-- ═══ SIDEBAR IZQUIERDO ═══ -->
+        <div style="width:252px;min-width:252px;background:linear-gradient(160deg,#fffdf7 0%,#fef8ec 100%);border-right:1px solid #e8d8b0;display:flex;flex-direction:column;overflow-y:auto">
+          <!-- Fecha grande -->
+          <div style="padding:18px 16px 12px;border-bottom:1px solid #e8d8b0">
+            <div id="jac-agenda-dia-num" style="font-size:60px;font-weight:900;color:#1a2a4a;line-height:1">18</div>
+            <div style="display:flex;align-items:baseline;gap:6px;margin-top:2px">
+              <div id="jac-agenda-dia-nombre" style="font-size:14px;font-weight:600;color:#5a6a8a">/&nbsp;sábado</div>
+            </div>
+            <div id="jac-agenda-mes-anio" style="font-size:12px;color:#8a9abb;margin-top:1px">Julio 2026</div>
+            <!-- Botones -->
+            <div style="display:flex;gap:6px;margin-top:11px;align-items:center">
+              <button onclick="jacAgendaAgregarCita()" style="flex:1;background:#1a3a6a;color:#fff;border:none;border-radius:7px;padding:7px 0;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.03em">AGREGAR CITA</button>
+              <button onclick="openModal('modalTarea')" style="background:#22c55e;color:#fff;border:none;border-radius:50%;width:30px;height:30px;font-size:20px;font-weight:700;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>
+            </div>
           </div>
-          <div class="cal-days-header">
-            <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+          <!-- Eventos del sidebar (hoy) -->
+          <div style="padding:10px 12px;flex:1;min-height:80px">
+            <div id="jac-sidebar-eventos"></div>
           </div>
-          <div class="cal-days" id="cal-days"></div>
+          <!-- Mini calendarios -->
+          <div style="padding:10px 12px;border-top:1px solid #e8d8b0">
+            <div id="jac-mini-cal-1" style="margin-bottom:10px"></div>
+            <div id="jac-mini-cal-2"></div>
+          </div>
         </div>
-        <div class="cal-sidebar">
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-primary btn-sm" style="flex:1" onclick="openModal('modalCita')">+ Cita</button>
-            <button class="btn btn-outline btn-sm" style="flex:1" onclick="openModal('modalCita')">+ Recordatorio</button>
+
+        <!-- ═══ CONTENIDO PRINCIPAL ═══ -->
+        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)">
+          <!-- Tabs -->
+          <div style="display:flex;border-bottom:2px solid var(--border);background:var(--card2);flex-shrink:0;overflow-x:auto">
+            <button id="jac-atab-agenda"    class="jac-atab jac-atab-active" onclick="jacSwitchTab('agenda')">Agenda</button>
+            <button id="jac-atab-semana"    class="jac-atab" onclick="jacSwitchTab('semana')">Semana</button>
+            <button id="jac-atab-tareas"    class="jac-atab" onclick="jacSwitchTab('tareas')">Tareas</button>
+            <button id="jac-atab-metas"     class="jac-atab" onclick="jacSwitchTab('metas')">Metas</button>
+            <button id="jac-atab-diario"    class="jac-atab" onclick="jacSwitchTab('diario')">Diario</button>
+            <button id="jac-atab-reuniones" class="jac-atab" onclick="jacSwitchTab('reuniones')">Reuniones</button>
+            <button id="jac-atab-notas2"    class="jac-atab" onclick="jacSwitchTab('notas2')">Notas</button>
           </div>
-          <div class="upcoming">
-            <div class="upcoming-title">📅 Esta Semana</div>
-            <div id="upcoming-list"></div>
+
+          <!-- ── TAB: AGENDA (calendario mensual) ── -->
+          <div id="jac-atab-content-agenda" style="flex:1;overflow-y:auto;padding:18px 20px">
+            <!-- Navegación de mes -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <button onclick="calPrev()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;width:34px;height:34px;cursor:pointer;color:var(--text);font-size:16px;display:flex;align-items:center;justify-content:center">◀</button>
+              <span id="cal-month-label" style="font-size:16px;font-weight:700;color:var(--text)"></span>
+              <button onclick="calNext()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;width:34px;height:34px;cursor:pointer;color:var(--text);font-size:16px;display:flex;align-items:center;justify-content:center">▶</button>
+            </div>
+            <!-- Grid calendario -->
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);background:var(--card2);border-bottom:1px solid var(--border)">
+                <div style="text-align:center;padding:9px 0;font-size:11px;font-weight:600;color:var(--muted)">Dom</div>
+                <div style="text-align:center;padding:9px 0;font-size:11px;font-weight:600;color:var(--muted)">Lun</div>
+                <div style="text-align:center;padding:9px 0;font-size:11px;font-weight:600;color:var(--muted)">Mar</div>
+                <div style="text-align:center;padding:9px 0;font-size:11px;font-weight:600;color:var(--muted)">Mié</div>
+                <div style="text-align:center;padding:9px 0;font-size:11px;font-weight:600;color:var(--muted)">Jue</div>
+                <div style="text-align:center;padding:9px 0;font-size:11px;font-weight:600;color:var(--muted)">Vie</div>
+                <div style="text-align:center;padding:9px 0;font-size:11px;font-weight:600;color:var(--muted)">Sáb</div>
+              </div>
+              <div id="cal-days" style="display:grid;grid-template-columns:repeat(7,1fr)"></div>
+            </div>
+            <!-- Leyenda -->
+            <div style="display:flex;gap:18px;margin-top:10px;align-items:center;font-size:11px;color:var(--muted)">
+              <span style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;border-radius:50%;background:#f97316;display:inline-block"></span>Cita / Visita</span>
+              <span style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;border-radius:50%;background:#818cf8;display:inline-block"></span>Tarea</span>
+              <span style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;border-radius:50%;background:#22c55e;display:inline-block"></span>Seguimiento MLS</span>
+            </div>
+            <!-- EVENTOS DEL DÍA -->
+            <div style="margin-top:18px">
+              <div style="font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Eventos del Día</div>
+              <div id="jac-eventos-dia">
+                <div style="color:var(--muted);font-size:13px;padding:16px 0">Haz clic en un día para ver sus eventos</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── TAB: SEMANA ── -->
+          <div id="jac-atab-content-semana" style="flex:1;overflow-y:auto;padding:18px 20px;display:none">
+            <div id="jac-semana-grid"></div>
+          </div>
+
+          <!-- ── TAB: TAREAS ── -->
+          <div id="jac-atab-content-tareas" style="flex:1;overflow-y:auto;padding:18px 20px;display:none">
+            <div id="jac-atab-tareas-list"></div>
+          </div>
+
+          <!-- ── TAB: METAS ── -->
+          <div id="jac-atab-content-metas" style="flex:1;overflow-y:auto;padding:18px 20px;display:none;text-align:center;color:var(--muted)">
+            <div style="padding:60px 0;font-size:14px">🎯 Próximamente: Metas y objetivos de ventas</div>
+          </div>
+
+          <!-- ── TAB: DIARIO ── -->
+          <div id="jac-atab-content-diario" style="flex:1;overflow-y:auto;padding:18px 20px;display:none;text-align:center;color:var(--muted)">
+            <div style="padding:60px 0;font-size:14px">📔 Próximamente: Diario de actividades</div>
+          </div>
+
+          <!-- ── TAB: REUNIONES ── -->
+          <div id="jac-atab-content-reuniones" style="flex:1;overflow-y:auto;padding:18px 20px;display:none">
+            <div id="jac-reuniones-list"></div>
+          </div>
+
+          <!-- ── TAB: NOTAS (vista interna) ── -->
+          <div id="jac-atab-content-notas2" style="flex:1;overflow-y:auto;padding:18px 20px;display:none;text-align:center;color:var(--muted)">
+            <div style="padding:60px 0;font-size:14px">📝 Usa el módulo <strong>Notas</strong> en el menú lateral para gestionar notas</div>
           </div>
         </div>
       </div>
@@ -1584,7 +1722,19 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
               <option>Disponible</option><option>En Negociación</option><option>Vendido</option>
             </select>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="recargarMLS(this)">🔄 Recargar MLS</button>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <select id="mls-filter-zona" onchange="renderMLS()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none;max-width:150px">
+              <option value="">📍 Zona</option>
+            </select>
+            <input type="number" id="mls-precio-min" placeholder="$ Mín" oninput="renderMLS()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:var(--text);font-size:12px;outline:none;width:82px">
+            <span style="color:var(--text2);font-size:12px">–</span>
+            <input type="number" id="mls-precio-max" placeholder="$ Máx" oninput="renderMLS()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:var(--text);font-size:12px;outline:none;width:82px">
+            <button class="btn btn-outline btn-sm" onclick="mlsLimpiarFiltros()" title="Limpiar filtros">✕</button>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span id="mls-count-label" style="font-size:11px;color:var(--text2)"></span>
+            <button class="btn btn-primary btn-sm" onclick="recargarMLS(this)">🔄 Recargar MLS</button>
+          </div>
         </div>
         <div class="table-wrap">
           <table>
@@ -1595,7 +1745,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
         <div id="mls-empty" style="display:none;text-align:center;padding:40px;color:var(--text2)">
           <div style="font-size:36px;margin-bottom:8px">📡</div>
           <div style="font-weight:600;margin-bottom:4px">Cargando listados MLS...</div>
-          <div style="font-size:13px">Los 1305 listados del MLS ACOBIR se cargan desde Supabase</div>
+          <div style="font-size:13px">Los listados del MLS ACOBIR se cargan desde Supabase</div>
         </div>
         <div id="mls-pag-info" style="display:none;padding:12px 0;align-items:center;justify-content:space-between;gap:12px"></div>
       </div>
@@ -3749,6 +3899,54 @@ function renderDashboard(){
   document.getElementById('kpi-leads').textContent=leads.filter(l=>!['Cerrado ✅','Perdido ❌','Cerrado','Perdido'].includes(l.status)).length;
   document.getElementById('kpi-citas').textContent=citas.length;
   document.getElementById('kpi-empresas-dash').textContent=empresas.length+(contacts.filter(c=>c.categoria==='Empresa'||c.esEmpresa==='si').length);
+  // ── Deltas dinámicos (calculados desde fechas reales) ─────
+  (function(){
+    const now=new Date();
+    const y=now.getFullYear(), m=now.getMonth();
+    const iniMes=new Date(y,m,1);
+    const iniPrevMes=new Date(y,m-1,1);
+    const iniSemana=new Date(now); iniSemana.setDate(now.getDate()-now.getDay()); iniSemana.setHours(0,0,0,0);
+    // Props delta — nuevas este mes vs mes anterior
+    const pMes=props.filter(p=>p.created_at&&new Date(p.created_at)>=iniMes).length;
+    const pPrev=props.filter(p=>p.created_at&&new Date(p.created_at)>=iniPrevMes&&new Date(p.created_at)<iniMes).length;
+    const pDelta=document.getElementById('kpi-props-delta');
+    if(pDelta){
+      if(pMes>0){pDelta.textContent='↑ '+pMes+' este mes';pDelta.className='kpi-delta up';}
+      else if(pPrev>0){pDelta.textContent=pPrev+' el mes pasado';pDelta.className='kpi-delta';}
+      else{pDelta.textContent='Sin nuevas recientes';pDelta.className='kpi-delta';}
+    }
+    // Leads delta — nuevos esta semana
+    const lSemana=leads.filter(l=>l.created_at&&new Date(l.created_at)>=iniSemana).length;
+    const lDelta=document.getElementById('kpi-leads-delta');
+    if(lDelta){
+      if(lSemana>0){lDelta.textContent='↑ '+lSemana+' esta semana';lDelta.className='kpi-delta up';}
+      else{lDelta.textContent='Sin nuevos esta semana';lDelta.className='kpi-delta';}
+    }
+    // Citas delta — este mes vs mes anterior
+    const cMes=citas.filter(c=>c.fecha&&new Date(c.fecha)>=iniMes).length;
+    const cPrev=citas.filter(c=>c.fecha&&new Date(c.fecha)>=iniPrevMes&&new Date(c.fecha)<iniMes).length;
+    const cDelta=document.getElementById('kpi-citas-delta');
+    if(cDelta){
+      if(cPrev>0){const d=cMes-cPrev;if(d>0){cDelta.textContent='↑ '+d+' vs mes anterior';cDelta.className='kpi-delta up';}else if(d<0){cDelta.textContent='↓ '+Math.abs(d)+' vs mes anterior';cDelta.className='kpi-delta';cDelta.style.color='var(--red)';}else{cDelta.textContent='Igual al mes anterior';cDelta.className='kpi-delta';}}
+      else{if(cMes>0){cDelta.textContent=cMes+' este mes';cDelta.className='kpi-delta up';}else{cDelta.textContent='Sin citas este mes';cDelta.className='kpi-delta';}}
+    }
+  })();
+  // Tasa de cierre — sólo calcula si hay datos reales suficientes
+  (function(){
+    const totalLeads=leads.length;
+    const cerrados=leads.filter(l=>['Cerrado ✅','Cerrado'].includes(l.status)).length;
+    const el=document.getElementById('kpi-tasa-cierre');
+    const delta=document.getElementById('kpi-tasa-cierre-delta');
+    if(!el) return;
+    if(totalLeads<5){
+      el.textContent='—';
+      if(delta){ delta.textContent='Sin datos suficientes'; delta.className='kpi-delta'; delta.style.color='var(--text2)'; }
+    } else {
+      const pct=Math.round((cerrados/totalLeads)*100);
+      el.textContent=pct+'%';
+      if(delta){ delta.textContent=cerrados+' de '+totalLeads+' leads cerrados'; delta.className='kpi-delta up'; delta.style.color=''; }
+    }
+  })();
   updateBadges();
   // Hot leads
   const hot=leads.filter(l=>['Visita programada','En negociación','Oferta presentada','Visita','Oferta'].includes(l.status)).slice(0,5);
@@ -4049,39 +4247,268 @@ function dropLead(e,stage){
 // ============================================================
 // CALENDAR
 // ============================================================
+// ═══════════════════════════════════════════════════════════════
+// AGENDA NUEVA — Estilo JAC Seguros
+// ═══════════════════════════════════════════════════════════════
+let _jacSelDate = null; // YYYY-MM-DD fecha seleccionada en el calendario
+
+function jacAgendaAgregarCita(){
+  const fd=document.getElementById('cita-fecha');
+  if(fd) fd.value=(_jacSelDate||new Date().toISOString().slice(0,10));
+  openModal('modalCita');
+}
+
+function jacUpdateSidebarDate(){
+  const now=new Date();
+  const dias=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const el1=document.getElementById('jac-agenda-dia-num');
+  const el2=document.getElementById('jac-agenda-dia-nombre');
+  const el3=document.getElementById('jac-agenda-mes-anio');
+  if(el1) el1.textContent=now.getDate();
+  if(el2) el2.textContent='/ '+dias[now.getDay()];
+  if(el3) el3.textContent=meses[now.getMonth()]+' '+now.getFullYear();
+}
+
+function jacRenderMiniCal(containerId, year, month){
+  const el=document.getElementById(containerId); if(!el) return;
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const today=new Date();
+  const firstDay=new Date(year,month,1).getDay();
+  const daysInM=new Date(year,month+1,0).getDate();
+  const evDates=new Set();
+  citas.forEach(c=>{ if(c.fecha){ const p=c.fecha.split('-'); if(parseInt(p[0])===year&&parseInt(p[1])-1===month) evDates.add(parseInt(p[2])); }});
+  tasks.forEach(t=>{ if(t.due){ const p=t.due.split('-'); if(parseInt(p[0])===year&&parseInt(p[1])-1===month) evDates.add(parseInt(p[2])); }});
+  let h=`<div class="jac-mini-cal"><div class="jac-mini-cal-title">${meses[month]} ${year}</div><div class="jac-mini-cal-grid">
+    <div class="jac-mini-cal-dh">D</div><div class="jac-mini-cal-dh">L</div><div class="jac-mini-cal-dh">M</div><div class="jac-mini-cal-dh">X</div><div class="jac-mini-cal-dh">J</div><div class="jac-mini-cal-dh">V</div><div class="jac-mini-cal-dh">S</div>`;
+  for(let i=0;i<firstDay;i++) h+=`<div class="jac-mini-cal-day jac-mc-other"></div>`;
+  for(let d=1;d<=daysInM;d++){
+    const isT=today.getFullYear()===year&&today.getMonth()===month&&today.getDate()===d;
+    const hasE=evDates.has(d)&&!isT;
+    const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    h+=`<div class="jac-mini-cal-day${isT?' jac-mc-today':''}${hasE?' jac-mc-has-ev':''}" onclick="jacSelectDay('${ds}')">${d}</div>`;
+  }
+  h+=`</div></div>`;
+  el.innerHTML=h;
+}
+
+function jacRenderSidebarEvents(){
+  const el=document.getElementById('jac-sidebar-eventos'); if(!el) return;
+  const today=new Date().toISOString().slice(0,10);
+  const tc=citas.filter(c=>c.fecha===today);
+  const tt=tasks.filter(t=>t.due===today&&t.status!=='Completada');
+  let h='';
+  tc.slice(0,4).forEach(c=>{
+    h+=`<div class="jac-sidebar-card jac-sc-cita">
+      <div class="jac-sidebar-card-label">Cita</div>
+      <div class="jac-sidebar-card-title">${c.cliente||'Sin cliente'}</div>
+      <div style="font-size:9px;color:#8899bb;margin-top:1px">⏰ ${c.hora||'—'} · ${c.tipo||''}</div>
+    </div>`;
+  });
+  tt.slice(0,4).forEach(t=>{
+    h+=`<div class="jac-sidebar-card jac-sc-tarea">
+      <div class="jac-sidebar-card-label">Tarea</div>
+      <div class="jac-sidebar-card-title">${t.title||t.desc||'Sin desc.'}</div>
+      <div style="font-size:9px;color:#8899bb;margin-top:1px">📌 ${t.priority||'Normal'}</div>
+    </div>`;
+  });
+  if(!h) h=`<div style="font-size:10px;color:#8899bb;text-align:center;padding:16px 0;line-height:1.5">Sin eventos hoy</div>`;
+  el.innerHTML=h;
+}
+
 function renderCalendar(){
   const months=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  document.getElementById('cal-month-label').textContent=`${months[calMonth]} ${calYear}`;
+  const el=document.getElementById('cal-month-label');
+  if(el) el.textContent=`${months[calMonth]} ${calYear}`;
   const firstDay=new Date(calYear,calMonth,1).getDay();
   const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
   const today=new Date();
+  const todayStr=today.toISOString().slice(0,10);
+  if(!_jacSelDate) _jacSelDate=todayStr;
   let html='';
-  for(let i=0;i<firstDay;i++) html+=`<div class="cal-day other-month"><div class="cal-day-num">${new Date(calYear,calMonth,1-firstDay+i).getDate()}</div></div>`;
+  // Días previos (mes anterior)
+  for(let i=0;i<firstDay;i++){
+    const prevD=new Date(calYear,calMonth,1-firstDay+i);
+    html+=`<div class="jac-cal-day jac-other"><div class="jac-day-num">${prevD.getDate()}</div></div>`;
+  }
+  // Días del mes
   for(let d=1;d<=daysInMonth;d++){
-    const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
-    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dayCitas=citas.filter(c=>c.fecha===dateStr);
-    html+=`<div class="cal-day${isToday?' today':''}" onclick="openModal('modalCita')">
-      <div class="cal-day-num">${d}</div>
-      ${dayCitas.map(c=>`<div class="cal-event ${c.tipo.includes('Visita')?'visita':'reunion'}">${c.hora} ${c.cliente}</div>`).join('')}
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isT=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
+    const isSel=_jacSelDate===ds;
+    const dc=citas.filter(c=>c.fecha===ds);
+    const dt=tasks.filter(t=>t.due===ds);
+    const dm=(typeof mlsGuardadas!=='undefined'?mlsGuardadas:[]).filter(m=>m.fecha_seguimiento===ds||m.next_follow_up===ds);
+    let dots='';
+    if(dc.length) dots+=`<div class="jac-dot" style="background:#f97316" title="${dc.length} cita(s)"></div>`;
+    if(dt.length) dots+=`<div class="jac-dot" style="background:#818cf8" title="${dt.length} tarea(s)"></div>`;
+    if(dm.length) dots+=`<div class="jac-dot" style="background:#22c55e" title="${dm.length} MLS"></div>`;
+    html+=`<div class="jac-cal-day${isT?' jac-today':''}${isSel&&!isT?' jac-selected':''}" onclick="jacSelectDay('${ds}')" data-date="${ds}">
+      <div class="jac-day-num">${d}</div>
+      <div class="jac-cal-dots">${dots}</div>
     </div>`;
   }
-  document.getElementById('cal-days').innerHTML=html;
-  // Upcoming
-  const upcoming=citas.sort((a,b)=>a.fecha.localeCompare(b.fecha)).slice(0,5);
-  const typeColors={Visita:'var(--purple)','Reunión':'var(--accent)',Llamada:'var(--blue)',Firma:'var(--green)'};
-  document.getElementById('upcoming-list').innerHTML=upcoming.map(c=>{
-    const color=Object.entries(typeColors).find(([k])=>c.tipo.includes(k))?.[1]||'var(--muted)';
-    return `<div class="event-item">
-      <div class="event-dot" style="background:${color}"></div>
-      <div>
-        <div class="event-desc"><strong>${c.tipo}</strong> · ${c.cliente}</div>
-        <div class="event-time">📅 ${c.fecha} ⏰ ${c.hora}</div>
-      </div>
-    </div>`;}).join('');
+  // Días siguientes (relleno)
+  const total=firstDay+daysInMonth;
+  const rem=total%7===0?0:7-(total%7);
+  for(let i=1;i<=rem;i++){
+    const nd=new Date(calYear,calMonth+1,i);
+    html+=`<div class="jac-cal-day jac-other"><div class="jac-day-num">${nd.getDate()}</div></div>`;
+  }
+  const cdEl=document.getElementById('cal-days');
+  if(cdEl) cdEl.innerHTML=html;
+  // Sidebar
+  jacUpdateSidebarDate();
+  jacRenderSidebarEvents();
+  // Mini calendarios
+  jacRenderMiniCal('jac-mini-cal-1',calYear,calMonth);
+  const nm=calMonth===11?0:calMonth+1, ny=calMonth===11?calYear+1:calYear;
+  jacRenderMiniCal('jac-mini-cal-2',ny,nm);
+  // Eventos del día seleccionado
+  jacShowEventosDelDia(_jacSelDate);
 }
+
 function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
 function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();}
+
+function jacSelectDay(ds){
+  _jacSelDate=ds;
+  // Navegar al mes del día si hace falta
+  const [y,m]=ds.split('-');
+  calYear=parseInt(y); calMonth=parseInt(m)-1;
+  renderCalendar();
+}
+
+function jacShowEventosDelDia(ds){
+  const el=document.getElementById('jac-eventos-dia'); if(!el) return;
+  if(!ds){ el.innerHTML='<div style="color:var(--muted);font-size:13px;padding:16px 0">Haz clic en un día para ver sus eventos</div>'; return; }
+  const [y,m,d]=ds.split('-');
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const label=`${parseInt(d)} de ${meses[parseInt(m)-1]} ${y}`;
+  const dc=citas.filter(c=>c.fecha===ds);
+  const dt=tasks.filter(t=>t.due===ds);
+  const dm=(typeof mlsGuardadas!=='undefined'?mlsGuardadas:[]).filter(x=>x.fecha_seguimiento===ds||x.next_follow_up===ds);
+  let h='';
+  dc.forEach(c=>{
+    h+=`<div class="jac-evento-card jac-ec-cita">
+      <div style="color:#f97316;font-size:20px;line-height:1;flex-shrink:0">📅</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px;color:var(--text)">${c.cliente||'Sin cliente'}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${c.tipo||'Cita'} · ⏰ ${c.hora||'Sin hora'}${c.ubicacion?' · '+c.ubicacion:''}</div>
+        ${c.notas?`<div style="font-size:11px;color:var(--muted);margin-top:3px">${c.notas}</div>`:''}
+      </div>
+      <span style="font-size:9px;background:#f9731622;color:#f97316;padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0">${c.status||'Pendiente'}</span>
+    </div>`;
+  });
+  dt.forEach(t=>{
+    const done=t.status==='Completada';
+    h+=`<div class="jac-evento-card jac-ec-tarea">
+      <div onclick="(function(){if(typeof toggleTaskStatusById==='function')toggleTaskStatusById('${t.id}');})()" style="width:20px;height:20px;border-radius:50%;background:${done?'#818cf8':'transparent'};border:2px solid #818cf8;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;cursor:pointer;flex-shrink:0">${done?'✓':''}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px;color:var(--text);${done?'text-decoration:line-through;opacity:.6':''}">🔔 ${t.title||t.desc||'Sin descripción'}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">📌 ${t.priority||'Normal'}</div>
+      </div>
+      <span style="font-size:9px;background:#818cf822;color:#818cf8;padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0">${t.status||'Pendiente'}</span>
+    </div>`;
+  });
+  dm.forEach(mx=>{
+    h+=`<div class="jac-evento-card jac-ec-mls">
+      <div style="color:#22c55e;font-size:20px;line-height:1;flex-shrink:0">🏠</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px;color:var(--text)">${mx.titulo||mx.mls_code||'Propiedad MLS'}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Seguimiento MLS${mx.zona?' · '+mx.zona:''}${mx.precio?' · $'+Number(mx.precio).toLocaleString():''}</div>
+      </div>
+      <span style="font-size:9px;background:#22c55e22;color:#22c55e;padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0">Seguimiento</span>
+    </div>`;
+  });
+  if(!h) h=`<div style="color:var(--muted);font-size:13px;padding:16px 0;text-align:center">Sin eventos para ${label}</div>`;
+  el.innerHTML=h;
+}
+
+function jacSwitchTab(tab){
+  ['agenda','semana','tareas','metas','diario','reuniones','notas2'].forEach(t=>{
+    const btn=document.getElementById('jac-atab-'+t);
+    const cnt=document.getElementById('jac-atab-content-'+t);
+    if(btn) btn.classList.toggle('jac-atab-active',t===tab);
+    if(cnt) cnt.style.display=(t===tab)?'':'none';
+  });
+  if(tab==='semana') jacRenderSemana();
+  if(tab==='tareas') jacRenderTareasTab();
+  if(tab==='reuniones') jacRenderReunionesTab();
+}
+
+function jacRenderSemana(){
+  const el=document.getElementById('jac-semana-grid'); if(!el) return;
+  const today=new Date();
+  const sow=new Date(today); sow.setDate(today.getDate()-today.getDay());
+  const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  let h=`<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px">`;
+  for(let i=0;i<7;i++){
+    const dd=new Date(sow); dd.setDate(sow.getDate()+i);
+    const ds=dd.toISOString().slice(0,10);
+    const isT=dd.toDateString()===today.toDateString();
+    const dc=citas.filter(c=>c.fecha===ds);
+    const dt=tasks.filter(t=>t.due===ds);
+    h+=`<div onclick="jacSelectDay('${ds}');showPanel('agenda')" style="background:var(--card);border:1px solid ${isT?'var(--accent)':'var(--border)'};border-radius:10px;padding:10px;min-height:120px;cursor:pointer;transition:.1s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='${isT?'var(--accent)':'var(--border)'}'">
+      <div style="font-size:10px;font-weight:600;color:${isT?'var(--accent)':'var(--muted)'}">${dias[i]}</div>
+      <div style="font-size:${isT?22:17}px;font-weight:700;color:${isT?'var(--accent)':'var(--text)'};margin:3px 0 8px">${dd.getDate()}</div>
+      ${dc.map(c=>`<div style="font-size:9px;background:#f9731618;color:#f97316;border-radius:4px;padding:2px 5px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📅 ${c.cliente||c.tipo}</div>`).join('')}
+      ${dt.map(t=>`<div style="font-size:9px;background:#818cf818;color:#818cf8;border-radius:4px;padding:2px 5px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📌 ${t.title||t.desc||'Tarea'}</div>`).join('')}
+    </div>`;
+  }
+  h+=`</div><div style="margin-top:14px;font-size:11px;color:var(--muted);text-align:center">Semana del ${sow.toLocaleDateString('es-PA',{day:'numeric',month:'long'})} al ${new Date(sow.getTime()+6*86400000).toLocaleDateString('es-PA',{day:'numeric',month:'long',year:'numeric'})}</div>`;
+  el.innerHTML=h;
+}
+
+function jacRenderTareasTab(){
+  const el=document.getElementById('jac-atab-tareas-list'); if(!el) return;
+  const pending=tasks.filter(t=>t.status!=='Completada').sort((a,b)=>(a.due||'').localeCompare(b.due||''));
+  const done=tasks.filter(t=>t.status==='Completada').slice(0,8);
+  const priC={Alta:'#f87171',Media:'#fbbf24',Baja:'#4ade80'};
+  const renderT=list=>list.map(t=>{
+    const clr=priC[t.priority]||'var(--muted)';
+    const isDone=t.status==='Completada';
+    return `<div class="jac-evento-card jac-ec-tarea">
+      <div onclick="(function(){if(typeof toggleTaskStatusById==='function')toggleTaskStatusById('${t.id}');})()" style="width:20px;height:20px;border-radius:50%;background:${isDone?'#818cf8':'transparent'};border:2px solid #818cf8;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;cursor:pointer;flex-shrink:0">${isDone?'✓':''}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px;color:var(--text);${isDone?'text-decoration:line-through;opacity:.6':''}">${t.title||t.desc||'Sin descripción'}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${t.due?'📅 '+t.due+' · ':''}<span style="color:${clr}">${t.priority||'Normal'}</span></div>
+      </div>
+      <span style="font-size:9px;background:#818cf822;color:#818cf8;padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0">${t.status||'Pendiente'}</span>
+    </div>`;
+  }).join('');
+  el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <span style="font-weight:700;font-size:14px">Tareas Pendientes (${pending.length})</span>
+    <button class="btn btn-primary btn-sm" onclick="openModal('modalTarea')">+ Nueva Tarea</button>
+  </div>
+  ${pending.length?renderT(pending):'<div style="color:var(--muted);text-align:center;padding:30px 0">Sin tareas pendientes 🎉</div>'}
+  ${done.length?`<div style="font-weight:600;font-size:12px;color:var(--muted);margin:16px 0 10px;text-transform:uppercase;letter-spacing:.05em">Completadas</div>${renderT(done)}`:''}`;
+}
+
+function jacRenderReunionesTab(){
+  const el=document.getElementById('jac-reuniones-list'); if(!el) return;
+  const reu=citas.filter(c=>c.tipo&&(c.tipo.toLowerCase().includes('reuni')||c.tipo.toLowerCase().includes('meeting')));
+  if(!reu.length){
+    el.innerHTML=`<div style="text-align:center;padding:60px 0;color:var(--muted);font-size:14px">Sin reuniones programadas<br><small style="font-size:12px;margin-top:6px;display:block">Agrega una cita de tipo "Reunión" para verla aquí</small></div>`;
+    return;
+  }
+  el.innerHTML=reu.map(r=>`<div class="jac-evento-card jac-ec-cita">
+    <div style="color:#f97316;font-size:20px;flex-shrink:0">🤝</div>
+    <div style="flex:1">
+      <div style="font-weight:600;font-size:13px;color:var(--text)">${r.cliente}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">📅 ${r.fecha} · ⏰ ${r.hora||'—'}${r.ubicacion?' · '+r.ubicacion:''}</div>
+    </div>
+  </div>`).join('');}
+
+// Función auxiliar para toggle de tarea desde agenda
+function toggleTaskStatusById(id){
+  const t=tasks.find(x=>x.id===id||x.id===parseInt(id));
+  if(!t) return;
+  t.status=t.status==='Completada'?'Pendiente':'Completada';
+  if(typeof _sbSave==='function') _sbSave('tareas_crm',t,{upsert:true}).catch(()=>{});
+  renderCalendar();
+  if(document.getElementById('jac-atab-tareas-list')&&document.getElementById('jac-atab-content-tareas')?.style.display!=='none') jacRenderTareasTab();
+}
 
 // ============================================================
 // ACTIVITY
@@ -4260,6 +4687,36 @@ function toggleAuto(btn,name){
 // MLS ACOBIR — listados importados (persistidos en Supabase tabla propiedades_red tipo='mls')
 let mlsListados = [];
 let mlsGuardadas = []; // Propiedades MLS en seguimiento activo
+// ── MLS localStorage blindaje — datos NUNCA se pierden ───────────
+const _LS_GUARD    = 'jac_mls_guard_v2';
+const _LS_MLS_CACHE= 'jac_mls_cache_v2';
+const _LS_MLS_TS   = 'jac_mls_cache_ts';
+(function _initMlsLS(){
+  // Cargar guardadas inmediatamente desde LS (antes de que Supabase responda)
+  try{ const r=localStorage.getItem(_LS_GUARD); if(r) mlsGuardadas=JSON.parse(r)||[]; }catch(e){ mlsGuardadas=[]; }
+  // Cargar caché de listados MLS (válida por 6 h)
+  try{
+    const cRaw=localStorage.getItem(_LS_MLS_CACHE);
+    const cTs=parseInt(localStorage.getItem(_LS_MLS_TS)||'0');
+    if(cRaw && (Date.now()-cTs)<6*3600*1000) mlsListados=JSON.parse(cRaw)||[];
+  }catch(e){ mlsListados=[]; }
+})();
+function _saveMlsGuardadasLS(){ try{localStorage.setItem(_LS_GUARD,JSON.stringify(mlsGuardadas));}catch(e){} }
+function _saveMlsListadosLS(){
+  try{
+    // Guardar sólo los campos esenciales para ahorrar espacio (~500 props)
+    const slim=mlsListados.slice(0,800).map(m=>({
+      id:m.id,titulo:m.titulo,tipo_prop:m.tipo_prop,tipo:m.tipo,operacion:m.operacion,
+      zona:m.zona,precio:m.precio,area_total:m.area_total,habitaciones:m.habitaciones,
+      banos:m.banos,estado:m.estado,fotos:Array.isArray(m.fotos)?m.fotos.slice(0,2):m.fotos,
+      mls_code:m.mls_code,descripcion:(m.descripcion||'').slice(0,200),
+      agente:m.agente,agencia:m.agencia,tel_corredor_wa:m.tel_corredor_wa,
+      provincia:m.provincia,distrito:m.distrito,barrio:m.barrio,created_at:m.created_at
+    }));
+    localStorage.setItem(_LS_MLS_CACHE,JSON.stringify(slim));
+    localStorage.setItem(_LS_MLS_TS,String(Date.now()));
+  }catch(e){ console.warn('MLS cache LS error:',e); }
+}
 
 function mlsTab(btn, id){
   document.querySelectorAll('.mls-section').forEach(s=>s.style.display='none');
@@ -4312,6 +4769,7 @@ async function loadMlsListados(){
     from+=batch;
   }
   mlsListados=all;
+  _saveMlsListadosLS(); // ← cache blindado
   _mlsPage=0;
   updateMlsKpis();
   // Auto-render if MLS panel is visible
@@ -4339,6 +4797,9 @@ function renderMLS(){
   const est=(document.getElementById('mls-filter-estado')||{}).value||'';
   const op=(document.getElementById('mls-filter-op')||{}).value||'';
   const tipo=(document.getElementById('mls-filter-tipo')||{}).value||'';
+  const zona=(document.getElementById('mls-filter-zona')||{}).value||'';
+  const pMin=parseFloat((document.getElementById('mls-precio-min')||{}).value)||0;
+  const pMax=parseFloat((document.getElementById('mls-precio-max')||{}).value)||Infinity;
   _mlsPage=0;
   if(!mlsListados.length){
     const tbody=document.getElementById('mls-tbody');
@@ -4349,14 +4810,32 @@ function renderMLS(){
     if(pagInfo) pagInfo.style.display='none';
     return;
   }
+  // Poblar dropdown de zonas con valores únicos de los datos reales
+  const zonaEl=document.getElementById('mls-filter-zona');
+  if(zonaEl&&zonaEl.options.length<=1){
+    const zonas=[...new Set(mlsListados.map(m=>m.zona||'').filter(Boolean))].sort();
+    zonas.forEach(z=>{ const o=document.createElement('option'); o.value=z; o.textContent=z; zonaEl.appendChild(o); });
+    if(zona) zonaEl.value=zona; // restaurar selección actual
+  }
   _mlsFiltered=mlsListados.filter(m=>{
-    if(q&&!(m.titulo+' '+m.zona+' '+(m.agente||'')+' '+(m.mls_code||'')+' '+(m.agencia||'')).toLowerCase().includes(q.toLowerCase())) return false;
+    if(q&&!(m.titulo+' '+m.zona+' '+(m.agente||'')+' '+(m.mls_code||'')+' '+(m.agencia||'')+' '+(m.barrio||'')+' '+(m.distrito||'')).toLowerCase().includes(q.toLowerCase())) return false;
     if(est&&m.estado!==est) return false;
     if(op&&m.operacion!==op) return false;
     if(tipo&&(m.tipo_prop||m.tipo||'')!==tipo) return false;
+    if(zona&&m.zona!==zona) return false;
+    if(pMin>0&&(m.precio||0)<pMin) return false;
+    if(pMax<Infinity&&(m.precio||0)>pMax) return false;
     return true;
   });
+  // Actualizar contador
+  const cnt=document.getElementById('mls-count-label');
+  if(cnt) cnt.textContent=_mlsFiltered.length.toLocaleString()+' / '+mlsListados.length.toLocaleString()+' listados';
   _mlsRenderPage();
+}
+function mlsLimpiarFiltros(){
+  ['mls-search','mls-precio-min','mls-precio-max'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['mls-filter-op','mls-filter-tipo','mls-filter-estado','mls-filter-zona'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  renderMLS();
 }
 function _mlsRenderPage(){
   const tbody=document.getElementById('mls-tbody');
@@ -5085,8 +5564,11 @@ function updateGuardadaStage(id, newStage){
     // Also create post-venta follow-up sequence
     createPostVentaSequence(g);
   }
-  // Persist
-  if(sb){
+  // Persist — LS blindado + Supabase con cola offline
+  _saveMlsGuardadasLS();
+  if(typeof _sbSave==='function'){
+    _sbSave('mls_seguimiento',{id:g.id,mls_code:g.mls_code,payload:g},{upsert:true,onConflict:'mls_code'}).catch(()=>{});
+  } else if(sb){
     sb.from('mls_seguimiento').upsert({id:g.id,mls_code:g.mls_code,payload:g},{onConflict:'mls_code',ignoreDuplicates:false})
       .then(({error})=>{if(error&&error.code!=='42P01')console.warn('MLS stage update SB:',error);});
   }
@@ -5128,7 +5610,10 @@ function removeGuardada(id){
   if(!g) return;
   if(!confirm('¿Eliminar "'+g.titulo+'" del seguimiento? Las tareas auto-creadas permanecerán en Tareas.')) return;
   mlsGuardadas = mlsGuardadas.filter(x=>x.id!==id);
-  if(sb){
+  _saveMlsGuardadasLS(); // LS inmediato
+  if(typeof _sbDelete==='function'){
+    _sbDelete('mls_seguimiento',id).catch(()=>{});
+  } else if(sb){
     sb.from('mls_seguimiento').delete().eq('id',id).then(()=>{});
   }
   renderMlsGuardadas();
@@ -5208,22 +5693,40 @@ function exportMlsGuardadaPDF(id){
   }
 }
 
-// Load mlsGuardadas from Supabase
+// Load mlsGuardadas — LS primero (instant), luego Supabase sincroniza
 async function loadMlsGuardadas(){
+  // LS ya fue cargado en _initMlsLS → actualizar badge de inmediato
+  const badge=document.getElementById('badge-guardadas');
+  if(badge) badge.textContent=mlsGuardadas.length||0;
   if(!sb) return;
   try {
-    const {data,error} = await sb.from('mls_seguimiento').select('*').order('created_at',{ascending:false}).limit(500);
+    const {data,error}=await sb.from('mls_seguimiento').select('*').order('created_at',{ascending:false}).limit(500);
     if(error){
-      if(error.code==='42P01'){
-        // Table doesn't exist yet — create it
-        console.log('mls_seguimiento table not found, will be created on first save');
-      }
-      return;
+      if(error.code==='42P01') console.log('mls_seguimiento table not found, will be created on first save');
+      return; // mantener versión de LS
     }
     if(data&&data.length){
-      mlsGuardadas = data.map(r=>r.payload||r).filter(Boolean);
-      const badge = document.getElementById('badge-guardadas');
-      if(badge) badge.textContent = mlsGuardadas.length;
+      // Supabase es la fuente de verdad si tiene más registros que LS
+      const sbGuard=data.map(r=>r.payload||r).filter(Boolean);
+      if(sbGuard.length>=mlsGuardadas.length){
+        mlsGuardadas=sbGuard;
+      } else {
+        // LS tiene registros nuevos offline → hacer upsert de los que faltan
+        const sbIds=new Set(sbGuard.map(g=>g.id));
+        const pending=mlsGuardadas.filter(g=>!sbIds.has(g.id));
+        if(pending.length&&sb){
+          pending.forEach(g=>{
+            sb.from('mls_seguimiento').upsert({id:g.id,mls_code:g.mls_code,payload:g},{onConflict:'mls_code',ignoreDuplicates:false}).then(()=>{});
+          });
+        }
+        // Merge: usar sbGuard + offline-only
+        mlsGuardadas=[...sbGuard,...pending];
+      }
+      _saveMlsGuardadasLS();
+      if(badge) badge.textContent=mlsGuardadas.length;
+      // Re-render si la tab está visible
+      const gTab=document.getElementById('mls-tab-guardadas');
+      if(gTab&&gTab.style.display!=='none') renderMlsGuardadas();
     }
   } catch(e){ console.warn('loadMlsGuardadas:',e); }
 }
@@ -5310,8 +5813,11 @@ async function saveMlsGuardada(){
   if(badge) badge.textContent=mlsGuardadas.length;
   // Create auto follow-up tasks
   if(autoSeq) createAutoFollowUpTasks(gEntry);
-  // Persist guardadas to Supabase
-  if(sb){
+  // Persist guardadas — LS inmediato (nunca se pierden) + Supabase con cola offline
+  _saveMlsGuardadasLS();
+  if(typeof _sbSave==='function'){
+    _sbSave('mls_seguimiento',{id:gEntry.id,mls_code:gEntry.mls_code,payload:gEntry},{upsert:true,onConflict:'mls_code'}).catch(()=>{});
+  } else if(sb){
     sb.from('mls_seguimiento').upsert({id:gEntry.id,mls_code:gEntry.mls_code,payload:gEntry},{onConflict:'mls_code',ignoreDuplicates:false})
       .then(({error})=>{if(error&&error.code!=='42P01')console.warn('MLS seguimiento SB:',error);});
   }
@@ -7863,7 +8369,7 @@ function deleteRedProp(titleOrId){
   }
 
   // ── Legacy admin fallback (encoded) ──
-  const _la=[atob('amNhc3Rybw=='),atob('amVseWFucmVhbGVzdGF0ZQ==')+atob('QGdtYWlsLmNvbQ==')];
+  const _la=[atob('amNhc3Rybw=='),atob('amVseWFucmVhbGVzdGF0ZQ==')+atob('QGdtYWlsLmNvbQ=='),atob('amVseWFuY29ycmVkb3Jh')+atob('QGdtYWlsLmNvbQ==')];
   const _lp=atob('amFj')+['\x72\x65\x61\x6c\x74','\x79\x70\x61\x32\x30\x32\x36'].join('');
 
   // ── Default admin permissions ──
@@ -7926,8 +8432,9 @@ function deleteRedProp(titleOrId){
     const _p0=atob('amFj')+'realtypa2026';
     const _e0=_u0+'@'+atob('amFjcmVhbHR5cGE=')+'.com';
     const _e1=atob('amVseWFucmVhbGVzdGF0ZQ==')+atob('QGdtYWlsLmNvbQ==');
+    const _e2=atob('amVseWFuY29ycmVkb3Jh')+atob('QGdtYWlsLmNvbQ==');
     const ul=u.toLowerCase();
-    return (u===_u0||u===_e0||u===_e1||ul===_u0||ul===_e0||ul===_e1)&&p===_p0;
+    return (u===_u0||u===_e0||u===_e1||u===_e2||ul===_u0||ul===_e0||ul===_e1||ul===_e2)&&p===_p0;
   }
 
   window.doLogin = async function(){
@@ -7965,7 +8472,7 @@ function deleteRedProp(titleOrId){
       applyPermissions(agent);
       err.classList.remove('show');
     };
-    const _isAdmin=u2=>_la.includes(u2)||u2.includes('jcastro')||u2===atob('amNhc3Rybw==')+'@'+atob('amFjcmVhbHR5cGE=')+'.com';
+    const _isAdmin=u2=>_la.includes(u2)||_la.includes(u2.toLowerCase())||u2.includes('jcastro')||u2===atob('amNhc3Rybw==')+'@'+atob('amFjcmVhbHR5cGE=')+'.com';
     const legAgent={nombre:'J.',apellido:'Castro',email:'jcastro@jacrealtypa.com',username:'jcastro',rol:'admin',licencia:'PN-0931',permisos:PERM_ADMIN};
 
     try{
@@ -10599,6 +11106,325 @@ function openMiPerfil(){
   if(!me){ toast('No hay sesión activa'); return; }
   openModalAgente(me.id);
 }
+
+// ============================================================
+// ██████████  BLINDAJE SUPABASE — SYNC ENGINE v2  ██████████
+// Supabase = guardado principal │ localStorage = cola offline
+// + Realtime subscriptions (live updates entre dispositivos)
+// + Version check (cache-bust automático al desplegar)
+// ============================================================
+(function(){
+  const _SQ_KEY='_jac_sq';
+  const _MAX_RETRY=5;
+  const _RETRY_DELAY_MS=4000;
+  const _PING_INTERVAL_MS=20000;
+  const _LAST_SYNC_KEY='_jac_last_sync_ts';
+  let _flushing=false;
+  let _online=navigator.onLine;
+  let _sbAlive=false;
+
+  // ── Cola offline ──────────────────────────────────────────
+  function _getQueue(){ try{return JSON.parse(localStorage.getItem(_SQ_KEY)||'[]');}catch(e){return[];} }
+  function _setQueue(q){ try{localStorage.setItem(_SQ_KEY,JSON.stringify(q));}catch(e){} }
+  function _enqueue(op){ const q=_getQueue(); q.push({...op,_retries:0,_ts:Date.now()}); _setQueue(q); _refreshSyncBar(); }
+
+  // ── Barra de estado visual ────────────────────────────────
+  window._syncStatus=function(state,msg){
+    const bar=document.getElementById('sync-bar');
+    const lbl=document.getElementById('sync-bar-msg');
+    if(!bar||!lbl) return;
+    bar.className='';
+    if(state==='hidden'){bar.classList.add('sb-hidden');return;}
+    bar.classList.add('sb-'+state);
+    lbl.textContent=msg||'';
+    if(state==='ok') setTimeout(()=>{if(_getQueue().length===0)window._syncStatus('hidden');},3500);
+  };
+
+  function _fmtLastSync(){
+    const ts=localStorage.getItem(_LAST_SYNC_KEY);
+    if(!ts) return '';
+    const d=new Date(parseInt(ts));
+    return ' · último sync '+d.toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  function _refreshSyncBar(){
+    const q=_getQueue();
+    if(!_online){
+      window._syncStatus('offline','📡 Sin conexión — '+q.length+' cambio'+(q.length!==1?'s':'')+' en cola');
+    } else if(!_sbAlive){
+      window._syncStatus('offline','⚠️ Supabase no responde — '+q.length+' en cola');
+    } else if(q.length>0){
+      window._syncStatus('queue','🔄 Sincronizando '+q.length+' pendiente'+(q.length!==1?'s':'')+'…');
+    } else {
+      window._syncStatus('ok','✅ Supabase OK'+_fmtLastSync());
+    }
+  }
+
+  // ── Ping Supabase ─────────────────────────────────────────
+  async function _ping(){
+    if(!sb) return false;
+    try{
+      const r=await Promise.race([
+        sb.from('agentes_crm').select('id').limit(1),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),6000))
+      ]);
+      return !r.error;
+    }catch(e){return false;}
+  }
+
+  // ── Guardar en Supabase (principal) ──────────────────────
+  window._sbSave=async function(table,record,opts={}){
+    if(!sb||!_online){
+      _enqueue({op:'upsert',table,record,opts});
+      _refreshSyncBar();
+      return {queued:true};
+    }
+    window._syncStatus('syncing','🔄 Guardando…');
+    try{
+      let res;
+      if(opts.upsert||record.id){
+        res=await sb.from(table).upsert(record,opts.onConflict?{onConflict:opts.onConflict}:{});
+      } else {
+        res=await sb.from(table).insert([record]);
+      }
+      if(res.error) throw res.error;
+      _sbAlive=true;
+      localStorage.setItem(_LAST_SYNC_KEY, String(Date.now()));
+      _refreshSyncBar();
+      return res;
+    }catch(err){
+      _sbAlive=false;
+      _enqueue({op:'upsert',table,record,opts});
+      window._syncStatus('offline','❌ Error Supabase — en cola');
+      return {queued:true,error:err};
+    }
+  };
+
+  // ── Eliminar en Supabase ──────────────────────────────────
+  window._sbDelete=async function(table,id){
+    if(!sb||!_online){
+      _enqueue({op:'delete',table,id});
+      _refreshSyncBar();
+      return {queued:true};
+    }
+    window._syncStatus('syncing','🗑️ Eliminando…');
+    try{
+      const res=await sb.from(table).delete().eq('id',id);
+      if(res.error) throw res.error;
+      _sbAlive=true;
+      localStorage.setItem(_LAST_SYNC_KEY,String(Date.now()));
+      _refreshSyncBar();
+      return res;
+    }catch(err){
+      _sbAlive=false;
+      _enqueue({op:'delete',table,id});
+      window._syncStatus('offline','❌ Error — eliminación en cola');
+      return {queued:true,error:err};
+    }
+  };
+
+  // ── Vaciar cola offline ───────────────────────────────────
+  window._flushQueue=async function(){
+    if(_flushing||!sb) return;
+    const q=_getQueue();
+    if(q.length===0){_sbAlive=true;_refreshSyncBar();return;}
+    _flushing=true;
+    window._syncStatus('syncing','🔄 Vaciando cola ('+q.length+')…');
+    const alive=await _ping();
+    if(!alive){_sbAlive=false;_flushing=false;_refreshSyncBar();return;}
+    _sbAlive=true;
+    const remaining=[];
+    for(const item of q){
+      let ok=false;
+      try{
+        if(item.op==='delete'){
+          const r=await sb.from(item.table).delete().eq('id',item.id);
+          ok=!r.error;
+        } else {
+          const r=(item.opts?.upsert||item.record?.id)
+            ? await sb.from(item.table).upsert(item.record,item.opts?.onConflict?{onConflict:item.opts.onConflict}:{})
+            : await sb.from(item.table).insert([item.record]);
+          ok=!r.error;
+        }
+      }catch(e){ok=false;}
+      if(!ok){ item._retries=(item._retries||0)+1; if(item._retries<_MAX_RETRY) remaining.push(item); }
+    }
+    _setQueue(remaining);
+    _flushing=false;
+    localStorage.setItem(_LAST_SYNC_KEY,String(Date.now()));
+    _refreshSyncBar();
+    if(remaining.length>0) setTimeout(window._flushQueue,_RETRY_DELAY_MS);
+    else window._syncStatus('ok','✅ Todo sincronizado'+_fmtLastSync());
+  };
+
+  // ── Force sync manual ────────────────────────────────────
+  window._forceSync=async function(){
+    window._syncStatus('syncing','🔄 Sync manual…');
+    await window._flushQueue();
+    if(typeof loadLeads==='function') loadLeads();
+    if(typeof loadCitas==='function') loadCitas();
+    if(typeof loadTareas==='function') loadTareas();
+    if(typeof loadMlsGuardadas==='function') loadMlsGuardadas();
+    toast('🔄 Sync manual completado');
+  };
+
+  // ── Realtime: suscripciones live ─────────────────────────
+  window._initRealtime=function(){
+    if(!sb||!window.supabase) return;
+    // clientes = tabla real de leads (NO leads_crm — no existe)
+    sb.channel('crm_rt_clientes')
+      .on('postgres_changes',{event:'*',schema:'public',table:'clientes'},(payload)=>{
+        if(typeof loadLeads==='function'){ loadLeads(); toast('📡 Lead actualizado',1500); }
+      }).subscribe();
+    // agenda = tabla real de citas (NO citas_crm — no existe)
+    sb.channel('crm_rt_agenda')
+      .on('postgres_changes',{event:'*',schema:'public',table:'agenda'},(payload)=>{
+        if(typeof loadCitas==='function'){ loadCitas(); }
+        if(typeof renderCalendar==='function') setTimeout(renderCalendar,400);
+        toast('📡 Agenda actualizada',1500);
+      }).subscribe();
+    // tareas_crm
+    sb.channel('crm_rt_tareas')
+      .on('postgres_changes',{event:'*',schema:'public',table:'tareas_crm'},(payload)=>{
+        if(typeof loadTareas==='function'){ loadTareas(); }
+      }).subscribe();
+    // mls_seguimiento
+    sb.channel('crm_rt_mls')
+      .on('postgres_changes',{event:'*',schema:'public',table:'mls_seguimiento'},(payload)=>{
+        if(typeof loadMlsGuardadas==='function'){ loadMlsGuardadas(); }
+      }).subscribe();
+    // propiedades
+    sb.channel('crm_rt_propiedades')
+      .on('postgres_changes',{event:'*',schema:'public',table:'propiedades'},(payload)=>{
+        if(typeof loadProps==='function'){ loadProps(); }
+        if(typeof renderDashboard==='function') setTimeout(renderDashboard,300);
+        toast('📡 Propiedad actualizada',1500);
+      }).subscribe();
+    // contactos_crm
+    sb.channel('crm_rt_contactos')
+      .on('postgres_changes',{event:'*',schema:'public',table:'contactos_crm'},(payload)=>{
+        if(typeof loadContacts==='function'){ loadContacts(); }
+      }).subscribe();
+    // mensajes_internos
+    sb.channel('crm_rt_mensajes')
+      .on('postgres_changes',{event:'*',schema:'public',table:'mensajes_internos'},(payload)=>{
+        if(typeof loadMensajes==='function'){ loadMensajes(); }
+        toast('💬 Mensaje nuevo',1500);
+      }).subscribe();
+    // notas_crm
+    sb.channel('crm_rt_notas')
+      .on('postgres_changes',{event:'*',schema:'public',table:'notas_crm'},(payload)=>{
+        if(typeof loadNotas==='function'){ loadNotas(); }
+      }).subscribe();
+    // diligencias
+    sb.channel('crm_rt_diligencias')
+      .on('postgres_changes',{event:'*',schema:'public',table:'diligencias'},(payload)=>{
+        if(typeof loadDiligencias==='function'){ loadDiligencias(); }
+      }).subscribe();
+    // actividades_crm
+    sb.channel('crm_rt_actividades')
+      .on('postgres_changes',{event:'*',schema:'public',table:'actividades_crm'},(payload)=>{
+        if(typeof loadActividades==='function'){ loadActividades(); }
+      }).subscribe();
+    // clientes_activos
+    sb.channel('crm_rt_clientes_activos')
+      .on('postgres_changes',{event:'*',schema:'public',table:'clientes_activos'},(payload)=>{
+        if(typeof loadClientesActivos==='function'){ loadClientesActivos(); }
+      }).subscribe();
+    console.log('🔴 Supabase Realtime: 11 canales activos (clientes, agenda, tareas, mls, propiedades, contactos, mensajes, notas, diligencias, actividades, clientes_activos)');
+  };
+
+  // ── Listeners de red ──────────────────────────────────────
+  window.addEventListener('online',()=>{
+    _online=true;
+    toast('🌐 Conexión restaurada — sincronizando…');
+    setTimeout(window._flushQueue,800);
+  });
+  window.addEventListener('offline',()=>{
+    _online=false; _sbAlive=false; _refreshSyncBar();
+  });
+
+  // ── Health check periódico ────────────────────────────────
+  async function _healthCheck(){
+    if(!_online||!sb) return;
+    const alive=await _ping();
+    const prev=_sbAlive;
+    _sbAlive=alive;
+    if(!prev&&alive){
+      setTimeout(window._flushQueue,500);
+      setTimeout(()=>{if(typeof loadMlsGuardadas==='function') loadMlsGuardadas();},1200);
+      setTimeout(()=>{if(typeof loadMlsListados==='function') loadMlsListados();},2500);
+    }
+    _refreshSyncBar();
+  }
+  setInterval(_healthCheck,_PING_INTERVAL_MS);
+
+  // ── Version check (cache-bust automático) ────────────────
+  // Descarga version.json con timestamp para saltarse el CDN
+  // Si la versión cambió → recarga la página automáticamente
+  async function _checkVersion(){
+    try{
+      const r=await fetch('/version.json?_='+Date.now(),{cache:'no-cache'});
+      if(!r.ok) return;
+      const {v}=await r.json();
+      if(!v) return;
+      const stored=localStorage.getItem('_crm_app_ver');
+      if(stored&&stored!==v){
+        console.log('[CRM] Nueva versión detectada:',v,'→ recargando…');
+        localStorage.setItem('_crm_app_ver',v);
+        // Mostrar aviso antes de recargar
+        const bar=document.getElementById('sync-bar');
+        const lbl=document.getElementById('sync-bar-msg');
+        if(bar&&lbl){ bar.className='sb-queue'; lbl.textContent='🆕 Nueva versión disponible — recargando…'; }
+        setTimeout(()=>location.reload(true),1200);
+      } else {
+        localStorage.setItem('_crm_app_ver',v);
+      }
+    }catch(e){ /* sin version.json → ignorar */ }
+  }
+
+  // ── Inicialización ────────────────────────────────────────
+  window.addEventListener('load',()=>{
+    setTimeout(async()=>{
+      // 1. Check versión nueva
+      _checkVersion();
+      // 2. Flush cola offline
+      const q=_getQueue();
+      if(q.length>0){
+        window._syncStatus('queue','📦 '+q.length+' pendiente'+(q.length!==1?'s':'')+' — sincronizando…');
+        await window._flushQueue();
+      } else {
+        const alive=await _ping();
+        _sbAlive=alive;
+        if(alive){ window._syncStatus('ok','✅ Supabase conectado'+_fmtLastSync()); }
+        else { window._syncStatus('offline','⚠️ Supabase sin respuesta — modo offline'); }
+        setTimeout(()=>window._syncStatus('hidden'),4000);
+      }
+      // 3. Activar Realtime
+      setTimeout(window._initRealtime,2000);
+    },1500);
+  });
+
+  // ── Diagnóstico ───────────────────────────────────────────
+  window._getSyncQueue=_getQueue;
+  window._clearSyncQueue=()=>{_setQueue([]);_refreshSyncBar();};
+
+})();
+// ══════════════════════════════════════════════════════════════
+
+// ── Botón Force Sync en la barra de estado ───────────────────
+// Añadido dinámicamente al sync-bar al cargar
+document.addEventListener('DOMContentLoaded',()=>{
+  const bar=document.getElementById('sync-bar');
+  if(bar){
+    const btn=document.createElement('button');
+    btn.textContent='↺ Sync';
+    btn.title='Forzar sincronización con Supabase';
+    btn.style.cssText='margin-left:10px;padding:2px 8px;font-size:11px;font-weight:700;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:inherit;cursor:pointer';
+    btn.onclick=()=>{ if(typeof window._forceSync==='function') window._forceSync(); };
+    bar.appendChild(btn);
+  }
+});
 
 </script>
 </body>
