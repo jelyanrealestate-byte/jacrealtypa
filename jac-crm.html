@@ -2797,8 +2797,13 @@ CREATE POLICY "allow_all_diario_crm" ON diario_crm FOR ALL USING (true) WITH CHE
       <div class="form-group"><label>Cargo / Título</label><input id="ct-cargo" placeholder="Agente, Director, Abogado..."></div>
       <div class="form-group"><label>Categoría</label>
         <select id="ct-categoria" onchange="onContactoCategoriaChange(this)">
-          <option>Colega / Agente</option>
+          <option>Prospecto</option>
+          <option>Comprador</option>
+          <option>Vendedor</option>
+          <option>Arrendatario</option>
+          <option>Arrendador</option>
           <option>Propietario</option>
+          <option>Colega / Agente</option>
           <option>Proveedor</option>
           <option>Abogado / Notario</option>
           <option>Banco / Financiera</option>
@@ -3006,6 +3011,23 @@ CREATE POLICY "allow_all_diario_crm" ON diario_crm FOR ALL USING (true) WITH CHE
           <option value="Reunión">🤝 Reunión</option>
           <option value="Visita">👁️ Visita</option>
         </select>
+      </div>
+      <!-- Modalidad de reunión — aparece solo cuando tipo_accion = Reunión -->
+      <div id="c-modalidad-wrapper" class="form-group form-full" style="display:none">
+        <label>📍 Modalidad de reunión</label>
+        <select id="c-modalidad-reunion" onchange="jacCitaModalidadChange()">
+          <option value="Presencial">🤝 Presencial</option>
+          <option value="Videollamada">📹 Videollamada</option>
+          <option value="Zoom">🎥 Zoom</option>
+        </select>
+      </div>
+      <div id="c-calendly-wrapper" class="form-group form-full" style="display:none">
+        <label>📅 Calendly — compartir con cliente para elegir fecha/hora</label>
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+          <div style="font-size:13px;margin-bottom:6px">🔗 Envía este link al cliente para que elija su horario:</div>
+          <a href="https://calendly.com/jelyancastro-grupojac/cita" target="_blank" style="color:var(--accent);font-weight:600;word-break:break-all;font-size:13px">https://calendly.com/jelyancastro-grupojac/cita</a>
+          <br><button onclick="copiarCalendly()" class="btn btn-outline" style="font-size:11px;padding:3px 12px;margin-top:8px">📋 Copiar link</button>
+        </div>
       </div>
       <div class="form-group"><label>⭐ Prioridad agenda</label>
         <select id="c-prioridad">
@@ -4691,16 +4713,38 @@ function prioridadAgendaBadge(pa){
   const col=pa.startsWith('A')?'#ef4444':pa.startsWith('B')?'#f59e0b':'#22c55e';
   return `<span style="font-size:10px;font-weight:800;color:${col};margin-left:4px">${pa}</span>`;
 }
-// Auto-fill Zoom cuando tipo_accion = Reunión
+// Tipo acción cambia — mostrar/ocultar modalidad de reunión
 function jacCitaTipoAccionChange(){
   const v=(document.getElementById('c-tipo-accion')?.value||'');
+  const mW=document.getElementById('c-modalidad-wrapper');
+  const cW=document.getElementById('c-calendly-wrapper');
   if(v==='Reunión'){
+    if(mW) mW.style.display='';
+    if(cW) cW.style.display='';
+    const tpEl=document.getElementById('c-tipo'); if(tpEl) tpEl.value='Reunión cliente';
+    jacCitaModalidadChange();
+  } else {
+    if(mW) mW.style.display='none';
+    if(cW) cW.style.display='none';
+  }
+}
+// Modalidad cambia — auto-fill Zoom si corresponde
+function jacCitaModalidadChange(){
+  const mod=(document.getElementById('c-modalidad-reunion')?.value||'');
+  if(mod==='Zoom'){
     const zEl=document.getElementById('c-zoom');
     const _z1='https://us04web.zoom.us/j/';
     const _z2='2369524438?pwd=QmZPL3JWdCtBTDVLdW0rbFNqdDVpUT09';
     if(zEl&&!zEl.value) zEl.value=_z1+_z2;
-    const tpEl=document.getElementById('c-tipo'); if(tpEl) tpEl.value='Reunión cliente';
   }
+}
+function copiarCalendly(){
+  const _cal='https://calendly.com/jelyancastro-grupojac/cita';
+  navigator.clipboard.writeText(_cal).then(()=>toast('📋 Link Calendly copiado')).catch(()=>{
+    const ta=document.createElement('textarea'); ta.value=_cal;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); toast('📋 Link Calendly copiado');
+  });
 }
 
 // ── Vista día completo — estilo Opus One ────────────────────────
@@ -4871,8 +4915,10 @@ function openNuevaReunion(){
   const fd=document.getElementById('c-fecha'); if(fd) fd.value=new Date().toISOString().slice(0,10);
   ['c-cliente','c-propiedad','c-notas'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   const taEl=document.getElementById('c-tipo-accion'); if(taEl) taEl.value='Reunión';
+  const modEl=document.getElementById('c-modalidad-reunion'); if(modEl) modEl.value='Zoom';
   const zEl=document.getElementById('c-zoom'); if(zEl) zEl.value='https://us04web.zoom.us/j/2369524438?pwd=QmZPL3JWdCtBTDVLdW0rbFNqdDVpUT09';
   const priEl=document.getElementById('c-prioridad'); if(priEl) priEl.value='';
+  jacCitaTipoAccionChange();
   openModal('modalCita');
 }
 function jacReuWA(key){
@@ -5094,7 +5140,7 @@ const _LS_MLS_TS   = 'jac_mls_cache_ts';
   try{
     const cRaw=localStorage.getItem(_LS_MLS_CACHE);
     const cTs=parseInt(localStorage.getItem(_LS_MLS_TS)||'0');
-    if(cRaw && (Date.now()-cTs)<6*3600*1000) mlsListados=JSON.parse(cRaw)||[];
+    if(cRaw && (Date.now()-cTs)<24*3600*1000) mlsListados=JSON.parse(cRaw)||[];
   }catch(e){ mlsListados=[]; }
 })();
 function _saveMlsGuardadasLS(){ try{localStorage.setItem(_LS_GUARD,JSON.stringify(mlsGuardadas));}catch(e){} }
@@ -5148,6 +5194,17 @@ async function loadMlsListados(){
     if(!_mlsRetryTimer) _mlsRetryTimer=setTimeout(()=>{ _mlsRetryTimer=null; loadMlsListados(); },2000);
     return;
   }
+  // Sync MLS diaria: si caché <24h y hay datos, no re-fetch desde Supabase
+  try{
+    const cTs=parseInt(localStorage.getItem(_LS_MLS_TS)||'0');
+    if(mlsListados.length>0 && (Date.now()-cTs)<24*3600*1000){
+      updateMlsKpis();
+      const _panel=document.getElementById('panel-mls');
+      const _lt=document.getElementById('mls-tab-listados');
+      if(_panel&&_panel.style.display!=='none'&&_lt&&_lt.style.display!=='none') renderMLS();
+      return; // usar caché — siguiente sync en 24h
+    }
+  }catch(e){}
   // Show loading state in table
   const tbody=document.getElementById('mls-tbody');
   const empty=document.getElementById('mls-empty');
@@ -7738,6 +7795,7 @@ function saveCita(){
   const propiedad=document.getElementById('c-propiedad').value;
   const zoom_link=(document.getElementById('c-zoom')?.value||'').trim();
   const tipo_accion=(document.getElementById('c-tipo-accion')?.value||'');
+  const modalidad_reunion=(document.getElementById('c-modalidad-reunion')?.value||'');
   const prioridad_agenda=(document.getElementById('c-prioridad')?.value||'');
   const notas=document.getElementById('c-notas').value;
   const editId=(document.getElementById('c-edit-id')||{}).value||'';
@@ -7747,7 +7805,7 @@ function saveCita(){
     const idx=citas.findIndex(c=>String(c._sbId)===String(editId)||String(c._localId)===String(editId)||String(c.id)===String(editId));
     if(idx>=0){
       const c=citas[idx];
-      Object.assign(c,{tipo,cliente,propiedad,fecha,hora,zoom_link,tipo_accion,prioridad_agenda,notas});
+      Object.assign(c,{tipo,cliente,propiedad,fecha,hora,zoom_link,tipo_accion,modalidad_reunion,prioridad_agenda,notas});
       if(sb&&c._sbId){
         sb.from('agenda').update({titulo:cliente,tipo,lugar:propiedad||null,fecha:fecha||null,hora:hora||null,notas:notas||null})
           .eq('id',c._sbId).then(({error})=>{if(error)console.warn('Agenda update error:',error);});
@@ -7756,7 +7814,7 @@ function saveCita(){
     }
   } else {
     // Modo creación — nueva cita
-    const cita={_localId:'C_'+Date.now(),tipo,cliente,propiedad,fecha,hora,zoom_link,tipo_accion,prioridad_agenda,notas};
+    const cita={_localId:'C_'+Date.now(),tipo,cliente,propiedad,fecha,hora,zoom_link,tipo_accion,modalidad_reunion,prioridad_agenda,notas};
     citas.push(cita);
     activities.unshift({tipo:'📅 Cita',cliente,desc:`${tipo} agendada para ${fecha} ${hora}.`,time:'Ahora'});
     if(sb){
@@ -7771,6 +7829,9 @@ function saveCita(){
   const eId=document.getElementById('c-edit-id'); if(eId) eId.value='';
   const taEl=document.getElementById('c-tipo-accion'); if(taEl) taEl.value='';
   const priEl=document.getElementById('c-prioridad'); if(priEl) priEl.value='';
+  const modEl2=document.getElementById('c-modalidad-reunion'); if(modEl2) modEl2.value='Presencial';
+  const mW2=document.getElementById('c-modalidad-wrapper'); if(mW2) mW2.style.display='none';
+  const cW2=document.getElementById('c-calendly-wrapper'); if(cW2) cW2.style.display='none';
   closeModal('modalCita');
   renderCalendar();renderDashboard();
 }
@@ -7789,6 +7850,8 @@ function editCita(key){
   if(el('c-hora')) el('c-hora').value=c.hora||'10:00';
   if(el('c-zoom')) el('c-zoom').value=c.zoom_link||'';
   if(el('c-tipo-accion')) el('c-tipo-accion').value=c.tipo_accion||'';
+  jacCitaTipoAccionChange();
+  if(el('c-modalidad-reunion')) el('c-modalidad-reunion').value=c.modalidad_reunion||'Presencial';
   if(el('c-prioridad')) el('c-prioridad').value=c.prioridad_agenda||'';
   if(el('c-notas')) el('c-notas').value=c.notas||'';
   // Cambiar título y botón
@@ -9580,8 +9643,20 @@ function addFotosPropiedad(files){
   Array.from(files).forEach(f=>{
     const reader=new FileReader();
     reader.onload=e=>{
-      _fotosTemp.push(e.target.result);
-      renderFotosGrid();
+      // Comprimir imagen con canvas antes de almacenar (máx 1200px, JPEG 75%)
+      const img=new Image();
+      img.onload=()=>{
+        const MAX=1200;
+        let w=img.naturalWidth,h=img.naturalHeight;
+        if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+        const cv=document.createElement('canvas');
+        cv.width=w; cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        _fotosTemp.push(cv.toDataURL('image/jpeg',0.75));
+        renderFotosGrid();
+      };
+      img.onerror=()=>{ _fotosTemp.push(e.target.result); renderFotosGrid(); };
+      img.src=e.target.result;
     };
     reader.readAsDataURL(f);
   });
