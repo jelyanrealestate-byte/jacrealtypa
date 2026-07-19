@@ -592,7 +592,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 
   /* ---- Topbar ---- */
   .topbar{padding:9px 12px;flex-wrap:nowrap;gap:6px;min-height:48px}
-  .topbar h2{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+  .topbar h2{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
   .topbar-actions{gap:4px;flex-shrink:0}
   /* Hide secondary topbar buttons on mobile */
   .topbar-secondary{display:none!important}
@@ -666,7 +666,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
   .form-grid{grid-template-columns:1fr!important}
   .form-full{grid-column:1!important}
   .form-group input,.form-group select,.form-group textarea{
-    padding:10px 12px!important;font-size:14px!important;
+    padding:10px 12px!important;font-size:16px!important;
     min-height:44px;
   }
   .modal-footer{flex-direction:column-reverse;gap:8px}
@@ -744,6 +744,103 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
   .login-logo-badge{width:58px;height:58px;font-size:20px}
   #content{padding:10px!important}
   .topbar{padding:8px 10px}
+}
+
+/* ============================================================
+   RESPONSIVE — TABLET (769px–1100px)
+   ============================================================ */
+@media(min-width:769px) and (max-width:1100px){
+  #sidebar{width:185px}
+  .logo{padding:14px 12px 12px}
+  .logo h1{font-size:15px}
+  .nav-item{font-size:12px;padding:8px 8px;gap:8px}
+  #content{padding:14px 16px}
+  .topbar{padding:10px 16px}
+  .topbar h2{font-size:14px}
+  .kpi-grid{grid-template-columns:repeat(3,1fr)!important;gap:10px!important}
+  .prop-grid{grid-template-columns:repeat(2,1fr)!important}
+  .cal-grid{grid-template-columns:1fr!important}
+  .form-grid{grid-template-columns:repeat(2,1fr)}
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  th,td{padding:8px 10px}
+  .pipeline{min-width:unset;width:auto;overflow-x:auto}
+}
+
+/* ============================================================
+   TOUCH IMPROVEMENTS — MOBILE (≤768px)
+   ============================================================ */
+@media(max-width:768px){
+  /* iOS: evitar zoom al hacer focus en inputs (≥16px requerido) */
+  input,select,textarea{font-size:16px!important;-webkit-text-size-adjust:100%}
+
+  /* Props tabla: ocultar botones secundarios, mantener WA + Ver + Editar + Eliminar */
+  #props-tbody .action-btns>button:nth-child(2),
+  #props-tbody .action-btns>button:nth-child(3),
+  #props-tbody .action-btns>button:nth-child(5),
+  #props-tbody .action-btns>button:nth-child(6),
+  #props-tbody .action-btns>button:nth-child(7){display:none!important}
+
+  /* Prop cards: botones touch-friendly */
+  .pa-btn{min-height:36px;padding:6px 4px!important}
+
+  /* Evitar scroll horizontal en el contenido */
+  #content{overflow-x:hidden}
+
+  /* Momentum scroll en iOS */
+  .table-wrap,.pipeline-wrap,.modal,.guardada-board,.cal-grid{
+    -webkit-overflow-scrolling:touch
+  }
+
+  /* Tabs siempre scrollables */
+  .tabs{display:flex!important;overflow-x:auto!important;flex-wrap:nowrap!important;-webkit-overflow-scrolling:touch}
+  .tabs::-webkit-scrollbar{display:none}
+
+  /* Sidebar z-index seguro */
+  #sidebar{z-index:9998!important}
+  #sidebar-overlay{z-index:9997!important}
+
+  /* Safe area para notch (iPhone) */
+  .modal{padding-bottom:max(28px,env(safe-area-inset-bottom))!important}
+  .topbar{padding-top:max(9px,env(safe-area-inset-top))}
+
+  /* Tamaño mínimo táctil en botones clave */
+  .btn-primary,.btn-outline{min-height:42px}
+  .wa-btn{min-height:38px}
+
+  /* Búsqueda: inputs full width */
+  .search-bar input,.search-bar select{width:100%!important;min-width:unset!important;flex:unset}
+
+  /* KPI bar del pipeline */
+  .pipeline-kpi-bar{flex-direction:row;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .pipeline-kpi{min-width:100px;flex-shrink:0}
+}
+
+/* ============================================================
+   RESPONSIVE — TELÉFONOS PEQUEÑOS (≤480px) — ADICIONES
+   ============================================================ */
+@media(max-width:480px){
+  /* Prop cards más compactas */
+  .prop-body{padding:9px!important}
+  .prop-title{font-size:12px}
+  .prop-specs{gap:6px}
+  .prop-specs span{font-size:10px}
+  .prop-price{font-size:13px}
+
+  /* Pipeline cols más estrechas */
+  .pipeline-col{min-width:175px!important;width:175px!important}
+
+  /* KPI: siempre 2 columnas en móvil pequeño */
+  .kpi-grid{grid-template-columns:repeat(2,1fr)!important}
+  .kpi-card{padding:10px!important}
+  .kpi-value{font-size:20px!important}
+
+  /* Tabla props: ocultar columna Ref en pantalla muy pequeña */
+  #panel-propiedades .table-wrap thead th:first-child,
+  #panel-propiedades .table-wrap tbody td:first-child{display:none!important}
+
+  /* Reducir padding de modales al mínimo */
+  .modal{padding:14px 12px 24px!important}
+  .modal-header{padding:10px 14px!important}
 }
 
 /* ===== FOTOS PROPIEDAD ===== */
