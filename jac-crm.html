@@ -2970,9 +2970,10 @@ CREATE POLICY allow_all_mensajes_internos ON mensajes_internos FOR ALL USING (tr
       <div class="form-group"><label>Hora</label><input id="c-hora" type="time" value="10:00"></div>
       <div class="form-group form-full"><label>Notas</label><textarea id="c-notas" placeholder="Instrucciones, dirección exacta..."></textarea></div>
     </div>
+    <input type="hidden" id="c-edit-id" value="">
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalCita')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveCita()">Agendar</button>
+      <button class="btn btn-primary" id="c-save-btn" onclick="saveCita()">Agendar</button>
     </div>
   </div>
 </div>
@@ -3982,14 +3983,20 @@ function renderDashboard(){
 
   // Dash citas
   const tbody=document.getElementById('dash-citas');
-  tbody.innerHTML=citas.slice(0,4).map(c=>`<tr>
-    <td>${c.tipo}</td><td>${c.cliente}</td><td style="color:var(--muted)">${c.propiedad}</td>
+  tbody.innerHTML=citas.slice(0,4).map(c=>{
+    const cKey=c._sbId||c._localId||'';
+    return `<tr>
+    <td>${c.tipo}</td><td>${c.cliente}</td><td style="color:var(--muted)">${c.propiedad||'—'}</td>
     <td>${c.fecha} ${c.hora}</td>
     <td><div class="action-btns">
       <button class="btn btn-ghost btn-sm" title="WhatsApp" onclick="waClick('${c.cliente}')">💬</button>
       <button class="email-btn" title="Email" onclick="emailCita('${c.cliente}','${c.tipo}','${c.fecha}','${c.hora}')">📧</button>
+      <button class="btn btn-ghost btn-sm" title="Ver en agenda" onclick="jacSelectDay('${c.fecha}');showPanel('agenda')">👁️</button>
+      ${cKey?`<button class="btn btn-ghost btn-sm" title="Editar" onclick="editCita('${cKey}')">✏️</button>
+      <button class="btn btn-ghost btn-sm" title="Eliminar" style="color:#f87171" onclick="deleteCita('${cKey}')">🗑️</button>`:''}
     </div></td>
-  </tr>`).join('');
+  </tr>`;
+  }).join('');
   // Activity
   const actEl=document.getElementById('dash-activity');
   actEl.innerHTML=activities.slice(0,6).map(a=>`
@@ -4253,7 +4260,12 @@ function dropLead(e,stage){
 let _jacSelDate = null; // YYYY-MM-DD fecha seleccionada en el calendario
 
 function jacAgendaAgregarCita(){
-  const fd=document.getElementById('cita-fecha');
+  // Reset edit mode
+  const eId=document.getElementById('c-edit-id'); if(eId) eId.value='';
+  const tEl=document.querySelector('#modalCita .modal-title'); if(tEl) tEl.textContent='📅 Nueva Cita / Evento';
+  const bEl=document.getElementById('c-save-btn'); if(bEl) bEl.textContent='Agendar';
+  // Pre-fill date
+  const fd=document.getElementById('c-fecha');
   if(fd) fd.value=(_jacSelDate||new Date().toISOString().slice(0,10));
   openModal('modalCita');
 }
@@ -4390,7 +4402,8 @@ function jacShowEventosDelDia(ds){
   const dm=(typeof mlsGuardadas!=='undefined'?mlsGuardadas:[]).filter(x=>x.fecha_seguimiento===ds||x.next_follow_up===ds);
   let h='';
   dc.forEach(c=>{
-    h+=`<div class="jac-evento-card jac-ec-cita">
+    const cKey=c._sbId||c._localId||'';
+    h+=`<div class="jac-evento-card jac-ec-cita" style="flex-wrap:wrap;gap:6px">
       <div style="color:#f97316;font-size:20px;line-height:1;flex-shrink:0">📅</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:600;font-size:13px;color:var(--text)">${c.cliente||'Sin cliente'}</div>
@@ -4398,17 +4411,26 @@ function jacShowEventosDelDia(ds){
         ${c.notas?`<div style="font-size:11px;color:var(--muted);margin-top:3px">${c.notas}</div>`:''}
       </div>
       <span style="font-size:9px;background:#f9731622;color:#f97316;padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0">${c.status||'Pendiente'}</span>
+      <div style="width:100%;display:flex;gap:6px;margin-top:4px">
+        <button class="btn btn-ghost btn-sm" onclick="waClick('${c.cliente}')" title="WhatsApp">💬 WA</button>
+        ${cKey?`<button class="btn btn-ghost btn-sm" onclick="editCita('${cKey}')" title="Editar">✏️ Editar</button>
+        <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="deleteCita('${cKey}')" title="Eliminar">🗑️ Eliminar</button>`:''}
+      </div>
     </div>`;
   });
   dt.forEach(t=>{
     const done=t.status==='Completada';
-    h+=`<div class="jac-evento-card jac-ec-tarea">
+    h+=`<div class="jac-evento-card jac-ec-tarea" style="flex-wrap:wrap;gap:6px">
       <div onclick="(function(){if(typeof toggleTaskStatusById==='function')toggleTaskStatusById('${t.id}');})()" style="width:20px;height:20px;border-radius:50%;background:${done?'#818cf8':'transparent'};border:2px solid #818cf8;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;cursor:pointer;flex-shrink:0">${done?'✓':''}</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:600;font-size:13px;color:var(--text);${done?'text-decoration:line-through;opacity:.6':''}">🔔 ${t.title||t.desc||'Sin descripción'}</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px">📌 ${t.priority||'Normal'}</div>
       </div>
       <span style="font-size:9px;background:#818cf822;color:#818cf8;padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0">${t.status||'Pendiente'}</span>
+      <div style="width:100%;display:flex;gap:6px;margin-top:4px">
+        <button class="btn btn-ghost btn-sm" onclick="editTareaById('${t.id}')" title="Editar">✏️ Editar</button>
+        <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="deleteTarea('${t.id}')" title="Eliminar">🗑️ Eliminar</button>
+      </div>
     </div>`;
   });
   dm.forEach(mx=>{
@@ -4468,18 +4490,22 @@ function jacRenderTareasTab(){
   const renderT=list=>list.map(t=>{
     const clr=priC[t.priority]||'var(--muted)';
     const isDone=t.status==='Completada';
-    return `<div class="jac-evento-card jac-ec-tarea">
+    return `<div class="jac-evento-card jac-ec-tarea" style="flex-wrap:wrap;gap:6px">
       <div onclick="(function(){if(typeof toggleTaskStatusById==='function')toggleTaskStatusById('${t.id}');})()" style="width:20px;height:20px;border-radius:50%;background:${isDone?'#818cf8':'transparent'};border:2px solid #818cf8;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;cursor:pointer;flex-shrink:0">${isDone?'✓':''}</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:600;font-size:13px;color:var(--text);${isDone?'text-decoration:line-through;opacity:.6':''}">${t.title||t.desc||'Sin descripción'}</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px">${t.due?'📅 '+t.due+' · ':''}<span style="color:${clr}">${t.priority||'Normal'}</span></div>
       </div>
       <span style="font-size:9px;background:#818cf822;color:#818cf8;padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0">${t.status||'Pendiente'}</span>
+      <div style="width:100%;display:flex;gap:6px;margin-top:2px">
+        <button class="btn btn-ghost btn-sm" onclick="editTareaById('${t.id}')" title="Editar">✏️ Editar</button>
+        <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="deleteTarea('${t.id}')" title="Eliminar">🗑️ Eliminar</button>
+      </div>
     </div>`;
   }).join('');
   el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
     <span style="font-weight:700;font-size:14px">Tareas Pendientes (${pending.length})</span>
-    <button class="btn btn-primary btn-sm" onclick="openModal('modalTarea')">+ Nueva Tarea</button>
+    <button class="btn btn-primary btn-sm" onclick="openNuevaTarea()">+ Nueva Tarea</button>
   </div>
   ${pending.length?renderT(pending):'<div style="color:var(--muted);text-align:center;padding:30px 0">Sin tareas pendientes 🎉</div>'}
   ${done.length?`<div style="font-weight:600;font-size:12px;color:var(--muted);margin:16px 0 10px;text-transform:uppercase;letter-spacing:.05em">Completadas</div>${renderT(done)}`:''}`;
@@ -4492,13 +4518,23 @@ function jacRenderReunionesTab(){
     el.innerHTML=`<div style="text-align:center;padding:60px 0;color:var(--muted);font-size:14px">Sin reuniones programadas<br><small style="font-size:12px;margin-top:6px;display:block">Agrega una cita de tipo "Reunión" para verla aquí</small></div>`;
     return;
   }
-  el.innerHTML=reu.map(r=>`<div class="jac-evento-card jac-ec-cita">
+  el.innerHTML=reu.map(r=>{
+    const rKey=r._sbId||r._localId||'';
+    return `<div class="jac-evento-card jac-ec-cita" style="flex-wrap:wrap;gap:6px">
     <div style="color:#f97316;font-size:20px;flex-shrink:0">🤝</div>
     <div style="flex:1">
       <div style="font-weight:600;font-size:13px;color:var(--text)">${r.cliente}</div>
       <div style="font-size:11px;color:var(--muted);margin-top:2px">📅 ${r.fecha} · ⏰ ${r.hora||'—'}${r.ubicacion?' · '+r.ubicacion:''}</div>
+      ${r.notas?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${r.notas}</div>`:''}
     </div>
-  </div>`).join('');}
+    <span style="font-size:9px;background:#f9731622;color:#f97316;padding:2px 8px;border-radius:10px;font-weight:700;align-self:flex-start">${r.status||'Programada'}</span>
+    <div style="width:100%;display:flex;gap:6px;margin-top:4px">
+      <button class="btn btn-ghost btn-sm" onclick="waClick('${r.cliente}')" title="WhatsApp">💬 WA</button>
+      ${rKey?`<button class="btn btn-ghost btn-sm" onclick="editCita('${rKey}')" title="Editar">✏️ Editar</button>
+      <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="deleteCita('${rKey}')" title="Eliminar">🗑️ Eliminar</button>`:''}
+    </div>
+  </div>`;
+  }).join('');}
 
 // Función auxiliar para toggle de tarea desde agenda
 function toggleTaskStatusById(id){
@@ -7341,17 +7377,105 @@ function saveCita(){
   const hora=document.getElementById('c-hora').value;
   const propiedad=document.getElementById('c-propiedad').value;
   const notas=document.getElementById('c-notas').value;
-  const cita={tipo,cliente,propiedad,fecha,hora,notas};
-  citas.push(cita);
-  activities.unshift({tipo:'📅 Cita',cliente,desc:`${tipo} agendada para ${fecha} ${hora}.`,time:'Ahora'});
-  // Persist to Supabase
-  if(sb){
-    sb.from('agenda').insert({titulo:cliente,tipo,lugar:propiedad||null,fecha:fecha||null,hora:hora||null,notas:notas||null,estado:'Programada'})
-      .then(({error,data})=>{ if(error) console.warn('Agenda save error:',error); else if(data&&data[0]) cita._sbId=data[0].id; });
+  const editId=(document.getElementById('c-edit-id')||{}).value||'';
+
+  if(editId){
+    // Modo edición — actualizar cita existente
+    const idx=citas.findIndex(c=>String(c._sbId)===String(editId)||String(c._localId)===String(editId));
+    if(idx>=0){
+      const c=citas[idx];
+      Object.assign(c,{tipo,cliente,propiedad,fecha,hora,notas});
+      if(sb&&c._sbId){
+        sb.from('agenda').update({titulo:cliente,tipo,lugar:propiedad||null,fecha:fecha||null,hora:hora||null,notas:notas||null})
+          .eq('id',c._sbId).then(({error})=>{if(error)console.warn('Agenda update error:',error);});
+      }
+      toast('✅ Cita actualizada');
+    }
+  } else {
+    // Modo creación — nueva cita
+    const cita={_localId:'C_'+Date.now(),tipo,cliente,propiedad,fecha,hora,notas};
+    citas.push(cita);
+    activities.unshift({tipo:'📅 Cita',cliente,desc:`${tipo} agendada para ${fecha} ${hora}.`,time:'Ahora'});
+    if(sb){
+      sb.from('agenda').insert({titulo:cliente,tipo,lugar:propiedad||null,fecha:fecha||null,hora:hora||null,notas:notas||null,estado:'Programada'})
+        .then(({error,data})=>{ if(error) console.warn('Agenda save error:',error); else if(data&&data[0]){ cita._sbId=data[0].id; } });
+    }
+    toast('✅ Cita agendada');
   }
+  // Reset modal
+  const tEl=document.querySelector('#modalCita .modal-title'); if(tEl) tEl.textContent='📅 Nueva Cita / Evento';
+  const bEl=document.getElementById('c-save-btn'); if(bEl) bEl.textContent='Agendar';
+  const eId=document.getElementById('c-edit-id'); if(eId) eId.value='';
   closeModal('modalCita');
   renderCalendar();renderDashboard();
-  toast('✅ Cita agendada');
+}
+
+// ── Edit / Delete cita ─────────────────────────────────────────
+function editCita(key){
+  const c=citas.find(x=>String(x._sbId)===String(key)||String(x._localId)===String(key));
+  if(!c){toast('⚠️ Cita no encontrada');return;}
+  // Rellenar modal
+  const eId=document.getElementById('c-edit-id'); if(eId) eId.value=key;
+  const el=id=>document.getElementById(id);
+  if(el('c-tipo')) el('c-tipo').value=c.tipo||'Visita propiedad';
+  if(el('c-cliente')) el('c-cliente').value=c.cliente||'';
+  if(el('c-propiedad')) el('c-propiedad').value=c.propiedad||'';
+  if(el('c-fecha')) el('c-fecha').value=c.fecha||'';
+  if(el('c-hora')) el('c-hora').value=c.hora||'10:00';
+  if(el('c-notas')) el('c-notas').value=c.notas||'';
+  // Cambiar título y botón
+  const tEl=document.querySelector('#modalCita .modal-title'); if(tEl) tEl.textContent='✏️ Editar Cita';
+  const bEl=document.getElementById('c-save-btn'); if(bEl) bEl.textContent='Guardar cambios';
+  openModal('modalCita');
+}
+
+function deleteCita(key){
+  if(!confirm('¿Eliminar esta cita?'))return;
+  const idx=citas.findIndex(x=>String(x._sbId)===String(key)||String(x._localId)===String(key));
+  if(idx>=0){
+    const c=citas[idx];
+    citas.splice(idx,1);
+    if(sb&&c._sbId){
+      sb.from('agenda').delete().eq('id',c._sbId).then(({error})=>{if(error)console.warn('Cita delete SB:',error);});
+    }
+  }
+  renderCalendar();renderDashboard();
+  // Refrescar pestañas si están abiertas
+  const tr=document.getElementById('jac-atab-content-tareas');
+  const rr=document.getElementById('jac-atab-content-reuniones');
+  if(tr&&tr.style.display!=='none') jacRenderTareasTab();
+  if(rr&&rr.style.display!=='none') jacRenderReunionesTab();
+  toast('🗑️ Cita eliminada');
+}
+
+// Abrir modal de tarea limpio (modo nueva)
+function openNuevaTarea(){
+  window._editTareaId=null;
+  const tEl=document.querySelector('#modalTarea .modal-title'); if(tEl) tEl.textContent='✅ Nueva Tarea';
+  const bEl=document.querySelector('#modalTarea .btn-primary'); if(bEl) bEl.textContent='Guardar';
+  const el=n=>document.getElementById(n);
+  if(el('t-titulo')) el('t-titulo').value='';
+  if(el('t-desc')) el('t-desc').value='';
+  if(el('t-vence')) el('t-vence').value='';
+  openModal('modalTarea');
+}
+
+// Editar tarea desde agenda — abre modal de tarea pre-rellenado
+function editTareaById(id){
+  const t=tasks.find(x=>String(x.id)===String(id));
+  if(!t){toast('⚠️ Tarea no encontrada');return;}
+  const el=n=>document.getElementById(n);
+  // Intentar rellenar campos del modal de tarea
+  if(el('t-titulo')) el('t-titulo').value=t.title||t.titulo||'';
+  if(el('t-prioridad')) el('t-prioridad').value=t.priority||t.prioridad||'Media';
+  if(el('t-vence')) el('t-vence').value=t.due||t.vence||'';
+  if(el('t-desc')) el('t-desc').value=t.desc||'';
+  if(el('t-tipo')) el('t-tipo').value=t.tipo||'general';
+  // Guardar ID para que saveTarea sepa que es edición
+  window._editTareaId=id;
+  const tEl=document.querySelector('#modalTarea .modal-title'); if(tEl) tEl.textContent='✏️ Editar Tarea';
+  const bEl=document.querySelector('#modalTarea .btn-primary'); if(bEl) bEl.textContent='Guardar cambios';
+  openModal('modalTarea');
 }
 
 async function saveActividad(){
@@ -7880,26 +8004,45 @@ function deleteTarea(id){if(confirm('¿Eliminar tarea?')){tasks=tasks.filter(t=>
 function saveTarea(){
   const titulo=document.getElementById('t-titulo').value.trim();
   if(!titulo){alert('Ingresa el título de la tarea');return;}
-  const tipo=document.getElementById('t-tipo').value;
-  const refVal=document.getElementById('t-ref').value;
+  const tipo=document.getElementById('t-tipo')?.value||'general';
+  const refVal=document.getElementById('t-ref')?.value||'';
+  const prioridad=document.getElementById('t-prioridad')?.value||'Media';
+  const vence=document.getElementById('t-vence')?.value||new Date().toISOString().split('T')[0];
+  const desc=document.getElementById('t-desc')?.value||'';
   const allRefs=[...leads.map(l=>({id:l.id,name:l.nombre})),...props.map(p=>({id:p.id,name:p.id+' · '+p.titulo}))];
   const refObj=allRefs.find(x=>x.id===refVal);
-  const tareaData={
-    id:'T'+String(tasks.length+1).padStart(3,'0'),
-    titulo,prioridad:document.getElementById('t-prioridad').value,
-    status:'Pendiente',
-    vence:document.getElementById('t-vence').value||new Date().toISOString().split('T')[0],
-    tipo,ref:refVal,refName:refObj?refObj.name:'',
-    desc:document.getElementById('t-desc').value
-  };
-  tasks.unshift(tareaData);
-  activities.unshift({tipo:'✅ Tarea',cliente:refObj?refObj.name:'General',desc:`Nueva tarea: "${titulo}"`,time:'Ahora'});
+
+  // Modo edición
+  if(window._editTareaId){
+    const idx=tasks.findIndex(x=>String(x.id)===String(window._editTareaId));
+    if(idx>=0){
+      Object.assign(tasks[idx],{titulo,title:titulo,prioridad,priority:prioridad,vence,due:vence,tipo,ref:refVal,refName:refObj?refObj.name:'',desc});
+      if(sb) sb.from('tareas_crm').upsert({id:tasks[idx].id,payload:tasks[idx]}).then(({error})=>{if(error)console.warn('Tarea update SB:',error);});
+      toast('✅ Tarea actualizada');
+    }
+    window._editTareaId=null;
+    const tEl=document.querySelector('#modalTarea .modal-title'); if(tEl) tEl.textContent='✅ Nueva Tarea';
+    const bEl=document.querySelector('#modalTarea .btn-primary'); if(bEl) bEl.textContent='Guardar';
+  } else {
+    // Nueva tarea
+    const tareaData={
+      id:'T'+String(tasks.length+1).padStart(3,'0'),
+      titulo,title:titulo,prioridad,priority:prioridad,
+      status:'Pendiente',
+      vence,due:vence,tipo,ref:refVal,refName:refObj?refObj.name:'',desc
+    };
+    tasks.unshift(tareaData);
+    activities.unshift({tipo:'✅ Tarea',cliente:refObj?refObj.name:'General',desc:`Nueva tarea: "${titulo}"`,time:'Ahora'});
+    if(sb) sb.from('tareas_crm').upsert({id:tareaData.id,payload:tareaData}).then(({error})=>{if(error)console.warn('Tarea save SB:',error);});
+    toast('✅ Tarea guardada');
+  }
   closeModal('modalTarea');
   renderTareas();
   document.getElementById('t-titulo').value='';
-  document.getElementById('t-desc').value='';
-  toast('✅ Tarea guardada');
-  if(sb) sb.from('tareas_crm').upsert({id:tareaData.id,payload:tareaData}).then(({error})=>{if(error)console.warn('Tarea save SB:',error);});
+  if(document.getElementById('t-desc')) document.getElementById('t-desc').value='';
+  // Refrescar tab tareas si está abierto
+  const tr=document.getElementById('jac-atab-content-tareas');
+  if(tr&&tr.style.display!=='none') jacRenderTareasTab();
 }
 function notifyTareaWA(id){
   const t=tasks.find(x=>x.id===id);
