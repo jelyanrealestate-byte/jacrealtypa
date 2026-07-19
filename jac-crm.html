@@ -135,15 +135,41 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .search-bar select option{background:var(--card2)}
 
 /* PIPELINE KANBAN */
-.pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;min-height:400px}
-.pipeline-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}
-.pipeline-col-header{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
-.pipeline-count{background:var(--card2);color:var(--muted);font-size:11px;padding:1px 7px;border-radius:10px}
-.pipeline-card{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer;transition:.15s}
-.pipeline-card:hover{border-color:var(--accent);transform:translateY(-1px)}
-.pipeline-card-name{font-size:13px;font-weight:500;margin-bottom:4px}
-.pipeline-card-meta{font-size:11px;color:var(--muted)}
-.pipeline-card-val{font-size:12px;color:var(--accent);font-weight:600;margin-top:6px}
+/* ── PIPELINE KANBAN ─────────────────────────────────── */
+.pipeline-wrap{overflow-x:auto;padding-bottom:8px}
+.pipeline{display:flex;gap:10px;min-height:420px;width:max-content;min-width:100%}
+.pipeline-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;width:200px;min-width:200px;flex-shrink:0;display:flex;flex-direction:column}
+.pipeline-col.col-cerrado{border-color:rgba(34,197,94,.35)}
+.pipeline-col.col-perdido{border-color:rgba(239,68,68,.3);opacity:.85}
+.pipeline-col-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.pipeline-count{background:var(--card2);color:var(--muted);font-size:11px;padding:1px 7px;border-radius:10px;font-weight:600}
+.pipeline-col-val{font-size:10px;color:var(--muted);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.pipeline-col-body{flex:1;min-height:80px}
+.pipeline-card{background:var(--card2);border:1px solid var(--border);border-left:3px solid transparent;border-radius:8px;padding:9px 10px;margin-bottom:7px;cursor:grab;transition:.15s;position:relative}
+.pipeline-card:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.pipeline-card.prio-alta{border-left-color:var(--red)}
+.pipeline-card.prio-urgente{border-left-color:#ff4500;animation:pulse-red 2s infinite}
+@keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.3)}50%{box-shadow:0 0 0 4px rgba(239,68,68,0)}}
+.pipeline-card-name{font-size:13px;font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pipeline-card-meta{font-size:11px;color:var(--muted);line-height:1.4}
+.pipeline-card-val{font-size:11px;color:var(--accent);font-weight:600;margin-top:5px}
+.pipeline-card-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.pipeline-card-tag{font-size:9px;padding:1px 5px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--muted)}
+.pipeline-card-actions{display:flex;flex-wrap:wrap;gap:3px;margin-top:7px;border-top:1px solid var(--border);padding-top:6px}
+.pipeline-card-actions button{font-size:10px;padding:2px 6px;border-radius:5px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:.1s}
+.pipeline-card-actions button:hover{background:var(--accent);color:#000;border-color:var(--accent)}
+.pipeline-card-move{font-size:12px;cursor:pointer;background:transparent;border:none;color:var(--muted);padding:1px 4px;border-radius:4px;transition:.1s}
+.pipeline-card-move:hover{background:var(--card2);color:var(--text)}
+/* KPI bar */
+.pipeline-kpi-bar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.pipeline-kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;flex:1;min-width:110px}
+.pipeline-kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.pipeline-kpi-val{font-size:20px;font-weight:700;margin-top:3px}
+/* Filter bar */
+.pipeline-filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.pipeline-filter-bar select{background:var(--card);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:5px 10px;font-size:12px}
+/* Drop target highlight */
+.pipeline-col.drag-over{background:rgba(232,160,32,.07);border-color:var(--accent)}
 
 /* CALENDAR */
 .cal-grid{display:grid;grid-template-columns:1fr 320px;gap:16px}
@@ -1169,8 +1195,37 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 
     <!-- ========== PIPELINE ========== -->
     <div class="panel" id="panel-pipeline">
-      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Arrastra los cards entre columnas para actualizar el embudo de ventas.</p>
-      <div class="pipeline" id="pipeline-board"></div>
+      <!-- KPI Bar -->
+      <div class="pipeline-kpi-bar" id="pipeline-kpi-bar">
+        <div class="pipeline-kpi"><div class="pipeline-kpi-label">Total Leads</div><div class="pipeline-kpi-val" id="pipe-kpi-total" style="color:var(--cyan)">0</div></div>
+        <div class="pipeline-kpi"><div class="pipeline-kpi-label">Activos</div><div class="pipeline-kpi-val" id="pipe-kpi-activos" style="color:var(--blue)">0</div></div>
+        <div class="pipeline-kpi"><div class="pipeline-kpi-label">En Negociación</div><div class="pipeline-kpi-val" id="pipe-kpi-neg" style="color:var(--accent)">0</div></div>
+        <div class="pipeline-kpi"><div class="pipeline-kpi-label">Valor Pipeline</div><div class="pipeline-kpi-val" id="pipe-kpi-valor" style="color:var(--green);font-size:14px">$0</div></div>
+        <div class="pipeline-kpi"><div class="pipeline-kpi-label">Cerrados</div><div class="pipeline-kpi-val" id="pipe-kpi-cerrados" style="color:var(--green)">0</div></div>
+      </div>
+      <!-- Filter bar -->
+      <div class="pipeline-filter-bar">
+        <select id="pipe-filter-interes" onchange="renderPipeline()" style="min-width:130px">
+          <option value="">Todo interés</option>
+          <option>Compra</option><option>Alquiler</option><option>Inversión</option><option>Preventa</option>
+        </select>
+        <select id="pipe-filter-agente" onchange="renderPipeline()" style="min-width:130px">
+          <option value="">Todos los agentes</option>
+          <option>J. Castro</option><option>F. Florez</option>
+        </select>
+        <select id="pipe-filter-prioridad" onchange="renderPipeline()" style="min-width:120px">
+          <option value="">Toda prioridad</option>
+          <option>Urgente</option><option>Alta</option><option>Normal</option><option>Baja</option>
+        </select>
+        <span style="flex:1"></span>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modalLead')">+ Nuevo Lead</button>
+        <button class="btn btn-outline btn-sm" onclick="renderPipeline()">🔄 Actualizar</button>
+      </div>
+      <!-- Kanban board -->
+      <div class="pipeline-wrap">
+        <div class="pipeline" id="pipeline-board"></div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:10px">💡 Arrastra las tarjetas entre columnas para mover leads · Los cambios se guardan automáticamente en Supabase</p>
     </div>
 
     <!-- ========== AGENDA ========== -->
@@ -2413,6 +2468,8 @@ CREATE POLICY "allow_all_diario_crm" ON diario_crm FOR ALL USING (true) WITH CHE
     <div id="ficha-preview" style="overflow-y:auto;max-height:60vh;border:1px solid var(--border);border-radius:8px;background:var(--card2)"></div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalFicha')">Cerrar</button>
+      <button class="btn btn-primary btn-sm" onclick="(()=>{const id=document.getElementById('ficha-modal-prop-id').value;closeModal('modalFicha');if(id)editProp(id);})()" style="gap:5px">✏️ Editar Propiedad</button>
+      <button class="btn btn-outline btn-sm" onclick="(()=>{const id=document.getElementById('ficha-modal-prop-id').value;if(id&&confirm('¿Eliminar propiedad?')){closeModal('modalFicha');deleteProp(id);}})()" style="color:var(--red);border-color:var(--red)44">🗑️ Eliminar</button>
     </div>
   </div>
 </div>
@@ -3545,9 +3602,10 @@ CREATE POLICY "allow_all_diario_crm" ON diario_crm FOR ALL USING (true) WITH CHE
 <div class="modal-bg" id="modalRedContacto">
   <div class="modal" style="max-width:640px">
     <div class="modal-header">
-      <span class="modal-title">🤝 Agregar Aliado a la Red</span>
+      <span class="modal-title">🤝 Nuevo Aliado / Corredor</span>
       <button class="modal-close" onclick="closeModal('modalRedContacto')">✕</button>
     </div>
+    <input type="hidden" id="rc-edit-nombre">
     <div class="form-grid">
       <div class="form-group"><label>Nombre completo *</label><input id="rc-nombre" placeholder="Nombre del agente / corredor"></div>
       <div class="form-group"><label>Tipo</label>
@@ -4453,39 +4511,132 @@ function deleteLead(id){
 // ============================================================
 // PIPELINE
 // ============================================================
-const stages=['Nuevo','Contactado','Visita','Oferta','Cerrado'];
-const stageColors={Nuevo:'var(--cyan)',Contactado:'var(--blue)',Visita:'var(--purple)',Oferta:'var(--accent)',Cerrado:'var(--green)'};
+// ── PIPELINE — stages match exactly the lead status values ──
+const stages=['Nuevo','Contactado','Visita programada','En negociación','Oferta presentada','Cerrado ✅','Perdido ❌'];
+const stageEmojis={
+  'Nuevo':'🔵','Contactado':'📞','Visita programada':'🏠',
+  'En negociación':'🤝','Oferta presentada':'📄','Cerrado ✅':'✅','Perdido ❌':'❌'
+};
+const stageColors={
+  'Nuevo':'var(--cyan)','Contactado':'var(--blue)','Visita programada':'var(--purple)',
+  'En negociación':'var(--accent)','Oferta presentada':'#f0b840','Cerrado ✅':'var(--green)','Perdido ❌':'var(--red)'
+};
+
 function renderPipeline(){
   const board=document.getElementById('pipeline-board');
-  board.innerHTML=stages.map(stage=>{
-    const stLeads=leads.filter(l=>l.status===stage);
-    return `<div class="pipeline-col" ondragover="event.preventDefault()" ondrop="dropLead(event,'${stage}')">
+  if(!board) return;
+  // Filters
+  const fInt=(document.getElementById('pipe-filter-interes')||{}).value||'';
+  const fAg=(document.getElementById('pipe-filter-agente')||{}).value||'';
+  const fPri=(document.getElementById('pipe-filter-prioridad')||{}).value||'';
+  let filtered=leads.filter(l=>{
+    if(fInt && l.interes!==fInt) return false;
+    if(fAg && (l.agente||'')!==fAg) return false;
+    if(fPri && (l.prioridad||'Normal')!==fPri) return false;
+    return true;
+  });
+
+  // KPI bar update
+  const total=filtered.length;
+  const activos=filtered.filter(l=>!['Cerrado ✅','Perdido ❌'].includes(l.status)).length;
+  const enNeg=filtered.filter(l=>l.status==='En negociación'||l.status==='Oferta presentada').length;
+  const cerrados=filtered.filter(l=>l.status==='Cerrado ✅').length;
+  const valorTotal=filtered.filter(l=>l.status!=='Perdido ❌').reduce((s,l)=>s+(l.presupuesto_max||l.presupuesto_min||0),0);
+  const kv=id=>document.getElementById(id);
+  if(kv('pipe-kpi-total')) kv('pipe-kpi-total').textContent=total;
+  if(kv('pipe-kpi-activos')) kv('pipe-kpi-activos').textContent=activos;
+  if(kv('pipe-kpi-neg')) kv('pipe-kpi-neg').textContent=enNeg;
+  if(kv('pipe-kpi-cerrados')) kv('pipe-kpi-cerrados').textContent=cerrados;
+  if(kv('pipe-kpi-valor')) kv('pipe-kpi-valor').textContent=valorTotal>0?'$'+valorTotal.toLocaleString():'$0';
+
+  board.innerHTML=stages.map((stage,si)=>{
+    const stLeads=filtered.filter(l=>l.status===stage);
+    const stVal=stLeads.reduce((s,l)=>s+(l.presupuesto_max||l.presupuesto_min||0),0);
+    const colCls=stage==='Cerrado ✅'?' col-cerrado':stage==='Perdido ❌'?' col-perdido':'';
+    const prevStage=si>0?stages[si-1]:null;
+    const nextStage=si<stages.length-1?stages[si+1]:null;
+    return `<div class="pipeline-col${colCls}" id="pipe-col-${si}"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="dropLead(event,'${stage}',this)">
       <div class="pipeline-col-header">
-        <span style="color:${stageColors[stage]}">${stage}</span>
+        <span style="color:${stageColors[stage]}">${stageEmojis[stage]} ${stage}</span>
         <span class="pipeline-count">${stLeads.length}</span>
       </div>
-      ${stLeads.map(l=>`
-        <div class="pipeline-card" draggable="true" ondragstart="dragLead(event,'${l.id}')">
-          <div class="pipeline-card-name">${l.nombre}</div>
-          <div class="pipeline-card-meta">${l.interes} · ${l.fuente}</div>
-          <div class="pipeline-card-val">${l.presupuesto}</div>
-          <div style="margin-top:6px;display:flex;gap:3px;flex-wrap:wrap">
-            <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="waLead('${l.id}')">💬</button>
-            <button class="email-btn" style="font-size:10px;padding:3px 7px" title="jcastro@jacrealtypa.com" onclick="emailLeadJcastro('${l.id}')">📧JC</button>
-            <button class="email-btn" style="font-size:10px;padding:3px 7px;background:var(--cyan)22;color:var(--cyan);border-color:var(--cyan)44" title="jelyanrealestate@gmail.com" onclick="emailLeadJelyan('${l.id}')">📧JL</button>
-            <button style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:10px" onclick="editLead('${l.id}')">✏️</button>
+      <div class="pipeline-col-val">${stVal>0?'💰 $'+stVal.toLocaleString():'Sin valor registrado'}</div>
+      <div class="pipeline-col-body">
+      ${stLeads.map(l=>{
+        const priClass=l.prioridad==='Urgente'?' prio-urgente':l.prioridad==='Alta'?' prio-alta':'';
+        return `<div class="pipeline-card${priClass}" draggable="true" ondragstart="dragLead(event,'${l.id}')">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:4px">
+            <div class="pipeline-card-name" title="${l.nombre}">${l.nombre}</div>
+            ${l.prioridad&&l.prioridad!=='Normal'?`<span style="font-size:9px;padding:1px 5px;border-radius:8px;background:${l.prioridad==='Urgente'?'rgba(239,68,68,.2);color:var(--red)':'rgba(232,160,32,.2);color:var(--accent)'};white-space:nowrap">${l.prioridad}</span>`:''}
           </div>
-        </div>`).join('')}
+          <div class="pipeline-card-meta">
+            ${l.interes?`🎯 ${l.interes}`:''}${l.zona&&l.zona!=='Cualquier zona'?` · 📍 ${l.zona}`:''}
+          </div>
+          ${l.presupuesto?`<div class="pipeline-card-val">💰 ${l.presupuesto}</div>`:''}
+          ${l.agente&&l.agente!=='J. Castro'?`<div style="font-size:10px;color:var(--muted);margin-top:3px">👤 ${l.agente}</div>`:''}
+          <div class="pipeline-card-actions">
+            <button onclick="waLead('${l.id}')" title="WhatsApp" style="color:#25D366;border-color:#25D36644">💬</button>
+            <button onclick="emailPipelineJcastro('${l.id}')" title="Email JC" style="color:var(--blue)">📧JC</button>
+            <button onclick="emailPipelineJelyan('${l.id}')" title="Email JL" style="color:var(--cyan)">📧JL</button>
+            <button onclick="verEcosistema('${l.nombre}','lead',{info:['Tel: '+(l.tel||'—'),'Interés: '+(l.interes||'—'),'Presupuesto: '+(l.presupuesto||'—')]})" title="Ver ecosistema" style="color:var(--purple)">🔗</button>
+            <button onclick="pipCrearCita('${l.id}')" title="Nueva cita" style="color:var(--accent)">📅</button>
+            <button onclick="editLead('${l.id}')" title="Editar lead" style="color:var(--text)">✏️</button>
+            <button onclick="deleteLead('${l.id}')" title="Eliminar" style="color:var(--red)">🗑️</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px">
+            ${prevStage?`<button class="pipeline-card-move" onclick="moveLead('${l.id}','${prevStage}')" title="← ${prevStage}">◀</button>`:'<span></span>'}
+            ${nextStage?`<button class="pipeline-card-move" onclick="moveLead('${l.id}','${nextStage}')" title="${nextStage} →">▶</button>`:'<span></span>'}
+          </div>
+        </div>`;
+      }).join('')}
+      </div>
     </div>`;
   }).join('');
 }
+
 let dragId=null;
-function dragLead(e,id){dragId=id;}
-function dropLead(e,stage){
+function dragLead(e,id){dragId=id;e.dataTransfer.effectAllowed='move';}
+function dropLead(e,stage,colEl){
+  e.preventDefault();
+  if(colEl) colEl.classList.remove('drag-over');
   if(!dragId)return;
-  const l=leads.find(x=>x.id===dragId);
-  if(l){l.status=stage;renderPipeline();toast(`${l.nombre} → ${stage}`);}
+  moveLead(dragId, stage);
   dragId=null;
+}
+function moveLead(id, newStage){
+  const l=leads.find(x=>x.id===id);
+  if(!l) return;
+  const prev=l.status;
+  if(prev===newStage) return;
+  l.status=newStage;
+  renderPipeline();
+  renderLeads();
+  updateBadges();
+  toast(`${l.nombre} → ${newStage}`);
+  logHistory('lead', l.id, '🔄', `Estado: ${prev} → ${newStage}`, `Pipeline actualizado.`);
+  activities.unshift({tipo:'🔄 Pipeline',cliente:l.nombre,desc:`Movido: ${prev} → ${newStage}`,time:'Ahora'});
+  // ── Persistir en Supabase ──
+  if(sb && l._sbId){
+    sb.from('clientes').update({estado:newStage})
+      .eq('id', l._sbId)
+      .then(({error})=>{
+        if(error) console.warn('Pipeline update SB:',error);
+        else toast('☁️ Guardado en Supabase',1200);
+      });
+  }
+}
+function pipCrearCita(leadId){
+  const l=leads.find(x=>x.id===leadId);
+  if(!l) return;
+  showPanel('agenda');
+  setTimeout(()=>{
+    jacAgendaAgregarCita();
+    const cli=document.getElementById('c-cliente');
+    if(cli) cli.value=l.nombre;
+  },300);
 }
 
 // ============================================================
@@ -8959,6 +9110,7 @@ function renderRedAliados(list){
         <button class="wa-btn" style="font-size:10px;padding:3px 7px" onclick="waRedContact('${(c.nombre||'').replace(/'/g,"\\\'")}')" title="WhatsApp">💬</button>
         <button class="email-btn" style="font-size:10px;padding:3px 7px" onclick="emailRedContact('${(c.nombre||'').replace(/'/g,"\\\'")}')" title="Email">📧</button>
         <button class="btn btn-primary btn-sm" style="font-size:10px;padding:3px 8px" onclick="propuestaCoBrokingAliado('${(c.nombre||'').replace(/'/g,"\\\'")}')" title="Co-broking">💼</button>
+        <button class="btn btn-ghost btn-sm" onclick="editRedContact('${(c.nombre||'').replace(/'/g,"\\\'")}')" style="font-size:10px" title="Editar">✏️</button>
         <button class="btn btn-ghost btn-sm" onclick="deleteRedContact('${(c.nombre||'').replace(/'/g,"\\\'")}')" style="font-size:10px">🗑️</button>
       </div></td>
     </tr>`;
@@ -9065,10 +9217,28 @@ function filterRedContacts(q){
   renderRedAliados(list);
 }
 
+function editRedContact(nombre){
+  const c=redContacts.find(x=>x.nombre===nombre);
+  if(!c){toast('Aliado no encontrado');return;}
+  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||'';};
+  s('rc-nombre',c.nombre); s('rc-tipo',c.tipo); s('rc-empresa',c.empresa);
+  s('rc-licencia',c.licencia); s('rc-tel',c.telefono); s('rc-wa',c.whatsapp);
+  s('rc-email',c.email); s('rc-instagram',c.instagram); s('rc-zona',c.zona);
+  s('rc-comision-pct',c.comision_pct); s('rc-especialidades',c.especialidades);
+  s('rc-notas',c.notas);
+  const rEl=document.getElementById('rc-rating'); if(rEl) rEl.value=c.rating||3;
+  const editEl=document.getElementById('rc-edit-nombre'); if(editEl) editEl.value=nombre;
+  const mt=document.querySelector('#modalRedContacto .modal-title');
+  if(mt) mt.textContent='✏️ Editar Aliado';
+  const btn=document.querySelector('#modalRedContacto .btn-primary');
+  if(btn) btn.textContent='💾 Guardar Cambios';
+  openModal('modalRedContacto');
+}
 function saveRedContact(){
   const nombre=(document.getElementById('rc-nombre').value||'').trim();
   if(!nombre){alert('Ingresa el nombre del aliado');return;}
   const g=id=>(document.getElementById(id)||{value:''}).value||'';
+  const editNombre=(document.getElementById('rc-edit-nombre')||{}).value||'';
   const c={
     nombre, tipo:g('rc-tipo'), empresa:g('rc-empresa'), licencia:g('rc-licencia'),
     telefono:g('rc-tel'), email:g('rc-email'), whatsapp:g('rc-wa')||g('rc-tel'),
@@ -9076,22 +9246,43 @@ function saveRedContact(){
     rating:+(document.getElementById('rc-rating')||{value:3}).value||3,
     especialidades:g('rc-especialidades'), notas:g('rc-notas'), estado:'Activo'
   };
-  redContacts.unshift(c);
-  if(sb){
-    sb.from('red_inmobiliaria').insert({
-      nombre:c.nombre, tipo:c.tipo, empresa:c.empresa, licencia:c.licencia,
-      telefono:c.telefono, email:c.email, whatsapp:c.whatsapp,
-      instagram:c.instagram, zona:c.zona, comision_pct:c.comision_pct,
-      rating:c.rating, especialidades:c.especialidades?[c.especialidades]:[], notas:c.notas, estado:'Activo'
-    }).then(({error,data})=>{ if(error) console.warn('Red contact save:',error); else if(data&&data[0]) c._sbId=data[0].id; });
+  if(editNombre){
+    // EDIT mode
+    const idx=redContacts.findIndex(x=>x.nombre===editNombre);
+    if(idx>-1){
+      const prevId=redContacts[idx]._sbId;
+      redContacts[idx]={...redContacts[idx],...c};
+      if(sb&&prevId){
+        sb.from('red_inmobiliaria').update({
+          nombre:c.nombre, tipo:c.tipo, empresa:c.empresa, licencia:c.licencia,
+          telefono:c.telefono, email:c.email, whatsapp:c.whatsapp,
+          instagram:c.instagram, zona:c.zona, comision_pct:c.comision_pct,
+          rating:c.rating, especialidades:c.especialidades?[c.especialidades]:[], notas:c.notas
+        }).eq('id',prevId).then(({error})=>{if(error)console.warn('Red edit SB:',error);else toast('☁️ Aliado actualizado',1000);});
+      }
+    }
+    const editEl=document.getElementById('rc-edit-nombre'); if(editEl) editEl.value='';
+    const mt=document.querySelector('#modalRedContacto .modal-title'); if(mt) mt.textContent='🤝 Nuevo Aliado / Corredor';
+    const btn=document.querySelector('#modalRedContacto .btn-primary'); if(btn) btn.textContent='➕ Agregar Aliado';
+    toast('✏️ Aliado actualizado: '+nombre);
+  } else {
+    // NEW
+    redContacts.unshift(c);
+    if(sb){
+      sb.from('red_inmobiliaria').insert({
+        nombre:c.nombre, tipo:c.tipo, empresa:c.empresa, licencia:c.licencia,
+        telefono:c.telefono, email:c.email, whatsapp:c.whatsapp,
+        instagram:c.instagram, zona:c.zona, comision_pct:c.comision_pct,
+        rating:c.rating, especialidades:c.especialidades?[c.especialidades]:[], notas:c.notas, estado:'Activo'
+      }).then(({error,data})=>{ if(error) console.warn('Red contact save:',error); else if(data&&data[0]) c._sbId=data[0].id; });
+    }
+    activities.unshift({tipo:'🤝 Red',cliente:c.nombre,desc:`Nuevo aliado: ${c.tipo} · ${c.empresa||'Independiente'}`,time:'Ahora'});
+    toast('✅ Aliado agregado: '+c.nombre);
+    setTimeout(()=>{ if(confirm(`¿Enviar mensaje de bienvenida por WhatsApp a ${c.nombre}?`)) waWelcomeAliado(c); }, 600);
   }
   closeModal('modalRedContacto');
   renderRedInmo();
-  activities.unshift({tipo:'🤝 Red',cliente:c.nombre,desc:`Nuevo aliado: ${c.tipo} · ${c.empresa||'Independiente'}`,time:'Ahora'});
   ['rc-nombre','rc-empresa','rc-licencia','rc-tel','rc-wa','rc-email','rc-instagram','rc-especialidades','rc-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  toast('✅ Aliado agregado: '+c.nombre);
-  // Auto-welcome WA
-  setTimeout(()=>{ if(confirm(`¿Enviar mensaje de bienvenida por WhatsApp a ${c.nombre}?`)) waWelcomeAliado(c); }, 600);
 }
 
 function saveRedProp(){
