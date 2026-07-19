@@ -892,14 +892,7 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       <span class="icon">🏍️</span> Mensajero
       <span class="nav-badge" id="badge-mensajero" style="background:var(--accent);color:#111;display:none">0</span>
     </div>
-    <div class="nav-item" onclick="showPanel('notas')">
-      <span class="icon">📝</span> Notas
-      <span class="nav-badge" id="badge-notas" style="background:var(--blue)">0</span>
-    </div>
-    <div class="nav-item" onclick="showPanel('tareas')">
-      <span class="icon">✅</span> Tareas
-      <span class="nav-badge" id="badge-tareas">0</span>
-    </div>
+    <!-- Notas y Tareas movidas dentro de Agenda (pestañas Notas y Tareas) -->
     <div class="nav-item" onclick="showPanel('matching')">
       <span class="icon">🎯</span> Matching
       <span class="nav-badge" id="badge-matching" style="background:var(--purple)">0</span>
@@ -1270,13 +1263,21 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
           </div>
 
           <!-- ── TAB: METAS ── -->
-          <div id="jac-atab-content-metas" style="flex:1;overflow-y:auto;padding:18px 20px;display:none;text-align:center;color:var(--muted)">
-            <div style="padding:60px 0;font-size:14px">🎯 Próximamente: Metas y objetivos de ventas</div>
+          <div id="jac-atab-content-metas" style="flex:1;overflow-y:auto;padding:18px 20px;display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+              <span style="font-weight:700;font-size:16px;color:var(--text)">🎯 Metas y Objetivos</span>
+              <button class="btn btn-primary btn-sm" onclick="openNuevaMeta()">+ Nueva Meta</button>
+            </div>
+            <div id="jac-metas-list"></div>
           </div>
 
           <!-- ── TAB: DIARIO ── -->
-          <div id="jac-atab-content-diario" style="flex:1;overflow-y:auto;padding:18px 20px;display:none;text-align:center;color:var(--muted)">
-            <div style="padding:60px 0;font-size:14px">📔 Próximamente: Diario de actividades</div>
+          <div id="jac-atab-content-diario" style="flex:1;overflow-y:auto;padding:18px 20px;display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+              <span style="font-weight:700;font-size:16px;color:var(--text)">📔 Diario de Actividades</span>
+              <button class="btn btn-primary btn-sm" onclick="openNuevaDiario()">+ Nueva Entrada</button>
+            </div>
+            <div id="jac-diario-list"></div>
           </div>
 
           <!-- ── TAB: REUNIONES ── -->
@@ -1285,8 +1286,12 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
           </div>
 
           <!-- ── TAB: NOTAS (vista interna) ── -->
-          <div id="jac-atab-content-notas2" style="flex:1;overflow-y:auto;padding:18px 20px;display:none;text-align:center;color:var(--muted)">
-            <div style="padding:60px 0;font-size:14px">📝 Usa el módulo <strong>Notas</strong> en el menú lateral para gestionar notas</div>
+          <div id="jac-atab-content-notas2" style="flex:1;overflow-y:auto;padding:18px 20px;display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+              <span style="font-weight:700;font-size:16px;color:var(--text)">📝 Notas</span>
+              <button class="btn btn-primary btn-sm" onclick="openNuevaNota()">+ Nueva Nota</button>
+            </div>
+            <div id="jac-notas2-list"></div>
           </div>
         </div>
       </div>
@@ -3252,9 +3257,96 @@ CREATE POLICY allow_all_mensajes_internos ON mensajes_internos FOR ALL USING (tr
         <textarea id="n-cuerpo" style="min-height:100px" placeholder="Detalle de la nota..."></textarea>
       </div>
     </div>
+    <input type="hidden" id="n-edit-id" value="">
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalNota')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveNota()">Guardar Nota</button>
+      <button class="btn btn-primary" id="n-save-btn" onclick="saveNota()">Guardar Nota</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Meta -->
+<div class="modal-bg" id="modalMeta">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🎯 Nueva Meta</span>
+      <button class="modal-close" onclick="closeModal('modalMeta')">✕</button>
+    </div>
+    <input type="hidden" id="meta-edit-id" value="">
+    <div class="form-grid">
+      <div class="form-group form-full">
+        <label>Título de la meta</label>
+        <input id="meta-titulo" placeholder="Ej: Cerrar 5 ventas este mes">
+      </div>
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="meta-tipo">
+          <option value="Ventas">Ventas</option>
+          <option value="Captaciones">Captaciones</option>
+          <option value="Citas">Citas</option>
+          <option value="Leads">Leads</option>
+          <option value="Comisión">Comisión</option>
+          <option value="General">General</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Fecha Límite</label>
+        <input type="date" id="meta-fin">
+      </div>
+      <div class="form-group">
+        <label>Objetivo (número)</label>
+        <input type="number" id="meta-valor" placeholder="Ej: 5" min="0">
+      </div>
+      <div class="form-group">
+        <label>Progreso actual</label>
+        <input type="number" id="meta-progreso" placeholder="Ej: 2" min="0">
+      </div>
+      <div class="form-group form-full">
+        <label>Notas / Estrategia</label>
+        <textarea id="meta-notas" style="min-height:60px" placeholder="Estrategia, acciones clave..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalMeta')">Cancelar</button>
+      <button class="btn btn-primary" id="meta-save-btn" onclick="jacSaveMeta()">Guardar Meta</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Diario -->
+<div class="modal-bg" id="modalDiario">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📔 Nueva Entrada</span>
+      <button class="modal-close" onclick="closeModal('modalDiario')">✕</button>
+    </div>
+    <input type="hidden" id="diario-edit-id" value="">
+    <div class="form-grid">
+      <div class="form-group form-full">
+        <label>Título</label>
+        <input id="diario-titulo" placeholder="Resumen del día o actividad...">
+      </div>
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="diario-tipo">
+          <option value="Logro">🏆 Logro</option>
+          <option value="Aprendizaje">📚 Aprendizaje</option>
+          <option value="Seguimiento">📋 Seguimiento</option>
+          <option value="Nota" selected>📝 Nota</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="diario-fecha">
+      </div>
+      <div class="form-group form-full">
+        <label>Contenido</label>
+        <textarea id="diario-contenido" style="min-height:120px" placeholder="Detalla lo que pasó, aprendiste o planeas..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalDiario')">Cancelar</button>
+      <button class="btn btn-primary" id="diario-save-btn" onclick="jacSaveDiario()">Guardar Entrada</button>
     </div>
   </div>
 </div>
@@ -3742,8 +3834,8 @@ async function loadSupabaseData(){
     if(document.getElementById('panel-redInmo').classList.contains('active')) renderRedInmo();
     document.getElementById('badge-leads').textContent=leads.filter(l=>l.status==='Nuevo').length;
     document.getElementById('badge-red').textContent=redContacts.length;
-    document.getElementById('badge-notas').textContent=notes.length;
-    document.getElementById('badge-tareas').textContent=tasks.filter(t=>t.status!=='Completada').length;
+    const _bn=document.getElementById('badge-notas'); if(_bn) _bn.textContent=notes.length;
+    const _bt=document.getElementById('badge-tareas'); if(_bt) _bt.textContent=tasks.filter(t=>t.status!=='Completada').length;
     toast('🟢 Sincronizado con la nube');
   } catch(e){ console.warn('Supabase load error:',e); }
 }
@@ -4457,6 +4549,9 @@ function jacSwitchTab(tab){
   if(tab==='semana') jacRenderSemana();
   if(tab==='tareas') jacRenderTareasTab();
   if(tab==='reuniones') jacRenderReunionesTab();
+  if(tab==='metas') jacRenderMetas();
+  if(tab==='diario') jacRenderDiario();
+  if(tab==='notas2') jacRenderNotas2();
 }
 
 function jacRenderSemana(){
@@ -4528,8 +4623,10 @@ function jacRenderReunionesTab(){
       ${r.notas?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${r.notas}</div>`:''}
     </div>
     <span style="font-size:9px;background:#f9731622;color:#f97316;padding:2px 8px;border-radius:10px;font-weight:700;align-self:flex-start">${r.status||'Programada'}</span>
-    <div style="width:100%;display:flex;gap:6px;margin-top:4px">
+    <div style="width:100%;display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
       <button class="btn btn-ghost btn-sm" onclick="waClick('${r.cliente}')" title="WhatsApp">💬 WA</button>
+      <button class="btn btn-ghost btn-sm" onclick="emailJelyClick('${r.cliente.replace(/'/g,'')}')" title="Email Jely">📧 JL</button>
+      <button class="btn btn-ghost btn-sm" onclick="emailJcastroClick('${r.cliente.replace(/'/g,'')}')" title="Email J.Castro">📧 JC</button>
       ${rKey?`<button class="btn btn-ghost btn-sm" onclick="editCita('${rKey}')" title="Editar">✏️ Editar</button>
       <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="deleteCita('${rKey}')" title="Eliminar">🗑️ Eliminar</button>`:''}
     </div>
@@ -5439,7 +5536,7 @@ function createAutoFollowUpTasks(gEntry){
     tasks.push(task);
     if(sb) sb.from('tareas_crm').upsert({id:task.id,payload:task}).then(({error})=>{if(error)console.warn('AutoTask SB:',error);});
   });
-  document.getElementById('badge-tareas').textContent = tasks.filter(t=>t.status!=='Completada').length;
+  const _bt2=document.getElementById('badge-tareas'); if(_bt2) _bt2.textContent=tasks.filter(t=>t.status!=='Completada').length;
   renderTareas();
 }
 
@@ -5637,7 +5734,7 @@ function createPostVentaSequence(g){
     tasks.push(task);
     if(sb) sb.from('tareas_crm').upsert({id:task.id,payload:task}).then(()=>{});
   });
-  document.getElementById('badge-tareas').textContent = tasks.filter(t=>t.status!=='Completada').length;
+  const _bt2=document.getElementById('badge-tareas'); if(_bt2) _bt2.textContent=tasks.filter(t=>t.status!=='Completada').length;
   renderTareas();
 }
 
@@ -7891,21 +7988,25 @@ function viewEmailHistory(leadId){
 function renderNotas(arr){
   arr=arr||notes;
   const el=document.getElementById('notas-grid');
-  document.getElementById('badge-notas').textContent=notes.length;
+  const _bn=document.getElementById('badge-notas'); if(_bn) _bn.textContent=notes.length;
   if(!arr.length){el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">📝</div><div>Sin notas aún</div></div>';return;}
   el.innerHTML=arr.map(n=>`
     <div class="note-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <div class="note-card-title">${n.titulo}</div>
-        <button class="btn btn-ghost btn-sm" onclick="deleteNota('${n.id}')" style="flex-shrink:0">🗑️</button>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button class="btn btn-ghost btn-sm" onclick="editNota('${n.id}')" title="Editar">✏️</button>
+          <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="deleteNota('${n.id}')" title="Eliminar">🗑️</button>
+        </div>
       </div>
       <div class="note-card-body">${n.cuerpo}</div>
-      <div class="note-card-meta">
+      <div class="note-card-meta" style="flex-wrap:wrap;gap:4px">
         <span>📅 ${n.fecha}</span>
         ${n.refName?`<span class="note-ref">${n.tipo==='lead'?'👤':'🏠'} ${n.refName}</span>`:''}
-        <div style="margin-left:auto;display:flex;gap:4px">
-          <button class="wa-btn" style="font-size:10px;padding:3px 8px" onclick="shareNotaWA('${n.id}')">💬</button>
-          <button class="email-btn" style="font-size:10px;padding:3px 8px" onclick="shareNotaEmail('${n.id}')">📧</button>
+        <div style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap">
+          <button class="wa-btn" style="font-size:10px;padding:3px 8px" onclick="shareNotaWA('${n.id}')">💬 WA</button>
+          <button class="email-btn" style="font-size:10px;padding:3px 8px" onclick="shareNotaEmailJL('${n.id}')">📧 JL</button>
+          <button class="email-btn" style="font-size:10px;padding:3px 8px" onclick="shareNotaEmailJC('${n.id}')">📧 JC</button>
         </div>
       </div>
     </div>`).join('');
@@ -7918,24 +8019,39 @@ function saveNota(){
   if(!titulo){alert('Ingresa un título para la nota');return;}
   const tipo=document.getElementById('n-tipo').value;
   const refVal=document.getElementById('n-ref').value;
+  const editId=document.getElementById('n-edit-id')?.value||'';
   const allRefs=[...leads.map(l=>({id:l.id,name:l.nombre,tipo:'lead'})),...props.map(p=>({id:p.id,name:p.id+' · '+p.titulo,tipo:'propiedad'}))];
   const refObj=allRefs.find(x=>x.id===refVal);
-  const notaData={
-    id:'N'+String(notes.length+1).padStart(3,'0'),
-    titulo,cuerpo,tipo,
-    ref:refVal,refName:refObj?refObj.name:'',
-    fecha:new Date().toISOString().split('T')[0]
-  };
-  notes.unshift(notaData);
-  activities.unshift({tipo:'📝 Nota',cliente:refObj?refObj.name:'General',desc:`Nota creada: "${titulo}"`,time:'Ahora'});
+  if(editId){
+    const idx=notes.findIndex(n=>n.id===editId);
+    if(idx!==-1){
+      notes[idx]={...notes[idx],titulo,cuerpo,tipo,ref:refVal,refName:refObj?refObj.name:''};
+      if(typeof _sbSave==='function') _sbSave('notas_crm',{id:editId,payload:notes[idx]},{upsert:true}).catch(()=>{});
+      else if(sb) sb.from('notas_crm').upsert({id:editId,payload:notes[idx]}).then(({error})=>{if(error)console.warn('Nota edit SB:',error);});
+      toast('✅ Nota actualizada');
+    }
+  } else {
+    const notaData={
+      id:'N'+String(notes.length+1).padStart(3,'0'),
+      titulo,cuerpo,tipo,
+      ref:refVal,refName:refObj?refObj.name:'',
+      fecha:new Date().toISOString().split('T')[0]
+    };
+    notes.unshift(notaData);
+    activities.unshift({tipo:'📝 Nota',cliente:refObj?refObj.name:'General',desc:`Nota creada: "${titulo}"`,time:'Ahora'});
+    if(typeof _sbSave==='function') _sbSave('notas_crm',{id:notaData.id,payload:notaData},{upsert:true}).catch(()=>{});
+    else if(sb) sb.from('notas_crm').upsert({id:notaData.id,payload:notaData}).then(({error})=>{if(error)console.warn('Nota save SB:',error);});
+    toast('✅ Nota guardada');
+  }
   closeModal('modalNota');
   renderNotas();
+  jacRenderNotas2();
   document.getElementById('n-titulo').value='';
   document.getElementById('n-cuerpo').value='';
-  toast('✅ Nota guardada');
-  if(sb) sb.from('notas_crm').upsert({id:notaData.id,payload:notaData}).then(({error})=>{if(error)console.warn('Nota save SB:',error);});
+  const eId=document.getElementById('n-edit-id'); if(eId) eId.value='';
+  const bEl=document.getElementById('n-save-btn'); if(bEl) bEl.textContent='Guardar Nota';
 }
-function deleteNota(id){if(confirm('¿Eliminar nota?')){notes=notes.filter(n=>n.id!==id);renderNotas();toast('Nota eliminada');if(sb)sb.from('notas_crm').delete().eq('id',id).then(({error})=>{if(error)console.warn('Nota delete SB:',error);});}}
+function deleteNota(id){if(confirm('¿Eliminar nota?')){notes=notes.filter(n=>n.id!==id);renderNotas();jacRenderNotas2();toast('Nota eliminada');if(typeof _sbDelete==='function')_sbDelete('notas_crm',id).catch(()=>{});else if(sb)sb.from('notas_crm').delete().eq('id',id).then(({error})=>{if(error)console.warn('Nota delete SB:',error);});}}
 function shareNotaWA(id){
   const n=notes.find(x=>x.id===id);
   if(!n)return;
@@ -7946,6 +8062,289 @@ function shareNotaEmail(id){
   const n=notes.find(x=>x.id===id);
   if(!n)return;
   window.open(`mailto:?subject=${encodeURIComponent(n.titulo)}&body=${encodeURIComponent(n.cuerpo+'\n\n— JAC Realty')}`);
+}
+function shareNotaEmailJL(id){
+  const n=notes.find(x=>x.id===id); if(!n) return;
+  window.open('mailto:jelyanrealestate@gmail.com?subject='+encodeURIComponent(n.titulo)+'&body='+encodeURIComponent(n.cuerpo+'\n\n— JAC Realty · Jely An Castro'));
+}
+function shareNotaEmailJC(id){
+  const n=notes.find(x=>x.id===id); if(!n) return;
+  window.open('mailto:jcastro@jacrealtypa.com?subject='+encodeURIComponent(n.titulo)+'&body='+encodeURIComponent(n.cuerpo+'\n\n— JAC Realty'));
+}
+function editNota(id){
+  const n=notes.find(x=>x.id===id); if(!n) return;
+  const eId=document.getElementById('n-edit-id'); if(eId) eId.value=id;
+  const tEl=document.querySelector('#modalNota .modal-title'); if(tEl) tEl.textContent='📝 Editar Nota';
+  const bEl=document.getElementById('n-save-btn'); if(bEl) bEl.textContent='Actualizar Nota';
+  document.getElementById('n-titulo').value=n.titulo||'';
+  document.getElementById('n-tipo').value=n.tipo||'general';
+  document.getElementById('n-cuerpo').value=n.cuerpo||'';
+  populateNotaRef();
+  setTimeout(()=>{const rs=document.getElementById('n-ref'); if(rs) rs.value=n.ref||'';},50);
+  openModal('modalNota');
+}
+function openNuevaNota(){
+  const eId=document.getElementById('n-edit-id'); if(eId) eId.value='';
+  const tEl=document.querySelector('#modalNota .modal-title'); if(tEl) tEl.textContent='📝 Nueva Nota';
+  const bEl=document.getElementById('n-save-btn'); if(bEl) bEl.textContent='Guardar Nota';
+  const tit=document.getElementById('n-titulo'); if(tit) tit.value='';
+  const cpo=document.getElementById('n-cuerpo'); if(cpo) cpo.value='';
+  populateNotaRef();
+  openModal('modalNota');
+}
+// ── Notas2 (vista embedded en pestaña Agenda) ──────────────
+function jacRenderNotas2(){
+  const el=document.getElementById('jac-notas2-list'); if(!el) return;
+  if(!notes.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Sin notas aún. Crea tu primera nota ↑</div>';return;}
+  el.innerHTML=notes.map(n=>`
+    <div class="jac-evento-card" style="flex-wrap:wrap;gap:6px;margin-bottom:8px">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px;color:var(--text)">${n.titulo}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${n.tipo==='lead'?'👤 Lead':'n.tipo==='propiedad'?'🏠 Propiedad':'📄 General'} ${n.refName?'· '+n.refName:''} · 📅 ${n.fecha}</div>
+        <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.4">${(n.cuerpo||'').slice(0,150)}${(n.cuerpo||'').length>150?'…':''}</div>
+      </div>
+      <div style="width:100%;display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="shareNotaWA('${n.id}')">💬 WA</button>
+        <button class="btn btn-ghost btn-sm" onclick="shareNotaEmailJL('${n.id}')">📧 JL</button>
+        <button class="btn btn-ghost btn-sm" onclick="shareNotaEmailJC('${n.id}')">📧 JC</button>
+        <button class="btn btn-ghost btn-sm" onclick="editNota('${n.id}')">✏️ Editar</button>
+        <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="deleteNota('${n.id}')">🗑️ Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+// ── Email helpers globales ───────────────────────────────────
+function emailJelyClick(nombre,texto){
+  const sub=encodeURIComponent('JAC Realty — '+(nombre||'Consulta'));
+  const body=encodeURIComponent((texto?texto+'\n\n':'')+'— JAC Realty · Jely An Castro · +507 64627763\njelyanrealestate@gmail.com');
+  window.open('mailto:jelyanrealestate@gmail.com?subject='+sub+'&body='+body);
+}
+function emailJcastroClick(nombre,texto){
+  const sub=encodeURIComponent('JAC Realty — '+(nombre||'Consulta'));
+  const body=encodeURIComponent((texto?texto+'\n\n':'')+'— JAC Realty · +507 64627763\njcastro@jacrealtypa.com');
+  window.open('mailto:jcastro@jacrealtypa.com?subject='+sub+'&body='+body);
+}
+// ══════════════════════════════════════════════════════════════
+// METAS
+// ══════════════════════════════════════════════════════════════
+window.metas=[];
+(function _loadMetasLS(){try{const d=localStorage.getItem('_jac_metas');if(d)window.metas=JSON.parse(d);}catch(e){}}());
+function _saveMetas(){try{localStorage.setItem('_jac_metas',JSON.stringify(metas));}catch(e){}}
+function loadMetas(){
+  if(!sb) return;
+  sb.from('metas_crm').select('*').order('created_at',{ascending:false}).then(({data,error})=>{
+    if(error||!data) return;
+    // Merge: Supabase records override localStorage
+    const sbIds=new Set(data.map(r=>r.id));
+    window.metas=[...data.map(r=>r.payload||r),...(window.metas||[]).filter(m=>!sbIds.has(m.id))];
+    _saveMetas();
+    jacRenderMetas();
+  });
+}
+function jacRenderMetas(){
+  const el=document.getElementById('jac-metas-list'); if(!el) return;
+  if(!metas.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">🎯</div><div>Sin metas aún.<br><small>Crea tu primera meta de ventas ↑</small></div></div>';return;}
+  el.innerHTML=metas.map(m=>{
+    const pct=m.meta>0?Math.min(100,Math.round(((m.progreso||0)/m.meta)*100)):0;
+    const clr=pct>=100?'#22c55e':pct>=50?'#f97316':'#818cf8';
+    return `<div class="jac-evento-card jac-ec-cita" style="flex-wrap:wrap;gap:6px;margin-bottom:8px">
+      <div style="color:#818cf8;font-size:20px;flex-shrink:0">🎯</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px;color:var(--text)">${m.titulo}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${m.tipo||'General'}${m.fecha_fin?' · 📅 Vence: '+m.fecha_fin:''}</div>
+        <div style="margin-top:8px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px">
+            <span>${m.progreso||0} / ${m.meta||0}</span>
+            <span style="font-weight:700;color:${clr}">${pct}%</span>
+          </div>
+          <div style="height:7px;background:var(--border);border-radius:4px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:${clr};border-radius:4px;transition:.4s"></div>
+          </div>
+        </div>
+        ${m.notas?`<div style="font-size:11px;color:var(--muted);margin-top:6px">${m.notas}</div>`:''}
+      </div>
+      <span style="font-size:9px;background:#818cf822;color:#818cf8;padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0;align-self:flex-start">${m.tipo||'Meta'}</span>
+      <div style="width:100%;display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="jacMetaWA('${m.id}')">💬 WA</button>
+        <button class="btn btn-ghost btn-sm" onclick="jacMetaEmailJL('${m.id}')">📧 JL</button>
+        <button class="btn btn-ghost btn-sm" onclick="jacMetaEmailJC('${m.id}')">📧 JC</button>
+        <button class="btn btn-ghost btn-sm" onclick="jacEditMeta('${m.id}')">✏️ Editar</button>
+        <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="jacDeleteMeta('${m.id}')">🗑️ Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openNuevaMeta(){
+  const eId=document.getElementById('meta-edit-id'); if(eId) eId.value='';
+  const tEl=document.querySelector('#modalMeta .modal-title'); if(tEl) tEl.textContent='🎯 Nueva Meta';
+  const bEl=document.getElementById('meta-save-btn'); if(bEl) bEl.textContent='Guardar Meta';
+  ['meta-titulo','meta-valor','meta-progreso','meta-fin','meta-notas'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  const mt=document.getElementById('meta-tipo'); if(mt) mt.value='Ventas';
+  const fd=document.getElementById('meta-fin'); if(fd) fd.value=new Date().toISOString().slice(0,7)+'-30';
+  openModal('modalMeta');
+}
+function jacEditMeta(id){
+  const m=metas.find(x=>x.id===id); if(!m) return;
+  const eId=document.getElementById('meta-edit-id'); if(eId) eId.value=id;
+  const tEl=document.querySelector('#modalMeta .modal-title'); if(tEl) tEl.textContent='🎯 Editar Meta';
+  const bEl=document.getElementById('meta-save-btn'); if(bEl) bEl.textContent='Actualizar Meta';
+  const sv=(s,v)=>{const e=document.getElementById(s);if(e)e.value=v||'';};
+  sv('meta-titulo',m.titulo); sv('meta-tipo',m.tipo||'Ventas');
+  sv('meta-valor',m.meta); sv('meta-progreso',m.progreso); sv('meta-fin',m.fecha_fin); sv('meta-notas',m.notas);
+  openModal('modalMeta');
+}
+function jacSaveMeta(){
+  const titulo=(document.getElementById('meta-titulo')?.value||'').trim();
+  if(!titulo){alert('Ingresa un título para la meta');return;}
+  const editId=document.getElementById('meta-edit-id')?.value||'';
+  const metaData={
+    id:editId||'M'+Date.now(),
+    titulo,
+    tipo:document.getElementById('meta-tipo')?.value||'General',
+    meta:parseFloat(document.getElementById('meta-valor')?.value||0)||0,
+    progreso:parseFloat(document.getElementById('meta-progreso')?.value||0)||0,
+    fecha_fin:document.getElementById('meta-fin')?.value||'',
+    notas:(document.getElementById('meta-notas')?.value||'').trim(),
+    fecha:new Date().toISOString().split('T')[0],
+    created_at:editId?(metas.find(m=>m.id===editId)?.created_at||new Date().toISOString()):new Date().toISOString()
+  };
+  if(editId){const idx=metas.findIndex(m=>m.id===editId);if(idx!==-1)metas[idx]=metaData;}
+  else metas.unshift(metaData);
+  _saveMetas();
+  if(typeof _sbSave==='function') _sbSave('metas_crm',{id:metaData.id,payload:metaData},{upsert:true}).catch(()=>{});
+  else if(sb) sb.from('metas_crm').upsert({id:metaData.id,payload:metaData}).catch(()=>{});
+  closeModal('modalMeta');
+  jacRenderMetas();
+  toast(editId?'✅ Meta actualizada':'✅ Meta guardada');
+}
+function jacDeleteMeta(id){
+  if(!confirm('¿Eliminar esta meta?')) return;
+  metas=metas.filter(m=>m.id!==id);
+  _saveMetas();
+  if(typeof _sbDelete==='function') _sbDelete('metas_crm',id).catch(()=>{});
+  else if(sb) sb.from('metas_crm').delete().eq('id',id).catch(()=>{});
+  jacRenderMetas();
+  toast('Meta eliminada');
+}
+function jacMetaWA(id){
+  const m=metas.find(x=>x.id===id); if(!m) return;
+  const pct=m.meta>0?Math.min(100,Math.round(((m.progreso||0)/m.meta)*100)):0;
+  const txt=`🎯 *Meta: ${m.titulo}*\nTipo: ${m.tipo||'General'}\nProgreso: ${m.progreso||0}/${m.meta||0} (${pct}%)\nVence: ${m.fecha_fin||'—'}\n${m.notas?'\n'+m.notas:''}\n\n— JAC Realty · +507 64627763`;
+  window.open('https://wa.me/?text='+encodeURIComponent(txt));
+}
+function jacMetaEmailJL(id){
+  const m=metas.find(x=>x.id===id); if(!m) return;
+  const pct=m.meta>0?Math.min(100,Math.round(((m.progreso||0)/m.meta)*100)):0;
+  window.open('mailto:jelyanrealestate@gmail.com?subject='+encodeURIComponent('Meta: '+m.titulo)+'&body='+encodeURIComponent(`Meta: ${m.titulo}\nTipo: ${m.tipo||'General'}\nProgreso: ${m.progreso||0}/${m.meta||0} (${pct}%)\nVence: ${m.fecha_fin||'—'}\n\n${m.notas||''}\n\n— JAC Realty`));
+}
+function jacMetaEmailJC(id){
+  const m=metas.find(x=>x.id===id); if(!m) return;
+  const pct=m.meta>0?Math.min(100,Math.round(((m.progreso||0)/m.meta)*100)):0;
+  window.open('mailto:jcastro@jacrealtypa.com?subject='+encodeURIComponent('Meta: '+m.titulo)+'&body='+encodeURIComponent(`Meta: ${m.titulo}\nTipo: ${m.tipo||'General'}\nProgreso: ${m.progreso||0}/${m.meta||0} (${pct}%)\nVence: ${m.fecha_fin||'—'}\n\n${m.notas||''}\n\n— JAC Realty`));
+}
+// ══════════════════════════════════════════════════════════════
+// DIARIO
+// ══════════════════════════════════════════════════════════════
+window.diario=[];
+(function _loadDiarioLS(){try{const d=localStorage.getItem('_jac_diario');if(d)window.diario=JSON.parse(d);}catch(e){}}());
+function _saveDiario(){try{localStorage.setItem('_jac_diario',JSON.stringify(diario));}catch(e){}}
+function loadDiario(){
+  if(!sb) return;
+  sb.from('diario_crm').select('*').order('fecha',{ascending:false}).then(({data,error})=>{
+    if(error||!data) return;
+    const sbIds=new Set(data.map(r=>r.id));
+    window.diario=[...data.map(r=>r.payload||r),...(window.diario||[]).filter(d=>!sbIds.has(d.id))];
+    window.diario.sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+    _saveDiario();
+    jacRenderDiario();
+  });
+}
+const _dTipoClr={'Logro':'#22c55e','Aprendizaje':'#818cf8','Seguimiento':'#f97316','Nota':'var(--muted)'};
+function jacRenderDiario(){
+  const el=document.getElementById('jac-diario-list'); if(!el) return;
+  if(!diario.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">📔</div><div>Sin entradas aún.<br><small>Escribe tu primera entrada del diario ↑</small></div></div>';return;}
+  el.innerHTML=diario.map(d=>{
+    const clr=_dTipoClr[d.tipo]||'var(--muted)';
+    const emoji={'Logro':'🏆','Aprendizaje':'📚','Seguimiento':'📋','Nota':'📝'}[d.tipo]||'📝';
+    return `<div class="jac-evento-card" style="flex-wrap:wrap;gap:6px;margin-bottom:8px;border-left:3px solid ${clr}">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+          <span style="font-size:9px;background:${clr}22;color:${clr};padding:2px 8px;border-radius:10px;font-weight:700">${emoji} ${d.tipo||'Nota'}</span>
+          <span style="font-size:11px;color:var(--muted)">📅 ${d.fecha}</span>
+        </div>
+        <div style="font-weight:600;font-size:13px;color:var(--text)">${d.titulo}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4;white-space:pre-wrap">${(d.contenido||'').slice(0,200)}${(d.contenido||'').length>200?'…':''}</div>
+      </div>
+      <div style="width:100%;display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="jacDiarioWA('${d.id}')">💬 WA</button>
+        <button class="btn btn-ghost btn-sm" onclick="jacDiarioEmailJL('${d.id}')">📧 JL</button>
+        <button class="btn btn-ghost btn-sm" onclick="jacDiarioEmailJC('${d.id}')">📧 JC</button>
+        <button class="btn btn-ghost btn-sm" onclick="jacEditDiario('${d.id}')">✏️ Editar</button>
+        <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="jacDeleteDiario('${d.id}')">🗑️ Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openNuevaDiario(){
+  const eId=document.getElementById('diario-edit-id'); if(eId) eId.value='';
+  const tEl=document.querySelector('#modalDiario .modal-title'); if(tEl) tEl.textContent='📔 Nueva Entrada';
+  const bEl=document.getElementById('diario-save-btn'); if(bEl) bEl.textContent='Guardar Entrada';
+  const fd=document.getElementById('diario-fecha'); if(fd) fd.value=new Date().toISOString().slice(0,10);
+  const tit=document.getElementById('diario-titulo'); if(tit) tit.value='';
+  const cpo=document.getElementById('diario-contenido'); if(cpo) cpo.value='';
+  const tipo=document.getElementById('diario-tipo'); if(tipo) tipo.value='Nota';
+  openModal('modalDiario');
+}
+function jacEditDiario(id){
+  const d=diario.find(x=>x.id===id); if(!d) return;
+  const eId=document.getElementById('diario-edit-id'); if(eId) eId.value=id;
+  const tEl=document.querySelector('#modalDiario .modal-title'); if(tEl) tEl.textContent='📔 Editar Entrada';
+  const bEl=document.getElementById('diario-save-btn'); if(bEl) bEl.textContent='Actualizar';
+  const sv=(s,v)=>{const e=document.getElementById(s);if(e)e.value=v||'';};
+  sv('diario-titulo',d.titulo); sv('diario-tipo',d.tipo||'Nota'); sv('diario-fecha',d.fecha); sv('diario-contenido',d.contenido);
+  openModal('modalDiario');
+}
+function jacSaveDiario(){
+  const titulo=(document.getElementById('diario-titulo')?.value||'').trim();
+  if(!titulo){alert('Ingresa un título');return;}
+  const editId=document.getElementById('diario-edit-id')?.value||'';
+  const entry={
+    id:editId||'D'+Date.now(),
+    titulo,
+    tipo:document.getElementById('diario-tipo')?.value||'Nota',
+    fecha:document.getElementById('diario-fecha')?.value||new Date().toISOString().slice(0,10),
+    contenido:(document.getElementById('diario-contenido')?.value||'').trim(),
+    created_at:editId?(diario.find(d=>d.id===editId)?.created_at||new Date().toISOString()):new Date().toISOString()
+  };
+  if(editId){const idx=diario.findIndex(d=>d.id===editId);if(idx!==-1)diario[idx]=entry;}
+  else diario.unshift(entry);
+  _saveDiario();
+  if(typeof _sbSave==='function') _sbSave('diario_crm',{id:entry.id,payload:entry},{upsert:true}).catch(()=>{});
+  else if(sb) sb.from('diario_crm').upsert({id:entry.id,payload:entry}).catch(()=>{});
+  closeModal('modalDiario');
+  jacRenderDiario();
+  toast(editId?'✅ Entrada actualizada':'✅ Entrada guardada');
+}
+function jacDeleteDiario(id){
+  if(!confirm('¿Eliminar esta entrada?')) return;
+  diario=diario.filter(d=>d.id!==id);
+  _saveDiario();
+  if(typeof _sbDelete==='function') _sbDelete('diario_crm',id).catch(()=>{});
+  else if(sb) sb.from('diario_crm').delete().eq('id',id).catch(()=>{});
+  jacRenderDiario();
+  toast('Entrada eliminada');
+}
+function jacDiarioWA(id){
+  const d=diario.find(x=>x.id===id); if(!d) return;
+  const txt=`📔 *${d.titulo}*\n${d.tipo||'Nota'} · ${d.fecha}\n\n${d.contenido||''}\n\n— JAC Realty · +507 64627763`;
+  window.open('https://wa.me/?text='+encodeURIComponent(txt));
+}
+function jacDiarioEmailJL(id){
+  const d=diario.find(x=>x.id===id); if(!d) return;
+  window.open('mailto:jelyanrealestate@gmail.com?subject='+encodeURIComponent(d.titulo)+'&body='+encodeURIComponent((d.tipo||'Nota')+' · '+d.fecha+'\n\n'+(d.contenido||'')+'\n\n— JAC Realty'));
+}
+function jacDiarioEmailJC(id){
+  const d=diario.find(x=>x.id===id); if(!d) return;
+  window.open('mailto:jcastro@jacrealtypa.com?subject='+encodeURIComponent(d.titulo)+'&body='+encodeURIComponent((d.tipo||'Nota')+' · '+d.fecha+'\n\n'+(d.contenido||'')+'\n\n— JAC Realty'));
 }
 function populateNotaRef(){
   const sel=document.getElementById('n-ref');
@@ -7964,7 +8363,7 @@ function renderTareas(arr){
   });
   const el=document.getElementById('tareas-list');
   const pending=tasks.filter(t=>t.status!=='Completada').length;
-  document.getElementById('badge-tareas').textContent=pending;
+  const _btp=document.getElementById('badge-tareas'); if(_btp) _btp.textContent=pending;
   if(!arr.length){el.innerHTML='<div class="empty"><div class="empty-icon">✅</div><div>Sin tareas pendientes</div></div>';return;}
   const today=new Date().toISOString().split('T')[0];
   el.innerHTML=arr.map(t=>{
@@ -9500,8 +9899,8 @@ populateNotaRef();
 // Init tarea ref selector
 updateTareaRef('lead');
 // Init badges
-document.getElementById('badge-notas').textContent=notes.length;
-document.getElementById('badge-tareas').textContent=tasks.filter(t=>t.status!=='Completada').length;
+const _bn=document.getElementById('badge-notas'); if(_bn) _bn.textContent=notes.length;
+const _bt=document.getElementById('badge-tareas'); if(_bt) _bt.textContent=tasks.filter(t=>t.status!=='Completada').length;
 updateBadges();
 // Load from Supabase (async — fills from cloud, overrides local demo data if available)
 loadSupabaseData().then(()=>{initRealtime();loadMlsListados();});
@@ -11265,6 +11664,7 @@ function openMiPerfil(){
   let _flushing=false;
   let _online=navigator.onLine;
   let _sbAlive=false;
+  let _sbInitializing=true;
 
   // ── Cola offline ──────────────────────────────────────────
   function _getQueue(){ try{return JSON.parse(localStorage.getItem(_SQ_KEY)||'[]');}catch(e){return[];} }
@@ -11294,6 +11694,8 @@ function openMiPerfil(){
     const q=_getQueue();
     if(!_online){
       window._syncStatus('offline','📡 Sin conexión — '+q.length+' cambio'+(q.length!==1?'s':'')+' en cola');
+    } else if(_sbInitializing){
+      window._syncStatus('syncing','🔄 Conectando a Supabase…');
     } else if(!_sbAlive){
       window._syncStatus('offline','⚠️ Supabase no responde — '+q.length+' en cola');
     } else if(q.length>0){
@@ -11474,7 +11876,19 @@ function openMiPerfil(){
       .on('postgres_changes',{event:'*',schema:'public',table:'clientes_activos'},(payload)=>{
         if(typeof loadClientesActivos==='function'){ loadClientesActivos(); }
       }).subscribe();
-    console.log('🔴 Supabase Realtime: 11 canales activos (clientes, agenda, tareas, mls, propiedades, contactos, mensajes, notas, diligencias, actividades, clientes_activos)');
+    // metas_crm
+    sb.channel('crm_rt_metas')
+      .on('postgres_changes',{event:'*',schema:'public',table:'metas_crm'},(payload)=>{
+        if(typeof loadMetas==='function'){ loadMetas(); }
+        else if(typeof jacRenderMetas==='function') jacRenderMetas();
+      }).subscribe();
+    // diario_crm
+    sb.channel('crm_rt_diario')
+      .on('postgres_changes',{event:'*',schema:'public',table:'diario_crm'},(payload)=>{
+        if(typeof loadDiario==='function'){ loadDiario(); }
+        else if(typeof jacRenderDiario==='function') jacRenderDiario();
+      }).subscribe();
+    console.log('🔴 Supabase Realtime: 13 canales activos (clientes, agenda, tareas, mls, propiedades, contactos, mensajes, notas, diligencias, actividades, clientes_activos, metas, diario)');
   };
 
   // ── Listeners de red ──────────────────────────────────────
@@ -11536,9 +11950,11 @@ function openMiPerfil(){
       if(q.length>0){
         window._syncStatus('queue','📦 '+q.length+' pendiente'+(q.length!==1?'s':'')+' — sincronizando…');
         await window._flushQueue();
+        _sbInitializing=false;
       } else {
         const alive=await _ping();
         _sbAlive=alive;
+        _sbInitializing=false;
         if(alive){ window._syncStatus('ok','✅ Supabase conectado'+_fmtLastSync()); }
         else { window._syncStatus('offline','⚠️ Supabase sin respuesta — modo offline'); }
         setTimeout(()=>window._syncStatus('hidden'),4000);
