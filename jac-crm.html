@@ -8123,7 +8123,7 @@ function jacRenderNotas2(){
     <div class="jac-evento-card" style="flex-wrap:wrap;gap:6px;margin-bottom:8px">
       <div style="flex:1;min-width:0">
         <div style="font-weight:600;font-size:13px;color:var(--text)">${n.titulo}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">${n.tipo==='lead'?'👤 Lead':'n.tipo==='propiedad'?'🏠 Propiedad':'📄 General'} ${n.refName?'· '+n.refName:''} · 📅 ${n.fecha}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${n.tipo==='lead'?'👤 Lead':n.tipo==='propiedad'?'🏠 Propiedad':'📄 General'} ${n.refName?'· '+n.refName:''} · 📅 ${n.fecha}</div>
         <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.4">${(n.cuerpo||'').slice(0,150)}${(n.cuerpo||'').length>150?'…':''}</div>
       </div>
       <div style="width:100%;display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
