@@ -4130,9 +4130,12 @@ async function loadSupabaseData(){
         id: p.id, titulo:p.titulo||'', tipo:p.tipo||'Apartamento',
         op:p.operacion||'Venta',
         zona:p.direccion||p.zona||(p.distrito&&p.corregimiento?`${p.distrito} · ${p.corregimiento}`:(p.distrito||p.corregimiento||'')),
-        precio:p.precio||0,
+        precio:p.precio!=null?Number(p.precio):null,
+        precio_alquiler:p.precio_alquiler!=null?Number(p.precio_alquiler):null,
+        mantenimiento:p.mantenimiento!=null?Number(p.mantenimiento):null,
         area:p.area_total||0, hab:p.habitaciones||0, banos:p.banos||0,
         estac:p.parqueos||0, status:p.estado||'Disponible', desc:p.descripcion||'',
+        referencia:p.referencia||p.codigo_referencia||'',
         fotos:(()=>{try{return Array.isArray(p.fotos)?p.fotos:JSON.parse(p.fotos||'[]');}catch(e){return[];}})(),
         provincia:p.provincia||'', distrito:p.distrito||'', corregimiento:p.corregimiento||'',
         propietario:p.propietario_nombre||'', tel_propietario:p.propietario_telefono||'',
@@ -4194,7 +4197,7 @@ function initRealtime(){
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'propiedades'},p=>{
       const d=p.new;
       if(!props.find(x=>x._sbId===d.id)){
-        props.unshift({id:d.id,titulo:d.titulo||'',tipo:d.tipo||'Apartamento',op:d.operacion||'Venta',zona:d.zona||'',precio:d.precio||0,area:d.area_total||0,hab:d.habitaciones||0,banos:d.banos||0,estac:d.parqueos||0,status:d.estado||'Disponible',desc:d.descripcion||'',_sbId:d.id});
+        props.unshift({id:d.id,titulo:d.titulo||'',tipo:d.tipo||'Apartamento',op:d.operacion||'Venta',zona:d.direccion||d.zona||'',precio:d.precio!=null?Number(d.precio):null,precio_alquiler:d.precio_alquiler!=null?Number(d.precio_alquiler):null,area:d.area_total||0,hab:d.habitaciones||0,banos:d.banos||0,estac:d.parqueos||0,status:d.estado||'Disponible',desc:d.descripcion||'',referencia:d.referencia||'',_sbId:d.id});
         renderProps();renderDashboard();toast('🏠 Nueva propiedad en la nube');
       }
     })
@@ -4276,8 +4279,8 @@ let currentEmail='jelyanrealestate@gmail.com';
 
 
 function fmtPrice(n,unit){
-  if(!n&&n!==0) return '–';
-  var s='$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(n==null||n===''||Number(n)===0) return '—';
+  var s='$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
   return unit?s+'/'+unit:s;
 }
 function fmtBudget(min,max){
@@ -4615,8 +4618,8 @@ function renderProps(data){
     <td><span class="tag" style="background:var(--card2);color:var(--text)">${propEmoji[p.tipo]||'🏠'} ${p.tipo}</span></td>
     <td><span class="tag tag-${p.op.toLowerCase().replace('-','')}">${p.op}</span></td>
     <td>${p.zona}</td>
-    <td class="price">${p.op==='Venta'||p.op==='Pre-venta'?fmtPrice(p.precio):fmtPrice(p.precio,'mes')}</td>
-    <td><span class="tag tag-${p.status.toLowerCase()}">${p.status}</span></td>
+    <td class="price">${p.op==='Alquiler'?fmtPrice(p.precio_alquiler||p.precio,'mes'):(p.op==='Venta'||p.op==='Pre-venta'?fmtPrice(p.precio):fmtPrice(p.precio))}</td>
+    <td><span class="tag tag-${(p.status||'disponible').toLowerCase()}">${p.status||'Disponible'}</span></td>
     <td><div class="action-btns">
       <button class="wa-btn" style="font-size:11px;padding:4px 8px" title="Compartir WhatsApp" onclick="shareWA('${p.id}')">💬 WA</button>
       <button class="email-btn" style="font-size:11px;padding:4px 8px" title="Email jcastro" onclick="sharePropEmailJcastro('${p.id}')">📧 JC</button>
@@ -4624,7 +4627,7 @@ function renderProps(data){
       <button class="btn btn-ghost btn-sm" title="Ver detalle" onclick="verFicha('${p.id}')">👁</button>
       <button class="btn btn-ghost btn-sm" title="Exportar PDF" onclick="showPropPDFOptions('${p.id}')">📄</button>
       <button class="btn btn-ghost btn-sm" title="Reporte propietario WA" onclick="reportePropietarioWA('${p.id}')" style="color:var(--purple)">📊</button>
-      <button class="btn btn-ghost btn-sm" title="Archivos" onclick="openArchivosProp('${p.id}')">���${(p.archivos||[]).length?` ${p.archivos.length}`:''}</button>
+      <button class="btn btn-ghost btn-sm" title="Archivos" onclick="openArchivosProp('${p.id}')">📁${(p.archivos||[]).length?` ${p.archivos.length}`:''}</button>
       <button class="btn btn-ghost btn-sm" title="Editar" onclick="editProp('${p.id}')">✏️</button>
       <button class="btn btn-ghost btn-sm" title="Eliminar" onclick="deleteProp('${p.id}')">🗑️</button>
     </div></td>
@@ -4657,7 +4660,7 @@ function renderProps(data){
           <span>📐 ${p.area}m²</span>
           ${p.estac>0?`<span>🚗 ${p.estac}</span>`:''}
         </div>
-        <div class="prop-price">${p.op==='Venta'||p.op==='Pre-venta'?fmtPrice(p.precio):fmtPrice(p.precio,'mes')}</div>
+        <div class="prop-price">${p.op==='Alquiler'?fmtPrice(p.precio_alquiler||p.precio,'mes'):fmtPrice(p.precio)}</div>
         <div class="prop-actions" onclick="event.stopPropagation()">
           <button class="pa-btn pa-wa" onclick="shareWA('${p.id}')" title="Compartir por WhatsApp">💬 WA</button>
           <button class="pa-btn pa-jc" onclick="sharePropEmailJcastro('${p.id}')" title="Email jcastro@jacrealtypa.com">📧 JC</button>
