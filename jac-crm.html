@@ -2996,6 +2996,28 @@ CREATE POLICY "allow_all_diario_crm" ON diario_crm FOR ALL USING (true) WITH CHE
       <div class="form-group form-full"><label>Tipo de evento</label>
         <select id="c-tipo"><option>Visita propiedad</option><option>Reunión cliente</option><option>Llamada</option><option>Firma contrato</option><option>Seguimiento</option><option>Otro</option></select>
       </div>
+      <div class="form-group"><label>🎯 Tipo de acción</label>
+        <select id="c-tipo-accion" onchange="jacCitaTipoAccionChange()">
+          <option value="">— Sin tipo —</option>
+          <option value="Llamada">📞 Llamada</option>
+          <option value="WhatsApp">💬 WhatsApp</option>
+          <option value="Correo">📧 Correo</option>
+          <option value="Captación">🏠 Captación</option>
+          <option value="Reunión">🤝 Reunión</option>
+          <option value="Visita">👁️ Visita</option>
+        </select>
+      </div>
+      <div class="form-group"><label>⭐ Prioridad agenda</label>
+        <select id="c-prioridad">
+          <option value="">— Sin prioridad —</option>
+          <option value="A1">A1 🔴 Urgente</option>
+          <option value="A2">A2 🟠 Alta</option>
+          <option value="B1">B1 🟡 Media-alta</option>
+          <option value="B2">B2 🟡 Media</option>
+          <option value="C1">C1 🟢 Baja</option>
+          <option value="C2">C2 ⚪ Opcional</option>
+        </select>
+      </div>
       <div class="form-group"><label>Cliente</label><input id="c-cliente" placeholder="Nombre del cliente"></div>
       <div class="form-group"><label>Propiedad</label><input id="c-propiedad" placeholder="Ref. o descripción"></div>
       <div class="form-group"><label>Fecha</label><input id="c-fecha" type="date"></div>
@@ -3007,6 +3029,24 @@ CREATE POLICY "allow_all_diario_crm" ON diario_crm FOR ALL USING (true) WITH CHE
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalCita')">Cancelar</button>
       <button class="btn btn-primary" id="c-save-btn" onclick="saveCita()">Agendar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Día Completo — Vista horaria Opus One style -->
+<div class="modal-bg" id="modalDiaCompleto">
+  <div class="modal" style="max-width:700px;height:88vh;display:flex;flex-direction:column">
+    <div class="modal-header">
+      <span class="modal-title" id="dia-completo-titulo">📆 Vista del Día</span>
+      <button class="modal-close" onclick="closeModal('modalDiaCompleto')">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0" id="dia-completo-scroll">
+      <div id="dia-completo-body"></div>
+    </div>
+    <div class="modal-footer" style="gap:8px">
+      <button class="btn btn-primary btn-sm" id="dc-agregar-btn">+ Nueva Cita</button>
+      <button class="btn btn-outline btn-sm" id="dc-agregar-tarea-btn">+ Nueva Tarea</button>
+      <button class="btn btn-outline" style="margin-left:auto" onclick="closeModal('modalDiaCompleto')">Cerrar</button>
     </div>
   </div>
 </div>
@@ -3397,6 +3437,30 @@ CREATE POLICY "allow_all_diario_crm" ON diario_crm FOR ALL USING (true) WITH CHE
           <option value="Alta">🔴 Alta</option>
           <option value="Media" selected>🟡 Media</option>
           <option value="Baja">🟢 Baja</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>🎯 Tipo de acción</label>
+        <select id="t-tipo-accion">
+          <option value="">— Sin tipo —</option>
+          <option value="Llamada">📞 Llamada</option>
+          <option value="WhatsApp">💬 WhatsApp</option>
+          <option value="Correo">📧 Correo</option>
+          <option value="Captación">🏠 Captación</option>
+          <option value="Reunión">🤝 Reunión</option>
+          <option value="Visita">👁️ Visita</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>⭐ Prioridad agenda</label>
+        <select id="t-prioridad-agenda">
+          <option value="">— Sin prioridad —</option>
+          <option value="A1">A1 🔴 Urgente</option>
+          <option value="A2">A2 🟠 Alta</option>
+          <option value="B1">B1 🟡 Media-alta</option>
+          <option value="B2">B2 🟡 Media</option>
+          <option value="C1">C1 🟢 Baja</option>
+          <option value="C2">C2 ⚪ Opcional</option>
         </select>
       </div>
       <div class="form-group">
@@ -4387,6 +4451,9 @@ function jacAgendaAgregarCita(){
   // Pre-fill date
   const fd=document.getElementById('c-fecha');
   if(fd) fd.value=(_jacSelDate||new Date().toISOString().slice(0,10));
+  // Reset new fields
+  const taEl=document.getElementById('c-tipo-accion'); if(taEl) taEl.value='';
+  const priEl=document.getElementById('c-prioridad'); if(priEl) priEl.value='';
   openModal('modalCita');
 }
 
@@ -4509,6 +4576,8 @@ function jacSelectDay(ds){
   const [y,m]=ds.split('-');
   calYear=parseInt(y); calMonth=parseInt(m)-1;
   renderCalendar();
+  // Abrir vista de día completo (estilo Opus One)
+  if(typeof openDiaCompleto==='function') openDiaCompleto(ds);
 }
 
 function jacShowEventosDelDia(ds){
@@ -4522,12 +4591,14 @@ function jacShowEventosDelDia(ds){
   const dm=(typeof mlsGuardadas!=='undefined'?mlsGuardadas:[]).filter(x=>x.fecha_seguimiento===ds||x.next_follow_up===ds);
   let h='';
   dc.forEach(c=>{
-    const cKey=c._sbId||c._localId||'';
+    const cKey=c._sbId||c._localId||c.id||'';
+    const taIcon=c.tipo_accion?tipoAccionIcon(c.tipo_accion):'📅';
+    const paBadge=c.prioridad_agenda?prioridadAgendaBadge(c.prioridad_agenda):'';
     h+=`<div class="jac-evento-card jac-ec-cita" style="flex-wrap:wrap;gap:6px">
-      <div style="color:#f97316;font-size:20px;line-height:1;flex-shrink:0">📅</div>
+      <div style="color:#f97316;font-size:20px;line-height:1;flex-shrink:0">${taIcon}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-weight:600;font-size:13px;color:var(--text)">${c.cliente||'Sin cliente'}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">${c.tipo||'Cita'} · ⏰ ${c.hora||'Sin hora'}${c.ubicacion?' · '+c.ubicacion:''}</div>
+        <div style="font-weight:600;font-size:13px;color:var(--text)">${c.cliente||'Sin cliente'}${paBadge}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${c.tipo||'Cita'} · ⏰ ${c.hora||'Sin hora'}${c.tipo_accion?tipoAccionBadge(c.tipo_accion):''}${c.ubicacion?' · '+c.ubicacion:''}</div>
         ${c.notas?`<div style="font-size:11px;color:var(--muted);margin-top:3px">${c.notas}</div>`:''}
       </div>
       <span style="font-size:9px;background:#f9731622;color:#f97316;padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0">${c.status||'Pendiente'}</span>
@@ -4605,6 +4676,132 @@ function jacRenderSemana(){
   el.innerHTML=h;
 }
 
+// ── Helpers tipo_accion ────────────────────────────────────────
+function tipoAccionIcon(ta){
+  const m={'Llamada':'📞','WhatsApp':'💬','Correo':'📧','Captación':'🏠','Reunión':'🤝','Visita':'👁️'};
+  return m[ta]||'';
+}
+function tipoAccionBadge(ta){
+  if(!ta) return '';
+  const ic=tipoAccionIcon(ta);
+  return `<span style="font-size:9px;background:rgba(232,160,32,.15);color:var(--accent);padding:2px 7px;border-radius:10px;font-weight:700;margin-left:4px">${ic} ${ta}</span>`;
+}
+function prioridadAgendaBadge(pa){
+  if(!pa) return '';
+  const col=pa.startsWith('A')?'#ef4444':pa.startsWith('B')?'#f59e0b':'#22c55e';
+  return `<span style="font-size:10px;font-weight:800;color:${col};margin-left:4px">${pa}</span>`;
+}
+// Auto-fill Zoom cuando tipo_accion = Reunión
+function jacCitaTipoAccionChange(){
+  const v=(document.getElementById('c-tipo-accion')?.value||'');
+  if(v==='Reunión'){
+    const zEl=document.getElementById('c-zoom');
+    const _z1='https://us04web.zoom.us/j/';
+    const _z2='2369524438?pwd=QmZPL3JWdCtBTDVLdW0rbFNqdDVpUT09';
+    if(zEl&&!zEl.value) zEl.value=_z1+_z2;
+    const tpEl=document.getElementById('c-tipo'); if(tpEl) tpEl.value='Reunión cliente';
+  }
+}
+
+// ── Vista día completo — estilo Opus One ────────────────────────
+function openDiaCompleto(ds){
+  const [y,m,d]=ds.split('-');
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const label=`📆 ${parseInt(d)} de ${meses[parseInt(m)-1]} ${y}`;
+  const tEl=document.getElementById('dia-completo-titulo');
+  if(tEl) tEl.textContent=label;
+  // Botón "Nueva Cita en este día"
+  const dcBtn=document.getElementById('dc-agregar-btn');
+  if(dcBtn) dcBtn.onclick=function(){
+    closeModal('modalDiaCompleto');
+    const eId=document.getElementById('c-edit-id'); if(eId) eId.value='';
+    const mT=document.querySelector('#modalCita .modal-title'); if(mT) mT.textContent='📅 Nueva Cita / Evento';
+    const bEl=document.getElementById('c-save-btn'); if(bEl) bEl.textContent='Agendar';
+    const fd=document.getElementById('c-fecha'); if(fd) fd.value=ds;
+    ['c-cliente','c-propiedad','c-zoom','c-notas'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    ['c-tipo-accion','c-prioridad'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    openModal('modalCita');
+  };
+  const dcTBtn=document.getElementById('dc-agregar-tarea-btn');
+  if(dcTBtn) dcTBtn.onclick=function(){
+    closeModal('modalDiaCompleto');
+    window._editTareaId=null;
+    const tEl2=document.querySelector('#modalTarea .modal-title'); if(tEl2) tEl2.textContent='✅ Nueva Tarea';
+    const bEl=document.querySelector('#modalTarea .btn-primary'); if(bEl) bEl.textContent='Guardar';
+    const el=n=>document.getElementById(n);
+    if(el('t-titulo')) el('t-titulo').value='';
+    if(el('t-desc')) el('t-desc').value='';
+    if(el('t-vence')) el('t-vence').value=ds;
+    if(el('t-tipo-accion')) el('t-tipo-accion').value='';
+    if(el('t-prioridad-agenda')) el('t-prioridad-agenda').value='';
+    openModal('modalTarea');
+  };
+  const dc=citas.filter(c=>c.fecha===ds);
+  const dt=tasks.filter(t=>t.due===ds);
+  const START_H=7, END_H=21, HOUR_PX=64;
+  const totalPx=(END_H-START_H)*HOUR_PX;
+  // Build timeline
+  let h=`<div style="position:relative;min-height:${totalPx+60}px;padding-bottom:20px">`;
+  // Hour grid lines
+  for(let hr=START_H;hr<=END_H;hr++){
+    const top=(hr-START_H)*HOUR_PX;
+    const isMajor=hr%2===0;
+    h+=`<div style="position:absolute;left:0;right:0;top:${top}px;display:flex;align-items:center;pointer-events:none">
+      <div style="width:46px;text-align:right;padding-right:8px;font-size:10px;color:${isMajor?'var(--muted)':'rgba(122,132,153,.4)'};font-weight:${isMajor?600:400};flex-shrink:0;line-height:1">${String(hr).padStart(2,'0')}:00</div>
+      <div style="flex:1;height:1px;background:${isMajor?'var(--border)':'rgba(42,51,71,.4)'}"></div>
+    </div>`;
+  }
+  // Place events at their correct time slots
+  const priColors={A1:'#ef4444',A2:'#f97316',B1:'#f59e0b',B2:'#fbbf24',C1:'#22c55e',C2:'#6b7280'};
+  const withHora=[...dc.map(c=>({...c,_kind:'cita'})),...dt.map(t=>({...t,_kind:'tarea'}))]
+    .filter(ev=>ev.hora&&ev.hora.includes(':'));
+  const noHora=[...dc.filter(c=>!c.hora||!c.hora.includes(':')),...dt.filter(t=>!t.hora&&!t.due_hora)];
+  withHora.forEach((ev,i)=>{
+    const [h2,min]=(ev.hora||'00:00').split(':').map(Number);
+    if(h2<START_H||h2>=END_H) return;
+    const top=(h2-START_H)*HOUR_PX+(min/60)*HOUR_PX;
+    const isCita=ev._kind==='cita';
+    const key=ev._sbId||ev._localId||ev.id||'';
+    const color=isCita?'#f97316':'#818cf8';
+    const bg=isCita?'rgba(249,115,22,.12)':'rgba(129,140,248,.12)';
+    const icon=(ev.tipo_accion?tipoAccionIcon(ev.tipo_accion):'')|| (isCita?'📅':'📌');
+    const title=isCita?(ev.cliente||'Cita'):(ev.title||ev.titulo||ev.desc||'Tarea');
+    const pa=ev.prioridad_agenda; const paCol=pa?priColors[pa]||'var(--accent)':null;
+    h+=`<div onclick="${isCita?`editCita('${key}')`:`editTareaById('${key}')`}" style="position:absolute;left:54px;right:8px;top:${top}px;background:${bg};border-left:3px solid ${color};border-radius:0 8px 8px 0;padding:5px 10px;min-height:30px;cursor:pointer;z-index:3;transition:.1s" onmouseover="this.style.background='${color}22'" onmouseout="this.style.background='${bg}'">
+      <div style="font-size:12px;font-weight:600;color:${color};display:flex;align-items:center;gap:4px">
+        ${icon} ${title}
+        ${pa?`<span style="font-size:10px;font-weight:800;color:${paCol};margin-left:4px">${pa}</span>`:''}
+        ${ev.tipo_accion&&!ev.tipo_accion===icon?`<span style="font-size:9px;background:rgba(232,160,32,.12);color:var(--accent);padding:1px 5px;border-radius:8px">${ev.tipo_accion}</span>`:''}
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:1px">${ev.hora}${isCita&&ev.propiedad?' · 🏠 '+ev.propiedad:''}${isCita&&ev.zoom_link?` · <a href="${ev.zoom_link}" target="_blank" style="color:var(--accent);text-decoration:none" onclick="event.stopPropagation()">🎥 Zoom</a>`:''}</div>
+    </div>`;
+  });
+  h+=`</div>`;
+  // Sin hora section
+  if(noHora.length){
+    h+=`<div style="padding:12px 16px;border-top:1px solid var(--border);background:var(--card2)">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Sin hora asignada</div>`;
+    noHora.forEach(ev=>{
+      const isCita=!!ev.cliente&&!ev._kind||ev._kind==='cita';
+      const key=ev._sbId||ev._localId||ev.id||'';
+      const icon=(ev.tipo_accion?tipoAccionIcon(ev.tipo_accion):'')|| (isCita?'📅':'📌');
+      const title=isCita?(ev.cliente||'Cita'):(ev.title||ev.titulo||ev.desc||'Tarea');
+      const pa=ev.prioridad_agenda; const paCol=pa?priColors[pa]||'var(--accent)':null;
+      h+=`<div onclick="${isCita?`editCita('${key}')`:`editTareaById('${key}')`}" style="background:var(--card);border-radius:6px;padding:6px 10px;margin-bottom:4px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;border:1px solid var(--border)">
+        <span>${icon} ${title}</span>
+        ${pa?`<span style="font-size:10px;font-weight:800;color:${paCol}">${pa}</span>`:''}
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  const body=document.getElementById('dia-completo-body');
+  if(body){ body.innerHTML=h; }
+  // Scroll to current hour
+  const scrollEl=document.getElementById('dia-completo-scroll');
+  if(scrollEl){ const now=new Date(); const offset=Math.max(0,(now.getHours()-START_H-1))*HOUR_PX; scrollEl.scrollTop=offset; }
+  openModal('modalDiaCompleto');
+}
+
 function jacRenderTareasTab(){
   const el=document.getElementById('jac-atab-tareas-list'); if(!el) return;
   const pending=tasks.filter(t=>t.status!=='Completada').sort((a,b)=>(a.due||'').localeCompare(b.due||''));
@@ -4613,11 +4810,13 @@ function jacRenderTareasTab(){
   const renderT=list=>list.map(t=>{
     const clr=priC[t.priority]||'var(--muted)';
     const isDone=t.status==='Completada';
+    const taIcon=t.tipo_accion?tipoAccionIcon(t.tipo_accion):'';
+    const paBadge=t.prioridad_agenda?prioridadAgendaBadge(t.prioridad_agenda):'';
     return `<div class="jac-evento-card jac-ec-tarea" style="flex-wrap:wrap;gap:6px">
       <div onclick="(function(){if(typeof toggleTaskStatusById==='function')toggleTaskStatusById('${t.id}');})()" style="width:20px;height:20px;border-radius:50%;background:${isDone?'#818cf8':'transparent'};border:2px solid #818cf8;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;cursor:pointer;flex-shrink:0">${isDone?'✓':''}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-weight:600;font-size:13px;color:var(--text);${isDone?'text-decoration:line-through;opacity:.6':''}">${t.title||t.desc||'Sin descripción'}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">${t.due?'📅 '+t.due+' · ':''}<span style="color:${clr}">${t.priority||'Normal'}</span></div>
+        <div style="font-weight:600;font-size:13px;color:var(--text);${isDone?'text-decoration:line-through;opacity:.6':''}">${taIcon?taIcon+' ':''}${t.title||t.desc||'Sin descripción'}${paBadge}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${t.due?'📅 '+t.due+' · ':''}<span style="color:${clr}">${t.priority||'Normal'}</span>${t.tipo_accion?tipoAccionBadge(t.tipo_accion):''}</div>
       </div>
       <span style="font-size:9px;background:#818cf822;color:#818cf8;padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0">${t.status||'Pendiente'}</span>
       <div style="width:100%;display:flex;gap:6px;margin-top:2px">
@@ -4644,11 +4843,12 @@ function jacRenderReunionesTab(){
   el.innerHTML=reu.map(r=>{
     const rKey=r._sbId||r._localId||r.id||'';
     const clienteEsc=r.cliente.replace(/'/g,"\\'");
+    const paBadge=r.prioridad_agenda?prioridadAgendaBadge(r.prioridad_agenda):'';
     return `<div class="jac-evento-card jac-ec-cita" style="flex-wrap:wrap;gap:6px">
     <div style="color:#f97316;font-size:20px;flex-shrink:0">🤝</div>
     <div style="flex:1;min-width:0">
-      <div style="font-weight:600;font-size:13px;color:var(--text)">${r.cliente}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px">📅 ${r.fecha||'—'} · ⏰ ${r.hora||'—'}${r.propiedad?' · 🏠 '+r.propiedad:''}</div>
+      <div style="font-weight:600;font-size:13px;color:var(--text)">${r.cliente}${paBadge}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">📅 ${r.fecha||'—'} · ⏰ ${r.hora||'—'}${r.tipo_accion?tipoAccionBadge(r.tipo_accion):''}${r.propiedad?' · 🏠 '+r.propiedad:''}</div>
       ${r.zoom_link?`<div style="margin-top:4px"><a href="${r.zoom_link}" target="_blank" style="font-size:11px;color:var(--accent);text-decoration:none">🎥 Unirse a la reunión virtual →</a></div>`:''}
       ${r.notas?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${r.notas}</div>`:''}
     </div>
@@ -4669,7 +4869,10 @@ function openNuevaReunion(){
   const bEl=document.getElementById('c-save-btn'); if(bEl) bEl.textContent='Agendar Reunión';
   const tp=document.getElementById('c-tipo'); if(tp) tp.value='Reunión cliente';
   const fd=document.getElementById('c-fecha'); if(fd) fd.value=new Date().toISOString().slice(0,10);
-  ['c-cliente','c-propiedad','c-zoom','c-notas'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['c-cliente','c-propiedad','c-notas'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  const taEl=document.getElementById('c-tipo-accion'); if(taEl) taEl.value='Reunión';
+  const zEl=document.getElementById('c-zoom'); if(zEl) zEl.value='https://us04web.zoom.us/j/2369524438?pwd=QmZPL3JWdCtBTDVLdW0rbFNqdDVpUT09';
+  const priEl=document.getElementById('c-prioridad'); if(priEl) priEl.value='';
   openModal('modalCita');
 }
 function jacReuWA(key){
@@ -7534,6 +7737,8 @@ function saveCita(){
   const hora=document.getElementById('c-hora').value;
   const propiedad=document.getElementById('c-propiedad').value;
   const zoom_link=(document.getElementById('c-zoom')?.value||'').trim();
+  const tipo_accion=(document.getElementById('c-tipo-accion')?.value||'');
+  const prioridad_agenda=(document.getElementById('c-prioridad')?.value||'');
   const notas=document.getElementById('c-notas').value;
   const editId=(document.getElementById('c-edit-id')||{}).value||'';
 
@@ -7542,7 +7747,7 @@ function saveCita(){
     const idx=citas.findIndex(c=>String(c._sbId)===String(editId)||String(c._localId)===String(editId)||String(c.id)===String(editId));
     if(idx>=0){
       const c=citas[idx];
-      Object.assign(c,{tipo,cliente,propiedad,fecha,hora,zoom_link,notas});
+      Object.assign(c,{tipo,cliente,propiedad,fecha,hora,zoom_link,tipo_accion,prioridad_agenda,notas});
       if(sb&&c._sbId){
         sb.from('agenda').update({titulo:cliente,tipo,lugar:propiedad||null,fecha:fecha||null,hora:hora||null,notas:notas||null})
           .eq('id',c._sbId).then(({error})=>{if(error)console.warn('Agenda update error:',error);});
@@ -7551,7 +7756,7 @@ function saveCita(){
     }
   } else {
     // Modo creación — nueva cita
-    const cita={_localId:'C_'+Date.now(),tipo,cliente,propiedad,fecha,hora,zoom_link,notas};
+    const cita={_localId:'C_'+Date.now(),tipo,cliente,propiedad,fecha,hora,zoom_link,tipo_accion,prioridad_agenda,notas};
     citas.push(cita);
     activities.unshift({tipo:'📅 Cita',cliente,desc:`${tipo} agendada para ${fecha} ${hora}.`,time:'Ahora'});
     if(sb){
@@ -7564,6 +7769,8 @@ function saveCita(){
   const tEl=document.querySelector('#modalCita .modal-title'); if(tEl) tEl.textContent='📅 Nueva Cita / Evento';
   const bEl=document.getElementById('c-save-btn'); if(bEl) bEl.textContent='Agendar';
   const eId=document.getElementById('c-edit-id'); if(eId) eId.value='';
+  const taEl=document.getElementById('c-tipo-accion'); if(taEl) taEl.value='';
+  const priEl=document.getElementById('c-prioridad'); if(priEl) priEl.value='';
   closeModal('modalCita');
   renderCalendar();renderDashboard();
 }
@@ -7581,6 +7788,8 @@ function editCita(key){
   if(el('c-fecha')) el('c-fecha').value=c.fecha||'';
   if(el('c-hora')) el('c-hora').value=c.hora||'10:00';
   if(el('c-zoom')) el('c-zoom').value=c.zoom_link||'';
+  if(el('c-tipo-accion')) el('c-tipo-accion').value=c.tipo_accion||'';
+  if(el('c-prioridad')) el('c-prioridad').value=c.prioridad_agenda||'';
   if(el('c-notas')) el('c-notas').value=c.notas||'';
   // Cambiar título y botón
   const isReunion=c.tipo&&c.tipo.toLowerCase().includes('reuni');
@@ -7617,6 +7826,8 @@ function openNuevaTarea(){
   if(el('t-titulo')) el('t-titulo').value='';
   if(el('t-desc')) el('t-desc').value='';
   if(el('t-vence')) el('t-vence').value='';
+  if(el('t-tipo-accion')) el('t-tipo-accion').value='';
+  if(el('t-prioridad-agenda')) el('t-prioridad-agenda').value='';
   openModal('modalTarea');
 }
 
@@ -7631,6 +7842,8 @@ function editTareaById(id){
   if(el('t-vence')) el('t-vence').value=t.due||t.vence||'';
   if(el('t-desc')) el('t-desc').value=t.desc||'';
   if(el('t-tipo')) el('t-tipo').value=t.tipo||'general';
+  if(el('t-tipo-accion')) el('t-tipo-accion').value=t.tipo_accion||'';
+  if(el('t-prioridad-agenda')) el('t-prioridad-agenda').value=t.prioridad_agenda||'';
   // Guardar ID para que saveTarea sepa que es edición
   window._editTareaId=id;
   const tEl=document.querySelector('#modalTarea .modal-title'); if(tEl) tEl.textContent='✏️ Editar Tarea';
@@ -8471,6 +8684,8 @@ function saveTarea(){
   const prioridad=document.getElementById('t-prioridad')?.value||'Media';
   const vence=document.getElementById('t-vence')?.value||new Date().toISOString().split('T')[0];
   const desc=document.getElementById('t-desc')?.value||'';
+  const tipo_accion=document.getElementById('t-tipo-accion')?.value||'';
+  const prioridad_agenda=document.getElementById('t-prioridad-agenda')?.value||'';
   const allRefs=[...leads.map(l=>({id:l.id,name:l.nombre})),...props.map(p=>({id:p.id,name:p.id+' · '+p.titulo}))];
   const refObj=allRefs.find(x=>x.id===refVal);
 
@@ -8478,7 +8693,7 @@ function saveTarea(){
   if(window._editTareaId){
     const idx=tasks.findIndex(x=>String(x.id)===String(window._editTareaId));
     if(idx>=0){
-      Object.assign(tasks[idx],{titulo,title:titulo,prioridad,priority:prioridad,vence,due:vence,tipo,ref:refVal,refName:refObj?refObj.name:'',desc});
+      Object.assign(tasks[idx],{titulo,title:titulo,prioridad,priority:prioridad,vence,due:vence,tipo,ref:refVal,refName:refObj?refObj.name:'',desc,tipo_accion,prioridad_agenda});
       if(sb) sb.from('tareas_crm').upsert({id:tasks[idx].id,payload:tasks[idx]}).then(({error})=>{if(error)console.warn('Tarea update SB:',error);});
       toast('✅ Tarea actualizada');
     }
@@ -8491,7 +8706,7 @@ function saveTarea(){
       id:'T'+String(tasks.length+1).padStart(3,'0'),
       titulo,title:titulo,prioridad,priority:prioridad,
       status:'Pendiente',
-      vence,due:vence,tipo,ref:refVal,refName:refObj?refObj.name:'',desc
+      vence,due:vence,tipo,ref:refVal,refName:refObj?refObj.name:'',desc,tipo_accion,prioridad_agenda
     };
     tasks.unshift(tareaData);
     activities.unshift({tipo:'✅ Tarea',cliente:refObj?refObj.name:'General',desc:`Nueva tarea: "${titulo}"`,time:'Ahora'});
