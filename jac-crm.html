@@ -1051,6 +1051,56 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
         </div>
       </div>
 
+      <!-- KPI Dashboard Avanzado -->
+      <div id="kpi-advanced-section" style="margin-top:14px">
+        <!-- Fila 2: Métricas de Tareas + MLS + Pipeline -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px">
+          <div class="kpi-card" style="cursor:pointer" onclick="showPanel('agenda');jacSwitchTab('tareas')">
+            <div class="kpi-label">Tareas Pendientes</div>
+            <div class="kpi-value" style="color:#818cf8" id="kpi-tareas-pending">0</div>
+            <div class="kpi-delta" id="kpi-tareas-vencidas-delta">—</div>
+          </div>
+          <div class="kpi-card" style="cursor:pointer" onclick="showPanel('agenda');jacSwitchTab('tareas')">
+            <div class="kpi-label">Tareas Completadas</div>
+            <div class="kpi-value" style="color:#22c55e" id="kpi-tareas-done">0</div>
+            <div class="kpi-delta" id="kpi-tareas-done-delta">—</div>
+          </div>
+          <div class="kpi-card" style="cursor:pointer" onclick="showPanel('mls')">
+            <div class="kpi-label">MLS Seguimiento</div>
+            <div class="kpi-value" style="color:#22c55e" id="kpi-mls-guardadas">0</div>
+            <div class="kpi-delta">Propiedades en seguimiento</div>
+          </div>
+          <div class="kpi-card" style="cursor:pointer" onclick="showPanel('mls')">
+            <div class="kpi-label">MLS Total</div>
+            <div class="kpi-value" style="color:#3b82f6" id="kpi-mls-total-dash">0</div>
+            <div class="kpi-delta" id="kpi-mls-sync-dash">—</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Pipeline Activo</div>
+            <div class="kpi-value" style="color:#f59e0b" id="kpi-pipeline-val">0</div>
+            <div class="kpi-delta" id="kpi-pipeline-delta">—</div>
+          </div>
+          <div class="kpi-card" style="cursor:pointer" onclick="showPanel('agenda')">
+            <div class="kpi-label">Citas Hoy</div>
+            <div class="kpi-value" style="color:#f97316" id="kpi-citas-hoy">0</div>
+            <div class="kpi-delta" id="kpi-citas-semana-delta">—</div>
+          </div>
+        </div>
+        <!-- Barra de progreso Pipeline Leads -->
+        <div style="background:var(--card);border-radius:12px;padding:14px 18px;border:1px solid var(--border);margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <span style="font-size:12px;font-weight:700;color:var(--text)">📊 Pipeline de Conversión de Leads</span>
+            <button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="showPanel('pipeline')">Ver Pipeline →</button>
+          </div>
+          <div id="kpi-pipeline-bars" style="display:flex;flex-direction:column;gap:5px"></div>
+        </div>
+        <!-- Resumen Propiedades por estado -->
+        <div style="background:var(--card);border-radius:12px;padding:14px 18px;border:1px solid var(--border);margin-bottom:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">🏠 Estado del Portafolio de Propiedades</div>
+          <div id="kpi-props-estado-bars" style="display:flex;flex-direction:column;gap:5px"></div>
+        </div>
+      </div>
+
       <!-- Quick props -->
       <div style="margin-top:16px">
         <div class="sec-header">
@@ -1920,6 +1970,101 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
       </div>
     </div>
 
+    <!-- ========== MODAL PDF OPTIONS (MLS) ========== -->
+    <div class="modal-bg" id="modalMlsPDF" onclick="if(event.target===this)closeModal('modalMlsPDF')">
+      <div class="modal" style="width:500px;max-width:96vw">
+        <div class="modal-header">
+          <span class="modal-title">📄 Exportar Ficha PDF — MLS</span>
+          <button class="modal-close" onclick="closeModal('modalMlsPDF')">✕</button>
+        </div>
+        <div class="modal-body" style="padding:20px">
+          <input type="hidden" id="mpdf-idx">
+          <div style="margin-bottom:18px">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Estilo de PDF</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="mpdf-style-opts">
+              <label onclick="_mpdfStyleSel(this,'ficha')" class="mpdf-opt mpdf-opt-sel" data-val="ficha" style="border:2px solid var(--accent);border-radius:10px;padding:14px 8px;cursor:pointer;text-align:center;background:rgba(232,160,32,.08);transition:.15s">
+                <div style="font-size:22px;margin-bottom:5px">🏠</div>
+                <div style="font-size:11px;font-weight:700">Ficha Elegante</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:3px">Logo · hero foto · galería completa</div>
+              </label>
+              <label onclick="_mpdfStyleSel(this,'brochure')" class="mpdf-opt" data-val="brochure" style="border:2px solid var(--border);border-radius:10px;padding:14px 8px;cursor:pointer;text-align:center;transition:.15s">
+                <div style="font-size:22px;margin-bottom:5px">📘</div>
+                <div style="font-size:11px;font-weight:700">Brochure Pro</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:3px">2 páginas · descripción completa</div>
+              </label>
+              <label onclick="_mpdfStyleSel(this,'compact')" class="mpdf-opt" data-val="compact" style="border:2px solid var(--border);border-radius:10px;padding:14px 8px;cursor:pointer;text-align:center;transition:.15s">
+                <div style="font-size:22px;margin-bottom:5px">📋</div>
+                <div style="font-size:11px;font-weight:700">Compacto</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:3px">1 página · datos clave</div>
+              </label>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Datos de contacto</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="mpdf-contact-opts">
+              <label onclick="_mpdfContactSel(this,'con')" class="mpdf-copt mpdf-copt-sel" data-val="con" style="border:2px solid var(--accent);border-radius:10px;padding:14px 12px;cursor:pointer;text-align:center;background:rgba(232,160,32,.08);transition:.15s">
+                <div style="font-size:20px;margin-bottom:4px">📞</div>
+                <div style="font-size:11px;font-weight:700">Con mis datos</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px">Para prospectos y clientes</div>
+              </label>
+              <label onclick="_mpdfContactSel(this,'sin')" class="mpdf-copt" data-val="sin" style="border:2px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;text-align:center;transition:.15s">
+                <div style="font-size:20px;margin-bottom:4px">🤝</div>
+                <div style="font-size:11px;font-weight:700">Sin contacto</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px">Para colegas / co-broking</div>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="closeModal('modalMlsPDF')">Cancelar</button>
+          <button class="btn btn-primary" onclick="(()=>{
+            const idx=parseInt(document.getElementById('mpdf-idx').value);
+            const style=(document.querySelector('.mpdf-opt-sel')||{dataset:{val:'ficha'}}).dataset.val;
+            const contact=(document.querySelector('.mpdf-copt-sel')||{dataset:{val:'con'}}).dataset.val==='con';
+            closeModal('modalMlsPDF');
+            exportMlsPDF(idx,{style,contact});
+          })()">📄 Exportar PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL PDF OPTIONS (PROP PROPIA) ========== -->
+    <div class="modal-bg" id="modalPropPDF" onclick="if(event.target===this)closeModal('modalPropPDF')">
+      <div class="modal" style="width:460px;max-width:96vw">
+        <div class="modal-header">
+          <span class="modal-title">📄 Exportar Ficha PDF — Propiedad</span>
+          <button class="modal-close" onclick="closeModal('modalPropPDF')">✕</button>
+        </div>
+        <div class="modal-body" style="padding:20px">
+          <input type="hidden" id="ppdf-id">
+          <div style="margin-bottom:18px">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Datos de contacto</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <label onclick="_ppdfContactSel(this,'con')" class="ppdf-copt ppdf-copt-sel" data-val="con" style="border:2px solid var(--accent);border-radius:10px;padding:14px 12px;cursor:pointer;text-align:center;background:rgba(232,160,32,.08);transition:.15s">
+                <div style="font-size:20px;margin-bottom:4px">📞</div>
+                <div style="font-size:11px;font-weight:700">Con mis datos</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px">Para prospectos y clientes</div>
+              </label>
+              <label onclick="_ppdfContactSel(this,'sin')" class="ppdf-copt" data-val="sin" style="border:2px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;text-align:center;transition:.15s">
+                <div style="font-size:20px;margin-bottom:4px">🤝</div>
+                <div style="font-size:11px;font-weight:700">Sin contacto</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px">Para colegas / co-broking</div>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="closeModal('modalPropPDF')">Cancelar</button>
+          <button class="btn btn-primary" onclick="(()=>{
+            const id=document.getElementById('ppdf-id').value;
+            const contact=(document.querySelector('.ppdf-copt-sel')||{dataset:{val:'con'}}).dataset.val==='con';
+            closeModal('modalPropPDF');
+            exportPropPDF(id,{contact});
+          })()">📄 Exportar PDF</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ========== MODAL MLS GUARDAR ========== -->
     <div class="modal-bg" id="modalMlsGuardar" onclick="if(event.target===this)closeModal('modalMlsGuardar')">
       <div class="modal" style="width:600px;max-width:98vw">
@@ -2468,6 +2613,7 @@ CREATE POLICY "allow_all_diario_crm" ON diario_crm FOR ALL USING (true) WITH CHE
     <div id="ficha-preview" style="overflow-y:auto;max-height:60vh;border:1px solid var(--border);border-radius:8px;background:var(--card2)"></div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalFicha')">Cerrar</button>
+      <button class="btn btn-outline btn-sm" onclick="(()=>{const id=document.getElementById('ficha-modal-prop-id').value;if(id){closeModal('modalFicha');showPropPDFOptions(id);}})()" style="color:var(--red);border-color:var(--red)44">📄 PDF</button>
       <button class="btn btn-primary btn-sm" onclick="(()=>{const id=document.getElementById('ficha-modal-prop-id').value;closeModal('modalFicha');if(id)editProp(id);})()" style="gap:5px">✏️ Editar Propiedad</button>
       <button class="btn btn-outline btn-sm" onclick="(()=>{const id=document.getElementById('ficha-modal-prop-id').value;if(id&&confirm('¿Eliminar propiedad?')){closeModal('modalFicha');deleteProp(id);}})()" style="color:var(--red);border-color:var(--red)44">🗑️ Eliminar</button>
     </div>
@@ -4072,7 +4218,35 @@ function initRealtime(){
       redContacts.unshift(p.new); renderRedInmo();
       document.getElementById('badge-red').textContent=redContacts.length;
     })
-    .subscribe(s=>{ if(s==='SUBSCRIBED') console.log('🟢 CRM realtime activo'); });
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'propiedades_red'},p=>{
+      const d=p.new;
+      if(!mlsListados.find(x=>x.id===d.id)){
+        mlsListados.unshift(d);
+        updateMlsKpis();
+        toast(`🌐 Nueva propiedad MLS: ${d.titulo||d.mls_code||''}`,2500);
+      }
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'propiedades_red'},p=>{
+      const d=p.new;
+      const idx=mlsListados.findIndex(x=>x.id===d.id);
+      if(idx>=0){
+        const prev=mlsListados[idx];
+        if(prev.precio!==d.precio) toast(`💰 MLS precio actualizado: ${d.titulo||d.mls_code||''}`,2000);
+        if(prev.estado!==d.estado) toast(`🔄 MLS estado → ${d.estado}: ${d.titulo||d.mls_code||''}`,2000);
+        mlsListados[idx]=d;
+        updateMlsKpis();
+        const panel=document.getElementById('panel-mls');
+        const lt=document.getElementById('mls-tab-listados');
+        if(panel&&panel.style.display!=='none'&&lt&&lt.style.display!=='none') renderMLS();
+      }
+    })
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'propiedades_red'},p=>{
+      mlsListados=mlsListados.filter(x=>x.id!==p.old.id);
+      updateMlsKpis();
+    })
+    .subscribe(s=>{ if(s==='SUBSCRIBED') console.log('🟢 CRM realtime activo (incl. MLS)'); });
+  // Auto-refresh MLS cada 4 horas
+  setInterval(()=>{ loadMlsListados(); }, 4*3600*1000);
 }
 
 // ============================================================
@@ -4303,6 +4477,125 @@ function renderDashboard(){
       </div>
     </div>`).join('');
   document.getElementById('badge-leads').textContent=leads.filter(l=>l.status==='Nuevo').length;
+
+  // ── KPIs Avanzados ──────────────────────────────────────────
+  (function renderAdvancedKPIs(){
+    const today=new Date().toISOString().slice(0,10);
+    const now=new Date();
+
+    // Tareas
+    const tPending=tasks.filter(t=>t.status!=='Completada'&&t.status!=='Cancelada');
+    const tDone=tasks.filter(t=>t.status==='Completada');
+    const tVencidas=tPending.filter(t=>t.due&&t.due<today);
+    const el=id=>document.getElementById(id);
+    if(el('kpi-tareas-pending')) el('kpi-tareas-pending').textContent=tPending.length;
+    if(el('kpi-tareas-vencidas-delta')){
+      el('kpi-tareas-vencidas-delta').textContent=tVencidas.length?`⚠️ ${tVencidas.length} vencida${tVencidas.length>1?'s':''}`:tPending.length?'Al día ✓':'Sin tareas';
+      el('kpi-tareas-vencidas-delta').style.color=tVencidas.length?'var(--red)':'var(--green)';
+    }
+    if(el('kpi-tareas-done')) el('kpi-tareas-done').textContent=tDone.length;
+    if(el('kpi-tareas-done-delta')){
+      const iniMes=new Date(now.getFullYear(),now.getMonth(),1).toISOString().slice(0,10);
+      const doneMes=tDone.filter(t=>t.due&&t.due>=iniMes).length;
+      el('kpi-tareas-done-delta').textContent=doneMes?`${doneMes} completadas este mes`:`${tDone.length} total`;
+      el('kpi-tareas-done-delta').style.color='var(--green)';
+    }
+
+    // MLS
+    const mlsG=typeof mlsGuardadas!=='undefined'?mlsGuardadas:[];
+    const mlsL=typeof mlsListados!=='undefined'?mlsListados:[];
+    if(el('kpi-mls-guardadas')) el('kpi-mls-guardadas').textContent=mlsG.length;
+    if(el('kpi-mls-total-dash')) el('kpi-mls-total-dash').textContent=mlsL.length.toLocaleString();
+    if(el('kpi-mls-sync-dash')){
+      const cTs=parseInt(localStorage.getItem('jac_mls_cache_ts')||'0');
+      const mins=cTs?Math.round((Date.now()-cTs)/60000):null;
+      el('kpi-mls-sync-dash').textContent=mins!==null?(mins<60?`Sync hace ${mins}m`:`Sync hace ${Math.round(mins/60)}h`):'Sin sync reciente';
+    }
+
+    // Citas hoy y semana
+    const citasHoy=citas.filter(c=>c.fecha===today);
+    const iniSem=new Date(now); iniSem.setDate(now.getDate()-now.getDay()); iniSem.setHours(0,0,0,0);
+    const finSem=new Date(iniSem); finSem.setDate(iniSem.getDate()+7);
+    const citasSem=citas.filter(c=>c.fecha&&new Date(c.fecha)>=iniSem&&new Date(c.fecha)<finSem);
+    if(el('kpi-citas-hoy')) el('kpi-citas-hoy').textContent=citasHoy.length;
+    if(el('kpi-citas-semana-delta')) el('kpi-citas-semana-delta').textContent=`${citasSem.length} esta semana`;
+
+    // Pipeline
+    const STAGES_ORDER=['Nuevo','Contactado','Interesado','Visita programada','Visita','Oferta presentada','En negociación','Oferta','Negociación','Cerrado ✅','Cerrado','Perdido ❌','Perdido'];
+    const pipeActive=leads.filter(l=>!['Cerrado ✅','Cerrado','Perdido ❌','Perdido'].includes(l.status));
+    const pipeVal=pipeActive.reduce((s,l)=>s+(l.presupuesto_max||l.presupuesto_min||0),0);
+    if(el('kpi-pipeline-val')) el('kpi-pipeline-val').textContent=pipeActive.length;
+    if(el('kpi-pipeline-delta')) el('kpi-pipeline-delta').textContent=pipeVal>0?'$'+pipeVal.toLocaleString()+' potencial':'—';
+
+    // Pipeline bars
+    const pBars=el('kpi-pipeline-bars');
+    if(pBars){
+      const stages=[
+        {l:'Nuevo / Contactado',keys:['Nuevo','Contactado'],c:'#60a5fa'},
+        {l:'Interesado / Visita',keys:['Interesado','Visita programada','Visita'],c:'#f59e0b'},
+        {l:'Oferta / Negociación',keys:['Oferta presentada','En negociación','Oferta','Negociación'],c:'#c084fc'},
+        {l:'Cerrado ✅',keys:['Cerrado ✅','Cerrado'],c:'#22c55e'},
+        {l:'Perdido ❌',keys:['Perdido ❌','Perdido'],c:'#f87171'},
+      ];
+      const total=leads.length||1;
+      pBars.innerHTML=stages.map(s=>{
+        const cnt=leads.filter(l=>s.keys.includes(l.status)).length;
+        const pct=Math.round((cnt/total)*100);
+        return `<div style="display:flex;align-items:center;gap:8px;font-size:11px">
+          <span style="width:160px;flex-shrink:0;color:var(--muted)">${s.l}</span>
+          <div style="flex:1;background:var(--card2);border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:${pct}%;background:${s.c};height:100%;border-radius:4px;transition:width .4s"></div>
+          </div>
+          <span style="width:36px;text-align:right;font-weight:700;color:${s.c}">${cnt}</span>
+          <span style="width:32px;text-align:right;color:var(--muted)">${pct}%</span>
+        </div>`;
+      }).join('');
+    }
+
+    // Props estado bars
+    const pEstBars=el('kpi-props-estado-bars');
+    if(pEstBars){
+      const estados=[
+        {l:'Disponibles',filter:p=>(!p.status||p.status==='Disponible'),c:'#22c55e'},
+        {l:'En Negociación',filter:p=>p.status==='En Negociación'||p.status==='Negociación',c:'#f59e0b'},
+        {l:'Vendidas/Cerradas',filter:p=>['Vendida','Cerrada','Vendido'].includes(p.status),c:'#818cf8'},
+        {l:'Alquiladas',filter:p=>p.status==='Alquilada'||p.status==='Alquilado',c:'#22d3ee'},
+        {l:'Reservadas',filter:p=>p.status==='Reservada',c:'#f97316'},
+      ];
+      const totalP=props.length||1;
+      const mlsDisp=mlsL.filter(m=>m.estado==='Disponible').length;
+      const mlsNeg=mlsL.filter(m=>m.estado==='En Negociación').length;
+      pEstBars.innerHTML=`
+        ${estados.map(e=>{
+          const cnt=props.filter(e.filter).length;
+          const pct=Math.round((cnt/totalP)*100);
+          return `<div style="display:flex;align-items:center;gap:8px;font-size:11px">
+            <span style="width:160px;flex-shrink:0;color:var(--muted)">CRM · ${e.l}</span>
+            <div style="flex:1;background:var(--card2);border-radius:4px;height:8px;overflow:hidden">
+              <div style="width:${pct}%;background:${e.c};height:100%;border-radius:4px;transition:width .4s"></div>
+            </div>
+            <span style="width:36px;text-align:right;font-weight:700;color:${e.c}">${cnt}</span>
+          </div>`;
+        }).join('')}
+        ${mlsL.length?`
+        <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px">
+            <span style="width:160px;flex-shrink:0;color:var(--muted)">MLS · Disponibles</span>
+            <div style="flex:1;background:var(--card2);border-radius:4px;height:8px;overflow:hidden">
+              <div style="width:${Math.round((mlsDisp/mlsL.length)*100)}%;background:#22c55e;height:100%;border-radius:4px"></div>
+            </div>
+            <span style="width:36px;text-align:right;font-weight:700;color:#22c55e">${mlsDisp}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px;margin-top:4px">
+            <span style="width:160px;flex-shrink:0;color:var(--muted)">MLS · En Negociación</span>
+            <div style="flex:1;background:var(--card2);border-radius:4px;height:8px;overflow:hidden">
+              <div style="width:${Math.round((mlsNeg/mlsL.length)*100)}%;background:#f59e0b;height:100%;border-radius:4px"></div>
+            </div>
+            <span style="width:36px;text-align:right;font-weight:700;color:#f59e0b">${mlsNeg}</span>
+          </div>
+        </div>`:''}`;
+    }
+  })();
 }
 function showPanelById(id){
   const nav=[...document.querySelectorAll('.nav-item')].find(n=>n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"));
@@ -4329,7 +4622,7 @@ function renderProps(data){
       <button class="email-btn" style="font-size:11px;padding:4px 8px" title="Email jcastro" onclick="sharePropEmailJcastro('${p.id}')">📧 JC</button>
       <button class="email-btn" style="font-size:11px;padding:4px 8px;background:var(--cyan)22;color:var(--cyan);border-color:var(--cyan)44" title="Email jelyan" onclick="sharePropEmailJelyan('${p.id}')">📧 JL</button>
       <button class="btn btn-ghost btn-sm" title="Ver detalle" onclick="verFicha('${p.id}')">👁</button>
-      <button class="btn btn-ghost btn-sm" title="Exportar PDF" onclick="exportPropPDF('${p.id}')">📄</button>
+      <button class="btn btn-ghost btn-sm" title="Exportar PDF" onclick="showPropPDFOptions('${p.id}')">📄</button>
       <button class="btn btn-ghost btn-sm" title="Reporte propietario WA" onclick="reportePropietarioWA('${p.id}')" style="color:var(--purple)">📊</button>
       <button class="btn btn-ghost btn-sm" title="Archivos" onclick="openArchivosProp('${p.id}')">���${(p.archivos||[]).length?` ${p.archivos.length}`:''}</button>
       <button class="btn btn-ghost btn-sm" title="Editar" onclick="editProp('${p.id}')">✏️</button>
@@ -5028,99 +5321,255 @@ function openDiaCompleto(ds){
   };
   const dc=citas.filter(c=>c.fecha===ds);
   const dt=tasks.filter(t=>t.due===ds);
-  const START_H=7, END_H=21, HOUR_PX=64;
-  const totalPx=(END_H-START_H)*HOUR_PX;
-  // Build timeline
-  let h=`<div style="position:relative;min-height:${totalPx+60}px;padding-bottom:20px">`;
-  // Hour grid lines
-  for(let hr=START_H;hr<=END_H;hr++){
-    const top=(hr-START_H)*HOUR_PX;
-    const isMajor=hr%2===0;
-    h+=`<div style="position:absolute;left:0;right:0;top:${top}px;display:flex;align-items:center;pointer-events:none">
-      <div style="width:46px;text-align:right;padding-right:8px;font-size:10px;color:${isMajor?'var(--muted)':'rgba(122,132,153,.4)'};font-weight:${isMajor?600:400};flex-shrink:0;line-height:1">${String(hr).padStart(2,'0')}:00</div>
-      <div style="flex:1;height:1px;background:${isMajor?'var(--border)':'rgba(42,51,71,.4)'}"></div>
+  const dm=(typeof mlsGuardadas!=='undefined'?mlsGuardadas:[]).filter(x=>x.fecha_seguimiento===ds||x.next_follow_up===ds);
+  // TODAS las horas del día 00:00-23:00
+  const START_H=0, END_H=23, HOUR_PX=60;
+  const totalPx=(END_H-START_H+1)*HOUR_PX;
+  const now=new Date();
+  const isToday=ds===now.toISOString().slice(0,10);
+  const nowTop=isToday?Math.min((now.getHours()-START_H)*HOUR_PX+(now.getMinutes()/60)*HOUR_PX, totalPx):null;
+
+  // Resumen del día en la parte superior
+  const totalEvs=dc.length+dt.length+dm.length;
+  let h=`<div style="padding:10px 14px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span style="font-size:12px;color:var(--muted)">${totalEvs} evento${totalEvs!==1?'s':''} este día</span>
+    ${dc.length?`<span style="font-size:11px;background:#f9731618;color:#f97316;padding:2px 8px;border-radius:8px">📅 ${dc.length} cita${dc.length>1?'s':''}</span>`:''}
+    ${dt.length?`<span style="font-size:11px;background:#818cf818;color:#818cf8;padding:2px 8px;border-radius:8px">📌 ${dt.length} tarea${dt.length>1?'s':''}</span>`:''}
+    ${dm.length?`<span style="font-size:11px;background:#22c55e18;color:#22c55e;padding:2px 8px;border-radius:8px">🏠 ${dm.length} seguimiento MLS</span>`:''}
+  </div>`;
+
+  h+=`<div style="position:relative;min-height:${totalPx+40}px;padding-bottom:20px;overflow:hidden">`;
+  // Línea de hora actual
+  if(nowTop!==null){
+    h+=`<div style="position:absolute;left:0;right:0;top:${nowTop}px;z-index:10;pointer-events:none;display:flex;align-items:center">
+      <div style="width:46px;text-align:right;padding-right:4px;flex-shrink:0">
+        <div style="width:10px;height:10px;border-radius:50%;background:#ef4444;margin-left:auto"></div>
+      </div>
+      <div style="flex:1;height:2px;background:#ef444488"></div>
     </div>`;
   }
-  // Place events at their correct time slots
+  // Líneas de horas y etiquetas
+  for(let hr=START_H;hr<=END_H;hr++){
+    const top=(hr-START_H)*HOUR_PX;
+    const isMajor=hr%3===0||hr===START_H||hr===END_H;
+    const isNight=(hr<7||hr>=22);
+    const bgLine=isNight?'rgba(30,40,70,.6)':isMajor?'var(--border)':'rgba(82,92,115,.18)';
+    const txtCol=isNight?'rgba(100,120,160,.6)':isMajor?'var(--muted)':'rgba(122,132,153,.4)';
+    h+=`<div style="position:absolute;left:0;right:0;top:${top}px;display:flex;align-items:center;pointer-events:none">
+      <div style="width:50px;text-align:right;padding-right:8px;font-size:${isMajor?10:9}px;color:${txtCol};font-weight:${isMajor?600:400};flex-shrink:0;line-height:1">${String(hr).padStart(2,'0')}:00</div>
+      <div style="flex:1;height:1px;background:${bgLine}"></div>
+    </div>
+    ${isNight&&hr===7?`<div style="position:absolute;left:0;right:0;top:0;height:${HOUR_PX*7}px;background:rgba(15,20,40,.12);pointer-events:none;z-index:1"></div>`:''}`;
+  }
+
+  // Build event map by hour to handle overlaps
   const priColors={A1:'#ef4444',A2:'#f97316',B1:'#f59e0b',B2:'#fbbf24',C1:'#22c55e',C2:'#6b7280'};
   const withHora=[...dc.map(c=>({...c,_kind:'cita'})),...dt.map(t=>({...t,_kind:'tarea'}))]
     .filter(ev=>ev.hora&&ev.hora.includes(':'));
-  const noHora=[...dc.filter(c=>!c.hora||!c.hora.includes(':')),...dt.filter(t=>!t.hora&&!t.due_hora)];
+  const noHora=[...dc.filter(c=>!c.hora||!c.hora.includes(':')),...dt.filter(t=>!t.hora)];
+
   withHora.forEach((ev,i)=>{
     const [h2,min]=(ev.hora||'00:00').split(':').map(Number);
-    if(h2<START_H||h2>=END_H) return;
+    if(h2<START_H||h2>END_H) return;
     const top=(h2-START_H)*HOUR_PX+(min/60)*HOUR_PX;
     const isCita=ev._kind==='cita';
     const key=ev._sbId||ev._localId||ev.id||'';
     const color=isCita?'#f97316':'#818cf8';
-    const bg=isCita?'rgba(249,115,22,.12)':'rgba(129,140,248,.12)';
+    const bg=isCita?'rgba(249,115,22,.13)':'rgba(129,140,248,.13)';
     const icon=(ev.tipo_accion?tipoAccionIcon(ev.tipo_accion):'')|| (isCita?'📅':'📌');
     const title=isCita?(ev.cliente||'Cita'):(ev.title||ev.titulo||ev.desc||'Tarea');
     const pa=ev.prioridad_agenda; const paCol=pa?priColors[pa]||'var(--accent)':null;
-    h+=`<div onclick="${isCita?`editCita('${key}')`:`editTareaById('${key}')`}" style="position:absolute;left:54px;right:8px;top:${top}px;background:${bg};border-left:3px solid ${color};border-radius:0 8px 8px 0;padding:5px 10px;min-height:30px;cursor:pointer;z-index:3;transition:.1s" onmouseover="this.style.background='${color}22'" onmouseout="this.style.background='${bg}'">
-      <div style="font-size:12px;font-weight:600;color:${color};display:flex;align-items:center;gap:4px">
-        ${icon} ${title}
-        ${pa?`<span style="font-size:10px;font-weight:800;color:${paCol};margin-left:4px">${pa}</span>`:''}
-        ${ev.tipo_accion&&!ev.tipo_accion===icon?`<span style="font-size:9px;background:rgba(232,160,32,.12);color:var(--accent);padding:1px 5px;border-radius:8px">${ev.tipo_accion}</span>`:''}
+    const delBtn=isCita?`<button class="btn btn-ghost btn-sm" style="color:#f87171;padding:2px 6px;font-size:10px" onclick="event.stopPropagation();if(confirm('¿Eliminar?'))deleteCita('${key}')">✕</button>`
+                       :`<button class="btn btn-ghost btn-sm" style="color:#f87171;padding:2px 6px;font-size:10px" onclick="event.stopPropagation();if(confirm('¿Eliminar?'))deleteTarea('${key}')">✕</button>`;
+    h+=`<div onclick="${isCita?`editCita('${key}')`:`editTareaById('${key}')`}" style="position:absolute;left:58px;right:8px;top:${top+1}px;background:${bg};border-left:3px solid ${color};border-radius:0 8px 8px 0;padding:5px 10px 5px 8px;min-height:34px;cursor:pointer;z-index:3;transition:.1s;display:flex;align-items:flex-start;gap:6px" onmouseover="this.style.background='${color}22'" onmouseout="this.style.background='${bg}'">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:${color};display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+          ${icon} ${title}
+          ${pa?`<span style="font-size:10px;font-weight:800;color:${paCol}">${pa}</span>`:''}
+          ${ev.tipo_accion?`<span style="font-size:9px;background:rgba(232,160,32,.12);color:var(--accent);padding:1px 5px;border-radius:8px">${ev.tipo_accion}</span>`:''}
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">⏰ ${ev.hora}${isCita&&ev.propiedad?' · 🏠 '+ev.propiedad:''}${isCita&&ev.zoom_link?` · <a href="${ev.zoom_link}" target="_blank" style="color:var(--accent);text-decoration:none" onclick="event.stopPropagation()">🎥 Zoom</a>`:''}</div>
+        ${ev.notas?`<div style="font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ev.notas}</div>`:''}
       </div>
-      <div style="font-size:10px;color:var(--muted);margin-top:1px">${ev.hora}${isCita&&ev.propiedad?' · 🏠 '+ev.propiedad:''}${isCita&&ev.zoom_link?` · <a href="${ev.zoom_link}" target="_blank" style="color:var(--accent);text-decoration:none" onclick="event.stopPropagation()">🎥 Zoom</a>`:''}</div>
+      <div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;gap:2px;flex-shrink:0">
+        <button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:10px" onclick="${isCita?`editCita('${key}')`:`editTareaById('${key}')`}">✏️</button>
+        ${delBtn}
+      </div>
     </div>`;
   });
+
+  // MLS seguimientos sin hora en timeline
+  dm.forEach((mx,i)=>{
+    const top=HOUR_PX*9 + i*36; // mostrar en el bloque 9am
+    h+=`<div style="position:absolute;left:58px;right:8px;top:${top}px;background:rgba(34,197,94,.1);border-left:3px solid #22c55e;border-radius:0 8px 8px 0;padding:5px 10px;min-height:28px;z-index:3">
+      <div style="font-size:11px;font-weight:600;color:#22c55e">🏠 ${mx.titulo||mx.mls_code||'Seguimiento MLS'}</div>
+      <div style="font-size:10px;color:var(--muted)">Seguimiento${mx.zona?' · '+mx.zona:''}${mx.precio?' · $'+Number(mx.precio).toLocaleString():''}</div>
+    </div>`;
+  });
+
   h+=`</div>`;
-  // Sin hora section
+
+  // Sección sin hora
   if(noHora.length){
     h+=`<div style="padding:12px 16px;border-top:1px solid var(--border);background:var(--card2)">
-      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Sin hora asignada</div>`;
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📍 Sin hora asignada</div>`;
     noHora.forEach(ev=>{
-      const isCita=!!ev.cliente&&!ev._kind||ev._kind==='cita';
-      const key=ev._sbId||ev._localId||ev.id||'';
-      const icon=(ev.tipo_accion?tipoAccionIcon(ev.tipo_accion):'')|| (isCita?'📅':'📌');
-      const title=isCita?(ev.cliente||'Cita'):(ev.title||ev.titulo||ev.desc||'Tarea');
-      const pa=ev.prioridad_agenda; const paCol=pa?priColors[pa]||'var(--accent)':null;
-      h+=`<div onclick="${isCita?`editCita('${key}')`:`editTareaById('${key}')`}" style="background:var(--card);border-radius:6px;padding:6px 10px;margin-bottom:4px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;border:1px solid var(--border)">
-        <span>${icon} ${title}</span>
-        ${pa?`<span style="font-size:10px;font-weight:800;color:${paCol}">${pa}</span>`:''}
+      const isCita2=ev._kind==='cita'||(!ev._kind&&ev.cliente);
+      const key2=ev._sbId||ev._localId||ev.id||'';
+      const icon2=(ev.tipo_accion?tipoAccionIcon(ev.tipo_accion):'')|| (isCita2?'📅':'📌');
+      const title2=isCita2?(ev.cliente||'Cita'):(ev.title||ev.titulo||ev.desc||'Tarea');
+      const pa2=ev.prioridad_agenda; const paCol2=pa2?priColors[pa2]||'var(--accent)':null;
+      h+=`<div style="background:var(--card);border-radius:8px;padding:8px 12px;margin-bottom:5px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;border:1px solid var(--border)">
+        <span onclick="${isCita2?`editCita('${key2}')`:`editTareaById('${key2}')`}" style="flex:1">${icon2} ${title2}</span>
+        ${pa2?`<span style="font-size:10px;font-weight:800;color:${paCol2}">${pa2}</span>`:''}
+        <button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:10px" onclick="${isCita2?`editCita('${key2}')`:`editTareaById('${key2}')`}">✏️</button>
+        <button class="btn btn-ghost btn-sm" style="color:#f87171;padding:2px 6px;font-size:10px" onclick="if(confirm('¿Eliminar?')){${isCita2?`deleteCita('${key2}')`:`deleteTarea('${key2}')`}}">✕</button>
       </div>`;
     });
     h+=`</div>`;
   }
+
   const body=document.getElementById('dia-completo-body');
   if(body){ body.innerHTML=h; }
-  // Scroll to current hour
+  // Scroll a la hora actual o a las 7am
   const scrollEl=document.getElementById('dia-completo-scroll');
-  if(scrollEl){ const now=new Date(); const offset=Math.max(0,(now.getHours()-START_H-1))*HOUR_PX; scrollEl.scrollTop=offset; }
+  if(scrollEl){
+    const scrollTo=isToday
+      ? Math.max(0,(now.getHours()-1)*HOUR_PX)
+      : 7*HOUR_PX; // 7am por defecto
+    setTimeout(()=>{ scrollEl.scrollTop=scrollTo; },80);
+  }
   openModal('modalDiaCompleto');
+}
+
+// ── Reprogramar tarea rápida ──────────────────────────────────
+function reprogramarTarea(id, btn){
+  const t=tasks.find(x=>x.id===id||x.id===parseInt(id)); if(!t) return;
+  // Crear un input date inline junto al botón
+  let inp=document.getElementById('_reprogram_inp_'+id);
+  if(inp){ inp.remove(); return; }
+  inp=document.createElement('input');
+  inp.type='date'; inp.id='_reprogram_inp_'+id;
+  inp.value=t.due||new Date().toISOString().slice(0,10);
+  inp.style.cssText='font-size:11px;padding:3px 7px;border:1px solid var(--accent);border-radius:6px;background:var(--card);color:var(--text);margin-left:4px';
+  inp.onchange=async function(){
+    t.due=this.value;
+    t.status='Pendiente'; // reactivar si estaba cancelada
+    if(typeof _sbSave==='function') await _sbSave('tareas_crm',t,{upsert:true}).catch(()=>{});
+    this.remove();
+    jacRenderTareasTab(); renderCalendar();
+    toast(`📅 Tarea movida al ${t.due}`);
+  };
+  inp.onblur=function(){ setTimeout(()=>{ this.remove(); },200); };
+  btn.parentNode.insertBefore(inp, btn.nextSibling);
+  inp.focus(); inp.click();
+}
+
+async function cancelarTarea(id){
+  const t=tasks.find(x=>x.id===id||x.id===parseInt(id)); if(!t) return;
+  if(!confirm('¿Cancelar esta tarea? Pasará a archivo.')) return;
+  t.status='Cancelada';
+  if(typeof _sbSave==='function') await _sbSave('tareas_crm',t,{upsert:true}).catch(()=>{});
+  jacRenderTareasTab(); renderCalendar();
+  toast('❌ Tarea cancelada y archivada');
 }
 
 function jacRenderTareasTab(){
   const el=document.getElementById('jac-atab-tareas-list'); if(!el) return;
-  const pending=tasks.filter(t=>t.status!=='Completada').sort((a,b)=>(a.due||'').localeCompare(b.due||''));
-  const done=tasks.filter(t=>t.status==='Completada').slice(0,8);
+  const today=new Date().toISOString().slice(0,10);
+  const pending=tasks.filter(t=>t.status!=='Completada'&&t.status!=='Cancelada')
+    .sort((a,b)=>(a.due||'').localeCompare(b.due||''));
+  const vencidas=pending.filter(t=>t.due&&t.due<today);
+  const hoy=pending.filter(t=>t.due===today);
+  const futuras=pending.filter(t=>!t.due||t.due>today);
+  const done=tasks.filter(t=>t.status==='Completada').sort((a,b)=>(b.due||'').localeCompare(a.due||'')).slice(0,20);
+  const canceladas=tasks.filter(t=>t.status==='Cancelada').slice(0,10);
+
   const priC={Alta:'#f87171',Media:'#fbbf24',Baja:'#4ade80'};
-  const renderT=list=>list.map(t=>{
+  let _archHidden=true;
+
+  const renderTareaCard=(t,extraBorder='')=>{
     const clr=priC[t.priority]||'var(--muted)';
     const isDone=t.status==='Completada';
+    const isCancelled=t.status==='Cancelada';
     const taIcon=t.tipo_accion?tipoAccionIcon(t.tipo_accion):'';
     const paBadge=t.prioridad_agenda?prioridadAgendaBadge(t.prioridad_agenda):'';
-    return `<div class="jac-evento-card jac-ec-tarea" style="flex-wrap:wrap;gap:6px">
-      <div onclick="(function(){if(typeof toggleTaskStatusById==='function')toggleTaskStatusById('${t.id}');})()" style="width:20px;height:20px;border-radius:50%;background:${isDone?'#818cf8':'transparent'};border:2px solid #818cf8;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;cursor:pointer;flex-shrink:0">${isDone?'✓':''}</div>
+    const isVencida=t.due&&t.due<today&&!isDone&&!isCancelled;
+    const borderStyle=extraBorder||'var(--border)';
+    return `<div class="jac-evento-card jac-ec-tarea" style="border-color:${borderStyle};gap:0;padding:10px 12px;flex-wrap:nowrap;align-items:flex-start">
+      <!-- Checkmark -->
+      <div onclick="(function(){if(typeof toggleTaskStatusById==='function')toggleTaskStatusById('${t.id}');})()"
+        title="${isDone?'Marcar pendiente':'Marcar completada'}"
+        style="width:22px;height:22px;border-radius:50%;background:${isDone?'#818cf8':isCancelled?'#6b728044':'transparent'};border:2px solid ${isDone?'#818cf8':isCancelled?'#6b7280':'#818cf8'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;margin-right:10px;margin-top:2px;transition:.15s">${isDone?'✓':isCancelled?'—':''}</div>
+      <!-- Contenido -->
       <div style="flex:1;min-width:0">
-        <div style="font-weight:600;font-size:13px;color:var(--text);${isDone?'text-decoration:line-through;opacity:.6':''}">${taIcon?taIcon+' ':''}${t.title||t.desc||'Sin descripción'}${paBadge}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">${t.due?'📅 '+t.due+' · ':''}<span style="color:${clr}">${t.priority||'Normal'}</span>${t.tipo_accion?tipoAccionBadge(t.tipo_accion):''}</div>
+        <div style="font-weight:600;font-size:13px;color:${isCancelled?'var(--muted)':'var(--text)'};${isDone||isCancelled?'text-decoration:line-through;opacity:.65':''}">
+          ${taIcon?taIcon+' ':''}${t.title||t.desc||'Sin descripción'}${paBadge}
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          ${t.due?`<span style="color:${isVencida?'#f87171':'var(--muted)'}">📅 ${t.due}${isVencida?' ⚠️ Vencida':''}</span>`:'<span>📅 Sin fecha</span>'}
+          <span style="color:${clr}">${t.priority||'Normal'}</span>
+          ${t.tipo_accion?tipoAccionBadge(t.tipo_accion):''}
+        </div>
+        ${t.desc&&t.title?`<div style="font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.desc}</div>`:''}
       </div>
-      <span style="font-size:9px;background:#818cf822;color:#818cf8;padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0">${t.status||'Pendiente'}</span>
-      <div style="width:100%;display:flex;gap:6px;margin-top:2px">
-        <button class="btn btn-ghost btn-sm" onclick="editTareaById('${t.id}')" title="Editar">✏️ Editar</button>
-        <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="deleteTarea('${t.id}')" title="Eliminar">🗑️ Eliminar</button>
-      </div>
+      <!-- Acciones rápidas -->
+      ${!isDone&&!isCancelled?`<div style="display:flex;gap:3px;flex-shrink:0;margin-left:8px;margin-top:1px">
+        <button class="btn btn-ghost btn-sm" title="Completar"
+          onclick="(function(){if(typeof toggleTaskStatusById==='function')toggleTaskStatusById('${t.id}');})()"
+          style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#818cf818;color:#818cf8;font-size:14px">✓</button>
+        <button class="btn btn-ghost btn-sm" title="Mover a otro día"
+          id="reprogram-btn-${t.id}"
+          onclick="reprogramarTarea('${t.id}',this)"
+          style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px">→</button>
+        <button class="btn btn-ghost btn-sm" title="Editar"
+          onclick="editTareaById('${t.id}')"
+          style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:12px">✏️</button>
+        <button class="btn btn-ghost btn-sm" title="Cancelar / archivar"
+          onclick="cancelarTarea('${t.id}')"
+          style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#f87171;font-size:14px;font-weight:700">✕</button>
+      </div>`:`<div style="display:flex;gap:3px;flex-shrink:0;margin-left:8px">
+        <button class="btn btn-ghost btn-sm" title="Eliminar permanentemente"
+          onclick="if(confirm('¿Eliminar permanentemente?'))deleteTarea('${t.id}')"
+          style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#f87171;font-size:12px">🗑️</button>
+      </div>`}
     </div>`;
-  }).join('');
+  };
+
+  const seccion=(titulo,color,lista,borde='')=>{
+    if(!lista.length) return '';
+    return `<div style="font-size:10px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.08em;margin:14px 0 7px;display:flex;align-items:center;gap:6px">
+      ${titulo} <span style="background:${color}22;color:${color};padding:1px 7px;border-radius:8px;font-size:10px">${lista.length}</span>
+    </div>${lista.map(t=>renderTareaCard(t,borde)).join('')}`;
+  };
+
+  const kpiBar=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
+    ${[['Pendientes',pending.length,'#818cf8'],['Hoy',hoy.length,'#f59e0b'],['Vencidas',vencidas.length,'#f87171'],['Completadas',done.length,'#22c55e']].map(([l,v,c])=>
+      `<div style="background:${c}11;border-radius:8px;padding:8px;text-align:center;border:1px solid ${c}33">
+        <div style="font-size:18px;font-weight:700;color:${c}">${v}</div>
+        <div style="font-size:10px;color:var(--muted)">${l}</div>
+      </div>`
+    ).join('')}
+  </div>`;
+
   el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-    <span style="font-weight:700;font-size:14px">Tareas Pendientes (${pending.length})</span>
+    <span style="font-weight:700;font-size:14px">Mis Tareas</span>
     <button class="btn btn-primary btn-sm" onclick="openNuevaTarea()">+ Nueva Tarea</button>
   </div>
-  ${pending.length?renderT(pending):'<div style="color:var(--muted);text-align:center;padding:30px 0">Sin tareas pendientes 🎉</div>'}
-  ${done.length?`<div style="font-weight:600;font-size:12px;color:var(--muted);margin:16px 0 10px;text-transform:uppercase;letter-spacing:.05em">Completadas</div>${renderT(done)}`:''}`;
+  ${kpiBar}
+  ${seccion('⚠️ Vencidas','#f87171',vencidas,'#f8717144')}
+  ${seccion('📍 Hoy','#f59e0b',hoy,'#f59e0b44')}
+  ${seccion('📋 Próximas','var(--muted)',futuras)}
+  ${!pending.length?'<div style="color:var(--muted);text-align:center;padding:30px 0;font-size:14px">¡Sin tareas pendientes! 🎉</div>':''}
+  <!-- Archivo (completadas y canceladas) -->
+  <div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px">
+    <button onclick="(function(){const a=document.getElementById('_tareas-archivo');const b=document.getElementById('_tareas-arch-toggle');if(a){a.style.display=a.style.display==='none'?'':'none';b.textContent=a.style.display==='none'?'▶ Ver archivo':'▼ Ocultar archivo';}})()" id="_tareas-arch-toggle"
+      style="font-size:11px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;padding:0">▶ Ver archivo (${done.length+canceladas.length} tareas)</button>
+    <div id="_tareas-archivo" style="display:none;margin-top:10px">
+      ${seccion('✅ Completadas','#22c55e',done)}
+      ${seccion('❌ Canceladas','#6b7280',canceladas)}
+    </div>
+  </div>`;
 }
 
 function jacRenderReunionesTab(){
@@ -5391,20 +5840,43 @@ const _LS_MLS_TS   = 'jac_mls_cache_ts';
   }catch(e){ mlsListados=[]; }
 })();
 function _saveMlsGuardadasLS(){ try{localStorage.setItem(_LS_GUARD,JSON.stringify(mlsGuardadas));}catch(e){} }
+let _mlsFreshLoaded=false; // ← bandera: ya hicimos carga fresca en esta sesión
 function _saveMlsListadosLS(){
   try{
-    // Guardar sólo los campos esenciales para ahorrar espacio (~500 props)
-    const slim=mlsListados.slice(0,800).map(m=>({
+    // Guardar todos los campos incluyendo todas las fotos (fotos son URLs, no base64)
+    const slim=mlsListados.slice(0,1000).map(m=>({
       id:m.id,titulo:m.titulo,tipo_prop:m.tipo_prop,tipo:m.tipo,operacion:m.operacion,
       zona:m.zona,precio:m.precio,area_total:m.area_total,habitaciones:m.habitaciones,
-      banos:m.banos,estado:m.estado,fotos:Array.isArray(m.fotos)?m.fotos.slice(0,2):m.fotos,
-      mls_code:m.mls_code,descripcion:(m.descripcion||'').slice(0,200),
+      banos:m.banos,parqueos:m.parqueos,estado:m.estado,
+      fotos:Array.isArray(m.fotos)?m.fotos:m.fotos, // TODAS las fotos — son URLs
+      mls_code:m.mls_code,descripcion:(m.descripcion||'').slice(0,500),
       agente:m.agente,agencia:m.agencia,tel_corredor_wa:m.tel_corredor_wa,
-      provincia:m.provincia,distrito:m.distrito,barrio:m.barrio,created_at:m.created_at
+      email_corredor:m.email_corredor,
+      provincia:m.provincia,distrito:m.distrito,barrio:m.barrio,
+      corregimiento:m.corregimiento,edificio:m.edificio,
+      area_total:m.area_total,area_lote:m.area_lote,
+      ano_construccion:m.ano_construccion,zonificacion:m.zonificacion,
+      amenidades_prop:m.amenidades_prop,amueblado:m.amueblado,
+      vista_mar:m.vista_mar,vista_ciudad:m.vista_ciudad,
+      piscina:m.piscina,gym:m.gym,terraza:m.terraza,balcon:m.balcon,
+      created_at:m.created_at
     }));
     localStorage.setItem(_LS_MLS_CACHE,JSON.stringify(slim));
     localStorage.setItem(_LS_MLS_TS,String(Date.now()));
-  }catch(e){ console.warn('MLS cache LS error:',e); }
+  }catch(e){
+    // Si se supera el límite de LS, guardar versión mínima
+    try{
+      const mini=mlsListados.slice(0,500).map(m=>({
+        id:m.id,titulo:m.titulo,tipo_prop:m.tipo_prop,operacion:m.operacion,
+        zona:m.zona,precio:m.precio,estado:m.estado,
+        fotos:Array.isArray(m.fotos)?m.fotos.slice(0,5):m.fotos,
+        mls_code:m.mls_code,habitaciones:m.habitaciones,banos:m.banos,
+        created_at:m.created_at
+      }));
+      localStorage.setItem(_LS_MLS_CACHE,JSON.stringify(mini));
+      localStorage.setItem(_LS_MLS_TS,String(Date.now()));
+    }catch(e2){ console.warn('MLS cache LS error:',e2); }
+  }
 }
 
 function mlsTab(btn, id){
@@ -5441,15 +5913,17 @@ async function loadMlsListados(){
     if(!_mlsRetryTimer) _mlsRetryTimer=setTimeout(()=>{ _mlsRetryTimer=null; loadMlsListados(); },2000);
     return;
   }
-  // Sync MLS diaria: si caché <24h y hay datos, no re-fetch desde Supabase
+  // Sync MLS: forzar carga fresca en la primera llamada de la sesión;
+  // para llamadas posteriores (auto-refresh / navegación) usar caché 4h
   try{
     const cTs=parseInt(localStorage.getItem(_LS_MLS_TS)||'0');
-    if(mlsListados.length>0 && (Date.now()-cTs)<24*3600*1000){
+    const cacheOk=mlsListados.length>0 && (Date.now()-cTs)<4*3600*1000;
+    if(cacheOk && _mlsFreshLoaded){
       updateMlsKpis();
       const _panel=document.getElementById('panel-mls');
       const _lt=document.getElementById('mls-tab-listados');
       if(_panel&&_panel.style.display!=='none'&&_lt&&_lt.style.display!=='none') renderMLS();
-      return; // usar caché — siguiente sync en 24h
+      return; // usar caché — siguiente sync en 4h
     }
   }catch(e){}
   // Show loading state in table
@@ -5468,7 +5942,23 @@ async function loadMlsListados(){
     if(data.length<batch) break;
     from+=batch;
   }
+  // ── Change detection: detectar novedades vs caché anterior ──
+  try{
+    const prevCache=JSON.parse(localStorage.getItem('_jac_mls_prev')||'[]');
+    if(prevCache.length>0 && all.length>0){
+      const prevMap={}; prevCache.forEach(p=>{prevMap[p.id]=p;});
+      const newProps=all.filter(p=>!prevMap[p.id]);
+      const changed=all.filter(p=>{
+        const prev=prevMap[p.id]; if(!prev) return false;
+        return p.precio!==prev.precio||p.estado!==prev.estado;
+      });
+      if(newProps.length) toast(`🆕 ${newProps.length} propiedad${newProps.length>1?'es':''} nueva${newProps.length>1?'s':''} en MLS`,3000);
+      if(changed.length) toast(`🔄 ${changed.length} cambio${changed.length>1?'s':''} de precio/estado en MLS`,2500);
+    }
+    localStorage.setItem('_jac_mls_prev',JSON.stringify(all.map(p=>({id:p.id,precio:p.precio,estado:p.estado}))));
+  }catch(e){}
   mlsListados=all;
+  _mlsFreshLoaded=true; // ← carga fresca completada para esta sesión
   _saveMlsListadosLS(); // ← cache blindado
   _mlsPage=0;
   updateMlsKpis();
@@ -5579,7 +6069,7 @@ function _mlsRenderPage(){
           <button class="btn btn-outline btn-sm" title="WhatsApp corredor co-broking" style="padding:3px 6px;font-size:11px;color:var(--green)" onclick="event.stopPropagation();mlsContactarAgente(${idx})">💬</button>
           <button class="btn btn-outline btn-sm" title="Email jcastro@jacrealtypa.com" style="padding:3px 6px;font-size:11px" onclick="event.stopPropagation();mlsEmailJcastro(${idx})">📧</button>
           <button class="btn btn-outline btn-sm" title="Email jelyanrealestate@gmail.com" style="padding:3px 6px;font-size:11px" onclick="event.stopPropagation();mlsEmailJelyan(${idx})">📨</button>
-          <button class="btn btn-outline btn-sm" title="Exportar PDF ficha" style="padding:3px 6px;font-size:11px;color:var(--red)" onclick="event.stopPropagation();exportMlsPDF(${idx})">📄</button>
+          <button class="btn btn-outline btn-sm" title="Exportar PDF ficha" style="padding:3px 6px;font-size:11px;color:var(--red)" onclick="event.stopPropagation();showMlsPDFOptions(${idx})">📄</button>
           <button class="btn btn-primary btn-sm" title="Guardar en CRM" style="padding:3px 6px;font-size:11px" onclick="event.stopPropagation();guardarMlsProp(${idx})">💾</button>
         </div>
       </td>
@@ -5738,7 +6228,7 @@ function mlsAbrirDetalle(idx){
   // url_mls no se expone públicamente (contiene datos del corredor ACOBIR)
   acciones.push(`<button class="btn btn-outline btn-sm" onclick="mlsEmailJcastro(${idx})" title="Enviar por email jcastro@jacrealtypa.com">📧 jcastro</button>`);
   acciones.push(`<button class="btn btn-outline btn-sm" onclick="mlsEmailJelyan(${idx})" title="Enviar por email jelyanrealestate@gmail.com">📨 jelyan</button>`);
-  acciones.push(`<button class="btn btn-outline btn-sm" style="color:var(--red)" onclick="exportMlsPDF(${idx})" title="Exportar ficha PDF">📄 PDF</button>`);
+  acciones.push(`<button class="btn btn-outline btn-sm" style="color:var(--red)" onclick="showMlsPDFOptions(${idx})" title="Exportar ficha PDF">📄 PDF</button>`);
   acciones.push(`<button class="btn btn-primary btn-sm" onclick="guardarMlsProp(${idx})" title="Guardar en CRM con notas">💾 Guardar en CRM</button>`);
   el('mls-det-acciones').innerHTML=acciones.join('');
   // Gallery
@@ -5860,134 +6350,309 @@ async function _imgBase64(url){
   });
 }
 
-async function exportMlsPDF(idx){
+// ── PDF options modal helpers ──
+function _mpdfStyleSel(el,val){
+  document.querySelectorAll('.mpdf-opt').forEach(e=>{
+    e.style.border='2px solid var(--border)';e.style.background='';e.classList.remove('mpdf-opt-sel');
+  });
+  el.style.border='2px solid var(--accent)';el.style.background='rgba(232,160,32,.08)';el.classList.add('mpdf-opt-sel');
+}
+function _mpdfContactSel(el,val){
+  document.querySelectorAll('.mpdf-copt').forEach(e=>{
+    e.style.border='2px solid var(--border)';e.style.background='';e.classList.remove('mpdf-copt-sel');
+  });
+  el.style.border='2px solid var(--accent)';el.style.background='rgba(232,160,32,.08)';el.classList.add('mpdf-copt-sel');
+}
+function _ppdfContactSel(el,val){
+  document.querySelectorAll('.ppdf-copt').forEach(e=>{
+    e.style.border='2px solid var(--border)';e.style.background='';e.classList.remove('ppdf-copt-sel');
+  });
+  el.style.border='2px solid var(--accent)';el.style.background='rgba(232,160,32,.08)';el.classList.add('ppdf-copt-sel');
+}
+function showMlsPDFOptions(idx){
+  document.getElementById('mpdf-idx').value=idx;
+  // Reset selections
+  document.querySelectorAll('.mpdf-opt').forEach((e,i)=>{
+    const isFirst=i===0;
+    e.style.border=isFirst?'2px solid var(--accent)':'2px solid var(--border)';
+    e.style.background=isFirst?'rgba(232,160,32,.08)':'';
+    if(isFirst)e.classList.add('mpdf-opt-sel'); else e.classList.remove('mpdf-opt-sel');
+  });
+  document.querySelectorAll('.mpdf-copt').forEach((e,i)=>{
+    const isFirst=i===0;
+    e.style.border=isFirst?'2px solid var(--accent)':'2px solid var(--border)';
+    e.style.background=isFirst?'rgba(232,160,32,.08)':'';
+    if(isFirst)e.classList.add('mpdf-copt-sel'); else e.classList.remove('mpdf-copt-sel');
+  });
+  openModal('modalMlsPDF');
+}
+function showPropPDFOptions(id){
+  document.getElementById('ppdf-id').value=id;
+  document.querySelectorAll('.ppdf-copt').forEach((e,i)=>{
+    const isFirst=i===0;
+    e.style.border=isFirst?'2px solid var(--accent)':'2px solid var(--border)';
+    e.style.background=isFirst?'rgba(232,160,32,.08)':'';
+    if(isFirst)e.classList.add('ppdf-copt-sel'); else e.classList.remove('ppdf-copt-sel');
+  });
+  openModal('modalPropPDF');
+}
+
+async function exportMlsPDF(idx, opts={}){
   const m=_mlsFiltered[idx]; if(!m) return;
-  if(!window.jspdf){toast('⏳ Cargando motor PDF...'); setTimeout(()=>exportMlsPDF(idx),800); return;}
+  if(!window.jspdf){toast('⏳ Cargando motor PDF...'); setTimeout(()=>exportMlsPDF(idx,opts),800); return;}
+  const showContact=opts.contact!==false;
+  const safe=s=>(s||'').toString()
+    .replace(/[áàâä]/g,'a').replace(/[ÁÀÂÄ]/g,'A')
+    .replace(/[éèêë]/g,'e').replace(/[ÉÈÊË]/g,'E')
+    .replace(/[íìîï]/g,'i').replace(/[ÍÌÎÏ]/g,'I')
+    .replace(/[óòôö]/g,'o').replace(/[ÓÒÔÖ]/g,'O')
+    .replace(/[úùûü]/g,'u').replace(/[ÚÙÛÜ]/g,'U')
+    .replace(/[ñ]/g,'n').replace(/[Ñ]/g,'N')
+    .replace(/[^\x09\x0A\x0D\x20-\x7E]/g,'').trim();
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=210; const margin=16;
-  let y=margin;
-  // Header bar
-  // Header bar - JAC Realty red
-  doc.setFillColor(196,30,58);
-  doc.rect(0,0,W,30,'F');
-  doc.setFillColor(139,0,32);
-  doc.rect(0,24,W,6,'F');
-  // Logo text
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(20); doc.setFont('helvetica','bold');
-  doc.text('JAC',margin,17);
-  doc.setFontSize(7); doc.setFont('helvetica','bold');
-  doc.setTextColor(255,200,200);
-  doc.text('REALTY',margin+17,17);
-  doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.setTextColor(255,230,230);
-  doc.text('by Jely An Castro · Lic. PN-0931',margin,22);
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(7);
-  doc.text('+507 6462-7763 · jcastro@jacrealtypa.com · www.jacrealtypa.com',W-margin,22,{align:'right'});
-  y=36;
-  // MLS Code badge
-  doc.setFillColor(59,130,246);
-  doc.roundedRect(margin,y,40,7,2,2,'F');
-  doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
-  doc.text('MLS: '+(m.mls_code||'--'),margin+2,y+5);
-  // Operation badge
-  const opColor=m.operacion==='Venta'?[22,163,74]:m.operacion==='Alquiler'?[234,179,8]:[107,114,128];
-  doc.setFillColor(...opColor);
-  doc.roundedRect(margin+43,y,28,7,2,2,'F');
-  doc.text(m.operacion||'',margin+45,y+5);
-  // Status badge
-  const stColor=m.estado==='Disponible'?[22,163,74]:[234,179,8];
-  doc.setFillColor(...stColor);
-  doc.roundedRect(margin+74,y,28,7,2,2,'F');
-  doc.text(m.estado||'',margin+76,y+5);
-  y+=14;
-  // Title
-  doc.setTextColor(15,23,42); doc.setFontSize(16); doc.setFont('helvetica','bold');
-  const titleLines=doc.splitTextToSize(m.titulo||'Sin título',W-margin*2);
-  doc.text(titleLines,margin,y);
-  y+=titleLines.length*7+4;
-  // Price
-  doc.setFontSize(22); doc.setFont('helvetica','bold'); doc.setTextColor(196,30,58);
-  doc.text(m.precio?'$'+Number(m.precio).toLocaleString('en-US'):'Precio a consultar',margin,y);
-  y+=10;
-  // Photos — load first 2
-  try{
-    const rawFotos=m.fotos;
-    let fotosArr=[];
-    if(Array.isArray(rawFotos)) fotosArr=rawFotos;
-    else if(typeof rawFotos==='string'&&rawFotos.startsWith('[')) fotosArr=JSON.parse(rawFotos);
-    else if(typeof rawFotos==='string'&&rawFotos.length>5) fotosArr=[rawFotos];
-    const fUrls=fotosArr.filter(Boolean).slice(0,2);
-    if(fUrls.length>0){
-      const imgW=fUrls.length>1?(W-2*margin-4)/2:(W-2*margin);
-      const imgH=Math.round(imgW*0.62);
-      for(let fi=0;fi<fUrls.length;fi++){
-        const b64=await _imgBase64(fUrls[fi]);
-        if(b64){
-          const fx=margin+fi*(imgW+4);
-          doc.addImage(b64,'JPEG',fx,y,imgW,imgH,'img'+fi,'FAST');
-        }
-      }
-      y+=imgH+4;
+  const W=210, M=14, FOOTER_Y=283;
+  let y=0;
+  const style=opts.style||'ficha';
+  // ── page helpers ──
+  function addHeader(){
+    doc.setFillColor(196,30,58);
+    doc.rect(0,0,W,26,'F');
+    doc.setFillColor(139,0,32);
+    doc.rect(0,21,W,5,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(18); doc.setFont('helvetica','bold');
+    doc.text('JAC',M,16);
+    doc.setFontSize(6.5); doc.setFont('helvetica','bold');
+    doc.setTextColor(255,200,200);
+    doc.text('REALTY',M+15,16);
+    doc.setFontSize(7); doc.setFont('helvetica','normal');
+    doc.setTextColor(255,230,230);
+    if(showContact){
+      doc.text('by Jely An Castro · Lic. PN-0931',M+33,13);
+      doc.text('+507 6462-7763 · jcastro@jacrealtypa.com',M+33,19);
+    } else {
+      doc.text('www.jacrealtypa.com',M+33,16);
     }
-  }catch(e){}
-  // Separator line
-  doc.setDrawColor(226,232,240); doc.setLineWidth(0.4);
-  doc.line(margin,y,W-margin,y); y+=6;
-  // Features grid
-  doc.setTextColor(55,65,81); doc.setFontSize(10); doc.setFont('helvetica','normal');
-  const feats=[];
-  if(m.tipo_prop||m.tipo) feats.push(['🏠 Tipo',m.tipo_prop||m.tipo]);
-  if(m.operacion) feats.push(['🔑 Operación',m.operacion]);
-  if(m.zona||m.corregimiento) feats.push(['📍 Zona',m.corregimiento||m.zona]);
-  if(m.distrito) feats.push(['🗺 Distrito',m.distrito]);
-  if(m.provincia) feats.push(['🌎 Provincia',m.provincia]);
-  if(m.edificio) feats.push(['🏢 Edificio',m.edificio]);
-  if(m.habitaciones) feats.push(['🛏 Habitaciones',String(m.habitaciones)]);
-  if(m.banos) feats.push(['🚿 Baños',String(m.banos)]);
-  if(m.area_total) feats.push(['📐 Área',m.area_total+'m²']);
-  if(m.area_lote) feats.push(['🌿 Lote',m.area_lote+'m²']);
-  if(m.ano_construccion) feats.push(['🏗 Año',String(m.ano_construccion)]);
-  if(m.zonificacion) feats.push(['📋 Zonif.',m.zonificacion]);
-  const col1=feats.filter((_,i)=>i%2===0);
-  const col2=feats.filter((_,i)=>i%2===1);
-  const colW=(W-margin*2)/2;
-  col1.forEach((f,i)=>{
-    doc.setFont('helvetica','bold'); doc.text(f[0]+': ',margin,y+i*6);
-    const lw=doc.getTextWidth(f[0]+': ');
-    doc.setFont('helvetica','normal'); doc.text(f[1],margin+lw,y+i*6);
-  });
-  col2.forEach((f,i)=>{
-    doc.setFont('helvetica','bold'); doc.text(f[0]+': ',margin+colW,y+i*6);
-    const lw=doc.getTextWidth(f[0]+': ');
-    doc.setFont('helvetica','normal'); doc.text(f[1],margin+colW+lw,y+i*6);
-  });
-  y+=Math.max(col1.length,col2.length)*6+6;
-  doc.setDrawColor(226,232,240); doc.line(margin,y,W-margin,y); y+=6;
-  // Description
-  if(m.descripcion){
-    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
-    doc.text('DESCRIPCIÓN',margin,y); y+=5;
-    doc.setFont('helvetica','normal'); doc.setTextColor(55,65,81); doc.setFontSize(9);
-    const descLines=doc.splitTextToSize(m.descripcion,W-margin*2);
-    const maxLines=Math.min(descLines.length,30);
-    doc.text(descLines.slice(0,maxLines),margin,y);
-    y+=maxLines*4.5+6;
-    doc.setDrawColor(226,232,240); doc.line(margin,y,W-margin,y); y+=6;
+    doc.setTextColor(255,255,255); doc.setFontSize(6.5);
+    doc.text('www.jacrealtypa.com',W-M,13,{align:'right'});
+    doc.text(safe(m.titulo||'Propiedad MLS'),W-M,19,{align:'right'});
   }
-  // Footer — contact info
-  const footerY=280;
-  doc.setFillColor(248,250,252);
-  doc.rect(0,footerY-4,W,14,'F');
-  doc.setDrawColor(226,232,240); doc.line(0,footerY-4,W,footerY-4);
-  doc.setTextColor(100,116,139); doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.text('JAC Realty by Jely An Castro · Lic. PN-0931 · +507 6462-7763',margin,footerY+1);
-  doc.text('jcastro@jacrealtypa.com · jelyanrealestate@gmail.com · www.jacrealtypa.com',margin,footerY+5.5);
-  doc.setFontSize(7); doc.setTextColor(148,163,184);
-  doc.text(`Ficha generada el ${new Date().toLocaleDateString('es-PA')} · Información sujeta a cambios sin previo aviso`,margin,footerY+9.5);
-  const fname=`JAC_Realty_${(m.mls_code||m.titulo||'propiedad').replace(/[^a-zA-Z0-9]/g,'-')}.pdf`;
+  function addFooter(){
+    doc.setFillColor(248,250,252);
+    doc.rect(0,FOOTER_Y-2,W,14,'F');
+    doc.setDrawColor(220,228,240); doc.setLineWidth(0.3);
+    doc.line(0,FOOTER_Y-2,W,FOOTER_Y-2);
+    doc.setTextColor(100,116,139); doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+    if(showContact){
+      doc.text('JAC Realty · Jely An Castro · Lic. PN-0931 · +507 6462-7763 · jcastro@jacrealtypa.com',M,FOOTER_Y+3);
+    } else {
+      doc.text('JAC Realty · www.jacrealtypa.com',M,FOOTER_Y+3);
+    }
+    doc.setFontSize(6.5); doc.setTextColor(148,163,184);
+    doc.text('Ficha generada el '+new Date().toLocaleDateString('es-PA')+' · Informacion sujeta a cambios sin previo aviso',M,FOOTER_Y+8);
+    doc.setFontSize(7); doc.setTextColor(100,116,139);
+    doc.text('MLS: '+(m.mls_code||'--'),W-M,FOOTER_Y+3,{align:'right'});
+  }
+  function checkPage(needed){
+    if(y+needed>FOOTER_Y-4){
+      addFooter(); doc.addPage(); addHeader(); y=32;
+    }
+  }
+  // ── parse fotos ──
+  let fotosArr=[];
+  try{
+    const rf=m.fotos;
+    if(Array.isArray(rf)) fotosArr=rf;
+    else if(typeof rf==='string'&&rf.trim().startsWith('[')) fotosArr=JSON.parse(rf);
+    else if(typeof rf==='string'&&rf.trim().length>5) fotosArr=[rf];
+  }catch(e){}
+  fotosArr=fotosArr.filter(Boolean);
+
+  // ── PAGE 1: header ──
+  addHeader(); y=32;
+
+  // Badges row
+  const badgeY=y;
+  doc.setFillColor(37,99,235);
+  doc.roundedRect(M,badgeY,38,6.5,1.5,1.5,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+  doc.text('MLS: '+(m.mls_code||'--'),M+2,badgeY+4.5);
+  const opClr=m.operacion==='Venta'?[22,163,74]:m.operacion==='Alquiler'?[202,138,4]:[107,114,128];
+  doc.setFillColor(...opClr);
+  doc.roundedRect(M+41,badgeY,26,6.5,1.5,1.5,'F');
+  doc.text(safe(m.operacion||''),M+43,badgeY+4.5);
+  const stClr=m.estado==='Disponible'?[22,163,74]:[202,138,4];
+  doc.setFillColor(...stClr);
+  doc.roundedRect(M+70,badgeY,28,6.5,1.5,1.5,'F');
+  doc.text(safe(m.estado||''),M+72,badgeY+4.5);
+  y+=11;
+
+  // Title
+  doc.setTextColor(15,23,42); doc.setFontSize(style==='compact'?13:16); doc.setFont('helvetica','bold');
+  const tLines=doc.splitTextToSize(safe(m.titulo||'Sin titulo'),W-M*2);
+  checkPage(tLines.length*7+20);
+  doc.text(tLines,M,y); y+=tLines.length*7+3;
+
+  // Location
+  const loc=[m.edificio,m.corregimiento||m.zona,m.distrito,m.provincia].filter(Boolean).map(safe).join(', ');
+  if(loc){
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+    doc.text('Ubicacion: '+loc,M,y); y+=6;
+  }
+
+  // Price
+  const priceStr=m.precio?'$'+Number(m.precio).toLocaleString('en-US'):'Precio a consultar';
+  doc.setFontSize(style==='compact'?16:22); doc.setFont('helvetica','bold'); doc.setTextColor(196,30,58);
+  checkPage(14);
+  doc.text(priceStr,M,y); y+=style==='compact'?9:13;
+
+  // ── HERO photo ──
+  if(fotosArr.length>0){
+    const heroH=style==='compact'?42:68;
+    checkPage(heroH+4);
+    try{
+      const b64=await _imgBase64(fotosArr[0]);
+      if(b64){ doc.addImage(b64,'JPEG',M,y,W-M*2,heroH,'hero','FAST'); }
+    }catch(e){}
+    y+=heroH+4;
+  }
+
+  // ── GALLERY — remaining photos in 3-col grid ──
+  if(fotosArr.length>1){
+    const rest=fotosArr.slice(1);
+    const cols=3;
+    const gap=3;
+    const cellW=(W-M*2-(cols-1)*gap)/cols;
+    const cellH=Math.round(cellW*0.65);
+    // Section label
+    if(style!=='compact'){
+      checkPage(8);
+      doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+      doc.text('GALERIA DE FOTOS ('+rest.length+' imagenes)', M, y); y+=5;
+    }
+    for(let fi=0;fi<rest.length;fi++){
+      const col=fi%cols;
+      if(col===0){ checkPage(cellH+gap); }
+      const fx=M+col*(cellW+gap);
+      try{
+        const b64=await _imgBase64(rest[fi]);
+        if(b64){ doc.addImage(b64,'JPEG',fx,y,cellW,cellH,'gal'+fi,'FAST'); }
+      }catch(e){}
+      if(col===cols-1) y+=cellH+gap;
+    }
+    // flush last row
+    if(rest.length%cols!==0) y+=cellH+gap;
+    y+=2;
+  }
+
+  // ── Features grid ──
+  doc.setDrawColor(226,232,240); doc.setLineWidth(0.3);
+  checkPage(10);
+  doc.line(M,y,W-M,y); y+=5;
+  const feats=[];
+  if(m.tipo_prop||m.tipo) feats.push(['Tipo',safe(m.tipo_prop||m.tipo)]);
+  if(m.operacion) feats.push(['Operacion',safe(m.operacion)]);
+  if(m.zona||m.corregimiento) feats.push(['Zona',safe(m.corregimiento||m.zona)]);
+  if(m.distrito) feats.push(['Distrito',safe(m.distrito)]);
+  if(m.provincia) feats.push(['Provincia',safe(m.provincia)]);
+  if(m.edificio) feats.push(['Edificio',safe(m.edificio)]);
+  if(m.habitaciones) feats.push(['Habitaciones',String(m.habitaciones)]);
+  if(m.banos) feats.push(['Banos',String(m.banos)]);
+  if(m.parqueos) feats.push(['Parqueos',String(m.parqueos)]);
+  if(m.area_total) feats.push(['Area Total',m.area_total+'m2']);
+  if(m.area_lote) feats.push(['Area Lote',m.area_lote+'m2']);
+  if(m.area_construccion) feats.push(['Construccion',m.area_construccion+'m2']);
+  if(m.ano_construccion) feats.push(['Ano Constr.',String(m.ano_construccion)]);
+  if(m.zonificacion) feats.push(['Zonificacion',safe(m.zonificacion)]);
+  if(m.amueblado) feats.push(['Amueblado',safe(m.amueblado)]);
+  const fCols=2, fColW=(W-M*2)/fCols;
+  const fRowH=5.5;
+  const col1f=feats.filter((_,i)=>i%2===0);
+  const col2f=feats.filter((_,i)=>i%2===1);
+  const maxRows=Math.max(col1f.length,col2f.length);
+  checkPage(maxRows*fRowH+4);
+  for(let r=0;r<col1f.length;r++){
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(71,85,105);
+    doc.text(col1f[r][0]+':',M,y+r*fRowH);
+    const lw=doc.getTextWidth(col1f[r][0]+':');
+    doc.setFont('helvetica','normal'); doc.setTextColor(15,23,42);
+    doc.text(col1f[r][1],M+lw+2,y+r*fRowH);
+  }
+  for(let r=0;r<col2f.length;r++){
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(71,85,105);
+    doc.text(col2f[r][0]+':',M+fColW,y+r*fRowH);
+    const lw=doc.getTextWidth(col2f[r][0]+':');
+    doc.setFont('helvetica','normal'); doc.setTextColor(15,23,42);
+    doc.text(col2f[r][1],M+fColW+lw+2,y+r*fRowH);
+  }
+  y+=maxRows*fRowH+5;
+
+  // ── Amenities / Extras ──
+  const amens=[];
+  if(m.piscina) amens.push('Piscina');
+  if(m.gym) amens.push('Gimnasio');
+  if(m.terraza) amens.push('Terraza');
+  if(m.vista_mar) amens.push('Vista al Mar');
+  if(m.vista_ciudad) amens.push('Vista Ciudad');
+  if(m.cuarto_servicio) amens.push('Cuarto Servicio');
+  if(m.bodega) amens.push('Bodega');
+  if(m.balcon) amens.push('Balcon');
+  if(amens.length>0){
+    checkPage(14);
+    doc.setDrawColor(226,232,240); doc.line(M,y,W-M,y); y+=5;
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+    doc.text('AMENIDADES', M, y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(15,23,42);
+    const amenRow=amens.join('   ·   ');
+    const aLines=doc.splitTextToSize(amenRow,W-M*2);
+    doc.text(aLines,M,y); y+=aLines.length*5+4;
+  }
+
+  // ── Description ──
+  if(m.descripcion){
+    checkPage(20);
+    doc.setDrawColor(226,232,240); doc.line(M,y,W-M,y); y+=5;
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+    doc.text('DESCRIPCION', M, y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(30,41,59);
+    const dLines=doc.splitTextToSize(safe(m.descripcion),W-M*2);
+    const CHUNK=30;
+    for(let di=0;di<dLines.length;di+=CHUNK){
+      const slice=dLines.slice(di,di+CHUNK);
+      checkPage(slice.length*4.5+4);
+      doc.text(slice,M,y); y+=slice.length*4.5+2;
+    }
+    y+=2;
+  }
+
+  // ── Brochure style: contact CTA box ──
+  if(style==='brochure'&&showContact){
+    checkPage(28);
+    doc.setDrawColor(226,232,240); doc.line(M,y,W-M,y); y+=5;
+    doc.setFillColor(196,30,58);
+    doc.roundedRect(M,y,W-M*2,22,3,3,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(11); doc.setFont('helvetica','bold');
+    doc.text('Contacta a tu Agente JAC Realty',W/2,y+8,{align:'center'});
+    doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text('Jely An Castro  ·  +507 6462-7763  ·  jcastro@jacrealtypa.com',W/2,y+14,{align:'center'});
+    doc.text('www.jacrealtypa.com',W/2,y+19,{align:'center'});
+    y+=26;
+  }
+
+  // ── Footer on all pages ──
+  const totalPages=doc.getNumberOfPages();
+  for(let pg=1;pg<=totalPages;pg++){
+    doc.setPage(pg);
+    addFooter();
+    if(totalPages>1){
+      doc.setFontSize(6.5); doc.setTextColor(148,163,184);
+      doc.text('Pag. '+pg+' / '+totalPages,W-M,FOOTER_Y+8,{align:'right'});
+    }
+  }
+
+  const fname='JAC_MLS_'+(m.mls_code||safe(m.titulo||'propiedad')).replace(/[^a-zA-Z0-9]/g,'-')+'.pdf';
   doc.save(fname);
   toast('📄 PDF descargado: '+fname);
 }
@@ -6013,7 +6678,7 @@ function guardarMlsProp(idx){
     <button class="btn btn-outline btn-sm" onclick="mlsContactarAgente(${idx})" style="color:var(--green)">💬 WA Corredor</button>
     <button class="btn btn-outline btn-sm" onclick="mlsEmailJcastro(${idx})">📧 Email jcastro</button>
     <button class="btn btn-outline btn-sm" onclick="mlsEmailJelyan(${idx})">📨 Email jelyan</button>
-    <button class="btn btn-outline btn-sm" style="color:var(--red)" onclick="exportMlsPDF(${idx})">📄 Exportar PDF</button>`;
+    <button class="btn btn-outline btn-sm" style="color:var(--red)" onclick="showMlsPDFOptions(${idx})">📄 Exportar PDF</button>`;
   // Default follow-up date: 3 days from now
   const fd=new Date(); fd.setDate(fd.getDate()+3);
   gEl('mg-fecha-seguimiento').value=fd.toISOString().split('T')[0];
@@ -10804,10 +11469,11 @@ function sharePropEmailJelyan(id){
   const body=encodeURIComponent(`🏠 ${p.titulo}\n📍 ${p.zona}\n💰 ${p.op==='Alquiler'?fmtPrice(p.precio,'mes'):fmtPrice(p.precio)}\n🛏 ${p.hab} hab · 🚿 ${p.banos} baños · 📐 ${p.area}m²\n\n${p.desc||''}\n\nJelyan Castro · JAC Realty Panamá · Lic. PN-0931\n📞 +507 64627763\n✉️ jelyanrealestate@gmail.com`);
   window.open(`mailto:?from=jelyanrealestate@gmail.com&subject=${sub}&body=${body}`,'_blank');
 }
-async function exportPropPDF(id){
+async function exportPropPDF(id,opts={}){
   const p=props.find(x=>x.id===id); if(!p)return;
-  if(!window.jspdf){toast('Cargando motor PDF...'); setTimeout(()=>exportPropPDF(id),800); return;}
+  if(!window.jspdf){toast('Cargando motor PDF...'); setTimeout(()=>exportPropPDF(id,opts),800); return;}
   toast('Generando PDF con todas las fotos...');
+  const showContact=opts.contact!==false;
   const {jsPDF}=window.jspdf;
 
   // jsPDF solo soporta latin-1 con helvetica — eliminar tildes/emojis
@@ -10830,17 +11496,25 @@ async function exportPropPDF(id){
     doc.setTextColor(255,255,255); doc.setFontSize(20); doc.setFont('helvetica','bold');
     doc.text('JAC REALTY',M,15);
     doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(255,220,220);
-    doc.text('by Jely An Castro  Lic. PN-0931',M,21);
-    doc.setTextColor(255,255,255); doc.setFontSize(7);
-    doc.text('+507 6462-7763  jcastro@jacrealtypa.com  www.jacrealtypa.com',W-M,21,{align:'right'});
+    if(showContact){
+      doc.text('by Jely An Castro  Lic. PN-0931',M,21);
+      doc.setTextColor(255,255,255); doc.setFontSize(7);
+      doc.text('+507 6462-7763  jcastro@jacrealtypa.com  www.jacrealtypa.com',W-M,21,{align:'right'});
+    } else {
+      doc.text('www.jacrealtypa.com',M,21);
+    }
     y=33;
   };
   const addFooter=()=>{
     doc.setFillColor(196,30,58); doc.rect(0,FOOTER_Y,W,14,'F');
     doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
-    doc.text('Jely An Castro  JAC Realty Panama  Lic. PN-0931',M,FOOTER_Y+7);
-    doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(255,200,200);
-    doc.text('+507 6462-7763  jcastro@jacrealtypa.com  www.jacrealtypa.com',W-M,FOOTER_Y+7,{align:'right'});
+    if(showContact){
+      doc.text('Jely An Castro  JAC Realty Panama  Lic. PN-0931',M,FOOTER_Y+7);
+      doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(255,200,200);
+      doc.text('+507 6462-7763  jcastro@jacrealtypa.com  www.jacrealtypa.com',W-M,FOOTER_Y+7,{align:'right'});
+    } else {
+      doc.text('JAC Realty Panama  www.jacrealtypa.com',W/2,FOOTER_Y+7,{align:'center'});
+    }
     doc.setTextColor(255,170,170); doc.setFontSize(6);
     doc.text('Generado: '+new Date().toLocaleDateString('es-PA')+'  Informacion sujeta a cambios',W/2,FOOTER_Y+12,{align:'center'});
   };
