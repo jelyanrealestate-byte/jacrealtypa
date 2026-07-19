@@ -3044,6 +3044,17 @@ CREATE POLICY "allow_all_diario_crm" ON diario_crm FOR ALL USING (true) WITH CHE
       <div class="form-group"><label>Propiedad</label><input id="c-propiedad" placeholder="Ref. o descripción"></div>
       <div class="form-group"><label>Fecha</label><input id="c-fecha" type="date"></div>
       <div class="form-group"><label>Hora</label><input id="c-hora" type="time" value="10:00"></div>
+      <div class="form-group"><label>🔔 Recordatorio</label>
+        <select id="c-recordatorio">
+          <option value="">Sin recordatorio</option>
+          <option value="5min">5 minutos antes</option>
+          <option value="15min">15 minutos antes</option>
+          <option value="30min">30 minutos antes</option>
+          <option value="1hora">1 hora antes</option>
+          <option value="2horas">2 horas antes</option>
+          <option value="1dia">1 día antes</option>
+        </select>
+      </div>
       <div class="form-group form-full"><label>🎥 Link Zoom / Google Meet (opcional)</label><input id="c-zoom" placeholder="https://zoom.us/j/... o https://meet.google.com/..."></div>
       <div class="form-group form-full"><label>Notas</label><textarea id="c-notas" placeholder="Instrucciones, dirección exacta..."></textarea></div>
     </div>
@@ -3116,6 +3127,21 @@ CREATE POLICY "allow_all_diario_crm" ON diario_crm FOR ALL USING (true) WITH CHE
 </div>
 
 <!-- Modal Nuevo Mensaje -->
+<!-- Modal Ecosistema — historial unificado de citas, tareas y notas de un contacto -->
+<div class="modal-bg" id="modalEcosistema" onclick="if(event.target===this)closeModal('modalEcosistema')">
+  <div class="modal" style="max-width:620px;max-height:85vh;overflow-y:auto">
+    <div class="modal-header">
+      <span class="modal-title" id="eco-title">🔗 Ecosistema del Contacto</span>
+      <button class="modal-close" onclick="closeModal('modalEcosistema')">✕</button>
+    </div>
+    <div id="eco-body" style="padding:0 4px 8px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalEcosistema')">Cerrar</button>
+      <button class="btn btn-primary" onclick="document.getElementById('eco-nueva-cita-btn')&&document.getElementById('eco-nueva-cita-btn').click()">📅 Nueva Cita</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="modalNuevoMensaje">
   <div class="modal" style="max-width:480px">
     <div class="modal-header">
@@ -3934,8 +3960,12 @@ async function loadSupabaseData(){
     if(agendaRes.data && agendaRes.data.length){
       citas = agendaRes.data.map(a=>({
         tipo:a.tipo||'',cliente:a.titulo||'',propiedad:a.lugar||'',
-        fecha:a.fecha||'',hora:a.hora||'',notas:a.notas||'',_sbId:a.id
+        fecha:a.fecha||'',hora:a.hora||'',notas:a.notas||'',
+        tipo_accion:a.tipo_accion||'',modalidad_reunion:a.modalidad_reunion||'',
+        recordatorio:a.recordatorio||'',prioridad_agenda:a.prioridad_agenda||'',
+        zoom_link:a.zoom_link||'',_sbId:a.id
       }));
+      scheduleReminders();
     }
     if(redContactsRes.data) redContacts = redContactsRes.data;
     if(redPropsRes.data) redProps = redPropsRes.data;
@@ -4198,7 +4228,8 @@ function renderDashboard(){
       <button class="btn btn-ghost btn-sm" title="WhatsApp" onclick="waClick('${c.cliente}')">💬</button>
       <button class="email-btn" title="Email" onclick="emailCita('${c.cliente}','${c.tipo}','${c.fecha}','${c.hora}')">📧</button>
       <button class="btn btn-ghost btn-sm" title="Ver en agenda" onclick="jacSelectDay('${c.fecha}');showPanel('agenda')">👁️</button>
-      ${cKey?`<button class="btn btn-ghost btn-sm" title="Editar" onclick="editCita('${cKey}')">✏️</button>
+      ${cKey?`<button class="btn btn-ghost btn-sm" title="Google Calendar" onclick="abrirGoogleCalendar('${cKey}')" style="color:#4285F4">📅</button>
+      <button class="btn btn-ghost btn-sm" title="Editar" onclick="editCita('${cKey}')">✏️</button>
       <button class="btn btn-ghost btn-sm" title="Eliminar" style="color:#f87171" onclick="deleteCita('${cKey}')">🗑️</button>`:''}
     </div></td>
   </tr>`;
@@ -4626,7 +4657,8 @@ function jacShowEventosDelDia(ds){
       <span style="font-size:9px;background:#f9731622;color:#f97316;padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0">${c.status||'Pendiente'}</span>
       <div style="width:100%;display:flex;gap:6px;margin-top:4px">
         <button class="btn btn-ghost btn-sm" onclick="waClick('${c.cliente}')" title="WhatsApp">💬 WA</button>
-        ${cKey?`<button class="btn btn-ghost btn-sm" onclick="editCita('${cKey}')" title="Editar">✏️ Editar</button>
+        ${cKey?`<button class="btn btn-ghost btn-sm" onclick="abrirGoogleCalendar('${cKey}')" title="Google Calendar" style="color:#4285F4">📅 GCal</button>
+        <button class="btn btn-ghost btn-sm" onclick="editCita('${cKey}')" title="Editar">✏️ Editar</button>
         <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="deleteCita('${cKey}')" title="Eliminar">🗑️ Eliminar</button>`:''}
       </div>
     </div>`;
@@ -4745,6 +4777,69 @@ function copiarCalendly(){
     document.body.appendChild(ta); ta.select(); document.execCommand('copy');
     document.body.removeChild(ta); toast('📋 Link Calendly copiado');
   });
+}
+
+// ── Recordatorios — Notificaciones del navegador ────────────────
+let _reminderTimers=[];
+function scheduleReminders(){
+  // Cancelar timers previos
+  _reminderTimers.forEach(t=>clearTimeout(t));
+  _reminderTimers=[];
+  // Solicitar permiso notificaciones si no fue dado
+  if(Notification&&Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+  const now=Date.now();
+  citas.forEach(c=>{
+    if(!c.recordatorio||!c.fecha||!c.hora) return;
+    const [y,m,d]=c.fecha.split('-').map(Number);
+    const [hh,mm]=(c.hora||'00:00').split(':').map(Number);
+    if(!y||!m||!d) return;
+    const citaTs=new Date(y,m-1,d,hh||0,mm||0,0).getTime();
+    const offsets={'5min':5*60000,'15min':15*60000,'30min':30*60000,'1hora':60*60000,'2horas':2*60*60000,'1dia':24*60*60000};
+    const off=offsets[c.recordatorio]||0;
+    const fireAt=citaTs-off;
+    const diff=fireAt-now;
+    if(diff>0&&diff<7*24*60*60*1000){ // max 7 días
+      const t=setTimeout(()=>{
+        const msg=`📅 ${c.tipo||'Cita'} con ${c.cliente||'cliente'} — ${c.fecha} ${c.hora}`;
+        toast('🔔 '+msg);
+        if(Notification&&Notification.permission==='granted'){
+          try{new Notification('🔔 JAC Realty — Recordatorio',{body:msg,icon:'/logo.png'});}catch(e){}
+        }
+      },diff);
+      _reminderTimers.push(t);
+    }
+  });
+}
+
+// ── Google Calendar — abrir URL pre-llenada ─────────────────────
+function abrirGoogleCalendar(key){
+  const c=citas.find(x=>String(x._sbId)===String(key)||String(x._localId)===String(key)||String(x.id)===String(key));
+  if(!c){toast('⚠️ Cita no encontrada');return;}
+  const enc=encodeURIComponent;
+  const title=enc((c.tipo_accion||c.tipo||'Cita')+' — '+(c.cliente||''));
+  // Fecha: YYYYMMDD — hora inicio y fin (+1h)
+  let dateStr='';
+  if(c.fecha){
+    const d=c.fecha.replace(/-/g,'');
+    let h='T090000',he='T100000';
+    if(c.hora){
+      const [hh,mm]=(c.hora).split(':');
+      const hhN=parseInt(hh),mmN=parseInt(mm||0);
+      h=`T${String(hhN).padStart(2,'0')}${String(mmN).padStart(2,'0')}00`;
+      const hhE=hhN+1;
+      he=`T${String(hhE).padStart(2,'0')}${String(mmN).padStart(2,'0')}00`;
+    }
+    dateStr=`${d}${h}/${d}${he}`;
+  }
+  const det=[c.notas||'',c.modalidad_reunion?`Modalidad: ${c.modalidad_reunion}`:'',c.zoom_link?`Zoom: ${c.zoom_link}`:''].filter(Boolean).join('\n');
+  const loc=c.propiedad||c.zoom_link||'';
+  let url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}`;
+  if(dateStr) url+=`&dates=${enc(dateStr)}`;
+  if(det) url+=`&details=${enc(det)}`;
+  if(loc) url+=`&location=${enc(loc)}`;
+  window.open(url,'_blank');
 }
 
 // ── Vista día completo — estilo Opus One ────────────────────────
@@ -4901,6 +4996,7 @@ function jacRenderReunionesTab(){
       <button class="btn btn-ghost btn-sm" onclick="jacReuWA('${rKey}')" title="WhatsApp">💬 WA</button>
       <button class="btn btn-ghost btn-sm" onclick="jacReuEmailJL('${rKey}')" title="Email jelyanrealestate@gmail.com">📧 JL</button>
       <button class="btn btn-ghost btn-sm" onclick="jacReuEmailJC('${rKey}')" title="Email jcastro@jacrealtypa.com">📧 JC</button>
+      <button class="btn btn-ghost btn-sm" onclick="abrirGoogleCalendar('${rKey}')" title="Agregar a Google Calendar" style="color:#4285F4">📅 GCal</button>
       <button class="btn btn-ghost btn-sm" onclick="editCita('${rKey}')" title="Editar">✏️ Editar</button>
       <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="deleteCita('${rKey}')" title="Eliminar">🗑️ Eliminar</button>
     </div>
@@ -7796,6 +7892,7 @@ function saveCita(){
   const zoom_link=(document.getElementById('c-zoom')?.value||'').trim();
   const tipo_accion=(document.getElementById('c-tipo-accion')?.value||'');
   const modalidad_reunion=(document.getElementById('c-modalidad-reunion')?.value||'');
+  const recordatorio=(document.getElementById('c-recordatorio')?.value||'');
   const prioridad_agenda=(document.getElementById('c-prioridad')?.value||'');
   const notas=document.getElementById('c-notas').value;
   const editId=(document.getElementById('c-edit-id')||{}).value||'';
@@ -7805,7 +7902,8 @@ function saveCita(){
     const idx=citas.findIndex(c=>String(c._sbId)===String(editId)||String(c._localId)===String(editId)||String(c.id)===String(editId));
     if(idx>=0){
       const c=citas[idx];
-      Object.assign(c,{tipo,cliente,propiedad,fecha,hora,zoom_link,tipo_accion,modalidad_reunion,prioridad_agenda,notas});
+      Object.assign(c,{tipo,cliente,propiedad,fecha,hora,zoom_link,tipo_accion,modalidad_reunion,recordatorio,prioridad_agenda,notas});
+      scheduleReminders();
       if(sb&&c._sbId){
         sb.from('agenda').update({titulo:cliente,tipo,lugar:propiedad||null,fecha:fecha||null,hora:hora||null,notas:notas||null})
           .eq('id',c._sbId).then(({error})=>{if(error)console.warn('Agenda update error:',error);});
@@ -7814,8 +7912,9 @@ function saveCita(){
     }
   } else {
     // Modo creación — nueva cita
-    const cita={_localId:'C_'+Date.now(),tipo,cliente,propiedad,fecha,hora,zoom_link,tipo_accion,modalidad_reunion,prioridad_agenda,notas};
+    const cita={_localId:'C_'+Date.now(),tipo,cliente,propiedad,fecha,hora,zoom_link,tipo_accion,modalidad_reunion,recordatorio,prioridad_agenda,notas};
     citas.push(cita);
+    scheduleReminders();
     activities.unshift({tipo:'📅 Cita',cliente,desc:`${tipo} agendada para ${fecha} ${hora}.`,time:'Ahora'});
     if(sb){
       sb.from('agenda').insert({titulo:cliente,tipo,lugar:propiedad||null,fecha:fecha||null,hora:hora||null,notas:notas||null,estado:'Programada'})
@@ -7832,6 +7931,7 @@ function saveCita(){
   const modEl2=document.getElementById('c-modalidad-reunion'); if(modEl2) modEl2.value='Presencial';
   const mW2=document.getElementById('c-modalidad-wrapper'); if(mW2) mW2.style.display='none';
   const cW2=document.getElementById('c-calendly-wrapper'); if(cW2) cW2.style.display='none';
+  const recEl=document.getElementById('c-recordatorio'); if(recEl) recEl.value='';
   closeModal('modalCita');
   renderCalendar();renderDashboard();
 }
@@ -7852,6 +7952,7 @@ function editCita(key){
   if(el('c-tipo-accion')) el('c-tipo-accion').value=c.tipo_accion||'';
   jacCitaTipoAccionChange();
   if(el('c-modalidad-reunion')) el('c-modalidad-reunion').value=c.modalidad_reunion||'Presencial';
+  if(el('c-recordatorio')) el('c-recordatorio').value=c.recordatorio||'';
   if(el('c-prioridad')) el('c-prioridad').value=c.prioridad_agenda||'';
   if(el('c-notas')) el('c-notas').value=c.notas||'';
   // Cambiar título y botón
@@ -10701,8 +10802,71 @@ function emailLeadJelyan(id){
 }
 function viewLeadDetail(id){
   const l=leads.find(x=>x.id===id); if(!l)return;
-  const info=`👤 ${l.nombre}\n📞 ${l.tel||'—'} · 📧 ${l.email||'—'}\n🎯 Interés: ${l.interes||'—'} · ${l.tipo_prop||''}\n📍 Zona: ${l.zona||'—'}\n💰 Presupuesto: ${l.presupuesto||'—'}\n📊 Estado: ${l.status||'—'}\n📣 Fuente: ${l.fuente||'—'}\n📅 Fecha: ${l.fecha||'—'}\n📝 Notas: ${l.notas||'—'}`;
-  alert(info);
+  verEcosistema(l.nombre,'Lead',{
+    info:[
+      l.tel?`📞 ${l.tel}`:'',l.email?`📧 ${l.email}`:'',
+      `🎯 ${l.interes||'—'}${l.tipo_prop?' · '+l.tipo_prop:''}`,
+      l.zona?`📍 ${l.zona}`:'',l.presupuesto?`💰 ${l.presupuesto}`:'',
+      `📊 ${l.status||'—'}`,l.fuente?`📣 ${l.fuente}`:'',l.notas?`📝 ${l.notas}`:''
+    ].filter(Boolean)
+  });
+}
+
+// ── Ecosistema — vista unificada de citas, tareas y notas ──────
+function verEcosistema(nombre, tipo, extras){
+  const n=(nombre||'').toLowerCase();
+  const citasRel=citas.filter(c=>(c.cliente||'').toLowerCase().includes(n));
+  const tareasRel=(typeof tareas!=='undefined'?tareas:[]).filter(t=>(t.cliente||t.desc||'').toLowerCase().includes(n));
+  const notasRel=(typeof notas!=='undefined'?notas:[]).filter(nt=>(nt.cliente||nt.titulo||nt.texto||'').toLowerCase().includes(n));
+
+  const sect=(icon,label,items,renderFn)=>{
+    if(!items.length) return `<div style="font-size:12px;color:var(--muted);padding:6px 0">${icon} Sin ${label}</div>`;
+    return `<div style="margin-bottom:8px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${icon} ${label} (${items.length})</div>
+      ${items.map(renderFn).join('')}
+    </div>`;
+  };
+
+  const citaHtml=c=>{
+    const k=c._sbId||c._localId||c.id||'';
+    return `<div style="background:var(--card2);border-radius:8px;padding:8px 12px;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-size:13px;font-weight:600;flex:1">${c.tipo||'Cita'} · ${c.fecha||'?'} ${c.hora||''}</span>
+      ${c.recordatorio?`<span style="font-size:10px;background:#f9731622;color:#f97316;padding:1px 6px;border-radius:8px">🔔 ${c.recordatorio}</span>`:''}
+      ${c.modalidad_reunion?`<span style="font-size:10px;background:var(--card);padding:1px 6px;border-radius:8px">${c.modalidad_reunion}</span>`:''}
+      <div style="display:flex;gap:4px">
+        ${k?`<button class="btn btn-ghost btn-sm" onclick="abrirGoogleCalendar('${k}')" style="color:#4285F4;font-size:10px">📅GCal</button>`:''}
+        ${k?`<button class="btn btn-ghost btn-sm" onclick="editCita('${k}');closeModal('modalEcosistema')" style="font-size:10px">✏️</button>`:''}
+      </div>
+    </div>`;
+  };
+  const tareaHtml=t=>`<div style="background:var(--card2);border-radius:8px;padding:8px 12px;margin-bottom:4px;font-size:12px">
+    <span style="font-weight:600">${t.desc||t.titulo||'Tarea'}</span>
+    <span style="color:var(--muted);margin-left:8px">${t.fecha||''}</span>
+    ${t.tipo_accion?`<span style="font-size:10px;background:var(--card);padding:1px 6px;border-radius:8px;margin-left:4px">${t.tipo_accion}</span>`:''}
+  </div>`;
+  const notaHtml=nt=>`<div style="background:var(--card2);border-radius:8px;padding:8px 12px;margin-bottom:4px;font-size:12px">
+    ${nt.titulo?`<div style="font-weight:600">${nt.titulo}</div>`:''}
+    <div style="color:var(--muted)">${nt.texto||nt.desc||''}</div>
+  </div>`;
+
+  let infoHtml='';
+  if(extras&&extras.info&&extras.info.length){
+    infoHtml=`<div style="background:var(--card2);border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:6px">
+      ${extras.info.map(i=>`<span style="font-size:12px;color:var(--text)">${i}</span>`).join('<span style="color:var(--border)">·</span>')}
+    </div>`;
+  }
+
+  // Nueva cita button wired via hidden button
+  const nuevaCitaBtn=`<button id="eco-nueva-cita-btn" style="display:none" onclick="
+    if(document.getElementById('c-cliente')) document.getElementById('c-cliente').value='${nombre.replace(/'/g,'')}';
+    closeModal('modalEcosistema');openModal('modalCita');"></button>`;
+
+  document.getElementById('eco-title').textContent=`🔗 ${tipo||'Contacto'}: ${nombre}`;
+  document.getElementById('eco-body').innerHTML=infoHtml+nuevaCitaBtn+
+    sect('📅','Citas en agenda',citasRel,citaHtml)+
+    sect('✅','Tareas',tareasRel,tareaHtml)+
+    sect('📝','Notas',notasRel,notaHtml);
+  openModal('modalEcosistema');
 }
 function exportLeadPDF(id){
   const l=leads.find(x=>x.id===id); if(!l)return;
@@ -10794,7 +10958,13 @@ function emailContactJelyan(id){
 }
 function viewContactDetail(id){
   const c=contacts.find(x=>x.id===id); if(!c)return;
-  editContact(id);
+  verEcosistema(c.nombre,'Contacto',{
+    info:[
+      c.tel?`📞 ${c.tel}`:'',c.email?`📧 ${c.email}`:'',
+      c.empresa?`🏢 ${c.empresa}`:'',c.cargo?`💼 ${c.cargo}`:'',
+      c.categoria?`🏷️ ${c.categoria}`:'',c.notas?`📝 ${c.notas}`:''
+    ].filter(Boolean)
+  });
 }
 function exportContactPDF(id){
   const c=contacts.find(x=>x.id===id); if(!c)return;
@@ -10873,7 +11043,13 @@ function emailClientJelyan(id){
 }
 function viewClientDetail(id){
   const c=clients.find(x=>x.id===id); if(!c)return;
-  editClient(id);
+  verEcosistema(c.nombre,'Cliente',{
+    info:[
+      c.tel?`📞 ${c.tel}`:'',c.email?`📧 ${c.email}`:'',
+      c.tipo?`🏷️ ${c.tipo}`:'',c.status?`📊 ${c.status}`:'',
+      c.agente?`👤 ${c.agente}`:'',c.notas?`📝 ${c.notas}`:''
+    ].filter(Boolean)
+  });
 }
 function exportClientPDF(id){
   const c=clients.find(x=>x.id===id); if(!c)return;
