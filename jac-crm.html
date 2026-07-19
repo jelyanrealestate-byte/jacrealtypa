@@ -2274,7 +2274,30 @@ CREATE TABLE IF NOT EXISTS mensajes_internos (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ALTER TABLE mensajes_internos ENABLE ROW LEVEL SECURITY;
-CREATE POLICY allow_all_mensajes_internos ON mensajes_internos FOR ALL USING (true) WITH CHECK (true);</textarea>
+CREATE POLICY allow_all_mensajes_internos ON mensajes_internos FOR ALL USING (true) WITH CHECK (true);
+
+-- ══════════════════════════════════════════════
+-- TABLA METAS — Metas y Objetivos (v106)
+-- ══════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS metas_crm (
+  id TEXT PRIMARY KEY,
+  payload JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE metas_crm ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all_metas_crm" ON metas_crm FOR ALL USING (true) WITH CHECK (true);
+
+-- ══════════════════════════════════════════════
+-- TABLA DIARIO — Diario de Actividades (v106)
+-- ══════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS diario_crm (
+  id TEXT PRIMARY KEY,
+  payload JSONB DEFAULT '{}',
+  fecha TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE diario_crm ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all_diario_crm" ON diario_crm FOR ALL USING (true) WITH CHECK (true);</textarea>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('setup-sql-text').value).then(()=>toast('✅ SQL copiado al portapapeles'))">📋 Copiar SQL</button>
         <a href="https://supabase.com/dashboard/project/dskslrlxldnxrglrochv/sql/new" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none">🔗 Abrir SQL Editor</a>
