@@ -1282,6 +1282,10 @@ input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--
 
           <!-- ── TAB: REUNIONES ── -->
           <div id="jac-atab-content-reuniones" style="flex:1;overflow-y:auto;padding:18px 20px;display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+              <span style="font-weight:700;font-size:16px;color:var(--text)">🤝 Reuniones</span>
+              <button class="btn btn-primary btn-sm" onclick="openNuevaReunion()">+ Nueva Reunión</button>
+            </div>
             <div id="jac-reuniones-list"></div>
           </div>
 
@@ -2996,6 +3000,7 @@ CREATE POLICY "allow_all_diario_crm" ON diario_crm FOR ALL USING (true) WITH CHE
       <div class="form-group"><label>Propiedad</label><input id="c-propiedad" placeholder="Ref. o descripción"></div>
       <div class="form-group"><label>Fecha</label><input id="c-fecha" type="date"></div>
       <div class="form-group"><label>Hora</label><input id="c-hora" type="time" value="10:00"></div>
+      <div class="form-group form-full"><label>🎥 Link Zoom / Google Meet (opcional)</label><input id="c-zoom" placeholder="https://zoom.us/j/... o https://meet.google.com/..."></div>
       <div class="form-group form-full"><label>Notas</label><textarea id="c-notas" placeholder="Instrucciones, dirección exacta..."></textarea></div>
     </div>
     <input type="hidden" id="c-edit-id" value="">
@@ -4633,28 +4638,60 @@ function jacRenderReunionesTab(){
   const el=document.getElementById('jac-reuniones-list'); if(!el) return;
   const reu=citas.filter(c=>c.tipo&&(c.tipo.toLowerCase().includes('reuni')||c.tipo.toLowerCase().includes('meeting')));
   if(!reu.length){
-    el.innerHTML=`<div style="text-align:center;padding:60px 0;color:var(--muted);font-size:14px">Sin reuniones programadas<br><small style="font-size:12px;margin-top:6px;display:block">Agrega una cita de tipo "Reunión" para verla aquí</small></div>`;
+    el.innerHTML=`<div style="text-align:center;padding:60px 0;color:var(--muted);font-size:14px">Sin reuniones programadas.<br><small style="font-size:12px;margin-top:6px;display:block">Haz clic en "+ Nueva Reunión" para agendar una.</small></div>`;
     return;
   }
   el.innerHTML=reu.map(r=>{
-    const rKey=r._sbId||r._localId||'';
+    const rKey=r._sbId||r._localId||r.id||'';
+    const clienteEsc=r.cliente.replace(/'/g,"\\'");
     return `<div class="jac-evento-card jac-ec-cita" style="flex-wrap:wrap;gap:6px">
     <div style="color:#f97316;font-size:20px;flex-shrink:0">🤝</div>
-    <div style="flex:1">
+    <div style="flex:1;min-width:0">
       <div style="font-weight:600;font-size:13px;color:var(--text)">${r.cliente}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px">📅 ${r.fecha} · ⏰ ${r.hora||'—'}${r.ubicacion?' · '+r.ubicacion:''}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">📅 ${r.fecha||'—'} · ⏰ ${r.hora||'—'}${r.propiedad?' · 🏠 '+r.propiedad:''}</div>
+      ${r.zoom_link?`<div style="margin-top:4px"><a href="${r.zoom_link}" target="_blank" style="font-size:11px;color:var(--accent);text-decoration:none">🎥 Unirse a la reunión virtual →</a></div>`:''}
       ${r.notas?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${r.notas}</div>`:''}
     </div>
     <span style="font-size:9px;background:#f9731622;color:#f97316;padding:2px 8px;border-radius:10px;font-weight:700;align-self:flex-start">${r.status||'Programada'}</span>
-    <div style="width:100%;display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
-      <button class="btn btn-ghost btn-sm" onclick="waClick('${r.cliente}')" title="WhatsApp">💬 WA</button>
-      <button class="btn btn-ghost btn-sm" onclick="emailJelyClick('${r.cliente.replace(/'/g,'')}')" title="Email Jely">📧 JL</button>
-      <button class="btn btn-ghost btn-sm" onclick="emailJcastroClick('${r.cliente.replace(/'/g,'')}')" title="Email J.Castro">📧 JC</button>
-      ${rKey?`<button class="btn btn-ghost btn-sm" onclick="editCita('${rKey}')" title="Editar">✏️ Editar</button>
-      <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="deleteCita('${rKey}')" title="Eliminar">🗑️ Eliminar</button>`:''}
+    <div style="width:100%;display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="jacReuWA('${rKey}')" title="WhatsApp">💬 WA</button>
+      <button class="btn btn-ghost btn-sm" onclick="jacReuEmailJL('${rKey}')" title="Email jelyanrealestate@gmail.com">📧 JL</button>
+      <button class="btn btn-ghost btn-sm" onclick="jacReuEmailJC('${rKey}')" title="Email jcastro@jacrealtypa.com">📧 JC</button>
+      <button class="btn btn-ghost btn-sm" onclick="editCita('${rKey}')" title="Editar">✏️ Editar</button>
+      <button class="btn btn-ghost btn-sm" style="color:#f87171" onclick="deleteCita('${rKey}')" title="Eliminar">🗑️ Eliminar</button>
     </div>
   </div>`;
-  }).join('');}
+  }).join('');
+}
+function openNuevaReunion(){
+  const eId=document.getElementById('c-edit-id'); if(eId) eId.value='';
+  const tEl=document.querySelector('#modalCita .modal-title'); if(tEl) tEl.textContent='🤝 Nueva Reunión';
+  const bEl=document.getElementById('c-save-btn'); if(bEl) bEl.textContent='Agendar Reunión';
+  const tp=document.getElementById('c-tipo'); if(tp) tp.value='Reunión cliente';
+  const fd=document.getElementById('c-fecha'); if(fd) fd.value=new Date().toISOString().slice(0,10);
+  ['c-cliente','c-propiedad','c-zoom','c-notas'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  openModal('modalCita');
+}
+function jacReuWA(key){
+  const r=citas.find(x=>String(x._sbId)===String(key)||String(x._localId)===String(key)||String(x.id)===String(key));
+  if(!r)return;
+  const txt=`🤝 *Reunión: ${r.cliente}*\n📅 ${r.fecha||'—'} · ⏰ ${r.hora||'—'}${r.propiedad?'\n🏠 '+r.propiedad:''}${r.zoom_link?'\n🎥 '+r.zoom_link:''}${r.notas?'\n📝 '+r.notas:''}\n\n— JAC Realty · +507 64627763`;
+  window.open('https://wa.me/?text='+encodeURIComponent(txt));
+}
+function jacReuEmailJL(key){
+  const r=citas.find(x=>String(x._sbId)===String(key)||String(x._localId)===String(key)||String(x.id)===String(key));
+  if(!r)return;
+  const sub=encodeURIComponent('Reunión: '+r.cliente+' · '+r.fecha);
+  const body=encodeURIComponent(`Reunión: ${r.cliente}\nFecha: ${r.fecha||'—'} · Hora: ${r.hora||'—'}${r.propiedad?'\nPropiedad: '+r.propiedad:''}${r.zoom_link?'\nLink: '+r.zoom_link:''}${r.notas?'\nNotas: '+r.notas:''}\n\n— JAC Realty · Jely An Castro · +507 64627763\njelyanrealestate@gmail.com`);
+  window.open('mailto:jelyanrealestate@gmail.com?subject='+sub+'&body='+body);
+}
+function jacReuEmailJC(key){
+  const r=citas.find(x=>String(x._sbId)===String(key)||String(x._localId)===String(key)||String(x.id)===String(key));
+  if(!r)return;
+  const sub=encodeURIComponent('Reunión: '+r.cliente+' · '+r.fecha);
+  const body=encodeURIComponent(`Reunión: ${r.cliente}\nFecha: ${r.fecha||'—'} · Hora: ${r.hora||'—'}${r.propiedad?'\nPropiedad: '+r.propiedad:''}${r.zoom_link?'\nLink: '+r.zoom_link:''}${r.notas?'\nNotas: '+r.notas:''}\n\n— JAC Realty · +507 64627763\njcastro@jacrealtypa.com`);
+  window.open('mailto:jcastro@jacrealtypa.com?subject='+sub+'&body='+body);
+}
 
 // Función auxiliar para toggle de tarea desde agenda
 function toggleTaskStatusById(id){
@@ -7496,15 +7533,16 @@ function saveCita(){
   const fecha=document.getElementById('c-fecha').value;
   const hora=document.getElementById('c-hora').value;
   const propiedad=document.getElementById('c-propiedad').value;
+  const zoom_link=(document.getElementById('c-zoom')?.value||'').trim();
   const notas=document.getElementById('c-notas').value;
   const editId=(document.getElementById('c-edit-id')||{}).value||'';
 
   if(editId){
     // Modo edición — actualizar cita existente
-    const idx=citas.findIndex(c=>String(c._sbId)===String(editId)||String(c._localId)===String(editId));
+    const idx=citas.findIndex(c=>String(c._sbId)===String(editId)||String(c._localId)===String(editId)||String(c.id)===String(editId));
     if(idx>=0){
       const c=citas[idx];
-      Object.assign(c,{tipo,cliente,propiedad,fecha,hora,notas});
+      Object.assign(c,{tipo,cliente,propiedad,fecha,hora,zoom_link,notas});
       if(sb&&c._sbId){
         sb.from('agenda').update({titulo:cliente,tipo,lugar:propiedad||null,fecha:fecha||null,hora:hora||null,notas:notas||null})
           .eq('id',c._sbId).then(({error})=>{if(error)console.warn('Agenda update error:',error);});
@@ -7513,7 +7551,7 @@ function saveCita(){
     }
   } else {
     // Modo creación — nueva cita
-    const cita={_localId:'C_'+Date.now(),tipo,cliente,propiedad,fecha,hora,notas};
+    const cita={_localId:'C_'+Date.now(),tipo,cliente,propiedad,fecha,hora,zoom_link,notas};
     citas.push(cita);
     activities.unshift({tipo:'📅 Cita',cliente,desc:`${tipo} agendada para ${fecha} ${hora}.`,time:'Ahora'});
     if(sb){
@@ -7532,7 +7570,7 @@ function saveCita(){
 
 // ── Edit / Delete cita ─────────────────────────────────────────
 function editCita(key){
-  const c=citas.find(x=>String(x._sbId)===String(key)||String(x._localId)===String(key));
+  const c=citas.find(x=>String(x._sbId)===String(key)||String(x._localId)===String(key)||String(x.id)===String(key));
   if(!c){toast('⚠️ Cita no encontrada');return;}
   // Rellenar modal
   const eId=document.getElementById('c-edit-id'); if(eId) eId.value=key;
@@ -7542,9 +7580,11 @@ function editCita(key){
   if(el('c-propiedad')) el('c-propiedad').value=c.propiedad||'';
   if(el('c-fecha')) el('c-fecha').value=c.fecha||'';
   if(el('c-hora')) el('c-hora').value=c.hora||'10:00';
+  if(el('c-zoom')) el('c-zoom').value=c.zoom_link||'';
   if(el('c-notas')) el('c-notas').value=c.notas||'';
   // Cambiar título y botón
-  const tEl=document.querySelector('#modalCita .modal-title'); if(tEl) tEl.textContent='✏️ Editar Cita';
+  const isReunion=c.tipo&&c.tipo.toLowerCase().includes('reuni');
+  const tEl=document.querySelector('#modalCita .modal-title'); if(tEl) tEl.textContent=isReunion?'✏️ Editar Reunión':'✏️ Editar Cita';
   const bEl=document.getElementById('c-save-btn'); if(bEl) bEl.textContent='Guardar cambios';
   openModal('modalCita');
 }
