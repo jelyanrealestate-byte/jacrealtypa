@@ -4613,7 +4613,7 @@ function renderProps(data){
   const arr=data||props;
   const tbody=document.getElementById('props-tbody');
   tbody.innerHTML=arr.map(p=>`<tr>
-    <td style="color:var(--muted)">${p.id}</td>
+    <td style="color:var(--muted);font-size:11px;white-space:nowrap">${p.referencia||'—'}</td>
     <td><div style="font-weight:500">${p.titulo}</div><div style="font-size:11px;color:var(--muted)">${p.area}m² · ${p.hab>0?p.hab+' hab':'Sin hab'}</div></td>
     <td><span class="tag" style="background:var(--card2);color:var(--text)">${propEmoji[p.tipo]||'🏠'} ${p.tipo}</span></td>
     <td><span class="tag tag-${p.op.toLowerCase().replace('-','')}">${p.op}</span></td>
@@ -8076,7 +8076,8 @@ function saveProp(){
         sb.from('propiedades').update({
           titulo:p.titulo, tipo:p.tipo, operacion:p.op,
           direccion:p.zona, provincia:p.provincia||'', distrito:p.distrito||'', corregimiento:p.corregimiento||'',
-          precio:p.precio, area_total:p.area, habitaciones:p.hab,
+          referencia:p.referencia||'', precio:p.precio, precio_alquiler:p.precio_alquiler,
+          mantenimiento:p.mantenimiento, area_total:p.area, habitaciones:p.hab,
           banos:p.banos, parqueos:p.estac, estado:p.status, descripcion:p.desc,
           fotos:JSON.stringify(p.fotos||[]),
           propietario_nombre:p.propietario||'', propietario_telefono:p.tel_propietario||'',
@@ -8094,7 +8095,8 @@ function saveProp(){
     sb.from('propiedades').insert({
       titulo:p.titulo, tipo:p.tipo, operacion:p.op,
       direccion:p.zona, provincia:p.provincia||'', distrito:p.distrito||'', corregimiento:p.corregimiento||'',
-      precio:p.precio, area_total:p.area, habitaciones:p.hab,
+      referencia:p.referencia||'', precio:p.precio, precio_alquiler:p.precio_alquiler,
+      mantenimiento:p.mantenimiento, area_total:p.area, habitaciones:p.hab,
       banos:p.banos, parqueos:p.estac, estado:p.status, descripcion:p.desc,
       fotos:JSON.stringify(p.fotos||[]),
       propietario_nombre:p.propietario||'', propietario_telefono:p.tel_propietario||'',
