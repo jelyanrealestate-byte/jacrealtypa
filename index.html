@@ -327,10 +327,31 @@ footer{background:#0d0d0d;padding:70px 60px 0}
   .hero-scroll{display:none}
 }
 @media(max-width:560px){
-  .hero-searchbar{position:static;transform:none;width:100%;margin-top:-40px;position:relative;z-index:3}
   .hero{padding-bottom:0}
   .hsb-field{min-width:100%}
   .hsb-btn{width:100%;justify-content:center}
+}
+
+/* Botón toggle buscador — base (oculto en desktop) */
+.hero-sb-toggle{
+  display:none;
+  width:100%;align-items:center;justify-content:center;gap:8px;
+  background:rgba(255,255,255,.12);color:rgba(255,255,255,.92);
+  border:1px solid rgba(255,255,255,.28);
+  padding:12px 20px;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  cursor:pointer;font-family:inherit;transition:background .2s;border-radius:2px;
+  font-weight:600;
+}
+.hero-sb-toggle:hover,.hero-sb-toggle.active{background:rgba(196,30,58,.25);border-color:rgba(196,30,58,.5)}
+
+/* Filtros MLS en móvil: panel colapsable */
+@media(max-width:768px){
+  #mls-filter-row{display:none!important}
+  #mls-filter-toggle{display:flex!important}
+}
+@media(min-width:769px){
+  #mls-filter-toggle{display:none!important}
+  #mls-filter-panel{display:none!important}
 }
 
 /* ============================================================
@@ -355,6 +376,13 @@ footer{background:#0d0d0d;padding:70px 60px 0}
   input,select,textarea{font-size:16px!important;-webkit-text-size-adjust:100%}
   .fg select,.fg input,.cform input,.cform select,.cform textarea,
   .hsb-select,.hsb-input{font-size:16px!important}
+
+  /* Hero searchbar: oculto en móvil, se despliega con toggle */
+  .hero-searchbar{display:none!important;position:static!important;transform:none!important;width:100%!important;margin-top:0!important}
+  .hero-searchbar.sb-open{display:block!important}
+
+  /* Botón toggle del buscador (solo móvil) */
+  .hero-sb-toggle{display:flex!important}
 
   /* Hero más compacto */
   .hero{min-height:580px;padding:80px 20px 0}
@@ -841,24 +869,13 @@ function _populateZonasDatalist(){
   const selD=document.getElementById('web-filter-distrito');
   if(!selZ||!selD) return;
 
-  // --- Corregimientos: collect from loaded props ---
-  const rawZonas=_webProps.map(p=>p.zona||'').filter(z=>z&&z.length>2);
-  // For MLS full addresses (e.g. "Calle 50, San Francisco, Panamá"),
-  // split by comma and grab each meaningful fragment
-  const frags=new Set();
-  rawZonas.forEach(z=>{
-    z.split(',').forEach(part=>{
-      const clean=part.replace(/\d+/g,'').replace(/calle|ave|avenida|carretera|con|entre|y\s/gi,'').trim();
-      if(clean.length>3&&clean.length<50) frags.add(clean.trim());
-    });
-    // Also add full zona as-is for exact-match filtering
-    frags.add(z.trim());
+  // --- Corregimientos: solo campos estructurados, sin fragmentar texto libre ---
+  const corregs=new Set(_CORREGS_EXTRA);
+  _webProps.forEach(p=>{
+    if(p.corregimiento&&p.corregimiento.trim().length>2) corregs.add(p.corregimiento.trim());
+    if(p.barrio&&p.barrio.trim().length>2) corregs.add(p.barrio.trim());
   });
-  // Add known corregimientos for discoverability
-  _CORREGS_EXTRA.forEach(c=>frags.add(c));
-  const zonasSorted=[...frags].filter(z=>z.length>2).sort((a,b)=>a.localeCompare(b,'es'));
-
-  // Rebuild zona select (keep first placeholder option)
+  const zonasSorted=[...corregs].sort((a,b)=>a.localeCompare(b,'es'));
   selZ.innerHTML='<option value="">📍 Corregimiento / Zona</option>';
   zonasSorted.forEach(z=>{
     const o=document.createElement('option');
@@ -866,16 +883,13 @@ function _populateZonasDatalist(){
     selZ.appendChild(o);
   });
 
-  // --- Distritos: collect from loaded props ---
-  const distritos=new Set();
-  _webProps.forEach(p=>{
-    if(p.distrito) distritos.add(p.distrito);
-    // Try to match known districts in MLS zona string
-    if(p.zona){
-      const zl=p.zona.toLowerCase();
-      _DISTRITOS_PA.forEach(d=>{ if(zl.includes(d.toLowerCase())) distritos.add(d); });
-    }
-  });
+  // Sync zona panel select
+  const pSelZ=document.getElementById('mpf-zona');
+  if(pSelZ){ pSelZ.innerHTML=selZ.innerHTML; }
+
+  // --- Distritos: campos estructurados + lista conocida ---
+  const distritos=new Set(_DISTRITOS_PA);
+  _webProps.forEach(p=>{ if(p.distrito&&p.distrito.trim().length>1) distritos.add(p.distrito.trim()); });
   const distritosSorted=[...distritos].sort((a,b)=>a.localeCompare(b,'es'));
   selD.innerHTML='<option value="">🗺 Distrito</option>';
   distritosSorted.forEach(d=>{
@@ -883,6 +897,10 @@ function _populateZonasDatalist(){
     o.value=d; o.textContent=d;
     selD.appendChild(o);
   });
+
+  // Sync distrito panel select
+  const pSelD=document.getElementById('mpf-distrito');
+  if(pSelD){ pSelD.innerHTML=selD.innerHTML; }
 }
 
 // Map corregimientos to their parent district for smart cascade
@@ -976,28 +994,71 @@ function webRenderProps(list){
 }
 
 function webFilterProps(){
-  const op=document.getElementById('web-filter-op').value;
-  const tipo=document.getElementById('web-filter-tipo').value;
-  const zona=(document.getElementById('web-filter-zona')||{}).value||'';
-  const distrito=(document.getElementById('web-filter-distrito')||{}).value||'';
-  const src=document.getElementById('web-filter-src').value;
-  const precio=document.getElementById('web-filter-precio').value;
-  // Hero search text zona takes priority when select has no match
-  const zonaText=(!zona&&typeof _heroZonaText!=='undefined')?_heroZonaText:'';
-  const zonaFilter=zona||zonaText;
+  // Leer filtros del panel de escritorio o panel móvil (el que esté activo)
+  const isMob=window.innerWidth<=768;
+  const getV=(desktopId,mobileId)=>{
+    const mEl=document.getElementById(mobileId);
+    const dEl=document.getElementById(desktopId);
+    return (isMob&&mEl)?mEl.value:(dEl?dEl.value:'');
+  };
+  const op=getV('web-filter-op','mpf-op');
+  const tipo=getV('web-filter-tipo','mpf-tipo');
+  const zona=getV('web-filter-zona','mpf-zona');
+  const distrito=getV('web-filter-distrito','mpf-distrito');
+  const src=getV('web-filter-src','mpf-src');
+  const precio=getV('web-filter-precio','mpf-precio');
+
+  // Sincronizar selects entre panel escritorio y móvil
+  const pairs=[['web-filter-op','mpf-op'],['web-filter-tipo','mpf-tipo'],['web-filter-zona','mpf-zona'],
+    ['web-filter-distrito','mpf-distrito'],['web-filter-src','mpf-src'],['web-filter-precio','mpf-precio']];
+  pairs.forEach(([did,mid])=>{
+    const dEl=document.getElementById(did); const mEl=document.getElementById(mid);
+    if(dEl&&mEl){if(isMob)dEl.value=mEl.value;else mEl.value=dEl.value;}
+  });
+
   let list=_webProps;
-  if(op) list=list.filter(p=>(p.operacion||'').toLowerCase()===op.toLowerCase());
-  if(tipo) list=list.filter(p=>(p.tipo||'')===tipo);
-  if(zonaFilter){
-    const zl=zonaFilter.toLowerCase();
-    list=list.filter(p=>(p.zona||'').toLowerCase().includes(zl)||(p.corregimiento||'').toLowerCase().includes(zl)||(p.titulo||'').toLowerCase().includes(zl));
+
+  // Operación: case-insensitive, soporte "Alquiler y Venta"
+  if(op){
+    const opl=op.toLowerCase().trim();
+    list=list.filter(p=>{
+      const pol=(p.operacion||'').toLowerCase().trim();
+      // Match exacto o parcial (e.g. "Alquiler" dentro de "Alquiler y Venta")
+      return pol===opl||pol.includes(opl)||opl.includes(pol);
+    });
   }
+
+  // Tipo: case-insensitive, normalizado
+  if(tipo){
+    const tipoL=tipo.toLowerCase().trim();
+    list=list.filter(p=>
+      (p.tipo||'').toLowerCase().trim()===tipoL||
+      (p.tipo_prop||'').toLowerCase().trim()===tipoL
+    );
+  }
+
+  // Zona/Corregimiento: busca en campos estructurados primero, zona como fallback
+  if(zona){
+    const zl=zona.toLowerCase().trim();
+    list=list.filter(p=>
+      (p.corregimiento||'').toLowerCase().includes(zl)||
+      (p.barrio||'').toLowerCase().includes(zl)||
+      (p.zona||'').toLowerCase().includes(zl)
+    );
+  }
+
+  // Distrito: match exacto preferido, includes como fallback
   if(distrito){
-    const dl=distrito.toLowerCase();
-    list=list.filter(p=>(p.distrito||'').toLowerCase().includes(dl)||(p.zona||'').toLowerCase().includes(dl));
+    const dl=distrito.toLowerCase().trim();
+    list=list.filter(p=>{
+      const pd=(p.distrito||'').toLowerCase().trim();
+      return pd===dl||pd.includes(dl)||(p.zona||'').toLowerCase().includes(dl);
+    });
   }
+
   if(src) list=list.filter(p=>p._src===src);
   if(precio){ const max=Number(precio); list=list.filter(p=>!p.precio||Number(p.precio)<=max); }
+
   webRenderProps(list);
   const hasFilter=op||tipo||zona||distrito||src||precio;
   const lm=document.getElementById('web-load-more');
@@ -1155,7 +1216,69 @@ function heroSearch(){
   setTimeout(()=>webFilterProps(),400);
 }
 
-document.addEventListener('DOMContentLoaded',()=>loadWebProps());
+document.addEventListener('DOMContentLoaded',()=>{
+  // ── Botón toggle buscador hero (solo móvil) ──
+  const heroButtons=document.querySelector('.hero-buttons');
+  const searchBar=document.querySelector('.hero-searchbar');
+  if(heroButtons&&searchBar){
+    const togBtn=document.createElement('button');
+    togBtn.className='hero-sb-toggle';
+    togBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Buscar Propiedades';
+    togBtn.onclick=function(){
+      const open=searchBar.classList.toggle('sb-open');
+      this.innerHTML=open
+        ?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar buscador'
+        :'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Buscar Propiedades';
+      this.classList.toggle('active',open);
+    };
+    heroButtons.appendChild(togBtn);
+  }
+
+  // ── Panel de filtros móvil para sección MLS ──
+  const filterContainer=document.getElementById('web-props-loading')?.parentNode;
+  if(filterContainer){
+    // Asignar ID al row de escritorio
+    const desktopRow=filterContainer.querySelector('div[style*="gap:10px"][style*="center"]');
+    if(desktopRow) desktopRow.id='mls-filter-row';
+
+    // Crear wrapper toggle + panel con display limpio
+    const mfWrap=document.createElement('div');
+    mfWrap.id='mls-filter-toggle';
+    mfWrap.style.cssText='display:none;flex-direction:column;gap:0;margin-bottom:20px';
+
+    // Botón toggle
+    const mfBtn=document.createElement('button');
+    mfBtn.style.cssText='width:100%;background:rgba(196,30,58,.15);color:#fff;border:1px solid rgba(196,30,58,.4);padding:12px 20px;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:inherit;border-radius:4px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px';
+    mfBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg> Filtrar propiedades';
+
+    // Panel (empieza oculto)
+    const mfPanel=document.createElement('div');
+    mfPanel.id='mls-filter-panel';
+    mfPanel.style.cssText='display:none;margin-top:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:14px;grid-template-columns:1fr 1fr;gap:10px';
+    mfPanel.innerHTML=`
+      <select id="mpf-op" onchange="webFilterProps()" class="wf-sel" style="grid-column:1/-1"><option value="">🏠 Venta &amp; Alquiler</option><option value="Venta">🔑 Venta</option><option value="Alquiler">📋 Alquiler</option><option value="Alquiler y Venta">🔄 Alquiler y Venta</option><option value="Pre-Venta">🏗️ Pre-Venta</option></select>
+      <select id="mpf-tipo" onchange="webFilterProps()" class="wf-sel"><option value="">📦 Tipo</option><option>Apartamento</option><option>Casa</option><option>Penthouse</option><option>Local Comercial</option><option>Oficina</option><option>Terreno</option></select>
+      <select id="mpf-src" onchange="webFilterProps()" class="wf-sel"><option value="">⭐ Fuente</option><option value="propia">🏆 Exclusivas JAC</option><option value="mls">🌐 MLS</option></select>
+      <select id="mpf-zona" onchange="webFilterProps()" class="wf-sel"><option value="">📍 Corregimiento</option></select>
+      <select id="mpf-distrito" onchange="webFilterProps()" class="wf-sel"><option value="">🗺 Distrito</option></select>
+      <select id="mpf-precio" onchange="webFilterProps()" class="wf-sel"><option value="">💰 Precio máx.</option><option value="100000">Hasta $100K</option><option value="200000">Hasta $200K</option><option value="300000">Hasta $300K</option><option value="500000">Hasta $500K</option><option value="800000">Hasta $800K</option><option value="1000000">Hasta $1M</option></select>
+      <button onclick="document.querySelectorAll('#mls-filter-panel select').forEach(s=>s.value='');webFilterProps()" style="grid-column:1/-1;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12);padding:10px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:4px;font-family:inherit">✕ Limpiar filtros</button>`;
+
+    mfBtn.onclick=function(){
+      const open=mfPanel.style.display==='none'||!mfPanel.style.display;
+      mfPanel.style.display=open?'grid':'none';
+      mfBtn.innerHTML=open
+        ?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar filtros'
+        :'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg> Filtrar propiedades';
+    };
+
+    mfWrap.appendChild(mfBtn);
+    mfWrap.appendChild(mfPanel);
+    if(desktopRow) desktopRow.after(mfWrap);
+  }
+
+  loadWebProps();
+});
 </script>
 
 <!-- STATS -->
